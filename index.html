@@ -231,6 +231,7 @@ body.title-mode{overflow:hidden}
 @keyframes rain{to{transform:translate(-6px,22px)}}
 @keyframes ember{0%{transform:translate(0,0);opacity:0}10%{opacity:1}100%{transform:translate(18px,-320px);opacity:0}}
 
+.intro-art.berserk{animation:ragequake .25s ease-in-out infinite;filter:drop-shadow(0 0 20px #ff2a2a)}
 .pf-valefor{box-shadow:0 0 24px rgba(150,180,255,.55),0 0 70px rgba(255,110,40,.25)}
 .pf-valefor .pglow{background:radial-gradient(ellipse at 50% 100%,rgba(255,120,40,.4),transparent 60%);box-shadow:inset 0 0 44px rgba(120,150,255,.4);animation:breathe 2.8s ease-in-out infinite}
 .pf-valefor.rage{box-shadow:0 0 34px rgba(255,40,40,.85),0 0 100px rgba(255,0,0,.45);animation:ragequake .35s ease-in-out infinite}
@@ -572,6 +573,7 @@ const RELICS={
   seal_bune:   {name:'부네의 인장',             icon:'🟣', desc:'공격력 +8',                     apply:p=>{p.atk+=8;}},
   seal_andras: {name:'안드라스의 인장',         icon:'⚪', desc:'방어력 +6 · 최대 HP +20',        apply:p=>{p.def+=6;p.maxHp+=20;p.hp+=20;}},
   seal_furfur: {name:'푸르푸르의 인장',         icon:'🔵', desc:'최대 HP +40 · 공격력 +4',        apply:p=>{p.maxHp+=40;p.hp+=40;p.atk+=4;}},
+  seal_gamigin:{name:'가미긴의 인장',  icon:'🐴', desc:'공격 +18 · 방어 +14 · 최대 HP +120',apply:p=>{p.atk+=18;p.def+=14;p.maxHp+=120;p.hp+=120;}},
   seal_valefor:{name:'발레포르의 인장',  icon:'💠', desc:'공격 +16 · 방어 +12 · 최대 HP +100',apply:p=>{p.atk+=16;p.def+=12;p.maxHp+=100;p.hp+=100;}},
   seal_amon:{name:'아몬의 인장',     icon:'🔶', desc:'공격 +14 · 방어 +10 · 최대 HP +80',apply:p=>{p.atk+=14;p.def+=10;p.maxHp+=80;p.hp+=80;}},
   seal_barbatos:{name:'바르바토스의 인장',     icon:'🟣', desc:'공격 +12 · 방어 +8 · 최대 HP +60',apply:p=>{p.atk+=12;p.def+=8;p.maxHp+=60;p.hp+=60;}},
@@ -772,6 +774,28 @@ const AREAS=[
       tick:4000, slowSil:2, rage:{art:'valefor2',line:'"…감히 내게서 이만큼이나 빼앗아 가다니."\n\n발레포르의 손톱이 길게 자라나고, 불타는 숲 전체가 그의 분노에 맞춰 울부짖는다.\n\n— 공격력 2배 —'},
       pre:'불타는 숲 한가운데, 은빛 머리칼의 사내가 서 있다. 날카롭게 자란 손톱이 불빛에 번뜩인다.\n\n"훔치는 건 내 특기지. 너희 동료의 힘과 목소리부터 가져가마."',
       moves:[{t:'atk',n:'발톱 베기'},{t:'strong',n:'도둑의 일격'},{t:'multi',n:'연속 할퀴기',hits:4,m:0.35},{t:'sweep',n:'불타는 숲의 포효',m:0.18},{t:'drain',n:'훔쳐 가는 손'},{t:'charge',n:'10군단의 습격'}]}
+  },
+  { name:'폐악터널', country:'버려진 지하 터널', flag:'🚇', rec:34, recEnd:38, glow:'#ff5a5a',
+    desc:'오래전에 버려진 지하 터널. 어둠 속에서 쉰 목소리의 울음이 메아리친다.',
+    intro:'비탈길의 끝은 지하로 이어지는 거대한 터널이었다.\n\n녹슨 선로를 따라 끝없이 이어지는 어둠. 벽에서는 무언가가 긁는 소리가 들리고, 저 깊은 곳에서 말 울음 같은 괴성이 울려 퍼졌다.\n\n— 이 터널의 주인은 쉰 목소리로 운다.',
+    outro:'가미긴의 괴성이 멎자 터널 끝에서 희미한 빛이 새어 들어왔다.\n\n녹슨 선로 위로 처음으로 바람이 불었다.\n\n"…출구다."\n\n— 폐악터널 해방 —',
+    enemies:[
+      {name:'굶주린 쥐떼',         icon:'🐀', hp:480, atk:88, def:34, xp:198, gold:104, demon:true, moves:[{t:'multi',n:'떼 지어 물기',hits:3,m:0.4},{t:'atk',n:'갉아먹기'},{t:'dot',n:'오염된 이빨',dn:'중독'}]},
+      {name:'녹슨 선로의 망령',    icon:'🚃', hp:520, atk:86, def:38, xp:202, gold:106, demon:true, moves:[{t:'atk',n:'선로 긁기'},{t:'strong',n:'폭주 열차'},{t:'atk',n:'선로 긁기'}]},
+      {name:'독안개 덩어리',       icon:'🌫️', hp:500, atk:84, def:35, xp:200, gold:105, demon:true, moves:[{t:'dot',n:'독안개',dn:'중독'},{t:'atk',n:'휘감기'},{t:'curse',n:'숨 막히는 안개'}]},
+      {name:'부서진 가스마스크 병사', icon:'😷', hp:510, atk:90, def:36, xp:204, gold:107, demon:true, moves:[{t:'atk',n:'개머리판 타격'},{t:'multi',n:'난사',hits:3,m:0.45},{t:'strong',n:'최후의 돌격'}]},
+      {name:'벽 속의 손',          icon:'✋', hp:490, atk:92, def:33, xp:203, gold:106, demon:true, moves:[{t:'atk',n:'움켜쥐기'},{t:'drain',n:'벽으로 끌어당기기'},{t:'atk',n:'움켜쥐기'}]}
+    ],
+    elite:{name:'폐선로의 차장', icon:'🏮', hp:7200, atk:120, def:40, xp:1100, gold:800, demon:true,
+      moves:[{t:'strong',n:'검표 펀치'},{t:'multi',n:'출발 신호',hits:3,m:0.55},{t:'curse',n:'승차 거부'},{t:'charge',n:'마지막 열차'}]},
+    mid:{name:'말파스', art:'malphas', title:'솔로몬 72악마 · 제39영 · 대총재 · 40군단', hp:17000, atk:128, def:39, xp:4300, gold:3400, demon:true,
+      pre:'터널 천장에 매달린 거대한 까마귀가 날개를 펼쳤다.\n\n"탑을 세우는 것도, 무너뜨리는 것도 내 일이다. 이 터널이 너희의 무덤이 되겠지."',
+      moves:[{t:'atk',n:'부리 쪼기'},{t:'sweep',n:'무너지는 천장',m:0.17},{t:'multi',n:'까마귀 떼',hits:4,m:0.35},{t:'curse',n:'불길한 울음'},{t:'charge',n:'40군단의 붕괴'}]},
+    boss:{name:'가미긴', art:'gamigin', title:'솔로몬 72악마 · 제4영 · 후작 · 30군단', hp:50000, exactHp:true, atk:140, def:42, xp:18000, gold:20000, goldFirst:50000, goldRepeat:20000, demon:true, drop:'seal_gamigin',
+      tick:4000, fixedDmg:true, paralyze:3000,
+      berserk:{at:15000,to:40000,line:'"히이이이이잉——!!"\n\n터널 전체가 무너질 듯한 괴성이 울려 퍼진다. 갈라졌던 가미긴의 몸이 순식간에 아물어 간다.\n\n— 폭주: 체력 40,000 회복 · 무수한 출혈 참격 —'},
+      pre:'어둠 속에서 작은 말의 형상이 걸어 나온다. 쉰 목소리가 터널을 울린다.\n\n"죽은 자들의 목소리를 들려주마. 너희도 곧 그 합창에 끼게 될 테니."',
+      moves:[{t:'atk',n:'발굽 내려찍기'},{t:'strong',n:'돌진'},{t:'multi',n:'광란의 발길질',hits:3,m:0.5},{t:'sweep',n:'터널을 울리는 괴성',m:0.16},{t:'atk',n:'발굽 내려찍기'},{t:'charge',n:'30군단의 행진'}]}
   }
 
 ];
@@ -781,7 +805,7 @@ const stageType=s=>s===15?'boss':s===10?'mid':s===5?'elite':'normal';
 const STYPE_LABEL={normal:'일반',elite:'정예',mid:'솔로몬 72악마',boss:'나라 보스'};
 const stageRec=(a,s)=>Math.round(AREAS[a].rec+(s-1)*(AREAS[a].recEnd-AREAS[a].rec)/(STAGES-1));
 const ENEMY_MULT=1.3, LATE_BOSS_MULT=1.1; // 적 공격력·체력 1.3배 (나베리우스·보티스는 1.1배)
-const NORMAL_HP=[2.4,4,4.5,5,5.5,6,6.5,7,7.5], NORMAL_REWARD=1.5; // 일반 적이 몇 턴은 버티며 공격하도록
+const NORMAL_HP=[2.4,4,4.5,5,5.5,6,6.5,7,7.5,8], NORMAL_REWARD=1.5; // 일반 적이 몇 턴은 버티며 공격하도록
 function scaleBase(base,a,s){
   const f=1+0.06*(s-1);
   return {...base,hp:Math.round(base.hp*f*NORMAL_HP[a]),atk:Math.round(base.atk*f),def:Math.round(base.def*(1+0.04*(s-1))),
@@ -928,6 +952,15 @@ const ART={
     eyes:`<circle cx="58" cy="100" r="2.2"/><circle cx="72" cy="99" r="2.2"/><path d="M58,116 C64,113 70,113 76,116" stroke="#c8f4ff" stroke-width="1.2" fill="none"/>
       <path d="M93,95 L99,97 L93,99 Z"/><path d="M107,95 L101,97 L107,99 Z"/>
       <ellipse cx="130" cy="107" rx="1.3" ry="3.2"/><ellipse cx="138" cy="107" rx="1.3" ry="3.2"/>`},
+  malphas:{c:'#b0b8c8',eye:'#ff4040',latin:'MALPHAS · SPIRITVS XXXIX · PRAESES · ',
+    body:`${wing('M96,108 C76,86 46,72 16,76 L34,88 L14,98 L38,102 L22,116 L48,114 L40,130 L66,118 C78,114 88,112 96,118 Z',96,108)}
+      <path d="M82,176 C76,150 80,124 92,110 C88,96 92,82 104,78 C116,76 124,84 124,94 L140,98 L124,104 C122,112 116,118 110,122 C120,136 122,158 116,176 L108,190 L104,176 L96,176 L92,190 Z"/>`,
+    eyes:`<circle cx="112" cy="90" r="2.6"/>`},
+  gamigin:{c:'#ff5a5a',eye:'#ffe0a0',latin:'GAMIGIN · SPIRITVS IV · MARCHIO · XXX LEGIONES · ',
+    body:`<path d="M46,128 C46,112 56,102 72,100 L118,100 C126,86 132,72 140,62 C146,54 156,52 162,58 L170,70 C172,76 168,80 162,80 L156,80 C152,92 148,108 146,124 C146,140 138,148 128,150 L124,190 L114,190 L114,152 L80,152 L80,190 L70,190 L68,150 C56,146 46,140 46,128 Z"/>
+      <path d="M140,62 L134,44 L146,56 Z M150,56 L150,38 L158,54 Z"/>
+      <path d="M46,120 C34,124 28,136 30,150 C34,140 40,134 48,132 Z"/>`,
+    eyes:`<circle cx="152" cy="66" r="2.4"/>`},
   gaap:{c:'#8f9cff',eye:'#e0e6ff',latin:'GAAP · SPIRITVS XXXIII · PRAESES · ',
     body:`${wing('M94,110 C70,78 38,66 12,80 C24,86 28,94 26,102 C36,98 44,104 44,112 C54,106 64,110 68,118 C76,112 86,110 94,116 Z',94,110)}
       <path d="M80,190 C80,150 84,124 92,112 C86,100 88,82 100,76 C112,82 114,100 108,112 C116,124 120,150 120,190 Z"/>
@@ -1042,6 +1075,12 @@ const MISSIONS=[
   {id:'viper', area:5, type:'kill', target:'모래시계 독사', count:8, title:'독사 소탕',
    desc:'모래시계 독사 8마리를 처치하라.', reward:{water:6,gold:600}, rewardText:'성수 ×6 · 600 G',
    story:'독사들이 사라지자 모래시계의 모래가 다시 흘러내렸다.'},
+  {id:'gasmask', area:9, type:'kill', target:'부서진 가스마스크 병사', count:8, title:'잊힌 병사들',
+   desc:'터널을 떠도는 가스마스크 병사 8명을 쉬게 하라.', reward:{tickets:5}, rewardText:'소환권 ×5',
+   story:'병사들의 낡은 배낭에서 소환권이 쏟아져 나왔다.'},
+  {id:'wallhand', area:9, type:'kill', target:'벽 속의 손', count:8, title:'벽 속의 손',
+   desc:'벽 속에서 뻗어 나오는 손 8개를 처치하라.', reward:{water:6,stone:1}, rewardText:'성수 ×6 · 천상의 성유물 ×1',
+   story:'마지막 손이 벽 속으로 사라지며 쥐고 있던 성유물을 떨어뜨렸다.'},
   {id:'thief', area:8, type:'kill', target:'비탈길의 도둑', count:8, title:'도둑 소탕',
    desc:'비탈길에 숨어 있는 도둑 8명을 처치하라.', reward:{tickets:4}, rewardText:'소환권 ×4',
    story:'도둑들이 훔쳐 간 물건 사이에서 소환권 묶음이 나왔다.'},
@@ -1987,10 +2026,12 @@ function synthAll(){
 }
 
 /* ===================== 전투 ===================== */
-function clearBattle(){document.body.classList.remove('battle');if(B&&B.zapT)clearInterval(B.zapT);if(B&&B.karmaT)clearInterval(B.karmaT);if(B&&B.isaT)clearInterval(B.isaT);B=null;}
+function clearBattle(){document.body.classList.remove('battle');if(B&&B.paraT)clearInterval(B.paraT);if(B&&B.zapT)clearInterval(B.zapT);if(B&&B.karmaT)clearInterval(B.karmaT);if(B&&B.isaT)clearInterval(B.isaT);B=null;}
 /* 반사·부적 등으로 적이 턴 밖에서 쓰러졌을 때 */
 function winNow(){
-  if(!B||B.won)return;B.won=true;B.busy=true;
+  if(!B||B.won)return;
+  if(B.e.berserk&&!B.berserked){B.e.hp=Math.max(1,B.e.hp);renderBattle();return;}
+  B.won=true;B.busy=true;if(B.paraT)clearInterval(B.paraT);
   if(B.zapT)clearInterval(B.zapT);if(B.karmaT)clearInterval(B.karmaT);if(B.isaT)clearInterval(B.isaT);
   renderBattle();setTimeout(victory,750);
 }
@@ -2048,6 +2089,7 @@ function startBattle(spec){
      defending:false,busy:false,menu:'main',log:[],fxq:[]};
   if(benched.length)addLog(`⚠ 출전 조건 — ${benched.map(id=>ALLIES[id].name).join(', ')} 출전 불가 (${sortieRule(a).text})`);
   const begin=()=>{
+    if(B&&t.paralyze)B.paraT=setInterval(paraTick,t.paralyze);
     if(B&&t.slowSil){
       const c=party.slice().sort(()=>Math.random()-0.5).slice(0,t.slowSil);
       B.vslow={};B.vsil={};c.forEach(id=>{B.vslow[id]=1;B.vsil[id]=1;});
@@ -2107,13 +2149,20 @@ function hitAllies(pct,label,quiet){
   const down=[];
   partyIds().forEach(id=>{const h=B.ahp[id];if(!h||h.hp<=0)return;
     if(id==='danian'&&Math.random()<0.5)return; // 다니안 회피
-    const d=Math.max(1,Math.round(h.max*pct*(B.ashield?0.5:1)*rnd(0.9,1.1)));h.hp=Math.max(0,h.hp-d);
+    const d=Math.max(1,Math.round(h.max*pct*(B.ashield?0.5:1)*(paraOn()?1.5:1)*rnd(0.9,1.1)));h.hp=Math.max(0,h.hp-d);
     if(h.hp<=0&&!allyDown(id))down.push(ALLIES[id].name);});
   if(!quiet)addLog(`${label} — 동료 전원 피해`);
   if(down.length)addLog(`💀 ${down.join(', ')} 쓰러짐 (이번 전투 행동 불가)`);
 }
 function addLog(s){B.log.push(s);if(B.log.length>40)B.log.shift();}
 const healMul=()=>(B&&B.healCut)?0.9:1;
+const paraOn=()=>!!(B&&B.paraUntil&&Date.now()<B.paraUntil);
+/* 가미긴: 3초마다 동료 전원 마비 (방어력 50% 감소 → 받는 피해 1.5배) */
+function paraTick(){
+  if(!B||B.over||B.won||!$('#modal').classList.contains('hidden'))return;
+  const was=paraOn();B.paraUntil=Date.now()+B.e.paralyze+600;
+  if(!was){addLog(`⚡ ${B.e.name}의 마비 — 동료 전원 방어력 50% 감소 (3초마다 다시 걸림)`);renderBattle();}
+}
 const stormOn=()=>!!(B&&B.stormUntil&&Date.now()<B.stormUntil);
 /* 키리에: 처음 쓰러진 동료 부활 (신화 2회) */
 function allyDown(id){
@@ -2166,6 +2215,7 @@ function renderBattle(){
   if(B.ebleed)st.push(`🩸 적 출혈 ${B.ebleed.turns}`);
   if(inParty('pasri')&&B.startAt&&Date.now()-B.startAt<10000)st.push(`🏮 파스리 충전 ${Math.ceil((10000-(Date.now()-B.startAt))/1000)}초`);
   if(B.healCut)st.push(`✂ 회복 -10% ${B.healCut}`);
+  if(paraOn())st.push('⚡ 동료 마비 (방어 -50%)');
   if(stormOn())st.push(`🌪 폭풍 ${Math.ceil((B.stormUntil-Date.now())/1000)}초`);
   if(B.defending)st.push('🛡 방어');
   const party=`<div class="party">${partyIds().map(id=>{const h=B.ahp[id];const p=h?Math.round(h.hp/h.max*100):100;
@@ -2183,6 +2233,9 @@ function renderBattle(){
   if(B.immune)passive.push('⏸ 시간 정지: 이번 턴 피해 무효 — 회복·방어 추천');
   if(B.reflect)passive.push('↩ 뒤집힌 시간: 준 피해의 50% 반사');
   if(e.bleedOnHit)passive.push('🩸 공격 시 출혈');
+  if(e.fixedDmg)passive.push('🎯 방어력 무시 고정 피해');
+  if(e.paralyze)passive.push('⚡ 3초마다 동료 마비');
+  if(e.berserk)passive.push(B.berserked?'💢 폭주 중':`💢 HP ${fmt(e.berserk.at)} 이하 폭주`);
   if(e.slowSil)passive.push(`🌀 강탈: 동료 ${e.slowSil}명 둔화·침묵`);
   if(e.rage)passive.push(B.raged?'💢 발악: 공격력 2배':'💢 HP 50% 이하 발악');
   if(e.burnAll)passive.push('🔥 끝없는 화상: 주인공·동료');
@@ -2422,7 +2475,7 @@ function hitPlayer(mult,label){
   if(B.blind&&Math.random()<0.35){addLog(`${label} — 📜 시야가 가려진 적의 공격이 빗나갔다!`);queueFx('player','MISS','mpf');return 0;}
   if(B.negate){addLog(`${label} — 🗡 갈라진 대지에 막혀 무력화됐다!`);queueFx('player','무력화','mpf');return 0;}
   const def=P.def*(B.curse?0.6:1);
-  let d=(e.atk*(1+0.2*B.rage)*(B.hex?0.8:1)*mult-def/2)*rnd(0.9,1.1);
+  let d=e.fixedDmg?e.atk*(1+0.2*B.rage)*(B.hex?0.8:1)*mult:(e.atk*(1+0.2*B.rage)*(B.hex?0.8:1)*mult-def/2)*rnd(0.9,1.1); // fixedDmg: 방어력 무시 고정 피해
   d=Math.max(1,Math.round(d));
   if(B.defending)d=Math.max(1,Math.round(d*0.6)); // 방어: 피해 40% 감소
   if(B.ward)d=Math.max(1,Math.round(d*0.5));
@@ -2476,6 +2529,7 @@ function act(kind,arg){
     addLog('도망에 실패했다!');
   }
   if(e.hp>0&&kind==='attack')alliesAct(); // 동료는 '공격'을 누른 턴에만 행동
+  if(e.hp<=0&&e.berserk&&!B.berserked)e.hp=1; // 폭주 전에는 쓰러지지 않음
   B.menu='main';B.busy=true;
   if(P.hp<=0&&e.hp>0){P.hp=0;B.over=true;renderBattle();setTimeout(defeat,900);return;}
   renderBattle();
@@ -2486,6 +2540,15 @@ function act(kind,arg){
 
 function checkPhase(){
   const e=B.e;
+  if(e.berserk&&!B.berserked&&e.hp>0&&e.hp<=e.berserk.at){
+    B.berserked=true;e.hp=e.berserk.to;B.charging=false;B.chargeKind=null;
+    e.moves=[...e.moves,{t:'bleedstorm',n:'무수한 출혈 참격',hits:8,m:0.25},{t:'bleedstorm',n:'무수한 출혈 참격',hits:8,m:0.25}];
+    addLog(`💢 ${e.name}의 폭주 — 괴성과 함께 체력 ${fmt(e.berserk.to)}까지 회복!`);
+    document.body.classList.add('flash');setTimeout(()=>document.body.classList.remove('flash'),400);
+    showStory(`<div class="sum s5"><div class="sum-title">폭주</div><div class="intro-art berserk">${bossSVG(e.art)}</div><div class="sum-name">${e.name}</div><p class="sum-desc" style="color:#ffb0b0">${esc(e.berserk.line).replace(/\n/g,'<br>')}</p></div>`,
+      ()=>{renderBattle();setTimeout(()=>enemyTurnForced({t:'bleedstorm',n:'무수한 출혈 참격',hits:8,m:0.25}),500);},true);
+    return true;
+  }
   if(e.rage&&!B.raged&&e.hp>0&&e.hp<=e.maxHp/2){
     B.raged=true;e.atk=Math.round(e.atk*2);e.art=e.rage.art;B.charging=false;B.chargeKind=null;
     addLog(`💢 ${e.name}의 발악 — 공격력 2배!`);
@@ -2505,10 +2568,13 @@ function checkPhase(){
   return false;
 }
 
+let forcedMv=null;
+function enemyTurnForced(mv){forcedMv=mv;enemyTurn();}
 function enemyTurn(){
   if(!B||B.over||B.won)return;
   const e=B.e;let mv;
-  if(B.sealed>0){mv={t:'sealed'};B.sealed--;}
+  if(forcedMv){mv=forcedMv;forcedMv=null;}
+  else if(B.sealed>0){mv={t:'sealed'};B.sealed--;}
   else if(B.charging){mv={t:'release',n:B.chargeName,kind:B.chargeKind};B.charging=false;B.chargeKind=null;}
   else if(e.pvp)mv={t:'pvp',n:''};
   else if(e.tornado&&e.hp<e.maxHp*0.35&&B.tornadoCD<=0){mv={t:'charge',n:'스파크 토네이도',kind:'tornado'};B.tornadoCD=4;}
@@ -2556,6 +2622,12 @@ function enemyTurn(){
       else{B.curse=3;addLog(`${label} — 3턴간 방어력 감소`);}
       break;}
     case 'storm':   hitPlayer(mv.m,label);hitAllies(0.12,label);break;
+    case 'bleedstorm':{
+      addLog(`${label}!`);
+      for(let i=0;i<mv.hits&&P.hp>0;i++)hitPlayer(mv.m,`  출혈 참격 ${i+1}`);
+      hitAllies(0.12,label);
+      if(P.hp>0){B.dot={name:'출혈',dmg:Math.max(5,Math.round(e.atk*0.3)),turns:4};addLog('🩸 깊은 상처 — 4턴간 출혈');}
+      break;}
     case 'barrage':{
       addLog(`${label}!`);
       for(let i=0;i<mv.hits&&P.hp>0;i++)hitPlayer(mv.m,`  참격 ${i+1}`);
