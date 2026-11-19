@@ -231,6 +231,11 @@ body.title-mode{overflow:hidden}
 @keyframes rain{to{transform:translate(-6px,22px)}}
 @keyframes ember{0%{transform:translate(0,0);opacity:0}10%{opacity:1}100%{transform:translate(18px,-320px);opacity:0}}
 
+.pf-botis{box-shadow:0 0 22px rgba(60,230,150,.5),0 0 60px rgba(30,180,110,.25)}
+.pf-botis .pglow{box-shadow:inset 0 0 44px rgba(40,220,140,.45);animation:breathe 3s ease-in-out infinite}
+.pf-botis img{animation:tstop 5.5s infinite}
+@keyframes tstop{0%,84%,100%{filter:none}85%,91%{filter:grayscale(1) contrast(1.25) brightness(.9)}}
+
 /* Map */
 .mapwrap{max-height:56vh;overflow-y:auto;border-radius:12px;background:radial-gradient(ellipse at 50% 0%,rgba(255,255,255,.04),transparent 60%),#070b18;border:1px solid var(--line)}
 .map{position:relative}
@@ -263,6 +268,47 @@ body.title-mode{overflow:hidden}
 .pvpa{font-size:30px;display:flex;flex-direction:column;align-items:center;background:#1a1030;border:1px solid #6b2a4a;border-radius:10px;padding:4px 6px}
 .pvpa i{font-style:normal;font-size:10px;color:var(--dim)}
 .pvpvs{font-family:'Noto Serif KR',serif;font-size:20px;font-weight:900;margin:6px 0}.pvpvs span{color:#ff5a6a;margin:0 8px}
+
+/* Summon FX */
+.sfx{position:fixed;inset:0;z-index:70;overflow:hidden;display:flex;align-items:center;justify-content:center;--c:#9fb8ff;cursor:pointer}
+.sfx.s3{--c:#4da3ff}.sfx.s4{--c:#b07cff}.sfx.s5{--c:#ffd24a}
+.sfx-bg{position:absolute;inset:0;background:radial-gradient(circle at 50% 50%,color-mix(in srgb,var(--c) 28%,#03050c),#03050c 70%);animation:sfxfade .3s ease-out}
+.sfx-circle{position:absolute;width:240px;height:240px;top:50%;left:50%;transform:translate(-50%,-50%)}
+.sfx-circle div{position:absolute;inset:0;border-radius:50%;border:2px solid var(--c);box-shadow:0 0 16px var(--c),inset 0 0 16px var(--c);opacity:.85}
+.sfx-circle .r1{animation:sfxspin 2.4s linear infinite;border-style:dashed}
+.sfx-circle .r2{inset:28px;animation:sfxspin 1.8s linear infinite reverse}
+.sfx-circle .r3{inset:62px;border-width:3px;animation:sfxpulse .6s ease-in-out infinite alternate}
+.sfx-pillar{position:absolute;left:50%;top:-10%;width:70px;height:120%;transform:translateX(-50%) scaleX(0);
+  background:linear-gradient(90deg,transparent,color-mix(in srgb,var(--c) 70%,#fff),#fff,color-mix(in srgb,var(--c) 70%,#fff),transparent);filter:blur(6px);animation:sfxpillar 1s .45s ease-out forwards}
+.sfx-rays{position:absolute;width:900px;height:900px;left:50%;top:50%;margin:-450px 0 0 -450px;opacity:0;
+  background:repeating-conic-gradient(from 0deg,color-mix(in srgb,var(--c) 55%,transparent) 0 6deg,transparent 6deg 18deg);
+  mask:radial-gradient(circle,#000 0 20%,transparent 62%);-webkit-mask:radial-gradient(circle,#000 0 20%,transparent 62%);animation:sfxrays 4s .7s linear forwards}
+.sfx-rays.r2{animation-direction:reverse;animation-duration:5s;filter:saturate(1.4) brightness(1.1)}
+.sfx-parts i{position:absolute;left:50%;top:50%;width:var(--s);height:var(--s);border-radius:50%;background:#fff;box-shadow:0 0 8px var(--c),0 0 16px var(--c);opacity:0;
+  transform:rotate(var(--a)) translateY(0);animation:sfxburst 1.1s ease-out forwards}
+.sfx-flash{position:absolute;inset:0;background:radial-gradient(circle,#fff,color-mix(in srgb,var(--c) 60%,#fff) 50%,transparent 80%);opacity:0;animation:sfxflash .9s .55s ease-out forwards}
+.sfx-label{position:absolute;top:calc(50% + 150px);left:0;right:0;text-align:center;font-size:34px;letter-spacing:6px;color:var(--c);
+  text-shadow:0 0 12px var(--c),0 0 28px var(--c);opacity:0;animation:sfxlabel .7s 1s cubic-bezier(.2,1.6,.4,1) forwards}
+.sfx-skip{position:absolute;bottom:calc(24px + env(safe-area-inset-bottom));left:0;right:0;text-align:center;color:#8a96b8;font-size:12px}
+.sfx.s5{animation:sfxshake .5s .6s 2}
+.sfx.s5 .sfx-circle div{border-color:#fff3b0}
+@keyframes sfxfade{from{opacity:0}}
+@keyframes sfxspin{to{transform:rotate(360deg)}}
+@keyframes sfxpulse{to{transform:scale(1.12);opacity:1}}
+@keyframes sfxpillar{0%{transform:translateX(-50%) scaleX(0);opacity:0}40%{opacity:1}100%{transform:translateX(-50%) scaleX(1);opacity:.9}}
+@keyframes sfxrays{0%{opacity:0;transform:rotate(0)}15%{opacity:1}100%{opacity:.8;transform:rotate(90deg)}}
+@keyframes sfxburst{0%{opacity:1;transform:rotate(var(--a)) translateY(0)}100%{opacity:0;transform:rotate(var(--a)) translateY(calc(-1*var(--r)))}}
+@keyframes sfxflash{0%{opacity:0}25%{opacity:.95}100%{opacity:0}}
+@keyframes sfxlabel{from{opacity:0;transform:scale(.3)}to{opacity:1;transform:scale(1)}}
+@keyframes sfxshake{0%,100%{transform:translate(0)}20%{transform:translate(-6px,3px)}40%{transform:translate(5px,-4px)}60%{transform:translate(-4px,-2px)}80%{transform:translate(3px,4px)}}
+/* reveal: high-rarity shine */
+.sumcell.s4,.sumcell.s5{overflow:hidden}
+.sumcell.s4::after,.sumcell.s5::after{content:'';position:absolute;inset:-40%;background:linear-gradient(115deg,transparent 40%,rgba(255,255,255,.55) 50%,transparent 60%);animation:shine 1.8s 1s ease-in-out infinite}
+.sumcell.s5{background:linear-gradient(160deg,#3a2a08,#0d1530)}
+.sum.s5 .sum-icon{position:relative}
+.sum.s5 .sum-stars,.sum.s4 .sum-stars{animation:sfxlabel .6s cubic-bezier(.2,1.6,.4,1)}
+.sum.s4 .sum-stars{color:#cfa8ff;text-shadow:0 0 14px #b07cff}
+@keyframes shine{0%{transform:translateX(-60%)}60%,100%{transform:translateX(60%)}}
 
 /* FX */
 #fx{position:fixed;inset:0;pointer-events:none;z-index:50}
@@ -350,6 +396,7 @@ const RELICS={
   seal_bune:   {name:'부네의 인장',             icon:'🟣', desc:'공격력 +8',                     apply:p=>{p.atk+=8;}},
   seal_andras: {name:'안드라스의 인장',         icon:'⚪', desc:'방어력 +6 · 최대 HP +20',        apply:p=>{p.def+=6;p.maxHp+=20;p.hp+=20;}},
   seal_furfur: {name:'푸르푸르의 인장',         icon:'🔵', desc:'최대 HP +40 · 공격력 +4',        apply:p=>{p.maxHp+=40;p.hp+=40;p.atk+=4;}},
+  seal_botis:  {name:'보티스의 인장',           icon:'🟢', desc:'공격 +10 · 방어 +8 · 최대 HP +50',apply:p=>{p.atk+=10;p.def+=8;p.maxHp+=50;p.hp+=50;}},
   angel_feather:{name:'대천사의 깃털',          icon:'🤍', desc:'공격 +6 · 방어 +6 · 최대 HP +30',apply:p=>{p.atk+=6;p.def+=6;p.maxHp+=30;p.hp+=30;}}
 };
 
@@ -460,14 +507,36 @@ const AREAS=[
       phase2:{name:'나베리우스 · 19군단의 주인', art:'naberius2', atkMult:1.25, slashes:3,
         line:'"좋다… 나의 군단을 보여주마."\n\n붉은 불길이 치솟고, 검은 갑옷의 기사들이 일제히 붉은 눈을 뜬다.',
         moves:[{t:'multi',n:'흑기사 군단의 돌격',hits:3,m:0.65},{t:'multi',n:'참격의 폭풍',hits:8,m:0.3},{t:'hellfire',n:'지옥의 불길'},{t:'sweep',n:'군단의 함성',m:0.2},{t:'discord',n:'현혹의 언변'},{t:'charge',n:'지옥문 개방'}]}}
+  }  ,
+  { name:'멈춰버린 도시', country:'시간이 멈춘 곳', flag:'⏳', rec:18, recEnd:22, glow:'#3fe0a0',
+    desc:'모든 시계가 같은 시각에 멈춘 도시. 쓰러진 사람들은 깨어나지 않는다.',
+    intro:'나베리우스가 쓰러지고 새벽이 찾아왔다.\n\n그런데 한 도시만은 새벽을 맞지 못했다.\n모든 시계가 같은 시각에 멈추고, 사람들은 쓰러진 채 깨어나지 않는다.\n\n교구의 마지막 기록에는 한 이름이 남아 있었다 — 솔로몬의 72악마, 제17영.',
+    outro:'보티스가 무너지자 멈춰 있던 시곗바늘이 다시 움직이기 시작했다.\n\n쓰러져 있던 사람들이 하나둘 눈을 뜬다.\n\n"과거도 미래도… 결국 네 편이었나."\n\n— 멈춰버린 도시 해방 —',
+    enemies:[
+      {name:'멈춘 시계의 망령',   icon:'🕰️', hp:300, atk:56, def:23, xp:120, gold:65, demon:true, moves:[{t:'atk',n:'초침 베기'},{t:'atk',n:'초침 베기'},{t:'silence',n:'정지된 순간'}]},
+      {name:'얼어붙은 군중',      icon:'🧍', hp:340, atk:54, def:25, xp:125, gold:66, demon:true, moves:[{t:'atk',n:'짓누르는 손'},{t:'atk',n:'짓누르는 손'},{t:'strong',n:'군중의 압박'}]},
+      {name:'시계탑의 가고일',    icon:'🗿', hp:360, atk:58, def:28, xp:130, gold:68, demon:true, moves:[{t:'atk',n:'돌 발톱'},{t:'atk',n:'돌 발톱'},{t:'strong',n:'낙하'}]},
+      {name:'모래시계 독사',      icon:'🐍', hp:280, atk:62, def:21, xp:125, gold:66, demon:true, moves:[{t:'atk',n:'독니'},{t:'atk',n:'독니'},{t:'dot',n:'맹독',dn:'중독'}]},
+      {name:'거꾸로 흐르는 그림자', icon:'👤', hp:300, atk:60, def:22, xp:128, gold:67, demon:true, moves:[{t:'atk',n:'그림자 베기'},{t:'drain',n:'시간 흡수'},{t:'multi',n:'되감기 연격',hits:2,m:0.6}]}
+    ],
+    elite:{name:'시간의 파수꾼', icon:'⌛', hp:4300, atk:86, def:30, xp:650, gold:480, demon:true,
+      moves:[{t:'strong',n:'시곗바늘 대검'},{t:'multi',n:'멈춘 시간의 연격',hits:3,m:0.55},{t:'silence',n:'시간 정지'},{t:'charge',n:'자정의 종'}]},
+    mid:{name:'아몬', art:'amon', title:'솔로몬 72악마 · 제7영 · 후작', hp:9000, atk:90, def:31, xp:2400, gold:1800, demon:true,
+      pre:'뱀의 꼬리를 가진 늑대가 입에서 불길을 토해 낸다.\n\n"과거와 미래를 모두 아는 내게, 너의 패배는 이미 지나간 일이다."',
+      moves:[{t:'atk',n:'송곳니'},{t:'hellfire',n:'불길 토하기'},{t:'discord',n:'분쟁 조장'},{t:'multi',n:'뱀 꼬리 휘감기',hits:2,m:0.7},{t:'charge',n:'지옥 불꽃'}]},
+    boss:{name:'보티스', art:'botis', title:'솔로몬 72악마 · 제17영 · 총재 겸 백작 · 60군단', hp:22000, atk:135, def:34, xp:8000, gold:5000, demon:true, drop:'seal_botis',
+      tick:4000, bleedOnHit:true,
+      pre:'깨진 유리가 흩어진 로비, 쓰러진 사람들 사이로 한 남자가 걸어온다.\n붉은 머리, 초록빛 눈, 검은 코트. 허리띠에 감긴 초록 독사의 버클이 번뜩인다.\n\n"과거도, 미래도 이미 다 보았다. 네가 여기서 멈추는 것까지."',
+      moves:[{t:'atk',n:'독사의 송곳니'},{t:'dot',n:'피의 독니',dn:'출혈'},{t:'nullify',n:'시간 정지'},{t:'reflect',n:'뒤집힌 시간'},{t:'multi',n:'빛나는 검의 연격',hits:4,m:0.4},{t:'charge',n:'60군단의 심판'}]}
   }
+
 ];
 
 /* 스테이지 */
 const stageType=s=>s===15?'boss':s===10?'mid':s===5?'elite':'normal';
 const STYPE_LABEL={normal:'일반',elite:'정예',mid:'솔로몬 72악마',boss:'나라 보스'};
 const stageRec=(a,s)=>Math.round(AREAS[a].rec+(s-1)*(AREAS[a].recEnd-AREAS[a].rec)/(STAGES-1));
-const NORMAL_HP=[2.4,4,4.5,5,5.5], NORMAL_REWARD=1.5; // 일반 적이 몇 턴은 버티며 공격하도록
+const NORMAL_HP=[2.4,4,4.5,5,5.5,6], NORMAL_REWARD=1.5; // 일반 적이 몇 턴은 버티며 공격하도록
 function scaleBase(base,a,s){
   const f=1+0.06*(s-1);
   return {...base,hp:Math.round(base.hp*f*NORMAL_HP[a]),atk:Math.round(base.atk*f),def:Math.round(base.def*(1+0.04*(s-1))),
@@ -582,6 +651,14 @@ const ART={
       <path class="bolt b2" d="M178,96 L190,120 L178,122 L194,152" stroke="#cdeeff" stroke-width="2.2" fill="none"/>
       <path class="bolt b3" d="M100,8 L94,30 L104,30 L96,52" stroke="#cdeeff" stroke-width="2" fill="none"/>`},
 
+  amon:{c:'#b05cff',eye:'#ffcf40',latin:'AMON · SPIRITVS VII · MARCHIO · ',
+    body:`<path d="M60,128 C54,156 64,180 82,186 L118,186 C134,180 144,156 138,128 Z"/>
+      <path d="M74,84 L62,46 L88,70 L112,70 L138,46 L126,84 C134,104 122,124 100,130 C78,124 66,104 74,84 Z"/>
+      <path d="M134,172 C170,180 192,156 182,126 C174,104 152,108 158,124 C162,134 172,132 170,122" stroke="#07040c" stroke-width="10" fill="none" stroke-linecap="round"/>
+      <path d="M166,118 L178,108 L176,124 Z"/>`,
+    eyes:`<path d="M83,92 L95,96 L83,98 Z"/><path d="M117,92 L105,96 L117,98 Z"/><circle cx="174" cy="116" r="1.6"/>
+      <g class="fire"><path d="M94,124 C82,146 96,160 86,184 C108,166 100,150 110,136 C112,156 124,160 118,180 C134,158 122,136 106,124 Z" fill="#ff7a1a"/>
+      <path d="M98,128 C94,144 102,152 98,166 C108,154 104,144 108,134 Z" fill="#ffe08a"/></g>`},
   aim:{c:'#ffa020',eye:'#ffd060',latin:'AIM · SPIRITVS XXIII · DVX · ',
     body:`<path d="M0,190 C40,160 80,198 120,180 C160,162 172,192 192,174" stroke="#07040c" stroke-width="13" fill="none" stroke-linecap="round"/>
       <path d="M186,170 L200,162 L196,180 Z"/>
@@ -615,7 +692,8 @@ const ART={
 const PORTRAIT={
   furfur:{img:'furfur.jpg',cls:'pf-furfur',pos:'50% 14%'},
   naberius:{img:'naberius.jpg',cls:'pf-naberius',pos:'50% 24%'},
-  naberius2:{img:'naberius.jpg',cls:'pf-naberius p2',pos:'50% 24%'}
+  naberius2:{img:'naberius.jpg',cls:'pf-naberius p2',pos:'50% 24%'},
+  botis:{img:'botis.jpg',cls:'pf-botis',pos:'50% 20%'}
 };
 function portraitHTML(key,size){
   const p=PORTRAIT[key];
@@ -675,6 +753,12 @@ const MISSIONS=[
   {id:'hound', area:4, type:'kill', target:'지옥의 사냥개', count:6, title:'사냥개 사냥',
    desc:'폐허를 누비는 지옥의 사냥개 6마리를 처치하라.', reward:{tickets:2}, rewardText:'소환권 ×2',
    story:'폐허에 잠시 정적이 찾아왔다.\n\n교구에서 마지막 소환권을 보내왔다.'},
+  {id:'stop_clock', area:5, type:'kill', target:'멈춘 시계의 망령', count:8, title:'멈춘 시간의 조각',
+   desc:'멈춘 시계의 망령 8마리를 정화하라.', reward:{tickets:3}, rewardText:'소환권 ×3',
+   story:'망령이 흩어질 때마다 어디선가 시계 소리가 희미하게 들렸다.\n\n교구에서 소환권을 보내왔다.'},
+  {id:'viper', area:5, type:'kill', target:'모래시계 독사', count:8, title:'독사 소탕',
+   desc:'모래시계 독사 8마리를 처치하라.', reward:{rosary:3,water:3,gold:600}, rewardText:'성수 ×3 · 묵주 ×3 · 600 G',
+   story:'독사들이 사라지자 모래시계의 모래가 다시 흘러내렸다.'},
   {id:'legion', area:4, type:'kill', target:'나베리우스의 군단병', count:8, title:'군단 섬멸',
    desc:'나베리우스의 군단병 8마리를 처치하라.', reward:{relic:'angel_feather'}, rewardText:'유물: 대천사의 깃털',
    story:'무너진 성당의 제단 위, 하얀 깃털 하나가 빛나고 있었다.\n\n🤍 유물 「대천사의 깃털」을 얻었다!'}
@@ -1112,8 +1196,14 @@ function restLabel(){
   const sec=Math.ceil(l/1000);
   return `⛪ 성당 휴식<small>다시 가능까지 ${Math.floor(sec/60)}:${String(sec%60).padStart(2,'0')}</small>`;
 }
+function migrateSave(){
+  ['prog','wins'].forEach(k=>{if(!Array.isArray(P[k]))P[k]=[];while(P[k].length<AREAS.length)P[k].push(0);});
+  if(!Array.isArray(P.cleared))P.cleared=[];while(P.cleared.length<AREAS.length)P.cleared.push(false);
+  if(P.ended&&P.unlocked<5)P.unlocked=5;
+}
 function renderHub(msg){
   clearBattle();
+  migrateSave();
   const a=AREAS[P.cur];
   const areas=AREAS.map((ar,i)=>{
     const locked=i>P.unlocked;
@@ -1267,7 +1357,7 @@ function renderShop(msg){
         <button class="btn ${P.gold>=r.cost?'primary':''}" data-id="${r.id}" ${P.gold<r.cost?'disabled':''}>${r.cost} G</button></div>`).join('')}
     </div>
     <div class="panel"><div class="ptitle">✝ 동료 소환</div>
-      <div class="desc">${STAR_RATE.map(([st,r])=>'★'+st+' '+(r*100)+'%').join(' · ')}<br>
+      <div class="desc">${STAR_RATE.map(([st,r])=>'★'+st+' '+(Math.round(r*1000)/10)+'%').join(' · ')}<br>
       합성: 같은 캐릭터 ★1×5 → ★2 · ★2×4 → ★3 · ★3×3 → ★4 · ★4×2 → ★5 (무작위)</div>
       <div class="grid">
         <button class="btn primary" id="sumT1" ${P.tickets<1?'disabled':''}>🎫 소환권 1회<small>보유 ${P.tickets}장</small></button>
@@ -1308,8 +1398,26 @@ function revealHTML(list,title){
       <div class="sum-name">${al.name}</div><div class="small">${al.role}</div><p class="sum-desc">${al.desc}</p>
       <div class="notice">${isNew?'새로운 동료가 합류했다!':'보유 수 +1 (합성 재료) · 현재 '+P.roster[id]+'개'}</div></div>`;
   }
-  return `<div class="sum s${best}"><div class="sum-title">${title}</div><div class="sumgrid">${list.map(({id,isNew})=>{const al=ALLIES[id];
-    return `<div class="sumcell s${al.star}"><div class="ic">${al.icon}</div><div class="st">${'★'.repeat(al.star)}</div><div class="nm">${al.name}</div>${isNew?'<div class="new">NEW</div>':''}</div>`;}).join('')}</div></div>`;
+  return `<div class="sum s${best}"><div class="sum-title">${title}</div><div class="sumgrid">${list.map(({id,isNew},i)=>{const al=ALLIES[id];
+    return `<div class="sumcell s${al.star}" style="animation-delay:${(i*0.09).toFixed(2)}s"><div class="ic">${al.icon}</div><div class="st">${'★'.repeat(al.star)}</div><div class="nm">${al.name}</div>${isNew?'<div class="new">NEW</div>':''}</div>`;}).join('')}</div></div>`;
+}
+/* 소환 연출: 최고 등급에 따라 화려해짐 */
+function summonFx(top,cb){
+  const n=top>=5?46:top>=4?30:top>=3?18:10;
+  const parts=Array.from({length:n},()=>`<i style="--a:${Math.round(Math.random()*360)}deg;--r:${Math.round(90+Math.random()*170)}px;--s:${(2+Math.random()*4).toFixed(1)}px;animation-delay:${(0.55+Math.random()*0.5).toFixed(2)}s"></i>`).join('');
+  const ov=document.createElement('div');
+  ov.className='sfx s'+top;
+  ov.innerHTML=`<div class="sfx-bg"></div>
+    <div class="sfx-circle"><div class="r1"></div><div class="r2"></div><div class="r3"></div></div>
+    <div class="sfx-pillar"></div>${top>=4?'<div class="sfx-rays"></div>':''}${top>=5?'<div class="sfx-rays r2"></div>':''}
+    <div class="sfx-parts">${parts}</div>
+    ${top>=4?`<div class="sfx-label">${'★'.repeat(top)}</div>`:''}
+    <div class="sfx-flash"></div><div class="sfx-skip">탭하여 건너뛰기</div>`;
+  document.body.appendChild(ov);
+  const dur=top>=5?2700:top>=4?2100:top>=3?1600:1300;
+  let done=false;
+  const fin=()=>{if(done)return;done=true;ov.remove();cb();};
+  ov.onclick=fin;setTimeout(fin,dur);
 }
 function summon(n,useTicket){
   if(useTicket){if(P.tickets<n)return;P.tickets-=n;}
@@ -1321,7 +1429,7 @@ function summon(n,useTicket){
   }
   save();
   const top=res.reduce((a,b)=>ALLIES[b.id].star>ALLIES[a.id].star?b:a);
-  showStory(revealHTML(res,n===1?'소환 결과':n+'회 소환 결과'),()=>renderShop(`${n}회 소환 완료 · 최고 등급 ${'★'.repeat(ALLIES[top.id].star)} ${ALLIES[top.id].name}`),true);
+  summonFx(ALLIES[top.id].star,()=>showStory(revealHTML(res,n===1?'소환 결과':n+'회 소환 결과'),()=>renderShop(`${n}회 소환 완료 · 최고 등급 ${'★'.repeat(ALLIES[top.id].star)} ${ALLIES[top.id].name}`),true));
 }
 function synthesize(id){
   const al=ALLIES[id],need=SYN_NEED[al.star];
@@ -1330,7 +1438,7 @@ function synthesize(id){
   if(P.roster[id]<=0){delete P.roster[id];P.active=P.active.filter(x=>x!==id);}
   const nid=pick(allyIds(al.star+1)),isNew=!owned(nid);
   addAlly(nid);save();
-  showStory(revealHTML([{id:nid,isNew}],`합성: ${al.name} ×${need} →`),()=>renderAllies(`🔮 합성 완료 — ${'★'.repeat(ALLIES[nid].star)} ${ALLIES[nid].name}`),true);
+  summonFx(ALLIES[nid].star,()=>showStory(revealHTML([{id:nid,isNew}],`합성: ${al.name} ×${need} →`),()=>renderAllies(`🔮 합성 완료 — ${'★'.repeat(ALLIES[nid].star)} ${ALLIES[nid].name}`),true));
 }
 
 /* ===================== 전투 ===================== */
@@ -1349,11 +1457,11 @@ function startBattle(spec){
   partyIds().forEach(id=>{const al=ALLIES[id],mx=Math.round((50+aData(id).lv*10)*(0.7+0.15*al.star));ahp[id]={hp:mx,max:mx};});
   B={e:{...t,maxHp:t.hp},spec,area:a,stage:spec.hunt?0:s,stype:type,baseName:t.name,isBoss,isFinal:!!t.final,
      charging:false,chargeName:'',chargeKind:null,phase:1,tornadoCD:0,
-     buff:0,aura:0,hex:0,stun:{},stunWhy:{},ahp,agatoUsed:false,curse:0,silence:0,weak:0,ward:false,rage:0,turn:0,
+     buff:0,aura:0,hex:0,immune:0,reflect:0,curAlly:null,stun:{},stunWhy:{},ahp,agatoUsed:false,curse:0,silence:0,weak:0,ward:false,rage:0,turn:0,
      dot:null,evade:false,sealed:false,over:false,
      defending:false,busy:false,menu:'main',log:[],fxq:[]};
   const begin=()=>{
-    if(B&&isBoss&&!t.pvp){B.tickMs=t.zap?3000:t.final?4500:type==='boss'?5000:6000;B.zapT=setInterval(bossTick,B.tickMs);}
+    if(B&&isBoss&&!t.pvp){B.tickMs=t.zap?3000:t.tick?t.tick:t.final?4500:type==='boss'?5000:6000;B.zapT=setInterval(bossTick,B.tickMs);}
     if(B&&!isBoss&&Math.random()<0.4){
       addLog(`⚠ 기습! ${t.name}이(가) 먼저 덤벼든다`);B.busy=true;renderBattle();setTimeout(enemyTurn,700);return;
     }
@@ -1438,6 +1546,8 @@ function renderBattle(){
   if(B.weak)st.push(`📜 적 방어↓ ${B.weak}`);
   if(B.dot)st.push(`🩸 ${B.dot.name} ${B.dot.turns}`);
   if(B.ward)st.push('🔰 결계');
+  if(B.immune)st.push('⏸ 적 피해 무효');
+  if(B.reflect)st.push('↩ 적 반사');
   if(B.defending)st.push('🛡 방어');
   const party=`<div class="party">${partyIds().map(id=>{const h=B.ahp[id];const p=h?Math.round(h.hp/h.max*100):100;
     return `<span class="chip ${h&&h.hp<=0?'down':''}">${ALLIES[id].icon} ${ALLIES[id].name}<i class="mhp"><b style="width:${p}%"></b></i></span>`;}).join('')}</div>`;
@@ -1451,6 +1561,9 @@ function renderBattle(){
   else if(B.isBoss&&B.tickMs)passive.push(`⏱ 맹공 (${B.tickMs/1000}초마다)`);
   if(e.slashes)passive.push(`🗡 추격 참격 ×${e.slashes}`);
   if(B.evade)passive.push('👁 투명화');
+  if(B.immune)passive.push('⏸ 시간 정지: 이번 턴 피해 무효 — 회복·방어 추천');
+  if(B.reflect)passive.push('↩ 뒤집힌 시간: 준 피해의 50% 반사');
+  if(e.bleedOnHit)passive.push('🩸 공격 시 출혈');
   let warn='';
   if(B.charging){
     warn=B.chargeKind==='jeongyeok'?`⚠ 「전격」 — 방어하지 않으면 HP 절반 소멸`
@@ -1503,6 +1616,7 @@ function hitEnemy(mult,label){
   const e=B.e;
   if(B.evade){B.evade=false;addLog(`${label}! — 적이 모습을 감춰 빗나갔다`);queueFx('enemy','MISS','mpf');return;}
   if(e.dimension&&Math.random()<0.5){addLog(`${label}! — 🌀 차원의 틈으로 흘러가 사라졌다`);queueFx('enemy','차원 전이','mpf');return;}
+  if(B.immune){addLog(`${label}! — ⏸ 시간이 멈춰 피해가 무효화됐다`);queueFx('enemy','무효','mpf');return;}
   let d=(P.atk*(B.buff?1.5:1)*(B.aura?1.2:1)*mult-enemyDef()/2)*rnd(0.9,1.1);
   d=Math.max(1,Math.round(d));
   const crit=Math.random()<0.1;
@@ -1510,13 +1624,19 @@ function hitEnemy(mult,label){
   e.hp=Math.max(0,e.hp-d);
   addLog(`${label}! ${e.name}에게 ${d} 피해${crit?' (치명타!)':''}`);
   queueFx('enemy',(crit?'💥':'')+d,crit?'crit':'dmg');
+  if(B.reflect){const r=Math.round(d*0.5);P.hp=Math.max(0,P.hp-r);addLog(`↩ 뒤집힌 시간 — 주인공에게 ${r} 반사`);queueFx('player','↩-'+r,'pdmg');}
 }
 function allyHit(base,label,defFactor){
   const e=B.e;
+  if(B.immune){addLog(`${label}! — ⏸ 피해 무효`);queueFx('enemy','무효','mpf');return;}
   let d=Math.max(1,Math.round((base*(B.am||1)-enemyDef()*defFactor)*rnd(0.9,1.1)));
   e.hp=Math.max(0,e.hp-d);
   addLog(`${label}! ${d} 피해`);
   queueFx('enemy',d,'dmg');
+  if(B.reflect&&B.curAlly&&B.ahp[B.curAlly]){
+    const h=B.ahp[B.curAlly],r=Math.round(d*0.5);h.hp=Math.max(0,h.hp-r);
+    addLog(`↩ 반사 — ${ALLIES[B.curAlly].name} ${r} 피해${h.hp<=0?' · 쓰러짐':''}`);
+  }
 }
 
 function alliesAct(){
@@ -1525,7 +1645,7 @@ function alliesAct(){
   for(const id of partyIds()){
     if(e.hp<=0)break;
     const al=ALLIES[id],nm=al.name,m=allyMult(id),lv=aData(id).lv;
-    B.am=m;
+    B.am=m;B.curAlly=id;
     if(B.ahp[id]&&B.ahp[id].hp<=0)continue;
     if(B.stun[id]>0){
       B.stun[id]--;
@@ -1612,6 +1732,7 @@ function hitPlayer(mult,label){
   P.hp=Math.max(0,P.hp-d);
   addLog(`${label}! ${d} 피해${B.defending?' (방어)':''}${B.ward?' (결계)':''}`);
   queueFx('player','-'+d,'pdmg');
+  if(e.bleedOnHit&&Math.random()<0.35){B.dot={name:'출혈',dmg:Math.max(5,Math.round(e.atk*0.3)),turns:3};addLog('🩸 독사의 이빨 — 출혈 (3턴)');}
   return d;
 }
 
@@ -1652,6 +1773,7 @@ function act(kind,arg){
   }
   if(e.hp>0)alliesAct();
   B.menu='main';B.busy=true;
+  if(P.hp<=0&&e.hp>0){P.hp=0;B.over=true;renderBattle();setTimeout(defeat,900);return;}
   renderBattle();
   if(e.hp<=0){setTimeout(victory,750);return;}
   if(checkPhase())return;
@@ -1686,6 +1808,8 @@ function enemyTurn(){
   switch(mv.t){
     case 'sealed':  addLog(`${e.name} — 봉인되어 움직일 수 없다!`);break;
     case 'pvp':     pvpEnemyActs(e);break;
+    case 'nullify': B.immune=2;addLog(`${label} — ⏸ 다음 턴 동안 모든 피해가 무효화된다!`);break;
+    case 'reflect': B.reflect=2;addLog(`${label} — ↩ 다음 턴 동안 준 피해의 절반이 되돌아온다!`);break;
     case 'atk':     hitPlayer(1,label);break;
     case 'strong':  hitPlayer(1.5,label);break;
     case 'hellfire':hitPlayer(1.8,label);break;
@@ -1743,6 +1867,8 @@ function enemyTurn(){
     if(--B.dot.turns<=0)B.dot=null;
   }
   if(B.tornadoCD>0)B.tornadoCD--;
+  if(B.immune)B.immune--;
+  if(B.reflect)B.reflect--;
   if(B.buff)B.buff--;
   if(B.aura)B.aura--;
   if(B.hex)B.hex--;
@@ -1808,10 +1934,11 @@ function victory(){
   if(stype==='boss'&&first){
     P.cleared[area]=true;
     if(wasFinal){
-      P.ended=true;save();
-      storyChain([ENDING],()=>renderHub(msg+'<br>✝ 나베리우스 토벌 완료! 엔딩 이후에도 계속 플레이할 수 있습니다.'));
+      P.ended=true;P.unlocked=Math.max(P.unlocked,area+1);P.cur=area+1;save();
+      storyChain([ENDING,AREAS[area+1].intro],()=>renderMap(area+1,msg+`<br>✝ 나베리우스 토벌 완료!<br>🔓 새 지역 개방: ${AREAS[area+1].flag} ${AREAS[area+1].name}`));
       return;
     }
+    if(area>=AREAS.length-1){save();storyChain([AREAS[area].outro],()=>renderMap(area,msg));return;}
     P.unlocked=Math.max(P.unlocked,area+1);
     P.cur=area+1;save();
     storyChain([AREAS[area].outro,AREAS[area+1].intro],
