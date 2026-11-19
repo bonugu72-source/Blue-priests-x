@@ -235,6 +235,8 @@ body.title-mode{overflow:hidden}
 .pf-terazio{box-shadow:0 0 30px rgba(255,40,40,.7),0 0 90px rgba(255,90,40,.35)}
 .pf-terazio .pglow{background:radial-gradient(ellipse at 50% 100%,rgba(255,80,30,.55),transparent 62%);box-shadow:inset 0 0 50px rgba(90,0,0,.7);animation:breathe 2s ease-in-out infinite}
 .pf-terazio img{animation:tbolt 4.5s infinite}
+.pf-terazio.rage{box-shadow:0 0 40px rgba(255,20,20,.95),0 0 120px rgba(255,0,0,.55);animation:ragequake .3s ease-in-out infinite}
+.pf-terazio.rage img{animation:tbolt 1.2s infinite;filter:saturate(1.5) contrast(1.15)}
 @keyframes tbolt{0%,90%,100%{filter:none}92%{filter:brightness(1.8) saturate(1.3)}94%{filter:none}96%{filter:brightness(1.5)}}
 .pf-barbatos{box-shadow:0 0 26px rgba(170,90,255,.6),0 0 80px rgba(80,140,255,.3)}
 .pf-barbatos .pglow{background:radial-gradient(ellipse at 50% 100%,rgba(90,150,255,.45),transparent 62%);box-shadow:inset 0 0 50px rgba(60,0,110,.7);animation:breathe 2.6s ease-in-out infinite}
@@ -839,6 +841,7 @@ const AREAS=[
       moves:[{t:'atk',n:'사자의 포효'},{t:'multi',n:'거위발 할퀴기',hits:3,m:0.5},{t:'curse',n:'겁먹게 하는 눈'},{t:'sweep',n:'36군단의 돌격',m:0.16},{t:'charge',n:'운명의 선고'}]},
     boss:{name:'테라지오', art:'terazio', title:'마르바스의 수호자 · 붉은 번개의 용', hp:60000, exactHp:true, atk:150, def:44, xp:20000, gold:25000, goldFirst:0, goldRepeat:25000, stoneFirst:2, demon:true, drop:'seal_terazio',
       tick:6000, burnBleed:true, wave:5000,
+      madness:{at:20000,to:80000,atkMult:2,art:'terazio2',line:'"크아아아아아——!!"\n\n광기에 찬 분노가 사원 전체를 뒤흔든다. 꺾였던 날개가 다시 펼쳐지고, 붉은 번개가 테라지오의 몸으로 쏟아져 들어간다.\n\n— 광기: 체력 80,000 · 공격력 2배 —'},
       pre:'사원 위를 뒤덮은 붉은 번개 속에서 거대한 용이 내려앉는다. 온몸에서 불길이 흘러넘치고, 입에서는 지옥불이 새어 나온다.\n\n"마르바스 님께 가는 길은 없다. 이 사원이 너희의 무덤이다."',
       moves:[{t:'atk',n:'불꽃 발톱'},{t:'strong',n:'지옥불 브레스'},{t:'sweep',n:'붉은 번개',m:0.18},{t:'multi',n:'꼬리 휩쓸기',hits:3,m:0.5},{t:'atk',n:'불꽃 발톱'},{t:'charge',n:'수호자의 업화'}]}
   }
@@ -1057,6 +1060,7 @@ const PORTRAIT={
   naberius2:{img:'naberius.jpg',cls:'pf-naberius p2',pos:'50% 24%'},
   botis:{img:'botis.jpg',cls:'pf-botis',pos:'50% 20%'},
   terazio:{img:'terazio.jpg',cls:'pf-terazio',pos:'45% 30%'},
+  terazio2:{img:'terazio.jpg',cls:'pf-terazio rage',pos:'45% 30%'},
   barbatos:{img:'barbatos.jpg',cls:'pf-barbatos',pos:'50% 12%'},
   gamigin:{img:'gamigin.jpg',cls:'pf-gamigin',pos:'55% 10%'},
   valefor:{img:'valefor.jpg',cls:'pf-valefor',pos:'50% 14%'},
@@ -2093,7 +2097,7 @@ function clearBattle(){forcedMv=null;document.body.classList.remove('battle');if
 /* 반사·부적 등으로 적이 턴 밖에서 쓰러졌을 때 */
 function winNow(){
   if(!B||B.won)return;
-  if(B.e.berserk&&!B.berserked){B.e.hp=Math.max(1,B.e.hp);renderBattle();return;}
+  if((B.e.berserk&&!B.berserked)||(B.e.madness&&!B.maddened)){B.e.hp=Math.max(1,B.e.hp);renderBattle();return;}
   B.won=true;B.busy=true;if(B.paraT)clearInterval(B.paraT);if(B.waveT)clearInterval(B.waveT);
   if(B.zapT)clearInterval(B.zapT);if(B.karmaT)clearInterval(B.karmaT);if(B.isaT)clearInterval(B.isaT);
   renderBattle();setTimeout(victory,750);
@@ -2316,6 +2320,7 @@ function renderBattle(){
   if(B.reflect)passive.push('↩ 뒤집힌 시간: 준 피해의 50% 반사');
   if(e.bleedOnHit)passive.push('🩸 공격 시 출혈');
   if(e.burnBleed)passive.push('🔥🩸 끝없는 화상·출혈');
+  if(e.madness)passive.push(B.maddened?`💢 광기: 공격력 ${e.madness.atkMult}배`:`💢 HP ${fmt(e.madness.at)} 이하 광기`);
   if(e.wave)passive.push('🌀 5초마다 거스르는 파동');
   if(e.fixedDmg)passive.push('🎯 방어력 무시 고정 피해');
   if(e.paralyze)passive.push('⚡ 3초마다 동료 마비');
@@ -2658,7 +2663,7 @@ function act(kind,arg){
     addLog('도망에 실패했다!');
   }
   if(e.hp>0&&kind==='attack')alliesAct(); // 동료는 '공격'을 누른 턴에만 행동
-  if(e.hp<=0&&e.berserk&&!B.berserked)e.hp=1; // 폭주 전에는 쓰러지지 않음
+  if(e.hp<=0&&((e.berserk&&!B.berserked)||(e.madness&&!B.maddened)))e.hp=1; // 폭주·광기 전에는 쓰러지지 않음
   B.menu='main';B.busy=true;
   if(P.hp<=0&&e.hp>0){P.hp=0;B.over=true;renderBattle();setTimeout(defeat,900);return;}
   renderBattle();
@@ -2669,6 +2674,15 @@ function act(kind,arg){
 
 function checkPhase(){
   const e=B.e;
+  if(e.madness&&!B.maddened&&e.hp>0&&e.hp<=e.madness.at){
+    const m=e.madness;
+    B.maddened=true;e.maxHp=Math.max(e.maxHp,m.to);e.hp=m.to;e.atk=Math.round(e.atk*m.atkMult);e.art=m.art;B.charging=false;B.chargeKind=null;
+    addLog(`💢 ${e.name}의 광기 — 체력 ${fmt(m.to)}까지 회복 · 공격력 ${m.atkMult}배!`);
+    document.body.classList.add('flash');setTimeout(()=>document.body.classList.remove('flash'),400);
+    showStory(`<div class="sum s5"><div class="sum-title">광기</div><div class="intro-art">${portraitHTML(m.art,'big')}</div><div class="sum-name">${e.name}</div><p class="sum-desc" style="color:#ffb0b0">${esc(m.line).replace(/\n/g,'<br>')}</p></div>`,
+      ()=>{renderBattle();setTimeout(enemyTurn,500);},true);
+    return true;
+  }
   if(e.berserk&&!B.berserked&&e.hp>0&&e.hp<=e.berserk.at){
     B.berserked=true;e.hp=e.berserk.to;B.charging=false;B.chargeKind=null;B.noHeal=true;B.invisNext=true;
     e.moves=[...e.moves,{t:'bleedstorm',n:'무수한 출혈 참격',hits:8,m:0.25},{t:'bleedstorm',n:'무수한 출혈 참격',hits:8,m:0.25}];
