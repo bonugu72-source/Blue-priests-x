@@ -836,7 +836,7 @@ const SUMMON_COST=50, SUMMON10_COST=450, SUMMON11_COST=11*50-50; // 11회 연속
 const BOSS_GOLD_MULT=1.25;
 const DROP={seal:0.30,stoneBoss:0.25,stoneMid:0.15,stoneNormal:0.01}; // 희귀 유물 확률 // 보스(솔로몬 72악마) 처치 골드 배율
 const STAR_RATE=[[5,0.01],[4,0.05],[3,0.14],[2,0.30],[1,0.50]];
-const SYN_NEED={1:5,2:4,3:3,4:2};   // 같은 캐릭터 N개 → 한 단계 위 무작위 캐릭터
+const SYN_NEED={1:6,2:5,3:4,4:3};   // 같은 캐릭터 N개 → 한 단계 위 무작위 캐릭터
 const RARE_DROPS={};
 
 const INTRO='밤마다 서울 곳곳에서 악마의 기운이 새어 나오고 있다.\n\n교구는 이 사태를 \'푸른사제들\'에게 맡겼다.\n천사의 권능을 빌려 악마와 싸우는 사제들.\n\n그리고 오늘, 견습 사제 {name}에게 첫 임무가 내려졌다.\n곁에는 든든한 조력자, 이사벨 부제가 함께한다.\n\n— 기운의 근원을 추적하고, 그 끝에 있는 악마를 쓰러뜨려라.';
@@ -1454,7 +1454,7 @@ function renderShop(msg){
     </div>
     <div class="panel"><div class="ptitle">✝ 동료 소환</div>
       <div class="desc">${STAR_RATE.map(([st,r])=>'★'+st+' '+(Math.round(r*1000)/10)+'%').join(' · ')}<br>
-      합성: 같은 캐릭터 ★1×5 → ★2 · ★2×4 → ★3 · ★3×3 → ★4 · ★4×2 → ★5 (무작위)</div>
+      합성: 같은 캐릭터 ★1×${SYN_NEED[1]} → ★2 · ★2×${SYN_NEED[2]} → ★3 · ★3×${SYN_NEED[3]} → ★4 · ★4×${SYN_NEED[4]} → ★5 (무작위)</div>
       <div class="grid">
         <button class="btn primary" id="sumT1" ${P.tickets<1?'disabled':''}>🎫 소환권 1회<small>보유 ${P.tickets}장</small></button>
         <button class="btn primary" id="sumT10" ${P.tickets<10?'disabled':''}>🎫 소환권 10회<small>10장 사용</small></button>
