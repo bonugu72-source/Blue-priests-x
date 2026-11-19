@@ -333,6 +333,9 @@ body.title-mode{overflow:hidden}
 .autonext .anext{margin:12px 0 10px;font-size:15px}
 .autonext #anstop{width:100%;margin-bottom:8px}
 .sumcell .gift{position:absolute;top:3px;left:3px;z-index:2;white-space:nowrap;font-size:9px;padding:1px 4px;border-radius:8px;background:linear-gradient(135deg,#7a3cff,#b07cff);color:#fff;font-weight:700}
+.sortbar{display:flex;align-items:center;gap:6px;margin:8px 0 10px;flex-wrap:wrap}
+.sortbtn{background:#0d1530;color:#9fb3e6;border:1px solid #2c4580;border-radius:14px;padding:5px 12px;font-size:13px;font-family:inherit;cursor:pointer}
+.sortbtn.on{background:linear-gradient(135deg,#2f6fe0,#4da3ff);color:#fff;border-color:#7fb8ff}
 .aportrait img{width:100%;height:100%;object-fit:cover;display:block}
 .sum.s4 .aportrait{box-shadow:0 0 24px #b07cff,0 0 50px rgba(176,124,255,.4)}
 .sum.s5 .aportrait{box-shadow:0 0 28px #ffd24a,0 0 70px rgba(255,210,74,.45);border:2px solid #ffe9a0}
@@ -1396,8 +1399,10 @@ function allyCard(id){
 }
 const topBack=()=>`<div class="backtop-row"><button class="backtop" data-backtop>← 돌아가기</button></div>`;
 document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('[data-backtop]');if(b){e.preventDefault();renderHub();}});
+let allySort=(()=>{try{return localStorage.getItem('bp_ally_sort')||'cp'}catch(e){return 'cp'}})();
 function renderAllies(msg){
-  const own=Object.keys(ALLIES).filter(owned).sort((x,y)=>ALLIES[y].star-ALLIES[x].star||aData(y).lv-aData(x).lv);
+  const key={lv:id=>aData(id).lv,cp:id=>allyCP(id),cnt:id=>P.roster[id]||0}[allySort]||(id=>allyCP(id));
+  const own=Object.keys(ALLIES).filter(owned).sort((x,y)=>key(y)-key(x)||allyCP(y)-allyCP(x)||ALLIES[y].star-ALLIES[x].star);
   $('#app').innerHTML=`${statusHTML()}${topBack()}
     ${msg?`<div class="notice">${msg}</div>`:''}
     <div class="panel"><div class="teamcp">⚔ 팀 전투력 <b>${fmt(teamCP())}</b></div>
@@ -1405,6 +1410,7 @@ function renderAllies(msg){
     <div class="panel"><div class="ptitle">🕊️ 고정 조력자</div>${allyCard(FIXED)}</div>
     <div class="panel"><div class="ptitle">🤝 보유 동료 <span class="small">도감 ${own.length}/${Object.keys(ALLIES).length-1} · 출전 ${P.active.length}/${MAX_ACTIVE} · ${AWAKEN_ITEM.icon} ${AWAKEN_ITEM.name} ${P.items.stone}개</span></div>
       <div class="desc">출전 동료와 이사벨은 전투 경험치를 함께 얻는다. 골드로 바로 레벨업할 수도 있다.</div>
+      <div class="sortbar"><span class="small">정렬</span>${[['cp','⚔ 전투력'],['lv','레벨'],['cnt','카드 개수']].map(([k,l])=>`<button class="sortbtn ${allySort===k?'on':''}" data-sort="${k}">${l}</button>`).join('')}</div>
       ${own.length?own.map(allyCard).join(''):'<div class="desc">아직 동료가 없다. 상점에서 소환하자.</div>'}</div>
     <button class="btn" id="back">← 돌아가기</button>`;
   document.querySelectorAll('[data-sortie]').forEach(b=>b.onclick=()=>toggleSortie(b.dataset.sortie));
@@ -1412,6 +1418,8 @@ function renderAllies(msg){
   document.querySelectorAll('[data-alv]').forEach(b=>b.onclick=()=>allyLevelUp(b.dataset.alv));
   document.querySelectorAll('[data-awk]').forEach(b=>b.onclick=()=>awaken(b.dataset.awk));
   document.querySelectorAll('[data-myth]').forEach(b=>b.onclick=()=>mythUp(b.dataset.myth));
+  document.querySelectorAll('[data-sort]').forEach(b=>b.onclick=()=>{allySort=b.dataset.sort;try{localStorage.setItem('bp_ally_sort',allySort)}catch(e){}
+    const y=window.scrollY;renderAllies();window.scrollTo(0,y);});
   $('#back').onclick=()=>renderHub();
 }
 function allyLevelUp(id){
