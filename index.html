@@ -358,6 +358,29 @@ body.title-mode{overflow:hidden}
 .acard.dex.unown .aface{filter:grayscale(.7) brightness(.8)}
 .dexown{float:right;font-size:11px;padding:1px 7px;border-radius:9px;background:#1a2547;color:#8494c0}
 .dexown.on{background:#1f5a3a;color:#9ff0c4}
+/* 전투 화면: 모바일 한 화면 고정 */
+body.battle{overflow:hidden}
+body.battle #app{height:100dvh;min-height:0;overflow:hidden;padding:8px 10px calc(8px + env(safe-area-inset-bottom));gap:6px}
+body.battle .status{padding:7px 10px;gap:4px;flex:none}
+body.battle .status .row{font-size:13px}
+body.battle .status .row.small{font-size:11px}
+body.battle .bar{height:16px}
+body.battle .bar.xp{height:8px}
+body.battle .enemy{flex:1 1 auto;min-height:0;padding:8px 10px;gap:3px}
+body.battle .ename{font-size:16px}
+body.battle .eicon{flex:1 1 0;min-height:0;display:flex;align-items:center;justify-content:center;width:100%;overflow:hidden;padding:2px 0}
+body.battle .enemy .bar.ehp,body.battle .enemy .epass,body.battle .enemy .eflag,body.battle .enemy .ename,body.battle .enemy .etitle{flex:none}
+body.battle .eicon.sil,body.battle .eicon:not(.art):not(.pvpvis){font-size:clamp(44px,11dvh,86px)}
+body.battle .eicon .bsvg{height:100%;width:auto;max-width:230px;max-height:230px;aspect-ratio:1}
+body.battle .eicon .portrait{height:100%;width:auto;max-height:250px;aspect-ratio:210/250;animation:none}
+body.battle .estat{min-height:0}
+body.battle .party{flex:none;gap:4px}
+body.battle .chip{font-size:11px;padding:3px 8px}
+body.battle .pstat{min-height:0;flex:none;font-size:11px}
+body.battle .log{flex:none;height:clamp(64px,13dvh,112px);min-height:0;overflow:hidden;padding:6px 10px;font-size:12px;line-height:1.5;-webkit-mask-image:linear-gradient(transparent,#000 20px);mask-image:linear-gradient(transparent,#000 20px)}
+body.battle .cmds{flex:none}
+body.battle .cmds .grid{gap:6px}
+body.battle .cmds .btn{min-height:44px;padding:6px 10px}
 .aportrait img{width:100%;height:100%;object-fit:cover;display:block}
 .sum.s4 .aportrait{box-shadow:0 0 24px #b07cff,0 0 50px rgba(176,124,255,.4)}
 .sum.s5 .aportrait{box-shadow:0 0 28px #ffd24a,0 0 70px rgba(255,210,74,.45);border:2px solid #ffe9a0}
@@ -1479,7 +1502,7 @@ function allyCard(id){
     btns.push(`<button class="btn myth ${ok?'':'off'}" data-myth="${id}" ${ok?'':'disabled'}>🔱 신화 승급 ${fmt(mc)} G${st?` · ${AWAKEN_ITEM.icon}${st}`:''}</button>`);
   }
   if(al.star===5)btns.push(aw>=AWAKEN_MAX?`<button class="btn" disabled>각성 완료</button>`
-    :`<button class="btn ${P.items.stone>=1?'danger':''}" data-awk="${id}" ${P.items.stone<1?'disabled':''}>각성 ${aw}/${AWAKEN_MAX} · ${AWAKEN_ITEM.icon}1</button>`);
+    :(()=>{const ok=P.items.stone>=1&&cnt>=2;return `<button class="btn ${ok?'danger':''}" data-awk="${id}" ${ok?'':'disabled'}>각성 ${aw}/${AWAKEN_MAX}<small>${AWAKEN_ITEM.icon}1 · 같은 카드 1장 (${Math.max(0,cnt-1)}/1)</small></button>`;})());
   return `<div class="acard ${isFixed?'fixed':''} ${my?'mythc':''}"><div class="ally"><div class="ic">${allyFace(id,'md')}</div><div style="flex:1">
     ${isFixed?'<span class="tag t-ally">고정 조력자</span>':`<span class="gold">${'★'.repeat(al.star)}</span>`} ${al.name}${my?' <span class="mytag">신화</span>':''}${aw?` <span class="gold">각성 ${aw}</span>`:''}${TIER5[id]?` <span class="small">${TIER5[id]}티어</span>`:''}
     <span class="small">Lv ${d.lv}/${cap} · ⚔ ${fmt(allyCP(id))}${!isFixed&&!needSyn?' · ×'+cnt:''}</span>
@@ -1556,12 +1579,12 @@ function mythUp(id){
     ()=>renderAllies(`🔱 ${al.name} 신화 승급!`),true));
 }
 function awaken(id){
-  if(ALLIES[id].star!==5||P.items.stone<1||(P.awaken[id]||0)>=AWAKEN_MAX)return;
-  P.items.stone--;P.awaken[id]=(P.awaken[id]||0)+1;save();
+  if(ALLIES[id].star!==5||P.items.stone<1||(P.roster[id]||0)<2||(P.awaken[id]||0)>=AWAKEN_MAX)return;
+  P.items.stone--;P.roster[id]--;P.awaken[id]=(P.awaken[id]||0)+1;save();
   const al=ALLIES[id];
   showStory(`<div class="sum s5"><div class="sum-title">각성</div><div class="sum-stars">${'★'.repeat(5)}</div>${allyPortrait(id)}
     <div class="sum-name">${al.name}</div><div class="small">각성 ${P.awaken[id]} / ${AWAKEN_MAX}</div>
-    <div class="notice" style="margin-top:12px">${AWAKEN_ITEM.name}의 빛이 스며든다 — 능력 +${P.awaken[id]*20}%</div></div>`,
+    <div class="notice" style="margin-top:12px">${AWAKEN_ITEM.name} 1개와 같은 카드 1장을 바쳤다 — 능력 +${P.awaken[id]*20}%</div></div>`,
     ()=>renderAllies(`💠 ${al.name} 각성 ${P.awaken[id]}단계`),true);
 }
 
@@ -1662,7 +1685,7 @@ function synthesize(id){
 }
 
 /* ===================== 전투 ===================== */
-function clearBattle(){if(B&&B.zapT)clearInterval(B.zapT);if(B&&B.karmaT)clearInterval(B.karmaT);if(B&&B.isaT)clearInterval(B.isaT);B=null;}
+function clearBattle(){document.body.classList.remove('battle');if(B&&B.zapT)clearInterval(B.zapT);if(B&&B.karmaT)clearInterval(B.karmaT);if(B&&B.isaT)clearInterval(B.isaT);B=null;}
 /* 반사·부적 등으로 적이 턴 밖에서 쓰러졌을 때 */
 function winNow(){
   if(!B||B.won)return;B.won=true;B.busy=true;
@@ -1810,6 +1833,7 @@ function cmdHTML(){
 }
 
 function renderBattle(){
+  document.body.classList.add('battle');
   const e=B.e;
   const st=[];
   if(B.buff)st.push(`✨ 축복 ${B.buff}`);
