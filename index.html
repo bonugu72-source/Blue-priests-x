@@ -381,6 +381,12 @@ body.battle .log{flex:none;height:clamp(64px,13dvh,112px);min-height:0;overflow:
 body.battle .cmds{flex:none}
 body.battle .cmds .grid{gap:6px}
 body.battle .cmds .btn{min-height:44px;padding:6px 10px}
+.synall{width:100%;margin:8px 0 2px}
+.synlist{text-align:left;margin:8px 0;max-height:46vh;overflow:auto}
+.synrow{display:flex;align-items:center;gap:6px;font-size:13px;padding:5px 0;border-bottom:1px solid #1d2a50}
+.synrow .synnm{flex:1;text-align:left}
+.synrow .aface,.synrow .aemo{flex:none}
+.synrow b{font-size:12px;color:#ffd27a;white-space:nowrap}
 .aportrait img{width:100%;height:100%;object-fit:cover;display:block}
 .sum.s4 .aportrait{box-shadow:0 0 24px #b07cff,0 0 50px rgba(176,124,255,.4)}
 .sum.s5 .aportrait{box-shadow:0 0 28px #ffd24a,0 0 70px rgba(255,210,74,.45);border:2px solid #ffe9a0}
@@ -1548,6 +1554,7 @@ function renderAllies(msg){
     <div class="panel"><div class="ptitle">🕊️ 고정 조력자</div>${allyCard(FIXED)}</div>
     <div class="panel"><div class="ptitle">🤝 보유 동료 <span class="small">도감 ${own.length}/${Object.keys(ALLIES).length-1} · 출전 ${P.active.length}/${MAX_ACTIVE} · ${AWAKEN_ITEM.icon} ${AWAKEN_ITEM.name} ${P.items.stone}개</span></div>
       <div class="desc">출전 동료와 이사벨은 전투 경험치를 함께 얻는다. 골드로 바로 레벨업할 수도 있다.</div>
+      ${(()=>{const pl=synthPlan(),t=pl.reduce((s,x)=>s+x.n,0);return `<button class="btn ${t?'danger':''} synall" id="synall" ${t?'':'disabled'}>🔮 일괄 합성${t?` (${t}회 가능)`:''}<small>${t?'재료가 모인 모든 캐릭터를 한 번에 합성':'합성할 수 있는 캐릭터가 없음'}</small></button>`;})()}
       <div class="sortbar"><span class="small">정렬</span>${[['cp','⚔ 전투력'],['lv','레벨'],['cnt','카드 개수']].map(([k,l])=>`<button class="sortbtn ${allySort===k?'on':''}" data-sort="${k}">${l}</button>`).join('')}</div>
       ${own.length?own.map(allyCard).join(''):'<div class="desc">아직 동료가 없다. 상점에서 소환하자.</div>'}</div>
     <button class="btn" id="back">← 돌아가기</button>`;
@@ -1556,6 +1563,7 @@ function renderAllies(msg){
   document.querySelectorAll('[data-alv]').forEach(b=>b.onclick=()=>allyLevelUp(b.dataset.alv));
   document.querySelectorAll('[data-awk]').forEach(b=>b.onclick=()=>awaken(b.dataset.awk));
   document.querySelectorAll('[data-myth]').forEach(b=>b.onclick=()=>mythUp(b.dataset.myth));
+  if($('#synall'))$('#synall').onclick=synthAllAsk;
   document.querySelectorAll('[data-sort]').forEach(b=>b.onclick=()=>{allySort=b.dataset.sort;try{localStorage.setItem('bp_ally_sort',allySort)}catch(e){}
     const y=window.scrollY;renderAllies();window.scrollTo(0,y);});
   $('#back').onclick=()=>renderHub();
@@ -1682,6 +1690,41 @@ function synthesize(id){
   const nid=pick(allyIds(al.star+1)),isNew=!owned(nid);
   addAlly(nid);save();
   summonFx(ALLIES[nid].star,()=>showStory(revealHTML([{id:nid,isNew}],`합성: ${al.name} ×${need} →`),()=>renderAllies(`🔮 합성 완료 — ${'★'.repeat(ALLIES[nid].star)} ${ALLIES[nid].name}`),true));
+}
+
+/* 일괄 합성: 지금 재료가 모인 모든 캐릭터를 한 번에 합성 */
+function synthPlan(){
+  return Object.keys(P.roster).filter(id=>SYN_NEED[ALLIES[id].star]&&(P.roster[id]||0)>=SYN_NEED[ALLIES[id].star])
+    .map(id=>({id,n:Math.floor(P.roster[id]/SYN_NEED[ALLIES[id].star])})).sort((a,b)=>ALLIES[a.id].star-ALLIES[b.id].star);
+}
+function synthAllAsk(){
+  const plan=synthPlan();if(!plan.length)return;
+  const total=plan.reduce((s,x)=>s+x.n,0);
+  $('#mtext').innerHTML=`<div class="sum"><div class="sum-title">🔮 일괄 합성</div>
+    <div class="synlist">${plan.map(x=>{const al=ALLIES[x.id],need=SYN_NEED[al.star];
+      return `<div class="synrow">${allyFace(x.id,'xs')} <span class="synnm">${'★'.repeat(al.star)} ${al.name}</span><b>${need*x.n}장 → ★${al.star+1} ×${x.n}</b></div>`;}).join('')}</div>
+    <p class="sum-desc">총 ${total}회 합성합니다. 재료로 쓴 캐릭터는 사라지고, 한 단계 위 등급의 무작위 캐릭터를 얻습니다.</p>
+    <button class="btn" id="syncancel" style="width:100%;margin-bottom:8px">취소</button></div>`;
+  $('#mbtn').textContent=`🔮 ${total}회 합성하기`;
+  $('#modal').classList.remove('hidden');
+  $('#syncancel').onclick=()=>{$('#modal').classList.add('hidden');};
+  $('#mbtn').onclick=()=>{$('#modal').classList.add('hidden');synthAll();};
+}
+function synthAll(){
+  const plan=synthPlan();if(!plan.length)return;
+  const res=[];
+  for(const {id,n} of plan){
+    const al=ALLIES[id],need=SYN_NEED[al.star];
+    for(let i=0;i<n;i++){
+      P.roster[id]-=need;
+      const nid=pick(allyIds(al.star+1)),isNew=!owned(nid);
+      addAlly(nid);res.push({id:nid,isNew});
+    }
+    if(P.roster[id]<=0){delete P.roster[id];P.active=P.active.filter(x=>x!==id);}
+  }
+  save();
+  const top=res.reduce((a,b)=>ALLIES[b.id].star>ALLIES[a.id].star?b:a);
+  summonFx(ALLIES[top.id].star,()=>showStory(revealHTML(res,`일괄 합성 결과 (${res.length}회)`),()=>renderAllies(`🔮 일괄 합성 ${res.length}회 완료 · 최고 등급 ${'★'.repeat(ALLIES[top.id].star)} ${ALLIES[top.id].name}`),true));
 }
 
 /* ===================== 전투 ===================== */
