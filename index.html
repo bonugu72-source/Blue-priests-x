@@ -472,6 +472,12 @@ const ALLIES={
   civ_seoyeon:{star:1,name:'이서연',      icon:'👩', role:'민간인', kit:'civ_heal', skill:'응급처치', desc:'주인공 HP 70% 미만이면 소량 회복'},
   civ_jihun:  {star:1,name:'박지훈',      icon:'👨', role:'민간인', kit:'civ_atk',  skill:'쇠파이프', desc:'쇠파이프로 약한 공격'},
   civ_yuna:   {star:1,name:'최유나',      icon:'🙋', role:'민간인', kit:'civ_mp',   skill:'응원', desc:'응원으로 HP 소량 회복'},
+  civ_dohyun: {star:1,name:'정도현',      icon:'🧯', role:'민간인', kit:'civ_burn', skill:'화염병', desc:'화염병 투척 — 약한 피해 + 2턴 불태움'},
+  civ_hayoon: {star:1,name:'한하윤',      icon:'🔦', role:'민간인', kit:'civ_blind',skill:'손전등', desc:'손전등으로 눈부시게 — 30% 확률로 적의 다음 공격이 빗나감'},
+  civ_junho:  {star:1,name:'윤준호',      icon:'🛒', role:'민간인', kit:'civ_cart', skill:'카트 돌진', desc:'마트 카트로 돌진 — 가끔(25%) 두 배 피해'},
+  civ_sua:    {star:1,name:'강수아',      icon:'📱', role:'민간인', kit:'civ_scan', skill:'촬영', desc:'적을 촬영해 약점 공유 — 2턴간 적 방어력 감소'},
+  civ_minsu:  {star:1,name:'오민수',      icon:'🪑', role:'민간인', kit:'civ_guard',skill:'의자 방패', desc:'적이 힘을 모으면 의자로 막아 다음 공격 피해 절반 · 평소엔 의자 휘두르기'},
+  civ_eunji:  {star:1,name:'임은지',      icon:'🍙', role:'민간인', kit:'civ_food', skill:'주먹밥', desc:'주먹밥 나눔 — 동료들의 HP 소량 회복 · 모두 건강하면 냄비 뚜껑 공격'},
   /* ★2 수도사 */
   monk_joseph:{star:2,name:'요셉 수도사',   icon:'🧎', role:'수도사', kit:'monk_heal', desc:'주인공 HP 60% 미만이면 치유 기도 · 평소엔 약한 공격'},
   monk_andrea:{star:2,name:'안드레아 수도사',icon:'📿', role:'수도사', kit:'monk_bless',desc:'3턴간 주인공 공격력 1.2배 · 축복 중엔 약한 공격'},
@@ -1623,7 +1629,8 @@ function pvpEnemyActs(e){
       case 'chant':    if(e.hp<e.maxHp*0.7&&Math.random()<0.4)heal(0.12);else dmg(7+lv*2.4,0.5,`${nm}의 빛의 음표`);break;
       case 'purify':   if(e.hp<e.maxHp*0.5&&Math.random()<0.4)heal(0.12);else dmg(10+lv*3.6,0.4,`${nm}의 날개 베기`);break;
       case 'monk_holy':dmg(8+lv*2.8,0,`${nm}의 성수 투척`);break;
-      case 'civ_atk':  dmg(6+lv*2,0.5,`${nm}의 ${al.skill}`);break;
+      case 'civ_atk': case 'civ_burn': case 'civ_blind': case 'civ_cart': case 'civ_scan': case 'civ_guard': case 'civ_food':
+                       dmg(6+lv*2,0.5,`${nm}의 ${al.skill}`);break;
       default:         dmg(10+lv*3,0.5,`${nm}의 공격`);
     }
   }
@@ -2222,6 +2229,7 @@ function renderBattle(){
   if(B.mshield>0)st.push(`🛡 방어막 ${B.mshield}`);
   if(B.prism)st.push('💎 프리즘');
   if(B.negate)st.push('🗡 무력화');
+  if(B.evadeNext)st.push('🔦 눈부심');
   if(B.blind)st.push(`📜 시야 차단 ${B.blind}`);
   if(B.sealed>0)st.push(`⛓ 적 속박 ${B.sealed}`);
   if(B.eburn)st.push(`🔥 적 불태움 ${B.eburn.turns}`);
@@ -2368,6 +2376,31 @@ function alliesAct(){
         if(P.hp<P.maxHp)heal(0.06,`${nm}의 ${al.skill}`);
         else allyHit(6+lv*2,`${nm}의 돌팔매`,0.5);
         break;
+      case 'civ_burn':{
+        const d=allyHit(5+lv*1.6,`${nm}의 화염병`,0.5);
+        if(d&&e.hp>0&&!B.eburn){B.eburn={dmg:Math.max(1,Math.round(d*0.5)),turns:2};addLog(`🔥 ${e.name}에게 불이 붙었다 (2턴)`);}
+        break;}
+      case 'civ_blind':
+        if(!B.evadeNext&&Math.random()<0.3){B.evadeNext=true;addLog(`${nm}의 손전등 — 적의 눈이 부시다! (다음 공격 빗나감)`);}
+        else allyHit(5+lv*1.8,`${nm}의 손전등 내려치기`,0.5);
+        break;
+      case 'civ_cart':
+        if(Math.random()<0.25)allyHit((6+lv*2)*2,`${nm}의 전력 카트 돌진`,0.5);
+        else allyHit(6+lv*2,`${nm}의 카트 돌진`,0.5);
+        break;
+      case 'civ_scan':
+        if(!B.weak){B.weak=2;addLog(`${nm}의 촬영 — 적의 약점이 공유됐다 (2턴간 적 방어력 감소)`);}
+        else allyHit(5+lv*1.8,`${nm}의 셀카봉`,0.5);
+        break;
+      case 'civ_guard':
+        if(B.charging&&!B.ward){B.ward=true;addLog(`${nm}의 의자 방패 — 다음 적 공격 피해 절반`);}
+        else allyHit(6+lv*2,`${nm}의 의자 휘두르기`,0.5);
+        break;
+      case 'civ_food':{
+        const hurt=partyIds().some(x=>B.ahp[x]&&B.ahp[x].hp>0&&B.ahp[x].hp<B.ahp[x].max*0.7);
+        if(hurt){partyIds().forEach(x=>{const ah=B.ahp[x];if(ah&&ah.hp>0)ah.hp=Math.min(ah.max,ah.hp+Math.round(ah.max*0.12*healMul()));});addLog(`${nm}의 주먹밥 — 동료들의 HP 회복`);}
+        else allyHit(5+lv*1.8,`${nm}의 냄비 뚜껑`,0.5);
+        break;}
       case 'monk_heal':
         if(P.hp<P.maxHp*0.6)heal(0.25,`${nm}의 치유 기도`);
         else allyHit(8+lv*2.5,`${nm}의 묵상 일격`,0.5);
@@ -2490,6 +2523,7 @@ function hitPlayer(mult,label){
   if(inParty('danian')&&isMyth('danian')&&!(B.stun&&B.stun.danian)&&B.ahp.danian&&B.ahp.danian.hp>0&&Math.random()<0.2){
     addLog(`${label} — 🔱 천지개벽: 다니안이 공격을 쳐냈다!`);queueFx('player','MISS','mpf');return 0;
   }
+  if(B.evadeNext){B.evadeNext=false;addLog(`${label} — 🔦 눈이 부신 적의 공격이 빗나갔다!`);queueFx('player','MISS','mpf');return 0;}
   if(B.blind&&Math.random()<0.35){addLog(`${label} — 📜 시야가 가려진 적의 공격이 빗나갔다!`);queueFx('player','MISS','mpf');return 0;}
   if(B.negate){addLog(`${label} — 🗡 갈라진 대지에 막혀 무력화됐다!`);queueFx('player','무력화','mpf');return 0;}
   const def=P.def*(B.curse?0.6:1);
