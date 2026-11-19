@@ -332,6 +332,7 @@ body.title-mode{overflow:hidden}
 .autonext .notice{text-align:left;font-size:13px;line-height:1.55}
 .autonext .anext{margin:12px 0 10px;font-size:15px}
 .autonext #anstop{width:100%;margin-bottom:8px}
+.sumcell .gift{position:absolute;top:3px;left:3px;z-index:2;white-space:nowrap;font-size:9px;padding:1px 4px;border-radius:8px;background:linear-gradient(135deg,#7a3cff,#b07cff);color:#fff;font-weight:700}
 .aportrait img{width:100%;height:100%;object-fit:cover;display:block}
 .sum.s4 .aportrait{box-shadow:0 0 24px #b07cff,0 0 50px rgba(176,124,255,.4)}
 .sum.s5 .aportrait{box-shadow:0 0 28px #ffd24a,0 0 70px rgba(255,210,74,.45);border:2px solid #ffe9a0}
@@ -1462,7 +1463,7 @@ function renderShop(msg){
         <button class="btn primary" id="sumT1" ${P.tickets<1?'disabled':''}>🎫 소환권 1회<small>보유 ${P.tickets}장</small></button>
         <button class="btn primary" id="sumT10" ${P.tickets<10?'disabled':''}>🎫 소환권 10회<small>10장 사용</small></button>
         <button class="btn primary full" id="sumG1" ${P.gold<SUMMON_COST?'disabled':''}>💰 골드 1회<small>${SUMMON_COST} G</small></button>
-        <button class="btn danger full" id="sumG11" ${P.gold<SUMMON11_COST?'disabled':''}>💰 골드 11회 연속<small>${fmt(SUMMON11_COST)} G (${SUMMON_COST*11-SUMMON11_COST} G 할인)</small></button>
+        <button class="btn danger full" id="sumG11" ${P.gold<SUMMON11_COST?'disabled':''}>💰 골드 11회 연속<small>${fmt(SUMMON11_COST)} G (${SUMMON_COST*11-SUMMON11_COST} G 할인) · 🎁 ★4 1명 확정 증정</small></button>
       </div>
     </div>
     <button class="btn" id="back">← 돌아가기</button>`;
@@ -1495,8 +1496,8 @@ function revealHTML(list,title){
       <div class="sum-name">${al.name}</div><div class="small">${al.role}</div><p class="sum-desc">${al.desc}</p>
       <div class="notice">${isNew?'새로운 동료가 합류했다!':'보유 수 +1 (합성 재료) · 현재 '+P.roster[id]+'개'}</div></div>`;
   }
-  return `<div class="sum s${best}"><div class="sum-title">${title}</div><div class="sumgrid">${list.map(({id,isNew},i)=>{const al=ALLIES[id];
-    return `<div class="sumcell s${al.star}" style="animation-delay:${(i*0.09).toFixed(2)}s"><div class="ic">${allyFace(id,'sm')}</div><div class="st">${'★'.repeat(al.star)}</div><div class="nm">${al.name}</div>${isNew?'<div class="new">NEW</div>':''}</div>`;}).join('')}</div></div>`;
+  return `<div class="sum s${best}"><div class="sum-title">${title}</div><div class="sumgrid">${list.map((x,i)=>{const {id,isNew}=x,al=ALLIES[id];
+    return `<div class="sumcell s${al.star}" style="animation-delay:${(i*0.09).toFixed(2)}s"><div class="ic">${allyFace(id,'sm')}</div><div class="st">${'★'.repeat(al.star)}</div><div class="nm">${al.name}</div>${isNew?'<div class="new">NEW</div>':''}${x.gift?'<div class="gift">🎁 확정</div>':''}</div>`;}).join('')}</div></div>`;
 }
 /* 소환 연출: 최고 등급에 따라 화려해짐 */
 function summonFx(top,cb){
@@ -1524,9 +1525,12 @@ function summon(n,useTicket){
     const id=pick(allyIds(rollStar()));
     const isNew=!owned(id);addAlly(id);res.push({id,isNew});
   }
+  if(n===11&&!useTicket){ // 11회 연속: ★4 무작위 1명 확정 증정
+    const id=pick(allyIds(4)),isNew=!owned(id);addAlly(id);res.push({id,isNew,gift:true});
+  }
   save();
   const top=res.reduce((a,b)=>ALLIES[b.id].star>ALLIES[a.id].star?b:a);
-  summonFx(ALLIES[top.id].star,()=>showStory(revealHTML(res,n===1?'소환 결과':n+'회 소환 결과'),()=>renderShop(`${n}회 소환 완료 · 최고 등급 ${'★'.repeat(ALLIES[top.id].star)} ${ALLIES[top.id].name}`),true));
+  summonFx(ALLIES[top.id].star,()=>showStory(revealHTML(res,n===1?'소환 결과':n+'회 소환 결과'+(res.some(r=>r.gift)?' + 🎁 ★4 확정':'')),()=>renderShop(`${n}회 소환 완료 · 최고 등급 ${'★'.repeat(ALLIES[top.id].star)} ${ALLIES[top.id].name}`),true));
 }
 function synthesize(id){
   const al=ALLIES[id],need=SYN_NEED[al.star];
