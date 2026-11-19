@@ -462,6 +462,12 @@ const ALLIES={
             desc:'투시로 적의 약점 간파(3턴간 적 방어력 절반) · 간파 중엔 방어 무시 일격'},
   javeran: {star:3,name:'자베르안 부제', icon:'🗡️', role:'능력 미정', kit:'basic',
             desc:'안정적인 공격 (임시 능력)'},
+  vista:   {star:3,name:'비스타 부제',   icon:'⚔️', role:'쌍검', kit:'twin',
+            desc:'쌍검 2연격 · 적 HP 30% 미만이면 마무리 일격(방어 무시)'},
+  viran:   {star:3,name:'비르안 부제',   icon:'🛡️', role:'수호', kit:'guard',
+            desc:'주인공 HP 50% 미만이면 수호의 기도(다음 적 공격 피해 절반 + 소량 치유) · 평소엔 방패 강타'},
+  sara:    {star:3,name:'사라 부제',     icon:'🎼', role:'성가', kit:'chant',
+            desc:'정화의 성가(방어력 감소·지속 피해 중 하나 제거) · 주인공 HP 70% 미만이면 치유의 성가 · 평소엔 빛의 음표 공격'},
   /* ★4 */
   agato:   {star:4,name:'아가토 사제',   icon:'🔱', role:'천사의 지배 · 신의 은총', kit:'dominion',
             desc:'지배(빛의 절단 · 방어 무시) · 위급할 때 단 한 번 신의 은총(거대한 피해, 대가로 2턴 행동 불가)'},
@@ -1495,6 +1501,9 @@ function pvpEnemyActs(e){
       case 'flower':   if(e.hp<e.maxHp*0.6&&Math.random()<0.5)heal(0.14);else dmg(8+lv*3.4,0.5,`${nm}의 꽃잎`);break;
       case 'prism':    dmg(12+lv*4.2,0.3,`${nm}의 보석 광선`);break;
       case 'storm':    dmg(11+lv*3.8,0.4,`${nm}의 깃털 칼날`);break;
+      case 'twin':     dmg(6+lv*1.8,0.5,`${nm}의 쌍검 ①`);dmg(6+lv*1.8,0.5,`${nm}의 쌍검 ②`);break;
+      case 'guard':    if(e.hp<e.maxHp*0.5&&Math.random()<0.3)heal(0.06);else dmg(9+lv*2.8,0.4,`${nm}의 방패 강타`);break;
+      case 'chant':    if(e.hp<e.maxHp*0.7&&Math.random()<0.4)heal(0.12);else dmg(7+lv*2.4,0.5,`${nm}의 빛의 음표`);break;
       case 'purify':   if(e.hp<e.maxHp*0.5&&Math.random()<0.4)heal(0.12);else dmg(10+lv*3.6,0.4,`${nm}의 날개 베기`);break;
       case 'monk_holy':dmg(8+lv*2.8,0,`${nm}의 성수 투척`);break;
       case 'civ_atk':  dmg(6+lv*2,0.5,`${nm}의 ${al.skill}`);break;
@@ -2194,6 +2203,20 @@ function alliesAct(){
         else allyHit(10+lv*3,`${nm}의 간파 일격`,0);
         break;
       case 'basic': allyHit(10+lv*3,`${nm}의 공격`,0.5);break;
+      case 'twin': // 비스타 부제: 쌍검 2연격 · 마무리 일격
+        if(e.hp<e.maxHp*0.3)allyHit(14+lv*3.6,`${nm}의 마무리 일격`,0);
+        else{allyHit(6+lv*1.8,`${nm}의 쌍검 ①`,0.5);if(e.hp>0)allyHit(6+lv*1.8,`${nm}의 쌍검 ②`,0.5);}
+        break;
+      case 'guard': // 비르안 부제: 수호의 기도
+        if(P.hp<P.maxHp*0.5&&!B.ward){B.ward=true;addLog(`${nm}의 수호의 기도 — 다음 적 공격 피해 절반`);heal(0.06,`${nm}의 수호의 기도`,0.5);}
+        else allyHit(9+lv*2.8,`${nm}의 방패 강타`,0.4);
+        break;
+      case 'chant': // 사라 부제: 정화·치유의 성가
+        if(B.dot){addLog(`${nm}의 정화의 성가 — ${B.dot.name} 제거`);B.dot=null;}
+        else if(B.curse){B.curse=0;addLog(`${nm}의 정화의 성가 — 방어력 감소 제거`);}
+        else if(P.hp<P.maxHp*0.7)heal(0.12,`${nm}의 치유의 성가`,0.5);
+        else allyHit(7+lv*2.4,`${nm}의 빛의 음표`,0.5);
+        break;
       case 'curse': // 구원의 계보에서 배제 — 저주의 힘
         if(!B.hex){B.hex=3;addLog(`${nm}의 저주 — 3턴간 적 공격력 감소`);}
         else allyHit(7+lv*2.5,`${nm}의 저주의 일격`,0.5);
