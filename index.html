@@ -440,11 +440,12 @@ const ALLY_IMG={
   siren:{src:'ally_siren.jpg',pos:'45% 22%',face:'42% 20%'},
   elia:{src:'ally_elia.jpg',pos:'55% 30%',face:'58% 34%'},
   danian:{src:'ally_danian.jpg',pos:'55% 14%',face:'58% 14%'},
-  karma:{src:'ally_karma.jpg',pos:'42% 22%',face:'35% 24%'}
+  karma:{src:'ally_karma.jpg',pos:'42% 22%',face:'35% 24%'},
+  gubeomju:{src:'ally_gubeomju.jpg',pos:'50% 26%',face:'48% 38%',size:'220%'}
 };
 function allyFace(id,cls){
   const im=ALLY_IMG[id];
-  return im?`<span class="aface ${cls||''}" style="background-image:url(${im.src});background-position:${im.face}"></span>`:`<span class="aemo ${cls||''}">${ALLIES[id].icon}</span>`;
+  return im?`<span class="aface ${cls||''}" style="background-image:url(${im.src});background-position:${im.face}${im.size?';background-size:'+im.size+' auto':''}"></span>`:`<span class="aemo ${cls||''}">${ALLIES[id].icon}</span>`;
 }
 function allyPortrait(id){
   const im=ALLY_IMG[id];
