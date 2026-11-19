@@ -231,6 +231,12 @@ body.title-mode{overflow:hidden}
 @keyframes rain{to{transform:translate(-6px,22px)}}
 @keyframes ember{0%{transform:translate(0,0);opacity:0}10%{opacity:1}100%{transform:translate(18px,-320px);opacity:0}}
 
+.pf-valefor{box-shadow:0 0 24px rgba(150,180,255,.55),0 0 70px rgba(255,110,40,.25)}
+.pf-valefor .pglow{background:radial-gradient(ellipse at 50% 100%,rgba(255,120,40,.4),transparent 60%);box-shadow:inset 0 0 44px rgba(120,150,255,.4);animation:breathe 2.8s ease-in-out infinite}
+.pf-valefor.rage{box-shadow:0 0 34px rgba(255,40,40,.85),0 0 100px rgba(255,0,0,.45);animation:ragequake .35s ease-in-out infinite}
+.pf-valefor.rage img{filter:saturate(1.5) contrast(1.15) hue-rotate(-12deg)}
+.pf-valefor.rage .pglow{background:radial-gradient(ellipse at 50% 100%,rgba(255,40,30,.7),transparent 70%);animation-duration:1s}
+@keyframes ragequake{0%,100%{transform:translate(0,0)}25%{transform:translate(-1.5px,1px)}75%{transform:translate(1.5px,-1px)}}
 .pf-amon{box-shadow:0 0 26px rgba(255,110,30,.6),0 0 80px rgba(255,60,0,.3)}
 .pf-amon .pglow{background:radial-gradient(ellipse at 50% 100%,rgba(255,120,30,.55),transparent 62%);box-shadow:inset 0 0 50px rgba(90,20,0,.75);animation:breathe 2.2s ease-in-out infinite}
 .pf-amon .pembers i{background:#ffb347;box-shadow:0 0 6px #ff6a00}
@@ -565,6 +571,7 @@ const RELICS={
   seal_bune:   {name:'부네의 인장',             icon:'🟣', desc:'공격력 +8',                     apply:p=>{p.atk+=8;}},
   seal_andras: {name:'안드라스의 인장',         icon:'⚪', desc:'방어력 +6 · 최대 HP +20',        apply:p=>{p.def+=6;p.maxHp+=20;p.hp+=20;}},
   seal_furfur: {name:'푸르푸르의 인장',         icon:'🔵', desc:'최대 HP +40 · 공격력 +4',        apply:p=>{p.maxHp+=40;p.hp+=40;p.atk+=4;}},
+  seal_valefor:{name:'발레포르의 인장',  icon:'💠', desc:'공격 +16 · 방어 +12 · 최대 HP +100',apply:p=>{p.atk+=16;p.def+=12;p.maxHp+=100;p.hp+=100;}},
   seal_amon:{name:'아몬의 인장',     icon:'🔶', desc:'공격 +14 · 방어 +10 · 최대 HP +80',apply:p=>{p.atk+=14;p.def+=10;p.maxHp+=80;p.hp+=80;}},
   seal_barbatos:{name:'바르바토스의 인장',     icon:'🟣', desc:'공격 +12 · 방어 +8 · 최대 HP +60',apply:p=>{p.atk+=12;p.def+=8;p.maxHp+=60;p.hp+=60;}},
   seal_botis:  {name:'보티스의 인장',           icon:'🟢', desc:'공격 +10 · 방어 +8 · 최대 HP +50',apply:p=>{p.atk+=10;p.def+=8;p.maxHp+=50;p.hp+=50;}},
@@ -743,6 +750,27 @@ const AREAS=[
       tick:4000, burnAll:true, voidHero:0.4,
       pre:'멈춰버린 도시에서 쓰러뜨렸던 아몬이었다. 하지만 그때와는 기세가 전혀 다르다.\n갈라진 용암 위에 검은 머리를 길게 묶은 사내가 서 있고, 찢어진 옷 사이로 검은 불길이 두 팔을 휘감고 있다.\n\n"그때 나를 쓰러뜨렸다고 생각했나? 이 불길이 꺼지기 전에 너희가 먼저 타 버릴 것이다."',
       moves:[{t:'atk',n:'불꽃 부리'},{t:'strong',n:'지옥불 숨결'},{t:'sweep',n:'불꽃의 날개',m:0.18},{t:'drain',n:'생명 흡수'},{t:'atk',n:'불꽃 부리'},{t:'charge',n:'40군단의 업화'}]}
+  },
+  { name:'차원의 비탈길', country:'차원과 차원 사이의 경사', flag:'🌀', rec:30, recEnd:34, glow:'#7a8cff',
+    desc:'발을 헛디디면 다른 차원으로 미끄러지는 비탈길. 끝없이 불타는 숲으로 이어진다.',
+    intro:'천계의 문 너머는 하늘이 아니었다.\n\n발밑의 땅이 기울어지며 끝없는 비탈길이 펼쳐졌다. 한 걸음마다 풍경이 바뀌고, 저 아래에서는 숲이 불타고 있었다.\n\n누군가 우리의 것을 훔쳐 가려 한다. 힘도, 목소리도.',
+    outro:'발레포르가 쓰러지자 비탈길이 천천히 평평해지기 시작했다.\n\n불타던 숲의 불길도 하나둘 사그라들었다.\n\n"빼앗긴 것은… 모두 돌려받았다."\n\n— 차원의 비탈길 해방 —',
+    enemies:[
+      {name:'차원의 방랑자',      icon:'🌀', hp:450, atk:80, def:33, xp:180, gold:95, demon:true, moves:[{t:'atk',n:'뒤틀린 주먹'},{t:'atk',n:'뒤틀린 주먹'},{t:'strong',n:'차원 붕괴'}]},
+      {name:'뒤틀린 그림자 짐승', icon:'🐺', hp:430, atk:84, def:31, xp:182, gold:96, demon:true, moves:[{t:'atk',n:'그림자 송곳니'},{t:'multi',n:'연속 물어뜯기',hits:2,m:0.6},{t:'atk',n:'그림자 송곳니'}]},
+      {name:'비탈길의 도둑',      icon:'🗡️', hp:420, atk:86, def:30, xp:184, gold:98, demon:true, moves:[{t:'atk',n:'단검 찌르기'},{t:'drain',n:'훔치는 손'},{t:'dot',n:'독 묻은 단검',dn:'중독'}]},
+      {name:'균열의 감시자',      icon:'👁️', hp:480, atk:78, def:36, xp:186, gold:97, demon:true, moves:[{t:'atk',n:'응시'},{t:'curse',n:'꿰뚫는 시선'},{t:'sweep',n:'균열 방출',m:0.14}]},
+      {name:'떨어지는 별의 잔해', icon:'☄️', hp:460, atk:82, def:34, xp:183, gold:96, demon:true, moves:[{t:'atk',n:'충돌'},{t:'strong',n:'유성 낙하'},{t:'dot',n:'타오르는 파편',dn:'화상'}]}
+    ],
+    elite:{name:'균열의 문지기', icon:'🚪', hp:6400, atk:112, def:38, xp:980, gold:720, demon:true,
+      moves:[{t:'strong',n:'닫히는 균열'},{t:'multi',n:'차원 연타',hits:3,m:0.55},{t:'curse',n:'뒤틀린 공간'},{t:'charge',n:'차원의 문 폐쇄'}]},
+    mid:{name:'가프', art:'gaap', title:'솔로몬 72악마 · 제33영 · 대총재 · 66군단', hp:15000, atk:120, def:37, xp:3800, gold:3000, demon:true,
+      pre:'박쥐의 날개를 펼친 자가 비탈길 위에 내려섰다.\n\n"왕국과 왕국 사이를 옮기는 것이 내 일이다. 너희는 어느 차원에 버려 줄까."',
+      moves:[{t:'atk',n:'차원 할퀴기'},{t:'invis',n:'차원 이동'},{t:'sweep',n:'박쥐 날개 폭풍',m:0.16},{t:'curse',n:'증오의 속삭임'},{t:'charge',n:'왕국 사이의 전이'}]},
+    boss:{name:'발레포르', art:'valefor', title:'솔로몬 72악마 · 제6영 · 공작 · 10군단', hp:70000, exactHp:true, atk:150, def:40, xp:15000, gold:15000, goldFirst:30000, goldRepeat:15000, demon:true, drop:'seal_valefor',
+      tick:4000, slowSil:2, rage:{art:'valefor2',line:'"…감히 내게서 이만큼이나 빼앗아 가다니."\n\n발레포르의 손톱이 길게 자라나고, 불타는 숲 전체가 그의 분노에 맞춰 울부짖는다.\n\n— 공격력 2배 —'},
+      pre:'불타는 숲 한가운데, 은빛 머리칼의 사내가 서 있다. 날카롭게 자란 손톱이 불빛에 번뜩인다.\n\n"훔치는 건 내 특기지. 너희 동료의 힘과 목소리부터 가져가마."',
+      moves:[{t:'atk',n:'발톱 베기'},{t:'strong',n:'도둑의 일격'},{t:'multi',n:'연속 할퀴기',hits:4,m:0.35},{t:'sweep',n:'불타는 숲의 포효',m:0.18},{t:'drain',n:'훔쳐 가는 손'},{t:'charge',n:'10군단의 습격'}]}
   }
 
 ];
@@ -752,7 +780,7 @@ const stageType=s=>s===15?'boss':s===10?'mid':s===5?'elite':'normal';
 const STYPE_LABEL={normal:'일반',elite:'정예',mid:'솔로몬 72악마',boss:'나라 보스'};
 const stageRec=(a,s)=>Math.round(AREAS[a].rec+(s-1)*(AREAS[a].recEnd-AREAS[a].rec)/(STAGES-1));
 const ENEMY_MULT=1.3, LATE_BOSS_MULT=1.1; // 적 공격력·체력 1.3배 (나베리우스·보티스는 1.1배)
-const NORMAL_HP=[2.4,4,4.5,5,5.5,6,6.5,7], NORMAL_REWARD=1.5; // 일반 적이 몇 턴은 버티며 공격하도록
+const NORMAL_HP=[2.4,4,4.5,5,5.5,6,6.5,7,7.5], NORMAL_REWARD=1.5; // 일반 적이 몇 턴은 버티며 공격하도록
 function scaleBase(base,a,s){
   const f=1+0.06*(s-1);
   return {...base,hp:Math.round(base.hp*f*NORMAL_HP[a]),atk:Math.round(base.atk*f),def:Math.round(base.def*(1+0.04*(s-1))),
@@ -899,6 +927,11 @@ const ART={
     eyes:`<circle cx="58" cy="100" r="2.2"/><circle cx="72" cy="99" r="2.2"/><path d="M58,116 C64,113 70,113 76,116" stroke="#c8f4ff" stroke-width="1.2" fill="none"/>
       <path d="M93,95 L99,97 L93,99 Z"/><path d="M107,95 L101,97 L107,99 Z"/>
       <ellipse cx="130" cy="107" rx="1.3" ry="3.2"/><ellipse cx="138" cy="107" rx="1.3" ry="3.2"/>`},
+  gaap:{c:'#8f9cff',eye:'#e0e6ff',latin:'GAAP · SPIRITVS XXXIII · PRAESES · ',
+    body:`${wing('M94,110 C70,78 38,66 12,80 C24,86 28,94 26,102 C36,98 44,104 44,112 C54,106 64,110 68,118 C76,112 86,110 94,116 Z',94,110)}
+      <path d="M80,190 C80,150 84,124 92,112 C86,100 88,82 100,76 C112,82 114,100 108,112 C116,124 120,150 120,190 Z"/>
+      <path d="M92,84 C84,72 82,62 86,52 C90,62 94,70 98,80 Z M108,84 C116,72 118,62 114,52 C110,62 106,70 102,80 Z"/>`,
+    eyes:`<path d="M93,92 L99,94 L93,96 Z"/><path d="M107,92 L101,94 L107,96 Z"/>`},
   paimon:{c:'#ffb347',eye:'#fff4c0',latin:'PAIMON · SPIRITVS IX · REX OCCIDENTIS · ',
     body:`<path d="M40,150 C40,136 50,128 62,128 C66,108 82,100 96,112 C104,104 116,108 122,126 L140,128 C148,112 156,96 162,86 C166,78 176,76 182,82 C186,88 182,94 176,94 L170,96 C164,112 160,134 154,150 C150,160 140,164 130,164 L70,164 C56,164 42,160 40,150 Z"/>
       <path d="M58,160 L54,194 L62,194 L66,162 Z M76,162 L74,194 L82,194 L84,162 Z M124,162 L126,194 L134,194 L132,160 Z M140,158 L146,194 L154,194 L148,154 Z"/>
@@ -938,13 +971,15 @@ const PORTRAIT={
   naberius:{img:'naberius.jpg',cls:'pf-naberius',pos:'50% 24%'},
   naberius2:{img:'naberius.jpg',cls:'pf-naberius p2',pos:'50% 24%'},
   botis:{img:'botis.jpg',cls:'pf-botis',pos:'50% 20%'},
+  valefor:{img:'valefor.jpg',cls:'pf-valefor',pos:'50% 14%'},
+  valefor2:{img:'valefor.jpg',cls:'pf-valefor rage',pos:'50% 14%'},
   amon:{img:'amon.jpg',cls:'pf-amon',pos:'50% 16%'},
   amon2:{img:'amon.jpg',cls:'pf-amon',pos:'50% 16%'}
 };
 function portraitHTML(key,size){
   const p=PORTRAIT[key];
   const bolts=key==='furfur'?`<svg class="pbolts" viewBox="0 0 100 140" preserveAspectRatio="none"><path class="bolt" d="M7,0 L3,18 L9,17 L2,42"/><path class="bolt b2" d="M95,58 L99,76 L93,77 L99,100"/><path class="bolt b3" d="M90,0 L86,12 L92,12 L87,26"/></svg><div class="prain"></div>`:'';
-  const embers=(key.startsWith('naberius')||key.startsWith('amon'))?`<div class="pembers">${Array.from({length:14},(_,i)=>`<i style="left:${(i*37)%100}%;animation-delay:${-(i*0.43).toFixed(2)}s;animation-duration:${(2.6+(i%5)*0.5).toFixed(1)}s"></i>`).join('')}</div>`:'';
+  const embers=(key.startsWith('naberius')||key.startsWith('amon')||key.startsWith('valefor'))?`<div class="pembers">${Array.from({length:14},(_,i)=>`<i style="left:${(i*37)%100}%;animation-delay:${-(i*0.43).toFixed(2)}s;animation-duration:${(2.6+(i%5)*0.5).toFixed(1)}s"></i>`).join('')}</div>`:'';
   return `<div class="portrait ${p.cls} ${size||''}"><img src="${p.img}" alt="" style="object-position:${p.pos}">${bolts}${embers}<div class="pflash"></div><div class="pglow"></div></div>`;
 }
 let svgSeq=0;
@@ -1006,6 +1041,12 @@ const MISSIONS=[
   {id:'viper', area:5, type:'kill', target:'모래시계 독사', count:8, title:'독사 소탕',
    desc:'모래시계 독사 8마리를 처치하라.', reward:{water:6,gold:600}, rewardText:'성수 ×6 · 600 G',
    story:'독사들이 사라지자 모래시계의 모래가 다시 흘러내렸다.'},
+  {id:'thief', area:8, type:'kill', target:'비탈길의 도둑', count:8, title:'도둑 소탕',
+   desc:'비탈길에 숨어 있는 도둑 8명을 처치하라.', reward:{tickets:4}, rewardText:'소환권 ×4',
+   story:'도둑들이 훔쳐 간 물건 사이에서 소환권 묶음이 나왔다.'},
+  {id:'watcher', area:8, type:'kill', target:'균열의 감시자', count:8, title:'감시의 눈 감기기',
+   desc:'균열의 감시자 8마리를 처치하라.', reward:{water:6,stone:1}, rewardText:'성수 ×6 · 천상의 성유물 ×1',
+   story:'감시의 눈이 모두 감기자, 균열 틈에서 빛나는 성유물이 굴러 나왔다.'},
   {id:'cherub', area:7, type:'kill', target:'불꽃의 케루빔', count:8, title:'불꽃 진화',
    desc:'천계의 문 앞을 지키는 불꽃의 케루빔 8마리를 정화하라.', reward:{tickets:4}, rewardText:'소환권 ×4',
    story:'불꽃이 사그라들자 문 앞의 길이 조금 넓어졌다.\n\n교구에서 소환권을 보내왔다.'},
@@ -1975,7 +2016,8 @@ function karmaTick(){
     else if(r===1){B.hex=Math.max(B.hex,2);addLog(`📜 카르마의 저주 부적 — 적 공격력 감소`);}
     else{
       if(B.immune){addLog('📜 카르마의 화염 부적 — ⏸ 피해 무효');continue;}
-      const d=Math.max(1,Math.round((6+lv*2.2)*m*rnd(0.9,1.1)));stat('dmg','karma',Math.min(d,e.hp));e.hp=Math.max(0,e.hp-d);
+      if(B.vsil&&B.vsil.karma&&Math.random()<0.3){addLog('📜 카르마의 화염 부적 — 🔇 침묵에 막혀 무효');continue;}
+      const d=Math.max(1,Math.round((6+lv*2.2)*m*rnd(0.9,1.1)*(B.vslow&&B.vslow.karma?0.6:1)));stat('dmg','karma',Math.min(d,e.hp));e.hp=Math.max(0,e.hp-d);
       B.eburn={dmg:Math.max(1,Math.round(d*0.4)),turns:2};
       addLog(`📜 카르마의 화염 부적 — ${d} 피해 · 불태움`);queueFx('enemy','🔥'+d,'dmg');
     }
@@ -2005,6 +2047,11 @@ function startBattle(spec){
      defending:false,busy:false,menu:'main',log:[],fxq:[]};
   if(benched.length)addLog(`⚠ 출전 조건 — ${benched.map(id=>ALLIES[id].name).join(', ')} 출전 불가 (${sortieRule(a).text})`);
   const begin=()=>{
+    if(B&&t.slowSil){
+      const c=party.slice().sort(()=>Math.random()-0.5).slice(0,t.slowSil);
+      B.vslow={};B.vsil={};c.forEach(id=>{B.vslow[id]=1;B.vsil[id]=1;});
+      if(c.length)addLog(`🌀 ${t.name}의 강탈 — ${c.map(id=>ALLIES[id].name).join(', ')} 둔화(공격 피해 40% 감소) · 침묵(공격 30% 무효) — 전투가 끝날 때까지`);
+    }
     if(B&&t.burnAll){B.dot={name:'화상',dmg:Math.max(5,Math.round(t.atk*0.2)),turns:99};addLog(`🔥 ${t.name}의 불길 — 주인공과 동료들이 끝없이 불타기 시작한다`);}
     if(B&&t.sealAlly){
       const c=party.filter(id=>id!==FIXED);
@@ -2121,7 +2168,7 @@ function renderBattle(){
   if(stormOn())st.push(`🌪 폭풍 ${Math.ceil((B.stormUntil-Date.now())/1000)}초`);
   if(B.defending)st.push('🛡 방어');
   const party=`<div class="party">${partyIds().map(id=>{const h=B.ahp[id];const p=h?Math.round(h.hp/h.max*100):100;
-    return `<span class="chip ${(h&&h.hp<=0)||(B.stun[id]>=9999)?'down':''}">${allyFace(id,'xs')} ${ALLIES[id].name}<i class="mhp"><b style="width:${p}%"></b></i></span>`;}).join('')}</div>`;
+    return `<span class="chip ${(h&&h.hp<=0)||(B.stun[id]>=9999)?'down':''}">${allyFace(id,'xs')} ${ALLIES[id].name}${B.vslow&&B.vslow[id]?' 🐢🔇':''}<i class="mhp"><b style="width:${p}%"></b></i></span>`;}).join('')}</div>`;
   const tag=B.pvp?'<em class="el">DUEL</em>':B.stype==='boss'?`<em>${B.isFinal?'FINAL':'BOSS'}</em>`:B.stype==='mid'?'<em>DEMON</em>':B.stype==='elite'?'<em class="el">ELITE</em>':'';
   const t=-(performance.now()/1000).toFixed(2);
   const vis=e.pvp?`<div class="eicon pvpvis" id="eicon"><div class="pvphero">✝</div><div class="pvpteam">${teamIconsHTML(e.party)}</div></div>`:e.art?`<div class="eicon art ${B.charging?'charge':''}" id="eicon" style="--t:${t}s">${bossSVG(e.art)}</div>`
@@ -2135,6 +2182,8 @@ function renderBattle(){
   if(B.immune)passive.push('⏸ 시간 정지: 이번 턴 피해 무효 — 회복·방어 추천');
   if(B.reflect)passive.push('↩ 뒤집힌 시간: 준 피해의 50% 반사');
   if(e.bleedOnHit)passive.push('🩸 공격 시 출혈');
+  if(e.slowSil)passive.push(`🌀 강탈: 동료 ${e.slowSil}명 둔화·침묵`);
+  if(e.rage)passive.push(B.raged?'💢 발악: 공격력 2배':'💢 HP 50% 이하 발악');
   if(e.burnAll)passive.push('🔥 끝없는 화상: 주인공·동료');
   if(e.voidHero)passive.push(`🔥 주인공 공격 ${Math.round(e.voidHero*100)}% 무효`);
   if(e.sealAlly)passive.push('🏹 사냥 표식: 동료 1명 전투 종료까지 행동 불능');
@@ -2205,7 +2254,9 @@ function hitEnemy(mult,label){
 function allyHit(base,label,defFactor,fixed){
   const e=B.e;
   if(B.immune){addLog(`${label}! — ⏸ 피해 무효`);queueFx('enemy','무효','mpf');return 0;}
+  if(B.vsil&&B.vsil[B.curAlly]&&Math.random()<0.3){addLog(`${label}! — 🔇 침묵에 막혀 무효`);queueFx('enemy','침묵','mpf');return 0;}
   let d=fixed?Math.max(1,Math.round(base*(B.am||1))):Math.max(1,Math.round((base*(B.am||1)-enemyDef()*defFactor)*rnd(0.9,1.1)));
+  if(B.vslow&&B.vslow[B.curAlly])d=Math.max(1,Math.round(d*0.6));
   stat('dmg',B.curAlly,Math.min(d,e.hp));
   e.hp=Math.max(0,e.hp-d);
   addLog(`${label}! ${d} 피해`);
@@ -2434,6 +2485,13 @@ function act(kind,arg){
 
 function checkPhase(){
   const e=B.e;
+  if(e.rage&&!B.raged&&e.hp>0&&e.hp<=e.maxHp/2){
+    B.raged=true;e.atk=Math.round(e.atk*2);e.art=e.rage.art;B.charging=false;B.chargeKind=null;
+    addLog(`💢 ${e.name}의 발악 — 공격력 2배!`);
+    showStory(`<div class="sum s5"><div class="sum-title">발악</div><div class="intro-art">${portraitHTML(e.rage.art,'big')}</div><div class="sum-name">${e.name}</div><p class="sum-desc" style="color:#ffb0b0">${esc(e.rage.line).replace(/\n/g,'<br>')}</p></div>`,
+      ()=>{renderBattle();setTimeout(enemyTurn,500);},true);
+    return true;
+  }
   if(B.isFinal&&B.phase===1&&e.phase2&&e.hp<=e.maxHp/2){
     const p2=e.phase2;
     B.phase=2;B.charging=false;B.chargeKind=null;B.silence=0;
@@ -2572,7 +2630,8 @@ function victory(){
   const e=B.e,area=B.area,stype=B.stype,stage=B.stage,wasFinal=B.isFinal,fromHunt=!!B.spec.hunt;
   const tName=B.baseName;
   B.over=true;
-  const gold=B.isBoss?Math.round(e.gold*BOSS_GOLD_MULT):e.gold;
+  const firstClear=!fromHunt&&stage>P.prog[area];
+  const gold=e.goldFirst?(firstClear?e.goldFirst:e.goldRepeat):B.isBoss?Math.round(e.gold*BOSS_GOLD_MULT):e.gold;
   P.gold+=gold;
   P.kills[tName]=(P.kills[tName]||0)+1;
   P.wins[area]=(P.wins[area]||0)+1;
@@ -2601,7 +2660,7 @@ function victory(){
   partyIds().forEach(id=>{if(allyGainXp(id,e.xp))allyUps.push(`${ALLIES[id].name} Lv ${aData(id).lv}`);});
   const ups=gainXp(e.xp);
   if(allyUps.length)ups.push('🤝 동료 레벨업: '+allyUps.join(', '));
-  let msg=`<b>${esc(tName)} 처치!</b> EXP +${e.xp} · ${gold} G${gold!==e.gold?' (보스 보너스 ×1.25)':''}`;
+  let msg=`<b>${esc(tName)} 처치!</b> EXP +${e.xp} · ${fmt(gold)} G${e.goldFirst?(firstClear?' (첫 클리어 보상)':' (재도전 보상)'):gold!==e.gold?' (보스 보너스 ×1.25)':''}`;
   if(extra.length)msg+='<br>'+extra.join('<br>');
   if(ups.length)msg+='<br>'+ups.join('<br>');
   const report=stype==='boss'?{st:B.st,party:partyIds().slice(),name:tName,area}:null;
