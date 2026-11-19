@@ -507,6 +507,8 @@ const ALLIES={
             desc:'은총 공격 · 레벨이 오를수록 위력이 가장 크게 성장'},
   bagiel:  {star:4,name:'바기엘 사제',   icon:'🕯️', role:'천사의 구원', kit:'salvation',
             desc:'균형 잡힌 공격 · 적이 힘을 모으면 구원의 오라(피해 절반)'},
+  vima:    {star:4,name:'비마 부제',     icon:'⛓️', role:'심판의 사슬', kit:'judge',
+            desc:'심판의 창 공격 · 역전의 심판(주인공 HP 비율이 적보다 낮으면 피해 1.6배) · 봉인의 사슬(적이 힘을 모으면 끊어내 기술 취소 + 2턴 적 공격력 감소, 4턴 재사용 대기)'},
   /* ★5 */
   guseju:  {star:5,name:'구세주',        icon:'👁️', role:'천사의 은총 · 천사의 의지', kit:'seju',
             desc:'강력한 은총 공격 · 예지(15% 확률로 적 공격 회피) · 의지(주인공 HP 40% 미만 시 보호 치유) · 가끔 폭주(3배 피해 후 1턴 이성 상실)'},
@@ -1624,6 +1626,7 @@ function pvpEnemyActs(e){
       case 'storm':    dmg(11+lv*3.8,0.4,`${nm}의 깃털 칼날`);break;
       case 'fixed':    {const d=Math.max(1,Math.round((20+lv*6)*m));P.hp=Math.max(0,P.hp-d);addLog(`${nm}의 등불 — 고정 피해! ${d} 피해`);queueFx('player','-'+d,'pdmg');}break;
       case 'weakspot': if(Math.random()<(a.my?0.3:0.15)){const d=Math.max(1,Math.round((12+lv*4)*3*m));P.hp=Math.max(0,P.hp-d);addLog(`${nm}의 약점 일격 — 고정 피해! ${d} 피해`);queueFx('player','-'+d,'pdmg');}else dmg(12+lv*4,0.5,`${nm}의 창 찌르기`);break;
+      case 'judge':    dmg((12+lv*3.4)*(P.hp/P.maxHp>e.hp/e.maxHp?1.6:1),0.3,`${nm}의 심판의 창`);break;
       case 'twin':     dmg(6+lv*1.8,0.5,`${nm}의 쌍검 ①`);dmg(6+lv*1.8,0.5,`${nm}의 쌍검 ②`);break;
       case 'guard':    if(e.hp<e.maxHp*0.5&&Math.random()<0.3)heal(0.06);else dmg(9+lv*2.8,0.4,`${nm}의 방패 강타`);break;
       case 'chant':    if(e.hp<e.maxHp*0.7&&Math.random()<0.4)heal(0.12);else dmg(7+lv*2.4,0.5,`${nm}의 빛의 음표`);break;
@@ -2376,6 +2379,16 @@ function alliesAct(){
         if(P.hp<P.maxHp)heal(0.06,`${nm}의 ${al.skill}`);
         else allyHit(6+lv*2,`${nm}의 돌팔매`,0.5);
         break;
+      case 'judge':{ // 비마 부제: 역전의 심판 · 봉인의 사슬
+        if(B.vimaCD>0)B.vimaCD--;
+        if(B.charging&&!(B.vimaCD>0)){
+          B.charging=false;B.chargeKind=null;B.hex=Math.max(B.hex||0,2);B.vimaCD=4;
+          addLog(`⛓️ ${nm}의 봉인의 사슬 — 「${B.chargeName||'기술'}」 기술을 끊어냈다! (2턴간 적 공격력 감소)`);
+          break;
+        }
+        const rev=P.hp/P.maxHp<e.hp/e.maxHp;
+        allyHit((12+lv*3.4)*(rev?1.6:1),`${nm}의 ${rev?'역전의 심판':'심판의 창'}`,0.3);
+        break;}
       case 'civ_burn':{
         const d=allyHit(5+lv*1.6,`${nm}의 화염병`,0.5);
         if(d&&e.hp>0&&!B.eburn){B.eburn={dmg:Math.max(1,Math.round(d*0.5)),turns:2};addLog(`🔥 ${e.name}에게 불이 붙었다 (2턴)`);}
