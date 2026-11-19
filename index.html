@@ -2013,7 +2013,7 @@ function cmdHTML(){
   }
   return `<div class="grid">
     <button class="btn primary full" data-act="attack" ${dis}>⚔ 공격</button>
-    <button class="btn" data-act="defend" ${dis}>🛡 방어<small>피해 40% 감소</small></button>
+    <button class="btn" data-act="defend" ${dis}>🛡 방어<small>피해 40% 감소 · 공격 없음</small></button>
     <button class="btn" data-act="itemmenu" ${dis}>🧪 아이템</button>
     <button class="btn full" data-act="flee" ${(B.busy||B.isBoss)?'disabled':''}>${B.pvp?'대결 중에는 도망칠 수 없다':B.isBoss?'보스전에서는 도망칠 수 없다':'🏃 도망 (60%)'}</button>
   </div>`;
@@ -2308,7 +2308,7 @@ function act(kind,arg){
       B.buff=4;addLog(`${s.name} — 3턴간 공격력 1.5배`);
     }
   }else if(kind==='defend'){
-    B.defending=true;addLog('방어 태세를 갖췄다.');
+    B.defending=true;addLog('방어 태세를 갖췄다. (이번 턴은 공격하지 않는다)');
   }else if(kind==='item'){
     if(arg==='water'&&P.items.water>0){
       P.items.water--;const h=Math.min(P.maxHp-P.hp,Math.round(Math.max(60,P.maxHp*0.4)*healMul()));
@@ -2325,7 +2325,7 @@ function act(kind,arg){
     }
     addLog('도망에 실패했다!');
   }
-  if(e.hp>0)alliesAct();
+  if(e.hp>0&&kind==='attack')alliesAct(); // 동료는 '공격'을 누른 턴에만 행동
   B.menu='main';B.busy=true;
   if(P.hp<=0&&e.hp>0){P.hp=0;B.over=true;renderBattle();setTimeout(defeat,900);return;}
   renderBattle();
