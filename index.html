@@ -232,6 +232,9 @@ body.title-mode{overflow:hidden}
 @keyframes ember{0%{transform:translate(0,0);opacity:0}10%{opacity:1}100%{transform:translate(18px,-320px);opacity:0}}
 
 .intro-art.berserk{animation:ragequake .25s ease-in-out infinite;filter:drop-shadow(0 0 20px #ff2a2a)}
+.pf-barbatos{box-shadow:0 0 26px rgba(170,90,255,.6),0 0 80px rgba(80,140,255,.3)}
+.pf-barbatos .pglow{background:radial-gradient(ellipse at 50% 100%,rgba(90,150,255,.45),transparent 62%);box-shadow:inset 0 0 50px rgba(60,0,110,.7);animation:breathe 2.6s ease-in-out infinite}
+.pf-barbatos .pembers i{background:#9fd0ff;box-shadow:0 0 6px #4aa8ff,0 0 12px #7a4dff}
 .pf-gamigin{box-shadow:0 0 26px rgba(255,50,60,.6),0 0 80px rgba(160,0,20,.35)}
 .pf-gamigin .pglow{background:radial-gradient(ellipse at 50% 100%,rgba(200,20,40,.5),transparent 62%);box-shadow:inset 0 0 50px rgba(80,0,10,.7);animation:breathe 2.4s ease-in-out infinite}
 .intro-art.berserk .pf-gamigin img{filter:saturate(1.6) contrast(1.15)}
@@ -736,8 +739,8 @@ const AREAS=[
       moves:[{t:'atk',n:'거미 다리 찌르기'},{t:'invis',n:'투명화'},{t:'multi',n:'세 머리의 물어뜯기',hits:3,m:0.5},{t:'drain',n:'쉰 목소리의 흡수'},{t:'charge',n:'66군단의 행진'}]},
     boss:{name:'바르바토스', art:'barbatos', title:'솔로몬 72악마 · 제8영 · 공작 · 30군단', hp:26000, atk:145, def:36, xp:10000, gold:6500, demon:true, drop:'seal_barbatos',
       tick:4000, sealAlly:true,
-      pre:'어둠 속에서 네 개의 나팔이 동시에 울린다.\n사슴뿔을 단 두건 아래로 금빛 눈동자가 빛나고, 그의 손에는 거대한 활이 들려 있다.\n\n"사냥감은 도망쳐야 재미가 있지. 먼저 네 동료 하나부터 묶어 두마."',
-      moves:[{t:'atk',n:'사냥꾼의 화살'},{t:'barrage',n:'무수한 참격',hits:7,m:0.24},{t:'sweep',n:'네 왕의 나팔',m:0.18},{t:'strong',n:'관통 화살'},{t:'barrage',n:'무수한 참격',hits:7,m:0.24},{t:'charge',n:'30군단의 일제 사격'}]}
+      pre:'어둠 속에서 네 개의 나팔이 동시에 울린다.\n보랏빛 불길 속에서 뿔 달린 투구를 쓴 흑기사가 걸어 나온다. 그의 검에서는 푸른 불꽃이 타오른다.\n\n"사냥감은 도망쳐야 재미가 있지. 먼저 네 동료 하나부터 묶어 두마."',
+      moves:[{t:'atk',n:'푸른 불꽃의 검'},{t:'barrage',n:'무수한 참격',hits:7,m:0.24},{t:'sweep',n:'네 왕의 나팔',m:0.18},{t:'strong',n:'흑기사의 일격'},{t:'barrage',n:'무수한 참격',hits:7,m:0.24},{t:'charge',n:'30군단의 일제 사격'}]}
   },
   { name:'천계의 문', country:'하늘로 이어지는 문', flag:'☁️', rec:26, recEnd:30, glow:'#ffc85a',
     desc:'하늘로 이어지는 거대한 문. 그 앞을 지옥불이 가로막고 있다.',
@@ -1012,6 +1015,7 @@ const PORTRAIT={
   naberius:{img:'naberius.jpg',cls:'pf-naberius',pos:'50% 24%'},
   naberius2:{img:'naberius.jpg',cls:'pf-naberius p2',pos:'50% 24%'},
   botis:{img:'botis.jpg',cls:'pf-botis',pos:'50% 20%'},
+  barbatos:{img:'barbatos.jpg',cls:'pf-barbatos',pos:'50% 12%'},
   gamigin:{img:'gamigin.jpg',cls:'pf-gamigin',pos:'55% 10%'},
   valefor:{img:'valefor.jpg',cls:'pf-valefor',pos:'50% 14%'},
   valefor2:{img:'valefor.jpg',cls:'pf-valefor rage',pos:'50% 14%'},
@@ -1021,7 +1025,7 @@ const PORTRAIT={
 function portraitHTML(key,size){
   const p=PORTRAIT[key];
   const bolts=key==='furfur'?`<svg class="pbolts" viewBox="0 0 100 140" preserveAspectRatio="none"><path class="bolt" d="M7,0 L3,18 L9,17 L2,42"/><path class="bolt b2" d="M95,58 L99,76 L93,77 L99,100"/><path class="bolt b3" d="M90,0 L86,12 L92,12 L87,26"/></svg><div class="prain"></div>`:'';
-  const embers=(key.startsWith('naberius')||key.startsWith('amon')||key.startsWith('valefor')||key==='gamigin')?`<div class="pembers">${Array.from({length:14},(_,i)=>`<i style="left:${(i*37)%100}%;animation-delay:${-(i*0.43).toFixed(2)}s;animation-duration:${(2.6+(i%5)*0.5).toFixed(1)}s"></i>`).join('')}</div>`:'';
+  const embers=(key.startsWith('naberius')||key.startsWith('amon')||key.startsWith('valefor')||key==='gamigin'||key==='barbatos')?`<div class="pembers">${Array.from({length:14},(_,i)=>`<i style="left:${(i*37)%100}%;animation-delay:${-(i*0.43).toFixed(2)}s;animation-duration:${(2.6+(i%5)*0.5).toFixed(1)}s"></i>`).join('')}</div>`:'';
   return `<div class="portrait ${p.cls} ${size||''}"><img src="${p.img}" alt="" style="object-position:${p.pos}">${bolts}${embers}<div class="pflash"></div><div class="pglow"></div></div>`;
 }
 let svgSeq=0;
