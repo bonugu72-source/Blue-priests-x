@@ -441,11 +441,13 @@ const ALLIES={
             desc:'대검으로 대지를 갈라 공격 · 적이 힘을 모으거나 4턴마다 대지 분쇄(다음 적 공격 무력화) · 회피(적의 광역 공격 50% 회피)'},
   elia:    {star:5,name:'엘리아',        icon:'🌹', role:'꽃의 수호', kit:'flower',
             desc:'색이 다른 꽃의 보호막(주인공 피해 흡수 · 동료 피해 절반, 2턴) · 꽃의 속박(적 1턴 행동 불가, 4턴마다) · 꽃잎 공격'},
+  kirie:   {star:5,name:'키리에',        icon:'🪶', role:'폭풍의 날개', kit:'storm',
+            desc:'날갯짓으로 폭풍을 일으켜 5초 동안 주인공 치명타 확률 2배 · 전투에서 처음 쓰러진 동료를 HP 50%로 부활(1회) · 폭풍 중엔 깃털 칼날 공격'},
   siren:   {star:5,name:'세이렌 사제',   icon:'💎', role:'보석의 빛', kit:'prism',
             desc:'보석처럼 반짝이는 광선 공격 · 적이 힘을 모으거나 3턴마다 프리즘 굴절(다음 적 공격 피해 절반, 절반은 적에게 반사)'}
 };
 /* ★5 티어 — 신화 제외 최대 전투력: 1티어 4000 · 2티어 3300 · 3티어 2700 */
-const TIER5={guseju:1,asiris:1,karma:1,danian:2,elia:2,siren:3};
+const TIER5={guseju:1,asiris:1,karma:1,danian:2,elia:2,kirie:2,siren:3};
 const TIER5_CP={1:4000,2:3300,3:2700};
 /* 신화: 최대 레벨에서 열림 · 능력치 2배 */
 const MYTH_COST={1:3000,2:5000,3:5000,4:10000,5:30000}, MYTH_STONE5=2;
@@ -455,6 +457,7 @@ const MYTH_SKILL={
   karma: {name:'백귀의 부적',desc:'5초마다 부적을 두 장씩 날림'},
   danian:{name:'천지개벽',desc:'대지 가르기가 방어 무시 · 주인공도 20% 확률로 적 공격 회피'},
   elia:  {name:'사계의 화원',desc:'보호막을 펼칠 때 주인공·동료 HP 회복 · 속박 2턴'},
+  kirie: {name:'폭풍의 수호천사',desc:'부활을 두 번까지 · 폭풍 중 치명타 피해 2배'},
   siren: {name:'천광의 프리즘',desc:'반사 피해 2배 · 광선이 방어 무시'}
 };
 /* 동료 일러스트 */
@@ -467,6 +470,7 @@ const ALLY_IMG={
   siren:{src:'ally_siren.jpg',pos:'45% 22%',face:'42% 20%'},
   elia:{src:'ally_elia.jpg',pos:'55% 30%',face:'58% 34%'},
   danian:{src:'ally_danian.jpg',pos:'55% 14%',face:'58% 14%'},
+  kirie:{src:'ally_kirie.jpg',pos:'50% 18%',face:'50% 19%'},
   karma:{src:'ally_karma.jpg',pos:'42% 22%',face:'35% 24%'},
   gubeomju:{src:'ally_gubeomju.jpg',pos:'50% 26%',face:'48% 38%',size:'220%'}
 };
@@ -1313,6 +1317,7 @@ function pvpEnemyActs(e){
       case 'earth':    dmg(14+lv*4.4,0.5,`${nm}의 대지 가르기`);break;
       case 'flower':   if(e.hp<e.maxHp*0.6&&Math.random()<0.5)heal(0.14);else dmg(8+lv*3.4,0.5,`${nm}의 꽃잎`);break;
       case 'prism':    dmg(12+lv*4.2,0.3,`${nm}의 보석 광선`);break;
+      case 'storm':    dmg(11+lv*3.8,0.4,`${nm}의 깃털 칼날`);break;
       case 'monk_holy':dmg(8+lv*2.8,0,`${nm}의 성수 투척`);break;
       case 'civ_atk':  dmg(6+lv*2,0.5,`${nm}의 ${al.skill}`);break;
       default:         dmg(10+lv*3,0.5,`${nm}의 공격`);
@@ -1733,12 +1738,21 @@ function hitAllies(pct,label,quiet){
   partyIds().forEach(id=>{const h=B.ahp[id];if(!h||h.hp<=0)return;
     if(id==='danian'&&Math.random()<0.5)return; // 다니안 회피
     const d=Math.max(1,Math.round(h.max*pct*(B.ashield?0.5:1)*rnd(0.9,1.1)));h.hp=Math.max(0,h.hp-d);
-    if(h.hp<=0)down.push(ALLIES[id].name);});
+    if(h.hp<=0&&!allyDown(id))down.push(ALLIES[id].name);});
   if(!quiet)addLog(`${label} — 동료 전원 피해`);
   if(down.length)addLog(`💀 ${down.join(', ')} 쓰러짐 (이번 전투 행동 불가)`);
 }
 function addLog(s){B.log.push(s);if(B.log.length>40)B.log.shift();}
 const healMul=()=>(B&&B.healCut)?0.9:1;
+const stormOn=()=>!!(B&&B.stormUntil&&Date.now()<B.stormUntil);
+/* 키리에: 처음 쓰러진 동료 부활 (신화 2회) */
+function allyDown(id){
+  if(!B||id==='kirie'||!inParty('kirie'))return false;
+  const k=B.ahp.kirie;if(!k||k.hp<=0||(B.stun.kirie>0))return false;
+  const max=isMyth('kirie')?2:1;if((B.revives||0)>=max)return false;
+  const h=B.ahp[id];h.hp=Math.round(h.max*0.5);B.revives=(B.revives||0)+1;
+  addLog(`🪶 키리에의 날개 — ${ALLIES[id].name} HP 50%로 부활!`);stat('heal','kirie',h.hp);return true;
+}
 function stat(kind,who,v){if(!B||!B.st||!who||!(v>0))return;const o=B.st[kind];o[who]=(o[who]||0)+Math.round(v);}
 function queueFx(target,txt,cls){B.fxq.push([target,txt,cls]);}
 const enemyDef=()=>B.e.def*(B.weak?0.5:1);
@@ -1778,6 +1792,7 @@ function renderBattle(){
   if(B.sealed>0)st.push(`⛓ 적 속박 ${B.sealed}`);
   if(B.eburn)st.push(`🔥 적 불태움 ${B.eburn.turns}`);
   if(B.healCut)st.push(`✂ 회복 -10% ${B.healCut}`);
+  if(stormOn())st.push(`🌪 폭풍 ${Math.ceil((B.stormUntil-Date.now())/1000)}초`);
   if(B.defending)st.push('🛡 방어');
   const party=`<div class="party">${partyIds().map(id=>{const h=B.ahp[id];const p=h?Math.round(h.hp/h.max*100):100;
     return `<span class="chip ${(h&&h.hp<=0)||(B.stun[id]>=9999)?'down':''}">${allyFace(id,'xs')} ${ALLIES[id].name}<i class="mhp"><b style="width:${p}%"></b></i></span>`;}).join('')}</div>`;
@@ -1850,8 +1865,8 @@ function hitEnemy(mult,label){
   if(B.immune){addLog(`${label}! — ⏸ 시간이 멈춰 피해가 무효화됐다`);queueFx('enemy','무효','mpf');return;}
   let d=(P.atk*(B.buff?1.5:1)*(B.aura?1.2:1)*mult-enemyDef()/2)*rnd(0.9,1.1);
   d=Math.max(1,Math.round(d));
-  const crit=Math.random()<0.1;
-  if(crit)d=Math.round(d*1.5);
+  const crit=Math.random()<0.1*(stormOn()?2:1);
+  if(crit)d=Math.round(d*(stormOn()&&isMyth('kirie')?2:1.5));
   stat('dmg','hero',Math.min(d,e.hp));
   e.hp=Math.max(0,e.hp-d);
   addLog(`${label}! ${e.name}에게 ${d} 피해${crit?' (치명타!)':''}`);
@@ -1868,7 +1883,7 @@ function allyHit(base,label,defFactor){
   queueFx('enemy',d,'dmg');
   if(B.reflect&&B.curAlly&&B.ahp[B.curAlly]){
     const h=B.ahp[B.curAlly],r=Math.round(d*0.5);h.hp=Math.max(0,h.hp-r);
-    addLog(`↩ 반사 — ${ALLIES[B.curAlly].name} ${r} 피해${h.hp<=0?' · 쓰러짐':''}`);
+    addLog(`↩ 반사 — ${ALLIES[B.curAlly].name} ${r} 피해${h.hp<=0?' · 쓰러짐':''}`);if(h.hp<=0)allyDown(B.curAlly);
   }
 }
 
@@ -1960,6 +1975,10 @@ function alliesAct(){
           if(isMyth(id))heal(0.08,`🔱 사계의 화원`);
         }else if(B.eliaCD<=0&&!B.sealed){B.sealed=isMyth(id)?2:1;B.eliaCD=4;addLog(`${nm}의 꽃의 속박 — 덩굴과 꽃이 적을 휘감았다 (${B.sealed}턴간 행동 불가)`);}
         else allyHit(8+lv*3.4,`${nm}의 꽃잎 폭풍`,0.5);
+        break;
+      case 'storm': // 키리에: 폭풍(5초 치명타 2배) · 깃털 칼날
+        if(!stormOn()){B.stormUntil=Date.now()+5000;addLog(`${nm}의 날갯짓 — 폭풍이 몰아친다! 5초 동안 주인공 치명타 확률 2배`);queueFx('player','🌪 치명타×2','mpf');}
+        else allyHit(11+lv*3.8,`${nm}의 깃털 칼날`,0.4);
         break;
       case 'prism':{ // 세이렌: 보석 광선 · 프리즘 굴절 반사
         B.sirenT++;
