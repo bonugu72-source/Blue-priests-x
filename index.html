@@ -822,6 +822,7 @@ const AREAS=[
 const stageType=s=>s===15?'boss':s===10?'mid':s===5?'elite':'normal';
 const STYPE_LABEL={normal:'일반',elite:'정예',mid:'솔로몬 72악마',boss:'나라 보스'};
 const stageRec=(a,s)=>Math.round(AREAS[a].rec+(s-1)*(AREAS[a].recEnd-AREAS[a].rec)/(STAGES-1));
+const DEF_FLOOR=0.3; // 방어력이 아무리 높아도 적 공격의 30%는 들어감
 const ENEMY_MULT=1.3, LATE_BOSS_MULT=1.1; // 적 공격력·체력 1.3배 (나베리우스·보티스는 1.1배)
 const NORMAL_HP=[2.4,4,4.5,5,5.5,6,6.5,7,7.5,8], NORMAL_REWARD=1.5; // 일반 적이 몇 턴은 버티며 공격하도록
 function scaleBase(base,a,s){
@@ -2540,7 +2541,9 @@ function hitPlayer(mult,label){
   if(B.blind&&Math.random()<0.35){addLog(`${label} — 📜 시야가 가려진 적의 공격이 빗나갔다!`);queueFx('player','MISS','mpf');return 0;}
   if(B.negate){addLog(`${label} — 🗡 갈라진 대지에 막혀 무력화됐다!`);queueFx('player','무력화','mpf');return 0;}
   const def=P.def*(B.curse?0.6:1);
-  let d=e.fixedDmg?e.atk*(1+0.2*B.rage)*(B.hex?0.8:1)*mult:(e.atk*(1+0.2*B.rage)*(B.hex?0.8:1)*mult-def/2)*rnd(0.9,1.1); // fixedDmg: 방어력 무시 고정 피해
+  const raw=e.atk*(1+0.2*B.rage)*(B.hex?0.8:1)*mult;
+  // fixedDmg: 방어력 무시 고정 피해 · 그 외에는 방어력으로 최대 70%까지만 줄어듦 (최소 30%는 들어감)
+  let d=e.fixedDmg?raw:Math.max(raw*DEF_FLOOR,raw-def/2)*rnd(0.9,1.1);
   d=Math.max(1,Math.round(d));
   if(B.defending)d=Math.max(1,Math.round(d*0.6)); // 방어: 피해 40% 감소
   if(B.ward)d=Math.max(1,Math.round(d*0.5));
