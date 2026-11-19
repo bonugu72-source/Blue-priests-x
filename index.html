@@ -400,7 +400,7 @@ const AWAKEN_MAX=3, AWAKEN_ITEM={name:'천상의 성유물',icon:'💠'};
 const ALLIES={
   /* 고정 조력자 */
   isabel:     {star:0,name:'이사벨 부제', icon:'🕊️', role:'천사의 의지 · 서포터', kit:'isabel',
-               desc:'HP 60% 미만이면 소량 치유 · 평소엔 버프(3턴간 주인공 공격력 1.2배) · 버프 중엔 기도의 빛 공격'},
+               desc:'5초마다 치유 기도(주인공 HP 40% 회복) · HP 60% 미만이면 소량 치유 · 평소엔 버프(3턴간 주인공 공격력 1.2배) · 버프 중엔 기도의 빛 공격'},
   /* ★1 민간인 */
   civ_minjun: {star:1,name:'김민준',      icon:'🧑', role:'민간인', kit:'civ_atk',  skill:'돌팔매', desc:'작은 돌팔매 공격'},
   civ_seoyeon:{star:1,name:'이서연',      icon:'👩', role:'민간인', kit:'civ_heal', skill:'응급처치', desc:'주인공 HP 70% 미만이면 소량 회복'},
@@ -1560,12 +1560,23 @@ function synthesize(id){
 }
 
 /* ===================== 전투 ===================== */
-function clearBattle(){if(B&&B.zapT)clearInterval(B.zapT);if(B&&B.karmaT)clearInterval(B.karmaT);B=null;}
+function clearBattle(){if(B&&B.zapT)clearInterval(B.zapT);if(B&&B.karmaT)clearInterval(B.karmaT);if(B&&B.isaT)clearInterval(B.isaT);B=null;}
 /* 반사·부적 등으로 적이 턴 밖에서 쓰러졌을 때 */
 function winNow(){
   if(!B||B.won)return;B.won=true;B.busy=true;
-  if(B.zapT)clearInterval(B.zapT);if(B.karmaT)clearInterval(B.karmaT);
+  if(B.zapT)clearInterval(B.zapT);if(B.karmaT)clearInterval(B.karmaT);if(B.isaT)clearInterval(B.isaT);
   renderBattle();setTimeout(victory,750);
+}
+/* 이사벨 부제: 5초마다 주인공 HP 40% 회복 */
+const ISABEL_TICK=5000, ISABEL_HEAL=0.4;
+function isabelTick(){
+  if(!B||B.over||B.won||P.hp<=0||!$('#modal').classList.contains('hidden'))return;
+  const h=B.ahp[FIXED];if(h&&h.hp<=0)return;
+  if(B.stun[FIXED]>0)return;
+  const hh=Math.min(P.maxHp-P.hp,Math.round(P.maxHp*ISABEL_HEAL));
+  if(hh<=0)return;
+  P.hp+=hh;stat('heal',FIXED,hh);addLog(`🕊️ 이사벨 부제의 치유 기도 — HP ${hh} 회복`);queueFx('player','+'+hh,'heal');
+  renderBattle();
 }
 /* 카르마: 5초마다 무작위 부적 (주인공 치유 / 적 저주 / 적 불태움) */
 function karmaTick(){
@@ -1607,6 +1618,7 @@ function startBattle(spec){
      defending:false,busy:false,menu:'main',log:[],fxq:[]};
   const begin=()=>{
     if(B&&P.active.includes('karma'))B.karmaT=setInterval(karmaTick,5000);
+    if(B)B.isaT=setInterval(isabelTick,ISABEL_TICK);
     if(B&&isBoss&&!t.pvp){B.tickMs=t.zap?3000:t.tick?t.tick:t.final?4500:type==='boss'?5000:6000;B.zapT=setInterval(bossTick,B.tickMs);}
     if(B&&!isBoss&&Math.random()<0.4){
       addLog(`⚠ 기습! ${t.name}이(가) 먼저 덤벼든다`);B.busy=true;renderBattle();setTimeout(enemyTurn,700);return;
