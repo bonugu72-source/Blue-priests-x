@@ -232,6 +232,9 @@ body.title-mode{overflow:hidden}
 @keyframes ember{0%{transform:translate(0,0);opacity:0}10%{opacity:1}100%{transform:translate(18px,-320px);opacity:0}}
 
 .intro-art.berserk{animation:ragequake .25s ease-in-out infinite;filter:drop-shadow(0 0 20px #ff2a2a)}
+.pf-gamigin{box-shadow:0 0 26px rgba(255,50,60,.6),0 0 80px rgba(160,0,20,.35)}
+.pf-gamigin .pglow{background:radial-gradient(ellipse at 50% 100%,rgba(200,20,40,.5),transparent 62%);box-shadow:inset 0 0 50px rgba(80,0,10,.7);animation:breathe 2.4s ease-in-out infinite}
+.intro-art.berserk .pf-gamigin img{filter:saturate(1.6) contrast(1.15)}
 .pf-valefor{box-shadow:0 0 24px rgba(150,180,255,.55),0 0 70px rgba(255,110,40,.25)}
 .pf-valefor .pglow{background:radial-gradient(ellipse at 50% 100%,rgba(255,120,40,.4),transparent 60%);box-shadow:inset 0 0 44px rgba(120,150,255,.4);animation:breathe 2.8s ease-in-out infinite}
 .pf-valefor.rage{box-shadow:0 0 34px rgba(255,40,40,.85),0 0 100px rgba(255,0,0,.45);animation:ragequake .35s ease-in-out infinite}
@@ -793,9 +796,9 @@ const AREAS=[
       moves:[{t:'atk',n:'부리 쪼기'},{t:'sweep',n:'무너지는 천장',m:0.17},{t:'multi',n:'까마귀 떼',hits:4,m:0.35},{t:'curse',n:'불길한 울음'},{t:'charge',n:'40군단의 붕괴'}]},
     boss:{name:'가미긴', art:'gamigin', title:'솔로몬 72악마 · 제4영 · 후작 · 30군단', hp:50000, exactHp:true, atk:140, def:42, xp:18000, gold:20000, goldFirst:50000, goldRepeat:20000, demon:true, drop:'seal_gamigin',
       tick:4000, fixedDmg:true, paralyze:3000,
-      berserk:{at:15000,to:40000,line:'"히이이이이잉——!!"\n\n터널 전체가 무너질 듯한 괴성이 울려 퍼진다. 갈라졌던 가미긴의 몸이 순식간에 아물어 간다.\n\n— 폭주: 체력 40,000 회복 · 무수한 출혈 참격 —'},
-      pre:'어둠 속에서 작은 말의 형상이 걸어 나온다. 쉰 목소리가 터널을 울린다.\n\n"죽은 자들의 목소리를 들려주마. 너희도 곧 그 합창에 끼게 될 테니."',
-      moves:[{t:'atk',n:'발굽 내려찍기'},{t:'strong',n:'돌진'},{t:'multi',n:'광란의 발길질',hits:3,m:0.5},{t:'sweep',n:'터널을 울리는 괴성',m:0.16},{t:'atk',n:'발굽 내려찍기'},{t:'charge',n:'30군단의 행진'}]}
+      berserk:{at:15000,to:40000,line:'"아아아아아아——!!"\n\n터널 전체가 무너질 듯한 괴성이 울려 퍼진다. 검붉은 기운이 폭발하듯 퍼지며, 갈라졌던 가미긴의 상처가 순식간에 아물어 간다.\n\n— 폭주: 체력 40,000 회복 · 무수한 출혈 참격 —'},
+      pre:'붉은 눈의 여인이 검붉은 기운을 두른 채 터널 깊은 곳에서 걸어 나온다. 쉰 목소리가 터널을 울린다.\n\n"죽은 자들의 목소리를 들려주마. 너희도 곧 그 합창에 끼게 될 테니."',
+      moves:[{t:'atk',n:'검붉은 베기'},{t:'strong',n:'저격'},{t:'multi',n:'광란의 연격',hits:3,m:0.5},{t:'sweep',n:'터널을 울리는 괴성',m:0.16},{t:'atk',n:'검붉은 베기'},{t:'charge',n:'30군단의 행진'}]}
   }
 
 ];
@@ -1005,6 +1008,7 @@ const PORTRAIT={
   naberius:{img:'naberius.jpg',cls:'pf-naberius',pos:'50% 24%'},
   naberius2:{img:'naberius.jpg',cls:'pf-naberius p2',pos:'50% 24%'},
   botis:{img:'botis.jpg',cls:'pf-botis',pos:'50% 20%'},
+  gamigin:{img:'gamigin.jpg',cls:'pf-gamigin',pos:'55% 10%'},
   valefor:{img:'valefor.jpg',cls:'pf-valefor',pos:'50% 14%'},
   valefor2:{img:'valefor.jpg',cls:'pf-valefor rage',pos:'50% 14%'},
   amon:{img:'amon.jpg',cls:'pf-amon',pos:'50% 16%'},
@@ -1013,7 +1017,7 @@ const PORTRAIT={
 function portraitHTML(key,size){
   const p=PORTRAIT[key];
   const bolts=key==='furfur'?`<svg class="pbolts" viewBox="0 0 100 140" preserveAspectRatio="none"><path class="bolt" d="M7,0 L3,18 L9,17 L2,42"/><path class="bolt b2" d="M95,58 L99,76 L93,77 L99,100"/><path class="bolt b3" d="M90,0 L86,12 L92,12 L87,26"/></svg><div class="prain"></div>`:'';
-  const embers=(key.startsWith('naberius')||key.startsWith('amon')||key.startsWith('valefor'))?`<div class="pembers">${Array.from({length:14},(_,i)=>`<i style="left:${(i*37)%100}%;animation-delay:${-(i*0.43).toFixed(2)}s;animation-duration:${(2.6+(i%5)*0.5).toFixed(1)}s"></i>`).join('')}</div>`:'';
+  const embers=(key.startsWith('naberius')||key.startsWith('amon')||key.startsWith('valefor')||key==='gamigin')?`<div class="pembers">${Array.from({length:14},(_,i)=>`<i style="left:${(i*37)%100}%;animation-delay:${-(i*0.43).toFixed(2)}s;animation-duration:${(2.6+(i%5)*0.5).toFixed(1)}s"></i>`).join('')}</div>`:'';
   return `<div class="portrait ${p.cls} ${size||''}"><img src="${p.img}" alt="" style="object-position:${p.pos}">${bolts}${embers}<div class="pflash"></div><div class="pglow"></div></div>`;
 }
 let svgSeq=0;
