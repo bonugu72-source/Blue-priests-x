@@ -326,6 +326,9 @@ body.title-mode{overflow:hidden}
 .acard.mythc{border-color:#ff7cc8;box-shadow:0 0 16px rgba(255,79,163,.28),inset 0 0 20px rgba(122,60,255,.12)}
 .acard.mythc .aface.md{border-color:#ff9ad6;box-shadow:0 0 12px #ff4fa3}
 .sum.smyth .aportrait{box-shadow:0 0 30px #ff4fa3,0 0 70px rgba(122,60,255,.55);border:2px solid #ffd9f0}
+.backtop-row{display:flex;justify-content:flex-start;margin:-4px 0 8px}
+.backtop{background:rgba(20,32,70,.7);color:#bcd0ff;border:1px solid #33508f;border-radius:16px;padding:5px 12px;font-size:13px;cursor:pointer;font-family:inherit}
+.backtop:active{transform:scale(.96)}
 .aportrait img{width:100%;height:100%;object-fit:cover;display:block}
 .sum.s4 .aportrait{box-shadow:0 0 24px #b07cff,0 0 50px rgba(176,124,255,.4)}
 .sum.s5 .aportrait{box-shadow:0 0 28px #ffd24a,0 0 70px rgba(255,210,74,.45);border:2px solid #ffe9a0}
@@ -1118,7 +1121,7 @@ const withTimeout=(p,ms=10000)=>Promise.race([p,new Promise((_,rej)=>setTimeout(
 
 async function renderFriends(msg){
   clearBattle();
-  const head=`${statusHTML()}${msg?`<div class="notice">${msg}</div>`:''}
+  const head=`${statusHTML()}${topBack()}${msg?`<div class="notice">${msg}</div>`:''}
     <div class="panel"><div class="ptitle">👥 친구</div>
       <div class="frow me"><div class="fcp">⚔ ${fmt(teamCP())}</div><div><b>${esc(P.name)}</b> <span class="small">Lv ${P.lv} · ${progressText(myPublic())}</span>
       <div class="small">내 팀 전투력</div></div></div></div>`;
@@ -1387,9 +1390,11 @@ function allyCard(id){
     ${d.lv<cap?bar(d.xp,need(d.lv),'xp','EXP'):''}
     <div class="abtns">${btns.join('')}</div></div>`;
 }
+const topBack=()=>`<div class="backtop-row"><button class="backtop" data-backtop>← 돌아가기</button></div>`;
+document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('[data-backtop]');if(b){e.preventDefault();renderHub();}});
 function renderAllies(msg){
   const own=Object.keys(ALLIES).filter(owned).sort((x,y)=>ALLIES[y].star-ALLIES[x].star||aData(y).lv-aData(x).lv);
-  $('#app').innerHTML=`${statusHTML()}
+  $('#app').innerHTML=`${statusHTML()}${topBack()}
     ${msg?`<div class="notice">${msg}</div>`:''}
     <div class="panel"><div class="teamcp">⚔ 팀 전투력 <b>${fmt(teamCP())}</b></div>
       <div class="small cpbreak">주인공 ${fmt(heroCP())}${partyIds().map(id=>` · ${ALLIES[id].name} ${fmt(allyCP(id))}`).join('')}</div></div>
@@ -1441,7 +1446,7 @@ function renderShop(msg){
     {id:'wpn',   name:`축성된 검 +${P.wpn+1}`,  info:'공격력 +4 (영구)',          cost:wpnCost()},
     {id:'arm',   name:`축성된 사제복 +${P.arm+1}`,info:'방어력 +3, 최대 HP +10 (영구)',cost:armCost()}
   ];
-  $('#app').innerHTML=`${statusHTML()}
+  $('#app').innerHTML=`${statusHTML()}${topBack()}
     ${msg?`<div class="notice">${msg}</div>`:''}
     <div class="panel"><div class="ptitle">🕯 교구 상점</div>
       ${rows.map(r=>`<div class="shopitem"><div class="info">${r.name}<small>${r.info}</small></div>
@@ -2146,7 +2151,7 @@ function renderMap(a,msg){
   }
   const s=mapSel.s,t=stageType(s),open=s<=prog+1;
   const art=(t==='boss'||t==='mid')?`<div class="sheet-art">${PORTRAIT[(t==='boss'?ar.boss:ar.mid).art]?portraitHTML((t==='boss'?ar.boss:ar.mid).art,'small'):bossSVG((t==='boss'?ar.boss:ar.mid).art)}</div>`:'';
-  $('#app').innerHTML=`${statusHTML()}
+  $('#app').innerHTML=`${statusHTML()}${topBack()}
     ${msg?`<div class="notice">${msg}</div>`:''}
     <div class="panel"><div class="ptitle">🗺 ${ar.flag} ${ar.name} <span class="small">스테이지 ${prog}/${STAGES}</span></div>
       <div class="mapwrap" style="--gc:${ar.glow}"><div class="map" style="height:${H}px">
