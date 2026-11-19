@@ -1354,10 +1354,15 @@ function migrateSave(){
   ['prog','wins'].forEach(k=>{if(!Array.isArray(P[k]))P[k]=[];while(P[k].length<AREAS.length)P[k].push(0);});
   if(!Array.isArray(P.cleared))P.cleared=[];while(P.cleared.length<AREAS.length)P.cleared.push(false);
   if(P.ended&&P.unlocked<5)P.unlocked=5;
+  // 이전 버전에서 마지막 지역 보스를 이미 깬 경우: 새로 추가된 다음 지역을 연다
+  let opened=null;
+  for(let i=0;i<AREAS.length-1;i++)if((P.prog[i]>=STAGES||P.cleared[i])&&P.unlocked<i+1){P.unlocked=i+1;opened=i+1;}
+  return opened;
 }
 function renderHub(msg){
   clearBattle();
-  migrateSave();
+  const opened=migrateSave();
+  if(opened!=null){save();showStory(AREAS[opened].intro,()=>renderHub(`🔓 새 지역 개방: ${AREAS[opened].flag} ${AREAS[opened].name}`));return;}
   const a=AREAS[P.cur];
   const areas=AREAS.map((ar,i)=>{
     const locked=i>P.unlocked;
