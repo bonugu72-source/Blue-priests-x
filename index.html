@@ -835,7 +835,7 @@ const MISSIONS=[
 ];
 
 /* 동료 소환 · 합성 */
-const SUMMON_COST=50, SUMMON10_COST=450, SUMMON11_COST=11*50-50; // 11회 연속: 50 G 할인
+const SUMMON_COST=100, SUMMON11_COST=1000; // 11회 연속: 1회 가격×11보다 100 G 할인
 const BOSS_GOLD_MULT=1.25;
 const DROP={seal:0.30,stoneBoss:0.25,stoneMid:0.15,stoneNormal:0.01}; // 희귀 유물 확률 // 보스(솔로몬 72악마) 처치 골드 배율
 const STAR_RATE=[[5,0.003],[4,0.03],[3,0.14],[2,0.30],[1,0.527]];
@@ -1461,16 +1461,14 @@ function renderShop(msg){
       <div class="grid">
         <button class="btn primary" id="sumT1" ${P.tickets<1?'disabled':''}>🎫 소환권 1회<small>보유 ${P.tickets}장</small></button>
         <button class="btn primary" id="sumT10" ${P.tickets<10?'disabled':''}>🎫 소환권 10회<small>10장 사용</small></button>
-        <button class="btn primary" id="sumG1" ${P.gold<SUMMON_COST?'disabled':''}>💰 골드 1회<small>${SUMMON_COST} G</small></button>
-        <button class="btn primary" id="sumG10" ${P.gold<SUMMON10_COST?'disabled':''}>💰 골드 10회<small>${SUMMON10_COST} G</small></button>
-        <button class="btn danger full" id="sumG11" ${P.gold<SUMMON11_COST?'disabled':''}>💰 골드 11회 연속<small>${SUMMON11_COST} G (50 G 할인)</small></button>
+        <button class="btn primary full" id="sumG1" ${P.gold<SUMMON_COST?'disabled':''}>💰 골드 1회<small>${SUMMON_COST} G</small></button>
+        <button class="btn danger full" id="sumG11" ${P.gold<SUMMON11_COST?'disabled':''}>💰 골드 11회 연속<small>${fmt(SUMMON11_COST)} G (${SUMMON_COST*11-SUMMON11_COST} G 할인)</small></button>
       </div>
     </div>
     <button class="btn" id="back">← 돌아가기</button>`;
   $('#sumT1').onclick=()=>summon(1,true);
   $('#sumT10').onclick=()=>summon(10,true);
   $('#sumG1').onclick=()=>summon(1,false);
-  $('#sumG10').onclick=()=>summon(10,false);
   $('#sumG11').onclick=()=>summon(11,false);
   document.querySelectorAll('[data-id]').forEach(b=>b.onclick=()=>buy(b.dataset.id));
   $('#back').onclick=()=>renderHub();
@@ -1520,7 +1518,7 @@ function summonFx(top,cb){
 }
 function summon(n,useTicket){
   if(useTicket){if(P.tickets<n)return;P.tickets-=n;}
-  else{const c=n===11?SUMMON11_COST:n===10?SUMMON10_COST:SUMMON_COST*n;if(P.gold<c)return;P.gold-=c;}
+  else{const c=n===11?SUMMON11_COST:SUMMON_COST*n;if(P.gold<c)return;P.gold-=c;}
   const res=[];
   for(let i=0;i<n;i++){
     const id=pick(allyIds(rollStar()));
