@@ -352,6 +352,7 @@ body.title-mode{overflow:hidden}
 .rp-v{text-align:right;font-size:12px;font-weight:700}
 .rp-v small{display:block;font-weight:400;color:#8fa3d6;font-size:10px}
 .rp-note{margin-top:10px;color:#7d8fbf}
+.notice.sortie{border-color:#9b5cff;background:rgba(80,40,140,.25);text-align:left;font-size:13px}
 .aportrait img{width:100%;height:100%;object-fit:cover;display:block}
 .sum.s4 .aportrait{box-shadow:0 0 24px #b07cff,0 0 50px rgba(176,124,255,.4)}
 .sum.s5 .aportrait{box-shadow:0 0 28px #ffd24a,0 0 70px rgba(255,210,74,.45);border:2px solid #ffe9a0}
@@ -485,6 +486,7 @@ const RELICS={
   seal_bune:   {name:'부네의 인장',             icon:'🟣', desc:'공격력 +8',                     apply:p=>{p.atk+=8;}},
   seal_andras: {name:'안드라스의 인장',         icon:'⚪', desc:'방어력 +6 · 최대 HP +20',        apply:p=>{p.def+=6;p.maxHp+=20;p.hp+=20;}},
   seal_furfur: {name:'푸르푸르의 인장',         icon:'🔵', desc:'최대 HP +40 · 공격력 +4',        apply:p=>{p.maxHp+=40;p.hp+=40;p.atk+=4;}},
+  seal_barbatos:{name:'바르바토스의 인장',     icon:'🟣', desc:'공격 +12 · 방어 +8 · 최대 HP +60',apply:p=>{p.atk+=12;p.def+=8;p.maxHp+=60;p.hp+=60;}},
   seal_botis:  {name:'보티스의 인장',           icon:'🟢', desc:'공격 +10 · 방어 +8 · 최대 HP +50',apply:p=>{p.atk+=10;p.def+=8;p.maxHp+=50;p.hp+=50;}},
   angel_feather:{name:'대천사의 깃털',          icon:'🤍', desc:'공격 +6 · 방어 +6 · 최대 HP +30',apply:p=>{p.atk+=6;p.def+=6;p.maxHp+=30;p.hp+=30;}}
 };
@@ -617,6 +619,28 @@ const AREAS=[
       tick:4000, bleedOnHit:true,
       pre:'깨진 유리가 흩어진 로비, 쓰러진 사람들 사이로 한 남자가 걸어온다.\n붉은 머리, 초록빛 눈, 검은 코트. 허리띠에 감긴 초록 독사의 버클이 번뜩인다.\n\n"과거도, 미래도 이미 다 보았다. 네가 여기서 멈추는 것까지."',
       moves:[{t:'atk',n:'독사의 송곳니'},{t:'dot',n:'피의 독니',dn:'출혈'},{t:'nullify',n:'시간 정지'},{t:'reflect',n:'뒤집힌 시간'},{t:'multi',n:'빛나는 검의 연격',hits:4,m:0.4},{t:'charge',n:'60군단의 심판'}]}
+  },
+  { name:'어둠의 낙원', country:'빛이 닿지 않는 낙원', flag:'🌑', rec:22, recEnd:26, glow:'#9b5cff',
+    desc:'아름다운 정원처럼 보이지만 빛이 닿지 않는 곳. 들어선 자는 사냥감이 된다.',
+    sortie:'myth4',
+    intro:'멈춰 있던 도시의 시계가 다시 움직인 그날 밤, 하늘 한쪽이 찢어졌다.\n\n찢어진 틈 너머로 끝없는 정원이 펼쳐져 있었다. 꽃은 피어 있지만 빛은 없다.\n\n어둠 속에서 나팔 소리가 울린다. 사냥이 시작되었다는 신호였다.\n\n— 이곳에는 신화에 오른 자와 ★4 사제만이 발을 들일 수 있다.',
+    outro:'바르바토스의 활이 부러지자 정원을 덮고 있던 어둠이 걷히기 시작했다.\n\n처음으로 낙원에 빛이 들었다.\n\n"사냥꾼이… 사냥당하는 날이 올 줄이야."\n\n— 어둠의 낙원 해방 —',
+    enemies:[
+      {name:'추락한 천사',        icon:'🪽', hp:360, atk:66, def:28, xp:145, gold:76, demon:true, moves:[{t:'atk',n:'부러진 날개 베기'},{t:'atk',n:'부러진 날개 베기'},{t:'strong',n:'타락한 빛'}]},
+      {name:'검은 백합의 망령',   icon:'🥀', hp:330, atk:64, def:26, xp:140, gold:74, demon:true, moves:[{t:'atk',n:'가시 채찍'},{t:'dot',n:'검은 꽃가루',dn:'중독'},{t:'atk',n:'가시 채찍'}]},
+      {name:'낙원의 뱀',          icon:'🐍', hp:310, atk:70, def:25, xp:142, gold:75, demon:true, moves:[{t:'atk',n:'독니'},{t:'drain',n:'유혹의 속삭임'},{t:'atk',n:'독니'}]},
+      {name:'바르바토스의 사냥꾼', icon:'🏹', hp:340, atk:72, def:27, xp:148, gold:78, demon:true, moves:[{t:'atk',n:'화살'},{t:'multi',n:'연사',hits:3,m:0.45},{t:'strong',n:'관통 화살'}]},
+      {name:'침묵의 성가대',      icon:'🎐', hp:380, atk:62, def:30, xp:146, gold:76, demon:true, moves:[{t:'atk',n:'불협화음'},{t:'curse',n:'저주의 찬가'},{t:'sweep',n:'울려 퍼지는 비명',m:0.12}]}
+    ],
+    elite:{name:'낙원의 문지기', icon:'🗝️', hp:5000, atk:96, def:33, xp:780, gold:560, demon:true,
+      moves:[{t:'strong',n:'철문 내리치기'},{t:'multi',n:'열쇠 사슬',hits:3,m:0.55},{t:'curse',n:'닫힌 문의 저주'},{t:'charge',n:'낙원의 빗장'}]},
+    mid:{name:'바엘', art:'bael', title:'솔로몬 72악마 · 제1영 · 동방의 왕 · 66군단', hp:11000, atk:100, def:33, xp:2900, gold:2200, demon:true,
+      pre:'두꺼비와 사람과 고양이의 머리가 한 몸에 붙어 거미의 다리로 걸어온다.\n\n"보이지 않는 것을 어찌 베겠느냐."\n\n목소리가 세 개의 입에서 동시에 흘러나왔다.',
+      moves:[{t:'atk',n:'거미 다리 찌르기'},{t:'invis',n:'투명화'},{t:'multi',n:'세 머리의 물어뜯기',hits:3,m:0.5},{t:'drain',n:'쉰 목소리의 흡수'},{t:'charge',n:'66군단의 행진'}]},
+    boss:{name:'바르바토스', art:'barbatos', title:'솔로몬 72악마 · 제8영 · 공작 · 30군단', hp:26000, atk:145, def:36, xp:10000, gold:6500, demon:true, drop:'seal_barbatos',
+      tick:4000, sealAlly:true,
+      pre:'어둠 속에서 네 개의 나팔이 동시에 울린다.\n사슴뿔을 단 두건 아래로 금빛 눈동자가 빛나고, 그의 손에는 거대한 활이 들려 있다.\n\n"사냥감은 도망쳐야 재미가 있지. 먼저 네 동료 하나부터 묶어 두마."',
+      moves:[{t:'atk',n:'사냥꾼의 화살'},{t:'barrage',n:'무수한 참격',hits:7,m:0.24},{t:'sweep',n:'네 왕의 나팔',m:0.18},{t:'strong',n:'관통 화살'},{t:'barrage',n:'무수한 참격',hits:7,m:0.24},{t:'charge',n:'30군단의 일제 사격'}]}
   }
 
 ];
@@ -626,7 +650,7 @@ const stageType=s=>s===15?'boss':s===10?'mid':s===5?'elite':'normal';
 const STYPE_LABEL={normal:'일반',elite:'정예',mid:'솔로몬 72악마',boss:'나라 보스'};
 const stageRec=(a,s)=>Math.round(AREAS[a].rec+(s-1)*(AREAS[a].recEnd-AREAS[a].rec)/(STAGES-1));
 const ENEMY_MULT=1.3, LATE_BOSS_MULT=1.1; // 적 공격력·체력 1.3배 (나베리우스·보티스는 1.1배)
-const NORMAL_HP=[2.4,4,4.5,5,5.5,6], NORMAL_REWARD=1.5; // 일반 적이 몇 턴은 버티며 공격하도록
+const NORMAL_HP=[2.4,4,4.5,5,5.5,6,6.5], NORMAL_REWARD=1.5; // 일반 적이 몇 턴은 버티며 공격하도록
 function scaleBase(base,a,s){
   const f=1+0.06*(s-1);
   return {...base,hp:Math.round(base.hp*f*NORMAL_HP[a]),atk:Math.round(base.atk*f),def:Math.round(base.def*(1+0.04*(s-1))),
@@ -761,6 +785,27 @@ const ART={
       <path d="M95,74 l1.2,2.6 2.8,.3 -2.1,1.9 .6,2.8 -2.5,-1.4 -2.5,1.4 .6,-2.8 -2.1,-1.9 2.8,-.3 Z"/><path d="M105,74 l1.2,2.6 2.8,.3 -2.1,1.9 .6,2.8 -2.5,-1.4 -2.5,1.4 .6,-2.8 -2.1,-1.9 2.8,-.3 Z"/>
       <g class="fire"><path d="M150,64 C138,48 150,36 146,20 C160,32 168,44 158,60 C164,54 166,46 164,40 C174,52 166,66 150,64 Z" fill="#ff8a1a"/><path d="M151,60 C147,52 152,46 151,38 C158,46 158,54 151,60 Z" fill="#ffe08a"/></g>`},
 
+  bael:{c:'#5cc8ff',eye:'#c8f4ff',latin:'BAEL · SPIRITVS I · REX ORIENTIS · ',
+    body:`<g stroke="#07040c" stroke-width="5" fill="none" stroke-linecap="round">
+        <path d="M82,140 C60,128 40,134 26,160"/><path d="M84,148 C62,146 46,160 40,186"/><path d="M88,154 C74,164 66,178 66,192"/><path d="M92,156 C88,170 86,182 88,192"/>
+        <path d="M118,140 C140,128 160,134 174,160"/><path d="M116,148 C138,146 154,160 160,186"/><path d="M112,154 C126,164 134,178 134,192"/><path d="M108,156 C112,170 114,182 112,192"/></g>
+      <ellipse cx="100" cy="142" rx="26" ry="20"/>
+      <ellipse cx="66" cy="110" rx="18" ry="12"/><circle cx="58" cy="100" r="5"/><circle cx="72" cy="99" r="5"/>
+      <circle cx="100" cy="96" r="13"/><path d="M86,86 L88,70 L94,80 L100,66 L106,80 L112,70 L114,86 Z"/>
+      <circle cx="134" cy="108" r="12"/><path d="M124,100 L124,86 L132,97 Z M144,100 L144,86 L136,97 Z"/>
+      <path d="M78,116 C86,124 92,126 100,126 C108,126 114,124 122,116 L118,132 L82,132 Z"/>`,
+    eyes:`<circle cx="58" cy="100" r="2.2"/><circle cx="72" cy="99" r="2.2"/><path d="M58,116 C64,113 70,113 76,116" stroke="#c8f4ff" stroke-width="1.2" fill="none"/>
+      <path d="M93,95 L99,97 L93,99 Z"/><path d="M107,95 L101,97 L107,99 Z"/>
+      <ellipse cx="130" cy="107" rx="1.3" ry="3.2"/><ellipse cx="138" cy="107" rx="1.3" ry="3.2"/>`},
+  barbatos:{c:'#e0c060',eye:'#fff2a0',latin:'BARBATOS · SPIRITVS VIII · DVX · ',
+    body:`<path d="M64,192 C66,152 74,126 84,114 C80,98 84,76 100,66 C116,76 120,98 116,114 C126,126 134,152 136,192 Z"/>
+      <g stroke="#07040c" stroke-width="4" fill="none" stroke-linecap="round"><path d="M92,70 L84,50 L74,44 M84,50 L82,36 M88,58 L78,58"/><path d="M108,70 L116,50 L126,44 M116,50 L118,36 M112,58 L122,58"/></g>
+      <path d="M50,40 C18,88 18,144 50,190" stroke="#07040c" stroke-width="7" fill="none" stroke-linecap="round"/>
+      <path d="M50,40 L50,190" stroke="#07040c" stroke-width="1.6"/>
+      <path d="M86,126 L50,116" stroke="#07040c" stroke-width="9" stroke-linecap="round"/>
+      <path d="M118,98 L150,44 L159,49 L127,104 Z"/><path d="M148,44 L145,30 L154,40 Z M155,48 L158,34 L161,46 Z"/>`,
+    eyes:`<path d="M89,90 L98,93 L89,96 Z"/><path d="M111,90 L102,93 L111,96 Z"/>
+      <path d="M50,115 L104,115" stroke="#fff2a0" stroke-width="1.6"/><path d="M40,115 L50,110 L50,120 Z"/>`},
   naberius:{c:'#ff2244',eye:'#ff2a2a',latin:'NABERIVS · SPIRITVS XXIV · MARCHIO · ',
     body:`${wing('M100,104 C80,64 50,32 12,20 C28,40 18,46 10,60 C32,60 24,72 16,84 C38,84 32,96 28,108 C54,100 72,106 96,114 Z',100,104)}
       <ellipse cx="100" cy="112" rx="17" ry="26"/>
@@ -849,6 +894,12 @@ const MISSIONS=[
   {id:'viper', area:5, type:'kill', target:'모래시계 독사', count:8, title:'독사 소탕',
    desc:'모래시계 독사 8마리를 처치하라.', reward:{water:6,gold:600}, rewardText:'성수 ×6 · 600 G',
    story:'독사들이 사라지자 모래시계의 모래가 다시 흘러내렸다.'},
+  {id:'fallen_angel', area:6, type:'kill', target:'추락한 천사', count:8, title:'추락한 날개',
+   desc:'어둠의 낙원을 떠도는 추락한 천사 8마리를 정화하라.', reward:{tickets:3}, rewardText:'소환권 ×3',
+   story:'부러진 날개들이 빛 속으로 흩어졌다.\n\n교구에서 소환권을 보내왔다.'},
+  {id:'hunter', area:6, type:'kill', target:'바르바토스의 사냥꾼', count:8, title:'사냥꾼 사냥',
+   desc:'바르바토스의 사냥꾼 8마리를 처치하라.', reward:{water:6,gold:800}, rewardText:'성수 ×6 · 800 G',
+   story:'화살 소리가 멎었다. 이번엔 우리가 사냥할 차례다.'},
   {id:'legion', area:4, type:'kill', target:'나베리우스의 군단병', count:8, title:'군단 섬멸',
    desc:'나베리우스의 군단병 8마리를 처치하라.', reward:{relic:'angel_feather'}, rewardText:'유물: 대천사의 깃털',
    story:'무너진 성당의 제단 위, 하얀 깃털 하나가 빛나고 있었다.\n\n🤍 유물 「대천사의 깃털」을 얻었다!'}
@@ -992,7 +1043,11 @@ function statusHTML(){
   </div>`;
 }
 const owned=id=>(P.roster[id]||0)>0;
-const partyIds=()=>[FIXED,...P.active];
+const SORTIE_RULES={myth4:{text:'신화 승급 동료 또는 ★4 동료만 출전 가능 (이사벨 부제는 고정 동행)',ok:id=>isMyth(id)||ALLIES[id].star===4}};
+const sortieRule=a=>AREAS[a]&&SORTIE_RULES[AREAS[a].sortie];
+const sortieOk=(a,id)=>{const r=sortieRule(a);return !r||r.ok(id);};
+const partyIds=()=>(B&&B.party)?B.party:[FIXED,...P.active];
+const inParty=id=>partyIds().includes(id);
 function aData(id){if(!P.alv[id])P.alv[id]={lv:1,xp:0};return P.alv[id];}
 const aCap=id=>LV_CAP[ALLIES[id].star];
 const aCost=id=>Math.round(20*aData(id).lv*COST_F[ALLIES[id].star]);
@@ -1573,7 +1628,7 @@ function isabelTick(){
   if(!B||B.over||B.won||P.hp<=0||!$('#modal').classList.contains('hidden'))return;
   const h=B.ahp[FIXED];if(h&&h.hp<=0)return;
   if(B.stun[FIXED]>0)return;
-  const hh=Math.min(P.maxHp-P.hp,Math.round(P.maxHp*ISABEL_HEAL));
+  const hh=Math.min(P.maxHp-P.hp,Math.round(P.maxHp*ISABEL_HEAL*healMul()));
   if(hh<=0)return;
   P.hp+=hh;stat('heal',FIXED,hh);addLog(`🕊️ 이사벨 부제의 치유 기도 — HP ${hh} 회복`);queueFx('player','+'+hh,'heal');
   renderBattle();
@@ -1582,11 +1637,11 @@ function isabelTick(){
 function karmaTick(){
   if(!B||B.over||B.won||!$('#modal').classList.contains('hidden'))return;
   const id='karma',h=B.ahp[id];
-  if(!P.active.includes(id)||(h&&h.hp<=0)||(B.stun[id]>0))return;
+  if(!inParty(id)||(h&&h.hp<=0)||(B.stun[id]>0))return;
   const m=allyMult(id),lv=aData(id).lv,e=B.e,n=isMyth(id)?2:1;
   for(let i=0;i<n&&e.hp>0;i++){
     const r=Math.floor(Math.random()*3);
-    if(r===0){const hh=Math.min(P.maxHp-P.hp,Math.round((P.maxHp*0.04+lv)*m));P.hp+=hh;stat('heal','karma',hh);addLog(`📜 카르마의 치유 부적 — HP ${hh} 회복`);if(hh>0)queueFx('player','+'+hh,'heal');}
+    if(r===0){const hh=Math.min(P.maxHp-P.hp,Math.round((P.maxHp*0.04+lv)*m*healMul()));P.hp+=hh;stat('heal','karma',hh);addLog(`📜 카르마의 치유 부적 — HP ${hh} 회복`);if(hh>0)queueFx('player','+'+hh,'heal');}
     else if(r===1){B.hex=Math.max(B.hex,2);addLog(`📜 카르마의 저주 부적 — 적 공격력 감소`);}
     else{
       if(B.immune){addLog('📜 카르마의 화염 부적 — ⏸ 피해 무효');continue;}
@@ -1610,14 +1665,22 @@ function startBattle(spec){
   const isBoss=type==='boss'||type==='mid'||type==='pvp';
   clearBattle();
   const ahp={};
-  partyIds().forEach(id=>{const al=ALLIES[id],mx=Math.round((50+aData(id).lv*10)*(0.7+0.15*al.star)*(isMyth(id)?2:1));ahp[id]={hp:mx,max:mx};});
+  const party=[FIXED,...P.active.filter(id=>spec.pvp||sortieOk(a,id))];
+  const benched=spec.pvp?[]:P.active.filter(id=>!sortieOk(a,id));
+  party.forEach(id=>{const al=ALLIES[id],mx=Math.round((50+aData(id).lv*10)*(0.7+0.15*al.star)*(isMyth(id)?2:1));ahp[id]={hp:mx,max:mx};});
   B={e:{...t,maxHp:t.hp},spec,area:a,stage:spec.hunt?0:s,stype:type,baseName:t.name,isBoss,isFinal:!!t.final,
      charging:false,chargeName:'',chargeKind:null,phase:1,tornadoCD:0,
      buff:0,aura:0,hex:0,immune:0,reflect:0,curAlly:null,stun:{},stunWhy:{},ahp,agatoUsed:false,curse:0,silence:0,weak:0,ward:false,rage:0,turn:0,
-     st:{dmg:{},heal:{}},dot:null,evade:false,sealed:0,over:false,won:false,shield:0,ashield:0,prism:0,negate:0,blind:0,eburn:null,eliaCD:0,sirenT:0,danT:0,
+     party,healCut:0,st:{dmg:{},heal:{}},dot:null,evade:false,sealed:0,over:false,won:false,shield:0,ashield:0,prism:0,negate:0,blind:0,eburn:null,eliaCD:0,sirenT:0,danT:0,
      defending:false,busy:false,menu:'main',log:[],fxq:[]};
+  if(benched.length)addLog(`⚠ 출전 조건 — ${benched.map(id=>ALLIES[id].name).join(', ')} 출전 불가 (${sortieRule(a).text})`);
   const begin=()=>{
-    if(B&&P.active.includes('karma'))B.karmaT=setInterval(karmaTick,5000);
+    if(B&&t.sealAlly){
+      const c=party.filter(id=>id!==FIXED);
+      if(c.length){const id=pick(c);B.stun[id]=99999;B.stunWhy[id]='바르바토스의 사냥 표식 — 전투가 끝날 때까지';
+        addLog(`🏹 ${t.name}의 사냥 표식 — ${ALLIES[id].name}이(가) 전투가 끝날 때까지 행동 불능!`);}
+    }
+    if(B&&inParty('karma'))B.karmaT=setInterval(karmaTick,5000);
     if(B)B.isaT=setInterval(isabelTick,ISABEL_TICK);
     if(B&&isBoss&&!t.pvp){B.tickMs=t.zap?3000:t.tick?t.tick:t.final?4500:type==='boss'?5000:6000;B.zapT=setInterval(bossTick,B.tickMs);}
     if(B&&!isBoss&&Math.random()<0.4){
@@ -1670,6 +1733,7 @@ function hitAllies(pct,label,quiet){
   if(down.length)addLog(`💀 ${down.join(', ')} 쓰러짐 (이번 전투 행동 불가)`);
 }
 function addLog(s){B.log.push(s);if(B.log.length>40)B.log.shift();}
+const healMul=()=>(B&&B.healCut)?0.9:1;
 function stat(kind,who,v){if(!B||!B.st||!who||!(v>0))return;const o=B.st[kind];o[who]=(o[who]||0)+Math.round(v);}
 function queueFx(target,txt,cls){B.fxq.push([target,txt,cls]);}
 const enemyDef=()=>B.e.def*(B.weak?0.5:1);
@@ -1708,9 +1772,10 @@ function renderBattle(){
   if(B.blind)st.push(`📜 시야 차단 ${B.blind}`);
   if(B.sealed>0)st.push(`⛓ 적 속박 ${B.sealed}`);
   if(B.eburn)st.push(`🔥 적 불태움 ${B.eburn.turns}`);
+  if(B.healCut)st.push(`✂ 회복 -10% ${B.healCut}`);
   if(B.defending)st.push('🛡 방어');
   const party=`<div class="party">${partyIds().map(id=>{const h=B.ahp[id];const p=h?Math.round(h.hp/h.max*100):100;
-    return `<span class="chip ${h&&h.hp<=0?'down':''}">${allyFace(id,'xs')} ${ALLIES[id].name}<i class="mhp"><b style="width:${p}%"></b></i></span>`;}).join('')}</div>`;
+    return `<span class="chip ${(h&&h.hp<=0)||(B.stun[id]>=9999)?'down':''}">${allyFace(id,'xs')} ${ALLIES[id].name}<i class="mhp"><b style="width:${p}%"></b></i></span>`;}).join('')}</div>`;
   const tag=B.pvp?'<em class="el">DUEL</em>':B.stype==='boss'?`<em>${B.isFinal?'FINAL':'BOSS'}</em>`:B.stype==='mid'?'<em>DEMON</em>':B.stype==='elite'?'<em class="el">ELITE</em>':'';
   const t=-(performance.now()/1000).toFixed(2);
   const vis=e.pvp?`<div class="eicon pvpvis" id="eicon"><div class="pvphero">✝</div><div class="pvpteam">${teamIconsHTML(e.party)}</div></div>`:e.art?`<div class="eicon art ${B.charging?'charge':''}" id="eicon" style="--t:${t}s">${bossSVG(e.art)}</div>`
@@ -1724,6 +1789,7 @@ function renderBattle(){
   if(B.immune)passive.push('⏸ 시간 정지: 이번 턴 피해 무효 — 회복·방어 추천');
   if(B.reflect)passive.push('↩ 뒤집힌 시간: 준 피해의 50% 반사');
   if(e.bleedOnHit)passive.push('🩸 공격 시 출혈');
+  if(e.sealAlly)passive.push('🏹 사냥 표식: 동료 1명 전투 종료까지 행동 불능');
   let warn='';
   if(B.charging){
     warn=B.chargeKind==='jeongyeok'?`⚠ 「전격」 — 방어하지 않으면 HP 절반 소멸`
@@ -1815,9 +1881,9 @@ function alliesAct(){
       continue;
     }
     const heal=(pct,label,k=1)=>{
-      const h=Math.min(P.maxHp-P.hp,Math.round((P.maxHp*pct+lv*2)*m*k));
+      const h=Math.min(P.maxHp-P.hp,Math.round((P.maxHp*pct+lv*2)*m*k*healMul()));
       if(h>0){P.hp+=h;stat('heal',id,h);addLog(`${label} — HP ${h} 회복`);queueFx('player','+'+h,'heal');}
-      partyIds().forEach(x=>{const ah=B.ahp[x];if(ah&&ah.hp>0)ah.hp=Math.min(ah.max,ah.hp+Math.round(ah.max*pct*0.6*k));});
+      partyIds().forEach(x=>{const ah=B.ahp[x];if(ah&&ah.hp>0)ah.hp=Math.min(ah.max,ah.hp+Math.round(ah.max*pct*0.6*k*healMul()));});
     };
     switch(al.kit){
       case 'isabel': // 천사의 의지 — 주인공을 돕는 서포터
@@ -1906,10 +1972,10 @@ function alliesAct(){
 
 function hitPlayer(mult,label){
   const e=B.e;
-  if(P.active.includes('guseju')&&!(B.stun&&B.stun.guseju)&&Math.random()<(isMyth('guseju')?0.25:0.15)){
+  if(inParty('guseju')&&!(B.stun&&B.stun.guseju)&&Math.random()<(isMyth('guseju')?0.25:0.15)){
     addLog(`${label} — 구세주의 예지로 공격을 피했다!`);queueFx('player','MISS','mpf');return 0;
   }
-  if(P.active.includes('danian')&&isMyth('danian')&&!(B.stun&&B.stun.danian)&&B.ahp.danian&&B.ahp.danian.hp>0&&Math.random()<0.2){
+  if(inParty('danian')&&isMyth('danian')&&!(B.stun&&B.stun.danian)&&B.ahp.danian&&B.ahp.danian.hp>0&&Math.random()<0.2){
     addLog(`${label} — 🔱 천지개벽: 다니안이 공격을 쳐냈다!`);queueFx('player','MISS','mpf');return 0;
   }
   if(B.blind&&Math.random()<0.35){addLog(`${label} — 📜 시야가 가려진 적의 공격이 빗나갔다!`);queueFx('player','MISS','mpf');return 0;}
@@ -1953,7 +2019,7 @@ function act(kind,arg){
     B.defending=true;addLog('방어 태세를 갖췄다.');
   }else if(kind==='item'){
     if(arg==='water'&&P.items.water>0){
-      P.items.water--;const h=Math.min(P.maxHp-P.hp,Math.max(60,Math.round(P.maxHp*0.4)));
+      P.items.water--;const h=Math.min(P.maxHp-P.hp,Math.round(Math.max(60,P.maxHp*0.4)*healMul()));
       P.hp+=h;stat('heal','hero',h);addLog(`성수 사용 — HP ${h} 회복`);queueFx('player','+'+h,'heal');
     }else if(arg==='rosary'&&P.items.rosary>0){
       P.items.rosary--;const m=Math.min(P.maxMp-P.mp,25);
@@ -2036,11 +2102,17 @@ function enemyTurn(){
       addLog(`${label} — 3턴간 ${B.dot.name}`);break;
     case 'invis':   B.evade=true;addLog(`${label} — 모습을 감췄다! 다음 공격이 빗나간다`);break;
     case 'discord':{
-      const c=P.active.filter(id=>!(B.stun[id]>0)&&B.ahp[id]&&B.ahp[id].hp>0);
+      const c=partyIds().filter(id=>id!==FIXED&&!(B.stun[id]>0)&&B.ahp[id]&&B.ahp[id].hp>0);
       if(c.length){const id=pick(c);B.stun[id]=2;B.stunWhy[id]='불화';addLog(`${label} — ${ALLIES[id].name} 2턴간 행동 불가`);}
       else{B.curse=3;addLog(`${label} — 3턴간 방어력 감소`);}
       break;}
     case 'storm':   hitPlayer(mv.m,label);hitAllies(0.12,label);break;
+    case 'barrage':{
+      addLog(`${label}!`);
+      for(let i=0;i<mv.hits&&P.hp>0;i++)hitPlayer(mv.m,`  참격 ${i+1}`);
+      hitAllies(0.08,label);
+      B.healCut=3;addLog('✂ 무수한 참격의 상처 — 3턴간 주인공·동료 회복량 10% 무효');
+      break;}
     case 'sweep':   hitPlayer(0.6,label);hitAllies(mv.m,label);break;
     case 'rage':
       if(B.rage<2){B.rage++;addLog(`${label} — 공격력 상승!`);}
@@ -2072,6 +2144,7 @@ function enemyTurn(){
   if(B.ashield){B.ashield--;if(!B.ashield)B.shield=0;}
   if(B.tornadoCD>0)B.tornadoCD--;
   if(B.immune)B.immune--;
+  if(B.healCut&&mv.t!=='barrage')B.healCut--;
   if(B.reflect)B.reflect--;
   if(B.buff)B.buff--;
   if(B.aura)B.aura--;
@@ -2233,6 +2306,8 @@ function renderMap(a,msg){
       <div class="ptitle">${s}. ${stageName(a,s)} <span class="tag ${t==='normal'?'done':t==='elite'?'item':'t-ally'}">${STYPE_LABEL[t]}</span></div>
       ${(t==='boss'||t==='mid')?`<div class="etitle" style="text-align:left">${(t==='boss'?ar.boss:ar.mid).title}</div>`:''}
       <div class="desc">권장 Lv ${stageRec(a,s)} · 첫 클리어 보상: ${STAGE_REWARD[t]}${s<=prog?' <span class="gold">(클리어 완료 · 재도전 가능)</span>':''}${t==='boss'&&ar.boss.drop?(P.relics.includes(ar.boss.drop)?' · 🔒 인장 보유':' · 인장 미획득'):''}</div>
+      ${sortieRule(a)?(()=>{const ok=P.active.filter(id=>sortieOk(a,id)),no=P.active.filter(id=>!sortieOk(a,id));
+        return `<div class="notice sortie">⚠ 출전 조건 — ${sortieRule(a).text}<br><span class="small">출전 가능: ${ok.length?ok.map(id=>ALLIES[id].name).join(', '):'없음'}${no.length?` · 출전 불가: ${no.map(id=>ALLIES[id].name).join(', ')}`:''}</span></div>`;})():''}
       <div class="grid">
         <button class="btn ${t==='boss'||t==='mid'?'danger':'primary'}" id="go" ${open?'':'disabled'}>${open?'⚔ 출전':'🔒 이전 스테이지를 먼저 클리어'}</button>
         <button class="btn" id="back">← 거점으로</button>
