@@ -353,6 +353,11 @@ body.title-mode{overflow:hidden}
 .rp-v small{display:block;font-weight:400;color:#8fa3d6;font-size:10px}
 .rp-note{margin-top:10px;color:#7d8fbf}
 .notice.sortie{border-color:#9b5cff;background:rgba(80,40,140,.25);text-align:left;font-size:13px}
+.acard.dex .dexdesc{font-size:13px;color:#c9d5f5;margin-top:4px;line-height:1.5}
+.acard.dex.unown{opacity:.72}
+.acard.dex.unown .aface{filter:grayscale(.7) brightness(.8)}
+.dexown{float:right;font-size:11px;padding:1px 7px;border-radius:9px;background:#1a2547;color:#8494c0}
+.dexown.on{background:#1f5a3a;color:#9ff0c4}
 .aportrait img{width:100%;height:100%;object-fit:cover;display:block}
 .sum.s4 .aportrait{box-shadow:0 0 24px #b07cff,0 0 50px rgba(176,124,255,.4)}
 .sum.s5 .aportrait{box-shadow:0 0 28px #ffd24a,0 0 70px rgba(255,210,74,.45);border:2px solid #ffe9a0}
@@ -1405,6 +1410,7 @@ function renderHub(msg){
         <button class="btn" id="hunt">⚔ 자유 사냥<small>경험치·골드 모으기</small></button>
         <button class="btn" id="rest" ${restLeft()>0?'disabled':''}>${restLabel()}</button>
         <button class="btn" id="shop">🕯 상점 · 동료 소환<small>소환권 ${P.tickets}장</small></button>
+        <button class="btn" id="dex">📖 동료 도감<small>모든 동료의 이름·능력</small></button>
       </div>
     </div>
     <div class="panel"><div class="ptitle">📜 미션</div>${missionHTML}</div>
@@ -1416,6 +1422,7 @@ function renderHub(msg){
   document.querySelectorAll('.area').forEach(b=>b.onclick=()=>{P.cur=+b.dataset.i;save();renderHub();});
   document.querySelectorAll('[data-claim]').forEach(b=>b.onclick=()=>claim(b.dataset.claim));
   $('#allies').onclick=()=>renderAllies();
+  $('#dex').onclick=()=>renderDex();
   $('#friends').onclick=()=>renderFriends();
   $('#hunt').onclick=()=>startBattle({area:P.cur,hunt:true});
   $('#map').onclick=()=>renderMap(P.cur);
@@ -1477,6 +1484,31 @@ function allyCard(id){
 }
 const topBack=()=>`<div class="backtop-row"><button class="backtop" data-backtop>← 돌아가기</button></div>`;
 document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('[data-backtop]');if(b){e.preventDefault();renderHub();}});
+/* 동료 도감: 모든 동료의 이름과 능력 */
+let dexStar='all';
+function renderDex(){
+  const ids=Object.keys(ALLIES).sort((x,y)=>ALLIES[y].star-ALLIES[x].star||(TIER5[x]||0)-(TIER5[y]||0));
+  const tabs=[['all','전체'],[5,'★5'],[4,'★4'],[3,'★3'],[2,'★2'],[1,'★1'],[0,'조력자']];
+  const list=ids.filter(id=>dexStar==='all'||ALLIES[id].star===+dexStar);
+  const own=Object.keys(ALLIES).filter(id=>id!==FIXED&&owned(id)).length;
+  const card=id=>{const al=ALLIES[id],has=id===FIXED||owned(id),my=MYTH_SKILL[id];
+    return `<div class="acard dex ${has?'':'unown'}"><div class="ally"><div class="ic">${allyFace(id,'md')}</div><div style="flex:1">
+      ${al.star?`<span class="gold">${'★'.repeat(al.star)}</span>`:'<span class="tag t-ally">고정 조력자</span>'} <b>${al.name}</b>
+      ${TIER5[id]?`<span class="small">${TIER5[id]}티어 · 최대 전투력 ${fmt(TIER5_CP[TIER5[id]])}</span>`:''}
+      <span class="dexown ${has?'on':''}">${has?'보유':'미보유'}</span>
+      <small>${al.role}</small>
+      <div class="dexdesc">${al.desc}</div>
+      ${my?`<small class="mysk ${has&&isMyth(id)?'on':''}">🔱 신화 고유 능력 「${my.name}」 — ${my.desc}</small>`:''}
+    </div></div></div>`;};
+  $('#app').innerHTML=`${statusHTML()}${topBack()}
+    <div class="panel"><div class="ptitle">📖 동료 도감 <span class="small">보유 ${own}/${Object.keys(ALLIES).length-1}</span></div>
+      <div class="sortbar">${tabs.map(([k,l])=>`<button class="sortbtn ${String(dexStar)===String(k)?'on':''}" data-dex="${k}">${l}</button>`).join('')}</div>
+      ${list.map(card).join('')}</div>
+    <button class="btn" id="back">← 돌아가기</button>`;
+  document.querySelectorAll('[data-dex]').forEach(b=>b.onclick=()=>{dexStar=b.dataset.dex;renderDex();});
+  $('#back').onclick=()=>renderHub();
+  window.scrollTo(0,0);
+}
 let allySort=(()=>{try{return localStorage.getItem('bp_ally_sort')||'cp'}catch(e){return 'cp'}})();
 function renderAllies(msg){
   const key={lv:id=>aData(id).lv,cp:id=>allyCP(id),cnt:id=>P.roster[id]||0}[allySort]||(id=>allyCP(id));
