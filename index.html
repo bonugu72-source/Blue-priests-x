@@ -598,6 +598,7 @@ const AREAS=[
 const stageType=s=>s===15?'boss':s===10?'mid':s===5?'elite':'normal';
 const STYPE_LABEL={normal:'일반',elite:'정예',mid:'솔로몬 72악마',boss:'나라 보스'};
 const stageRec=(a,s)=>Math.round(AREAS[a].rec+(s-1)*(AREAS[a].recEnd-AREAS[a].rec)/(STAGES-1));
+const ENEMY_MULT=1.5; // 보스·스테이지 적 공격력·체력 1.5배
 const NORMAL_HP=[2.4,4,4.5,5,5.5,6], NORMAL_REWARD=1.5; // 일반 적이 몇 턴은 버티며 공격하도록
 function scaleBase(base,a,s){
   const f=1+0.06*(s-1);
@@ -1565,6 +1566,7 @@ function startBattle(spec){
   if(spec.pvp){t=spec.pvp;s=0;}
   else if(spec.hunt){s=Math.min(14,Math.max(1,P.prog[a]));if(stageType(s)!=='normal')s=Math.max(1,s-1);t=scaledEnemy(a,s,pick(AREAS[a].enemies));}
   else t=stageEnemy(a,s);
+  if(!spec.pvp)t={...t,hp:Math.round(t.hp*ENEMY_MULT),atk:Math.round(t.atk*ENEMY_MULT)}; // 모든 적 체력·공격력 배율
   const type=spec.pvp?'pvp':spec.hunt?'normal':stageType(s);
   const isBoss=type==='boss'||type==='mid'||type==='pvp';
   clearBattle();
