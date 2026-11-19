@@ -528,6 +528,7 @@ const RELICS={
   seal_bune:   {name:'부네의 인장',             icon:'🟣', desc:'공격력 +8',                     apply:p=>{p.atk+=8;}},
   seal_andras: {name:'안드라스의 인장',         icon:'⚪', desc:'방어력 +6 · 최대 HP +20',        apply:p=>{p.def+=6;p.maxHp+=20;p.hp+=20;}},
   seal_furfur: {name:'푸르푸르의 인장',         icon:'🔵', desc:'최대 HP +40 · 공격력 +4',        apply:p=>{p.maxHp+=40;p.hp+=40;p.atk+=4;}},
+  seal_amon:{name:'아몬의 인장',     icon:'🔶', desc:'공격 +14 · 방어 +10 · 최대 HP +80',apply:p=>{p.atk+=14;p.def+=10;p.maxHp+=80;p.hp+=80;}},
   seal_barbatos:{name:'바르바토스의 인장',     icon:'🟣', desc:'공격 +12 · 방어 +8 · 최대 HP +60',apply:p=>{p.atk+=12;p.def+=8;p.maxHp+=60;p.hp+=60;}},
   seal_botis:  {name:'보티스의 인장',           icon:'🟢', desc:'공격 +10 · 방어 +8 · 최대 HP +50',apply:p=>{p.atk+=10;p.def+=8;p.maxHp+=50;p.hp+=50;}},
   angel_feather:{name:'대천사의 깃털',          icon:'🤍', desc:'공격 +6 · 방어 +6 · 최대 HP +30',apply:p=>{p.atk+=6;p.def+=6;p.maxHp+=30;p.hp+=30;}}
@@ -683,6 +684,28 @@ const AREAS=[
       tick:4000, sealAlly:true,
       pre:'어둠 속에서 네 개의 나팔이 동시에 울린다.\n사슴뿔을 단 두건 아래로 금빛 눈동자가 빛나고, 그의 손에는 거대한 활이 들려 있다.\n\n"사냥감은 도망쳐야 재미가 있지. 먼저 네 동료 하나부터 묶어 두마."',
       moves:[{t:'atk',n:'사냥꾼의 화살'},{t:'barrage',n:'무수한 참격',hits:7,m:0.24},{t:'sweep',n:'네 왕의 나팔',m:0.18},{t:'strong',n:'관통 화살'},{t:'barrage',n:'무수한 참격',hits:7,m:0.24},{t:'charge',n:'30군단의 일제 사격'}]}
+  },
+  { name:'천계의 문', country:'하늘로 이어지는 문', flag:'☁️', rec:26, recEnd:30, glow:'#ffc85a',
+    desc:'하늘로 이어지는 거대한 문. 그 앞을 지옥불이 가로막고 있다.',
+    sortie:'myth',
+    intro:'어둠의 낙원 끝에서 빛의 계단이 나타났다.\n\n계단 꼭대기에는 하늘로 이어지는 거대한 문이 서 있었다. 하지만 문 앞은 꺼지지 않는 불길에 휩싸여 있었다.\n\n불길 너머에서 낯익은 웃음소리가 들려왔다.\n\n— 이곳에는 신화에 오른 자만이 발을 들일 수 있다.',
+    outro:'마지막 불씨가 꺼지자, 천계의 문이 천천히 열리기 시작했다.\n\n문틈으로 쏟아지는 빛이 모두의 얼굴을 비췄다.\n\n"…드디어, 여기까지 왔다."\n\n— 천계의 문 해방 —',
+    enemies:[
+      {name:'불꽃의 케루빔',  icon:'🔥', hp:400, atk:74, def:30, xp:160, gold:85, demon:true, moves:[{t:'atk',n:'불꽃 검'},{t:'atk',n:'불꽃 검'},{t:'strong',n:'정화의 불길'}]},
+      {name:'천상의 석상',    icon:'🗿', hp:470, atk:68, def:36, xp:162, gold:86, demon:true, moves:[{t:'atk',n:'돌주먹'},{t:'strong',n:'무너지는 석상'},{t:'atk',n:'돌주먹'}]},
+      {name:'심판의 횃불',    icon:'🕯️', hp:380, atk:72, def:29, xp:158, gold:84, demon:true, moves:[{t:'atk',n:'횃불 내려치기'},{t:'dot',n:'심판의 불씨',dn:'화상'},{t:'atk',n:'횃불 내려치기'}]},
+      {name:'재가 된 성가대',  icon:'🎶', hp:420, atk:70, def:31, xp:160, gold:85, demon:true, moves:[{t:'atk',n:'타오르는 찬송'},{t:'sweep',n:'재의 합창',m:0.13},{t:'curse',n:'불협화음'}]},
+      {name:'타오르는 순례자', icon:'🚶', hp:410, atk:76, def:30, xp:164, gold:87, demon:true, moves:[{t:'atk',n:'불붙은 지팡이'},{t:'drain',n:'순례의 갈증'},{t:'atk',n:'불붙은 지팡이'}]}
+    ],
+    elite:{name:'천계의 수문장', icon:'⚔️', hp:5600, atk:104, def:36, xp:880, gold:640, demon:true,
+      moves:[{t:'strong',n:'문을 지키는 창'},{t:'multi',n:'세 번의 경고',hits:3,m:0.55},{t:'curse',n:'출입 금지'},{t:'charge',n:'닫힌 하늘'}]},
+    mid:{name:'파이몬', art:'paimon', title:'솔로몬 72악마 · 제9영 · 서방의 왕 · 200군단', hp:13000, atk:110, def:35, xp:3300, gold:2600, demon:true,
+      pre:'요란한 나팔 소리와 함께 왕관을 쓴 자가 낙타를 타고 나타났다.\n\n"왕 앞에서 고개를 숙여라. 아니면 그 머리를 숙이게 해 주마."',
+      moves:[{t:'atk',n:'왕관의 일격'},{t:'curse',n:'굉음의 나팔'},{t:'sweep',n:'200군단의 함성',m:0.16},{t:'multi',n:'낙타 기병 돌격',hits:3,m:0.5},{t:'charge',n:'왕의 포고'}]},
+    boss:{name:'아몬', art:'amon2', title:'솔로몬 72악마 · 제7영 · 후작 · 40군단 · 진정한 모습', hp:40000, exactHp:true, atk:150, def:38, xp:12000, gold:8000, demon:true, drop:'seal_amon',
+      tick:4000, burnAll:true, voidHero:0.4,
+      pre:'멈춰버린 도시에서 쓰러뜨렸던 아몬이었다. 하지만 그때와는 전혀 다른 모습이다.\n뱀의 꼬리를 단 늑대의 몸에서 끝없이 불길이 흘러넘친다.\n\n"그때 나를 쓰러뜨렸다고 생각했나? 이 불길이 꺼지기 전에 너희가 먼저 타 버릴 것이다."',
+      moves:[{t:'atk',n:'불꽃 부리'},{t:'strong',n:'지옥불 숨결'},{t:'sweep',n:'불꽃의 날개',m:0.18},{t:'drain',n:'생명 흡수'},{t:'atk',n:'불꽃 부리'},{t:'charge',n:'40군단의 업화'}]}
   }
 
 ];
@@ -692,7 +715,7 @@ const stageType=s=>s===15?'boss':s===10?'mid':s===5?'elite':'normal';
 const STYPE_LABEL={normal:'일반',elite:'정예',mid:'솔로몬 72악마',boss:'나라 보스'};
 const stageRec=(a,s)=>Math.round(AREAS[a].rec+(s-1)*(AREAS[a].recEnd-AREAS[a].rec)/(STAGES-1));
 const ENEMY_MULT=1.3, LATE_BOSS_MULT=1.1; // 적 공격력·체력 1.3배 (나베리우스·보티스는 1.1배)
-const NORMAL_HP=[2.4,4,4.5,5,5.5,6,6.5], NORMAL_REWARD=1.5; // 일반 적이 몇 턴은 버티며 공격하도록
+const NORMAL_HP=[2.4,4,4.5,5,5.5,6,6.5,7], NORMAL_REWARD=1.5; // 일반 적이 몇 턴은 버티며 공격하도록
 function scaleBase(base,a,s){
   const f=1+0.06*(s-1);
   return {...base,hp:Math.round(base.hp*f*NORMAL_HP[a]),atk:Math.round(base.atk*f),def:Math.round(base.def*(1+0.04*(s-1))),
@@ -839,6 +862,13 @@ const ART={
     eyes:`<circle cx="58" cy="100" r="2.2"/><circle cx="72" cy="99" r="2.2"/><path d="M58,116 C64,113 70,113 76,116" stroke="#c8f4ff" stroke-width="1.2" fill="none"/>
       <path d="M93,95 L99,97 L93,99 Z"/><path d="M107,95 L101,97 L107,99 Z"/>
       <ellipse cx="130" cy="107" rx="1.3" ry="3.2"/><ellipse cx="138" cy="107" rx="1.3" ry="3.2"/>`},
+  paimon:{c:'#ffb347',eye:'#fff4c0',latin:'PAIMON · SPIRITVS IX · REX OCCIDENTIS · ',
+    body:`<path d="M40,150 C40,136 50,128 62,128 C66,108 82,100 96,112 C104,104 116,108 122,126 L140,128 C148,112 156,96 162,86 C166,78 176,76 182,82 C186,88 182,94 176,94 L170,96 C164,112 160,134 154,150 C150,160 140,164 130,164 L70,164 C56,164 42,160 40,150 Z"/>
+      <path d="M58,160 L54,194 L62,194 L66,162 Z M76,162 L74,194 L82,194 L84,162 Z M124,162 L126,194 L134,194 L132,160 Z M140,158 L146,194 L154,194 L148,154 Z"/>
+      <path d="M84,118 C80,98 84,84 94,78 C88,68 90,56 100,52 C110,56 112,68 106,78 C116,84 120,98 116,118 Z"/>
+      <path d="M88,54 L90,36 L96,46 L100,30 L104,46 L110,36 L112,54 Z"/>
+      <path d="M108,88 L146,66 L150,54 L158,76 L146,74 L112,96 Z"/>`,
+    eyes:`<path d="M94,64 L99,66 L94,68 Z"/><path d="M106,64 L101,66 L106,68 Z"/><circle cx="176" cy="86" r="1.8"/>`},
   barbatos:{c:'#e0c060',eye:'#fff2a0',latin:'BARBATOS · SPIRITVS VIII · DVX · ',
     body:`<path d="M64,192 C66,152 74,126 84,114 C80,98 84,76 100,66 C116,76 120,98 116,114 C126,126 134,152 136,192 Z"/>
       <g stroke="#07040c" stroke-width="4" fill="none" stroke-linecap="round"><path d="M92,70 L84,50 L74,44 M84,50 L82,36 M88,58 L78,58"/><path d="M108,70 L116,50 L126,44 M116,50 L118,36 M112,58 L122,58"/></g>
@@ -879,6 +909,7 @@ function portraitHTML(key,size){
   return `<div class="portrait ${p.cls} ${size||''}"><img src="${p.img}" alt="" style="object-position:${p.pos}">${bolts}${embers}<div class="pflash"></div><div class="pglow"></div></div>`;
 }
 let svgSeq=0;
+ART.amon2={...ART.amon,c:'#ff6a2a',eye:'#fff0a0',latin:'AMON · SPIRITVS VII · MARCHIO · XL LEGIONES · '};
 function bossSVG(key){
   if(PORTRAIT[key])return portraitHTML(key);
   const a=ART[key],u='g'+(++svgSeq);
@@ -936,6 +967,12 @@ const MISSIONS=[
   {id:'viper', area:5, type:'kill', target:'모래시계 독사', count:8, title:'독사 소탕',
    desc:'모래시계 독사 8마리를 처치하라.', reward:{water:6,gold:600}, rewardText:'성수 ×6 · 600 G',
    story:'독사들이 사라지자 모래시계의 모래가 다시 흘러내렸다.'},
+  {id:'cherub', area:7, type:'kill', target:'불꽃의 케루빔', count:8, title:'불꽃 진화',
+   desc:'천계의 문 앞을 지키는 불꽃의 케루빔 8마리를 정화하라.', reward:{tickets:4}, rewardText:'소환권 ×4',
+   story:'불꽃이 사그라들자 문 앞의 길이 조금 넓어졌다.\n\n교구에서 소환권을 보내왔다.'},
+  {id:'pilgrim', area:7, type:'kill', target:'타오르는 순례자', count:8, title:'잠든 순례자',
+   desc:'불타며 헤매는 순례자 8명을 쉬게 하라.', reward:{water:6,stone:1}, rewardText:'성수 ×6 · 천상의 성유물 ×1',
+   story:'순례자들의 불길이 꺼졌다. 마지막 순례자가 품에 안고 있던 성유물을 건넸다.'},
   {id:'fallen_angel', area:6, type:'kill', target:'추락한 천사', count:8, title:'추락한 날개',
    desc:'어둠의 낙원을 떠도는 추락한 천사 8마리를 정화하라.', reward:{tickets:3}, rewardText:'소환권 ×3',
    story:'부러진 날개들이 빛 속으로 흩어졌다.\n\n교구에서 소환권을 보내왔다.'},
@@ -1085,7 +1122,7 @@ function statusHTML(){
   </div>`;
 }
 const owned=id=>(P.roster[id]||0)>0;
-const SORTIE_RULES={myth4:{text:'신화 승급 동료 또는 ★4 동료만 출전 가능 (이사벨 부제는 고정 동행)',ok:id=>isMyth(id)||ALLIES[id].star===4}};
+const SORTIE_RULES={myth:{text:'신화 승급 동료만 출전 가능 (이사벨 부제는 고정 동행)',ok:id=>isMyth(id)},myth4:{text:'신화 승급 동료 또는 ★4 동료만 출전 가능 (이사벨 부제는 고정 동행)',ok:id=>isMyth(id)||ALLIES[id].star===4}};
 const sortieRule=a=>AREAS[a]&&SORTIE_RULES[AREAS[a].sortie];
 const sortieOk=(a,id)=>{const r=sortieRule(a);return !r||r.ok(id);};
 const partyIds=()=>(B&&B.party)?B.party:[FIXED,...P.active];
@@ -1773,7 +1810,7 @@ function startBattle(spec){
   if(spec.pvp){t=spec.pvp;s=0;}
   else if(spec.hunt){s=Math.min(14,Math.max(1,P.prog[a]));if(stageType(s)!=='normal')s=Math.max(1,s-1);t=scaledEnemy(a,s,pick(AREAS[a].enemies));}
   else t=stageEnemy(a,s);
-  if(!spec.pvp){const em=(!spec.hunt&&stageType(s)==='boss'&&a>=4)?LATE_BOSS_MULT:ENEMY_MULT;t={...t,hp:Math.round(t.hp*em),atk:Math.round(t.atk*em)};} // 적 체력·공격력 배율
+  if(!spec.pvp){const em=(!spec.hunt&&stageType(s)==='boss'&&a>=4)?LATE_BOSS_MULT:ENEMY_MULT;t={...t,hp:t.exactHp?t.hp:Math.round(t.hp*em),atk:Math.round(t.atk*em)};} // 적 체력·공격력 배율 (exactHp: 체력 고정)
   const type=spec.pvp?'pvp':spec.hunt?'normal':stageType(s);
   const isBoss=type==='boss'||type==='mid'||type==='pvp';
   clearBattle();
@@ -1788,6 +1825,7 @@ function startBattle(spec){
      defending:false,busy:false,menu:'main',log:[],fxq:[]};
   if(benched.length)addLog(`⚠ 출전 조건 — ${benched.map(id=>ALLIES[id].name).join(', ')} 출전 불가 (${sortieRule(a).text})`);
   const begin=()=>{
+    if(B&&t.burnAll){B.dot={name:'화상',dmg:Math.max(5,Math.round(t.atk*0.2)),turns:99};addLog(`🔥 ${t.name}의 불길 — 주인공과 동료들이 끝없이 불타기 시작한다`);}
     if(B&&t.sealAlly){
       const c=party.filter(id=>id!==FIXED);
       if(c.length){const id=pick(c);B.stun[id]=99999;B.stunWhy[id]='바르바토스의 사냥 표식 — 전투가 끝날 때까지';
@@ -1885,7 +1923,7 @@ function renderBattle(){
   if(B.curse)st.push(`☠ 저주 ${B.curse}`);
   if(B.silence)st.push(`🔇 봉인 ${B.silence}`);
   if(B.weak)st.push(`📜 적 방어↓ ${B.weak}`);
-  if(B.dot)st.push(`🩸 ${B.dot.name} ${B.dot.turns}`);
+  if(B.dot)st.push(`${B.dot.name==='화상'?'🔥':'🩸'} ${B.dot.name} ${B.dot.turns>=90?'∞':B.dot.turns}`);
   if(B.ward)st.push('🔰 결계');
   if(B.immune)st.push('⏸ 적 피해 무효');
   if(B.reflect)st.push('↩ 적 반사');
@@ -1914,6 +1952,8 @@ function renderBattle(){
   if(B.immune)passive.push('⏸ 시간 정지: 이번 턴 피해 무효 — 회복·방어 추천');
   if(B.reflect)passive.push('↩ 뒤집힌 시간: 준 피해의 50% 반사');
   if(e.bleedOnHit)passive.push('🩸 공격 시 출혈');
+  if(e.burnAll)passive.push('🔥 끝없는 화상: 주인공·동료');
+  if(e.voidHero)passive.push(`🔥 주인공 공격 ${Math.round(e.voidHero*100)}% 무효`);
   if(e.sealAlly)passive.push('🏹 사냥 표식: 동료 1명 전투 종료까지 행동 불능');
   let warn='';
   if(B.charging){
@@ -1968,6 +2008,7 @@ function hitEnemy(mult,label){
   if(B.evade){B.evade=false;addLog(`${label}! — 적이 모습을 감춰 빗나갔다`);queueFx('enemy','MISS','mpf');return;}
   if(e.dimension&&Math.random()<0.5){addLog(`${label}! — 🌀 차원의 틈으로 흘러가 사라졌다`);queueFx('enemy','차원 전이','mpf');return;}
   if(B.immune){addLog(`${label}! — ⏸ 시간이 멈춰 피해가 무효화됐다`);queueFx('enemy','무효','mpf');return;}
+  if(e.voidHero&&Math.random()<e.voidHero){addLog(`${label}! — 🔥 아몬의 업화에 삼켜져 무효화됐다`);queueFx('enemy','무효','mpf');return;}
   let d=(P.atk*(B.buff?1.5:1)*(B.aura?1.2:1)*mult-enemyDef()/2)*rnd(0.9,1.1);
   d=Math.max(1,Math.round(d));
   const crit=Math.random()<0.1*(stormOn()?2:1);
@@ -2275,8 +2316,12 @@ function enemyTurn(){
     for(let i=0;i<e.slashes;i++)hitPlayer(0.35,`🗡 추격 참격 ${i+1}`);
   }
   B.defending=false;B.ward=false;
+  if(e.burnAll&&P.hp>0&&e.hp>0){ // 아몬: 끝없는 화상 (주인공·동료)
+    if(!B.dot||B.dot.name!=='화상')B.dot={name:'화상',dmg:Math.max(5,Math.round(e.atk*0.2)),turns:99};else B.dot.turns=99;
+    hitAllies(0.05,'🔥 끝없는 화상');
+  }
   if(B.dot&&P.hp>0){
-    P.hp=Math.max(0,P.hp-B.dot.dmg);addLog(`🩸 ${B.dot.name} — ${B.dot.dmg} 피해`);queueFx('player','-'+B.dot.dmg,'pdmg');
+    P.hp=Math.max(0,P.hp-B.dot.dmg);addLog(`${B.dot.name==='화상'?'🔥':'🩸'} ${B.dot.name} — ${B.dot.dmg} 피해`);queueFx('player','-'+B.dot.dmg,'pdmg');
     if(--B.dot.turns<=0)B.dot=null;
   }
   if(B.eburn&&e.hp>0){
