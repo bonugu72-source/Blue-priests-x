@@ -794,7 +794,7 @@ const AREAS=[
       pre:'불타는 숲 한가운데, 은빛 머리칼의 사내가 서 있다. 날카롭게 자란 손톱이 불빛에 번뜩인다.\n\n"훔치는 건 내 특기지. 너희 동료의 힘과 목소리부터 가져가마."',
       moves:[{t:'atk',n:'발톱 베기'},{t:'strong',n:'도둑의 일격'},{t:'multi',n:'연속 할퀴기',hits:4,m:0.35},{t:'sweep',n:'불타는 숲의 포효',m:0.18},{t:'drain',n:'훔쳐 가는 손'},{t:'charge',n:'10군단의 습격'}]}
   },
-  { name:'폐악터널', country:'버려진 지하 터널', flag:'🚇', rec:34, recEnd:38, glow:'#ff5a5a',
+  { name:'폐악터널', country:'버려진 지하 터널', flag:'🚇', rec:34, recEnd:38, glow:'#ff5a5a', sortie:'noIsabel',
     desc:'오래전에 버려진 지하 터널. 어둠 속에서 쉰 목소리의 울음이 메아리친다.',
     intro:'비탈길의 끝은 지하로 이어지는 거대한 터널이었다.\n\n녹슨 선로를 따라 끝없이 이어지는 어둠. 벽에서는 무언가가 긁는 소리가 들리고, 저 깊은 곳에서 말 울음 같은 괴성이 울려 퍼졌다.\n\n— 이 터널의 주인은 쉰 목소리로 운다.',
     outro:'가미긴의 괴성이 멎자 터널 끝에서 희미한 빛이 새어 들어왔다.\n\n녹슨 선로 위로 처음으로 바람이 불었다.\n\n"…출구다."\n\n— 폐악터널 해방 —',
@@ -812,7 +812,7 @@ const AREAS=[
       moves:[{t:'atk',n:'부리 쪼기'},{t:'sweep',n:'무너지는 천장',m:0.17},{t:'multi',n:'까마귀 떼',hits:4,m:0.35},{t:'curse',n:'불길한 울음'},{t:'charge',n:'40군단의 붕괴'}]},
     boss:{name:'가미긴', art:'gamigin', title:'솔로몬 72악마 · 제4영 · 후작 · 30군단', hp:50000, exactHp:true, atk:140, def:42, xp:18000, gold:20000, goldFirst:50000, goldRepeat:20000, demon:true, drop:'seal_gamigin',
       tick:4000, fixedDmg:true, paralyze:3000,
-      berserk:{at:15000,to:40000,line:'"아아아아아아——!!"\n\n터널 전체가 무너질 듯한 괴성이 울려 퍼진다. 검붉은 기운이 폭발하듯 퍼지며, 갈라졌던 가미긴의 상처가 순식간에 아물어 간다.\n\n— 폭주: 체력 40,000 회복 · 무수한 출혈 참격 —'},
+      berserk:{at:15000,to:40000,line:'"아아아아아아——!!"\n\n터널 전체가 무너질 듯한 괴성이 울려 퍼진다. 검붉은 기운이 폭발하듯 퍼지며, 갈라졌던 가미긴의 상처가 순식간에 아물어 간다.\n\n— 폭주: 체력 40,000 회복 · 주인공 회복 불가 · 무수한 출혈 참격 —'},
       pre:'붉은 눈의 여인이 검붉은 기운을 두른 채 터널 깊은 곳에서 걸어 나온다. 쉰 목소리가 터널을 울린다.\n\n"죽은 자들의 목소리를 들려주마. 너희도 곧 그 합창에 끼게 될 테니."',
       moves:[{t:'atk',n:'검붉은 베기'},{t:'strong',n:'저격'},{t:'multi',n:'광란의 연격',hits:3,m:0.5},{t:'sweep',n:'터널을 울리는 괴성',m:0.16},{t:'atk',n:'검붉은 베기'},{t:'charge',n:'30군단의 행진'}]}
   }
@@ -1264,7 +1264,7 @@ function statusHTML(){
   </div>`;
 }
 const owned=id=>(P.roster[id]||0)>0;
-const SORTIE_RULES={myth:{text:'신화 승급 동료만 출전 가능 (이사벨 부제는 고정 동행)',ok:id=>isMyth(id)},myth4:{text:'신화 승급 동료 또는 ★4 동료만 출전 가능 (이사벨 부제는 고정 동행)',ok:id=>isMyth(id)||ALLIES[id].star===4}};
+const SORTIE_RULES={noIsabel:{text:'이사벨 부제 출전 불가 — 출전 동료만으로 싸워야 함',ok:id=>true,noFixed:true},myth:{text:'신화 승급 동료만 출전 가능 (이사벨 부제는 고정 동행)',ok:id=>isMyth(id)},myth4:{text:'신화 승급 동료 또는 ★4 동료만 출전 가능 (이사벨 부제는 고정 동행)',ok:id=>isMyth(id)||ALLIES[id].star===4}};
 const sortieRule=a=>AREAS[a]&&SORTIE_RULES[AREAS[a].sortie];
 const sortieOk=(a,id)=>{const r=sortieRule(a);return !r||r.ok(id);};
 const partyIds=()=>(B&&B.party)?B.party:[FIXED,...P.active];
@@ -2051,7 +2051,7 @@ function synthAll(){
 }
 
 /* ===================== 전투 ===================== */
-function clearBattle(){document.body.classList.remove('battle');if(B&&B.paraT)clearInterval(B.paraT);if(B&&B.zapT)clearInterval(B.zapT);if(B&&B.karmaT)clearInterval(B.karmaT);if(B&&B.isaT)clearInterval(B.isaT);B=null;}
+function clearBattle(){forcedMv=null;document.body.classList.remove('battle');if(B&&B.paraT)clearInterval(B.paraT);if(B&&B.zapT)clearInterval(B.zapT);if(B&&B.karmaT)clearInterval(B.karmaT);if(B&&B.isaT)clearInterval(B.isaT);B=null;}
 /* 반사·부적 등으로 적이 턴 밖에서 쓰러졌을 때 */
 function winNow(){
   if(!B||B.won)return;
@@ -2064,9 +2064,10 @@ function winNow(){
 const ISABEL_TICK=5000, ISABEL_HEAL=0.4;
 function isabelTick(){
   if(!B||B.over||B.won||P.hp<=0||!$('#modal').classList.contains('hidden'))return;
+  if(!inParty(FIXED))return;
   const h=B.ahp[FIXED];if(h&&h.hp<=0)return;
   if(B.stun[FIXED]>0)return;
-  const hh=Math.min(P.maxHp-P.hp,Math.round(P.maxHp*ISABEL_HEAL*healMul()));
+  const hh=Math.min(P.maxHp-P.hp,Math.round(P.maxHp*ISABEL_HEAL*pHealMul()));
   if(hh<=0)return;
   P.hp+=hh;stat('heal',FIXED,hh);addLog(`🕊️ 이사벨 부제의 치유 기도 — HP ${hh} 회복`);queueFx('player','+'+hh,'heal');
   renderBattle();
@@ -2079,7 +2080,7 @@ function karmaTick(){
   const m=allyMult(id),lv=aData(id).lv,e=B.e,n=isMyth(id)?2:1;
   for(let i=0;i<n&&e.hp>0;i++){
     const r=Math.floor(Math.random()*3);
-    if(r===0){const hh=Math.min(P.maxHp-P.hp,Math.round((P.maxHp*0.04+lv)*m*healMul()));P.hp+=hh;stat('heal','karma',hh);addLog(`📜 카르마의 치유 부적 — HP ${hh} 회복`);if(hh>0)queueFx('player','+'+hh,'heal');}
+    if(r===0){const hh=Math.min(P.maxHp-P.hp,Math.round((P.maxHp*0.04+lv)*m*pHealMul()));P.hp+=hh;stat('heal','karma',hh);addLog(B.noHeal?'📜 카르마의 치유 부적 — 저주에 막혀 회복되지 않는다':`📜 카르마의 치유 부적 — HP ${hh} 회복`);if(hh>0)queueFx('player','+'+hh,'heal');}
     else if(r===1){B.hex=Math.max(B.hex,2);addLog(`📜 카르마의 저주 부적 — 적 공격력 감소`);}
     else{
       if(B.immune){addLog('📜 카르마의 화염 부적 — ⏸ 피해 무효');continue;}
@@ -2104,7 +2105,8 @@ function startBattle(spec){
   const isBoss=type==='boss'||type==='mid'||type==='pvp';
   clearBattle();
   const ahp={};
-  const party=[FIXED,...P.active.filter(id=>spec.pvp||sortieOk(a,id))];
+  const noFixed=!spec.pvp&&sortieRule(a)&&sortieRule(a).noFixed;
+  const party=[...(noFixed?[]:[FIXED]),...P.active.filter(id=>spec.pvp||sortieOk(a,id))];
   const benched=spec.pvp?[]:P.active.filter(id=>!sortieOk(a,id));
   party.forEach(id=>{const al=ALLIES[id],mx=Math.round((50+aData(id).lv*10)*(0.7+0.15*al.star)*(isMyth(id)?2:1));ahp[id]={hp:mx,max:mx};});
   B={e:{...t,maxHp:t.hp},spec,area:a,stage:spec.hunt?0:s,stype:type,baseName:t.name,isBoss,isFinal:!!t.final,
@@ -2112,6 +2114,7 @@ function startBattle(spec){
      buff:0,aura:0,hex:0,immune:0,reflect:0,curAlly:null,stun:{},stunWhy:{},ahp,agatoUsed:false,curse:0,silence:0,weak:0,ward:false,rage:0,turn:0,
      party,healCut:0,mikaCD:0,mshield:0,st:{dmg:{},heal:{}},dot:null,evade:false,sealed:0,over:false,won:false,shield:0,ashield:0,prism:0,negate:0,blind:0,eburn:null,eliaCD:0,sirenT:0,danT:0,
      defending:false,busy:false,menu:'main',log:[],fxq:[]};
+  if(noFixed)addLog('⚠ 출전 조건 — 이사벨 부제는 이 지역에 함께할 수 없다');
   if(benched.length)addLog(`⚠ 출전 조건 — ${benched.map(id=>ALLIES[id].name).join(', ')} 출전 불가 (${sortieRule(a).text})`);
   const begin=()=>{
     if(B&&t.paralyze)B.paraT=setInterval(paraTick,t.paralyze);
@@ -2181,6 +2184,7 @@ function hitAllies(pct,label,quiet){
 }
 function addLog(s){B.log.push(s);if(B.log.length>40)B.log.shift();}
 const healMul=()=>(B&&B.healCut)?0.9:1;
+const pHealMul=()=>(B&&B.noHeal)?0:healMul(); // 주인공 회복 배율 (가미긴 폭주 후 0)
 const paraOn=()=>!!(B&&B.paraUntil&&Date.now()<B.paraUntil);
 /* 가미긴: 3초마다 동료 전원 마비 (방어력 50% 감소 → 받는 피해 1.5배) */
 function paraTick(){
@@ -2242,6 +2246,7 @@ function renderBattle(){
   if(inParty('pasri')&&B.startAt&&Date.now()-B.startAt<10000)st.push(`🏮 파스리 충전 ${Math.ceil((10000-(Date.now()-B.startAt))/1000)}초`);
   if(B.healCut)st.push(`✂ 회복 -10% ${B.healCut}`);
   if(paraOn())st.push('⚡ 동료 마비 (방어 -50%)');
+  if(B.noHeal)st.push('🚫 회복 불가');
   if(stormOn())st.push(`🌪 폭풍 ${Math.ceil((B.stormUntil-Date.now())/1000)}초`);
   if(B.defending)st.push('🛡 방어');
   const party=`<div class="party">${partyIds().map(id=>{const h=B.ahp[id];const p=h?Math.round(h.hp/h.max*100):100;
@@ -2362,7 +2367,7 @@ function alliesAct(){
       continue;
     }
     const heal=(pct,label,k=1)=>{
-      const h=Math.min(P.maxHp-P.hp,Math.round((P.maxHp*pct+lv*2)*m*k*healMul()));
+      const h=Math.min(P.maxHp-P.hp,Math.round((P.maxHp*pct+lv*2)*m*k*pHealMul()));
       if(h>0){P.hp+=h;stat('heal',id,h);addLog(`${label} — HP ${h} 회복`);queueFx('player','+'+h,'heal');}
       partyIds().forEach(x=>{const ah=B.ahp[x];if(ah&&ah.hp>0)ah.hp=Math.min(ah.max,ah.hp+Math.round(ah.max*pct*0.6*k*healMul()));});
     };
@@ -2582,7 +2587,8 @@ function act(kind,arg){
   }else if(kind==='defend'){
     B.defending=true;addLog('방어 태세를 갖췄다. (이번 턴은 공격하지 않는다)');
   }else if(kind==='item'){
-    if(arg==='water'&&P.items.water>0){
+    if(arg==='water'&&P.items.water>0&&B.noHeal){addLog('🧪 가미긴의 괴성이 상처를 벌려 놓았다 — 회복할 수 없다');renderBattle();return;}
+    else if(arg==='water'&&P.items.water>0){
       P.items.water--;const h=Math.min(P.maxHp-P.hp,Math.round(Math.max(60,P.maxHp*0.4)*healMul()));
       P.hp+=h;stat('heal','hero',h);addLog(`성수 사용 — HP ${h} 회복`);queueFx('player','+'+h,'heal');
     }else if(arg==='rosary'&&P.items.rosary>0){
@@ -2610,12 +2616,12 @@ function act(kind,arg){
 function checkPhase(){
   const e=B.e;
   if(e.berserk&&!B.berserked&&e.hp>0&&e.hp<=e.berserk.at){
-    B.berserked=true;e.hp=e.berserk.to;B.charging=false;B.chargeKind=null;
+    B.berserked=true;e.hp=e.berserk.to;B.charging=false;B.chargeKind=null;B.noHeal=true;B.invisNext=true;
     e.moves=[...e.moves,{t:'bleedstorm',n:'무수한 출혈 참격',hits:8,m:0.25},{t:'bleedstorm',n:'무수한 출혈 참격',hits:8,m:0.25}];
     addLog(`💢 ${e.name}의 폭주 — 괴성과 함께 체력 ${fmt(e.berserk.to)}까지 회복!`);
     document.body.classList.add('flash');setTimeout(()=>document.body.classList.remove('flash'),400);
     showStory(`<div class="sum s5"><div class="sum-title">폭주</div><div class="intro-art berserk">${bossSVG(e.art)}</div><div class="sum-name">${e.name}</div><p class="sum-desc" style="color:#ffb0b0">${esc(e.berserk.line).replace(/\n/g,'<br>')}</p></div>`,
-      ()=>{renderBattle();setTimeout(()=>enemyTurnForced({t:'bleedstorm',n:'무수한 출혈 참격',hits:8,m:0.25}),500);},true);
+      ()=>{addLog('🚫 폭주의 저주 — 이제 주인공은 회복할 수 없다');addLog('…어딘가에서 공기가 갈라지는 소리가 들린다.');B.busy=false;renderBattle();},true);
     return true;
   }
   if(e.rage&&!B.raged&&e.hp>0&&e.hp<=e.maxHp/2){
@@ -2643,6 +2649,7 @@ function enemyTurn(){
   if(!B||B.over||B.won)return;
   const e=B.e;let mv;
   if(forcedMv){mv=forcedMv;forcedMv=null;}
+  else if(B.invisNext){B.invisNext=false;mv={t:'invisslash',n:'보이지 않는 참격'};forcedMv={t:'bleedstorm',n:'무수한 출혈 참격',hits:8,m:0.25};}
   else if(B.sealed>0){mv={t:'sealed'};B.sealed--;}
   else if(B.charging){mv={t:'release',n:B.chargeName,kind:B.chargeKind};B.charging=false;B.chargeKind=null;}
   else if(e.pvp)mv={t:'pvp',n:''};
@@ -2691,6 +2698,11 @@ function enemyTurn(){
       else{B.curse=3;addLog(`${label} — 3턴간 방어력 감소`);}
       break;}
     case 'storm':   hitPlayer(mv.m,label);hitAllies(0.12,label);break;
+    case 'invisslash':
+      if(B.defending){hitPlayer(1.2,`${e.name}의 「보이지 않는 참격」 — 간신히 막아냈다`);}
+      else{const d=Math.round(P.maxHp*0.5);P.hp=Math.max(0,P.hp-d);addLog(`${e.name}의 「보이지 않는 참격」! 방어하지 못했다 — HP ${d} 소멸`);queueFx('player','-'+d,'pdmg');
+        document.body.classList.add('flash');setTimeout(()=>document.body.classList.remove('flash'),300);}
+      break;
     case 'bleedstorm':{
       addLog(`${label}!`);
       for(let i=0;i<mv.hits&&P.hp>0;i++)hitPlayer(mv.m,`  출혈 참격 ${i+1}`);
