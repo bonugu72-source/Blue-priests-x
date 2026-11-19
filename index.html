@@ -1471,7 +1471,7 @@ function renderShop(msg){
         <button class="btn primary" id="sumT1" ${P.tickets<1?'disabled':''}>🎫 소환권 1회<small>보유 ${P.tickets}장</small></button>
         <button class="btn primary" id="sumT10" ${P.tickets<10?'disabled':''}>🎫 소환권 10회<small>10장 사용</small></button>
         <button class="btn primary full" id="sumG1" ${P.gold<SUMMON_COST?'disabled':''}>💰 골드 1회<small>${SUMMON_COST} G</small></button>
-        <button class="btn danger full" id="sumG11" ${P.gold<SUMMON11_COST?'disabled':''}>💰 골드 11회 연속<small>${fmt(SUMMON11_COST)} G (${SUMMON_COST*11-SUMMON11_COST} G 할인) · 🎁 ★4 1명 확정 증정</small></button>
+        <button class="btn danger full" id="sumG11" ${P.gold<SUMMON11_COST?'disabled':''}>💰 골드 11회 연속<small>${fmt(SUMMON11_COST)} G (${SUMMON_COST*11-SUMMON11_COST} G 할인)</small></button>
       </div>
     </div>
     <button class="btn" id="back">← 돌아가기</button>`;
@@ -1532,9 +1532,6 @@ function summon(n,useTicket){
   for(let i=0;i<n;i++){
     const id=pick(allyIds(rollStar()));
     const isNew=!owned(id);addAlly(id);res.push({id,isNew});
-  }
-  if(n===11&&!useTicket){ // 11회 연속: ★4 무작위 1명 확정 증정
-    const id=pick(allyIds(4)),isNew=!owned(id);addAlly(id);res.push({id,isNew,gift:true});
   }
   save();
   const top=res.reduce((a,b)=>ALLIES[b.id].star>ALLIES[a.id].star?b:a);
