@@ -231,6 +231,9 @@ body.title-mode{overflow:hidden}
 @keyframes rain{to{transform:translate(-6px,22px)}}
 @keyframes ember{0%{transform:translate(0,0);opacity:0}10%{opacity:1}100%{transform:translate(18px,-320px);opacity:0}}
 
+.pf-amon{box-shadow:0 0 26px rgba(255,110,30,.6),0 0 80px rgba(255,60,0,.3)}
+.pf-amon .pglow{background:radial-gradient(ellipse at 50% 100%,rgba(255,120,30,.55),transparent 62%);box-shadow:inset 0 0 50px rgba(90,20,0,.75);animation:breathe 2.2s ease-in-out infinite}
+.pf-amon .pembers i{background:#ffb347;box-shadow:0 0 6px #ff6a00}
 .pf-botis{box-shadow:0 0 22px rgba(60,230,150,.5),0 0 60px rgba(30,180,110,.25)}
 .pf-botis .pglow{box-shadow:inset 0 0 44px rgba(40,220,140,.45);animation:breathe 3s ease-in-out infinite}
 .pf-botis img{animation:tstop 5.5s infinite}
@@ -704,7 +707,7 @@ const AREAS=[
       moves:[{t:'atk',n:'왕관의 일격'},{t:'curse',n:'굉음의 나팔'},{t:'sweep',n:'200군단의 함성',m:0.16},{t:'multi',n:'낙타 기병 돌격',hits:3,m:0.5},{t:'charge',n:'왕의 포고'}]},
     boss:{name:'아몬', art:'amon2', title:'솔로몬 72악마 · 제7영 · 후작 · 40군단 · 진정한 모습', hp:40000, exactHp:true, atk:150, def:38, xp:12000, gold:8000, demon:true, drop:'seal_amon',
       tick:4000, burnAll:true, voidHero:0.4,
-      pre:'멈춰버린 도시에서 쓰러뜨렸던 아몬이었다. 하지만 그때와는 전혀 다른 모습이다.\n뱀의 꼬리를 단 늑대의 몸에서 끝없이 불길이 흘러넘친다.\n\n"그때 나를 쓰러뜨렸다고 생각했나? 이 불길이 꺼지기 전에 너희가 먼저 타 버릴 것이다."',
+      pre:'멈춰버린 도시에서 쓰러뜨렸던 아몬이었다. 하지만 그때와는 전혀 다른 모습이다.\n갈라진 용암 위에 검은 머리를 길게 묶은 사내가 서 있고, 찢어진 옷 사이로 검은 불길이 두 팔을 휘감고 있다.\n\n"그때 나를 쓰러뜨렸다고 생각했나? 이 불길이 꺼지기 전에 너희가 먼저 타 버릴 것이다."',
       moves:[{t:'atk',n:'불꽃 부리'},{t:'strong',n:'지옥불 숨결'},{t:'sweep',n:'불꽃의 날개',m:0.18},{t:'drain',n:'생명 흡수'},{t:'atk',n:'불꽃 부리'},{t:'charge',n:'40군단의 업화'}]}
   }
 
@@ -900,12 +903,13 @@ const PORTRAIT={
   furfur:{img:'furfur.jpg',cls:'pf-furfur',pos:'50% 14%'},
   naberius:{img:'naberius.jpg',cls:'pf-naberius',pos:'50% 24%'},
   naberius2:{img:'naberius.jpg',cls:'pf-naberius p2',pos:'50% 24%'},
-  botis:{img:'botis.jpg',cls:'pf-botis',pos:'50% 20%'}
+  botis:{img:'botis.jpg',cls:'pf-botis',pos:'50% 20%'},
+  amon2:{img:'amon.jpg',cls:'pf-amon',pos:'50% 16%'}
 };
 function portraitHTML(key,size){
   const p=PORTRAIT[key];
   const bolts=key==='furfur'?`<svg class="pbolts" viewBox="0 0 100 140" preserveAspectRatio="none"><path class="bolt" d="M7,0 L3,18 L9,17 L2,42"/><path class="bolt b2" d="M95,58 L99,76 L93,77 L99,100"/><path class="bolt b3" d="M90,0 L86,12 L92,12 L87,26"/></svg><div class="prain"></div>`:'';
-  const embers=key.startsWith('naberius')?`<div class="pembers">${Array.from({length:14},(_,i)=>`<i style="left:${(i*37)%100}%;animation-delay:${-(i*0.43).toFixed(2)}s;animation-duration:${(2.6+(i%5)*0.5).toFixed(1)}s"></i>`).join('')}</div>`:'';
+  const embers=(key.startsWith('naberius')||key==='amon2')?`<div class="pembers">${Array.from({length:14},(_,i)=>`<i style="left:${(i*37)%100}%;animation-delay:${-(i*0.43).toFixed(2)}s;animation-duration:${(2.6+(i%5)*0.5).toFixed(1)}s"></i>`).join('')}</div>`:'';
   return `<div class="portrait ${p.cls} ${size||''}"><img src="${p.img}" alt="" style="object-position:${p.pos}">${bolts}${embers}<div class="pflash"></div><div class="pglow"></div></div>`;
 }
 let svgSeq=0;
