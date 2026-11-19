@@ -396,6 +396,15 @@ body.battle .cmds .btn{min-height:44px;padding:6px 10px}
 .frow.rk .fbtns{width:100%;display:flex;flex-direction:row;gap:6px;margin-top:6px}
 .frow.rk+.frow.rk{margin-top:6px}
 .frow.rk .fbtns .btn{flex:1;min-height:38px}
+.cosgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.coscard{background:#0d1530;border:1px solid var(--line);border-radius:12px;padding:6px;display:flex;flex-direction:column;gap:4px;text-align:center}
+.coscard.on{border-color:#ffd27a;box-shadow:0 0 12px rgba(255,210,122,.35)}
+.cospic{aspect-ratio:3/4;border-radius:8px;background-size:cover;background-color:#080d1e}
+.cospic.none{display:flex;flex-direction:column;align-items:center;justify-content:center;color:#7d8fbf;border:1px dashed #2c4580}
+.cospic.none span{font-size:26px}
+.cosname{font-weight:700;font-size:13px}
+.cosdesc{min-height:30px;font-size:10.5px;line-height:1.35}
+.coscard .btn{min-height:38px;font-size:12px;padding:4px}
 .aportrait img{width:100%;height:100%;object-fit:cover;display:block}
 .sum.s4 .aportrait{box-shadow:0 0 24px #b07cff,0 0 50px rgba(176,124,255,.4)}
 .sum.s5 .aportrait{box-shadow:0 0 28px #ffd24a,0 0 70px rgba(255,210,74,.45);border:2px solid #ffe9a0}
@@ -531,12 +540,21 @@ const ALLY_IMG={
   karma:{src:'ally_karma.jpg',pos:'42% 22%',face:'35% 24%'},
   gubeomju:{src:'ally_gubeomju.jpg',pos:'50% 26%',face:'48% 38%',size:'220%'}
 };
+/* 동료 코스튬 (그림은 받는 대로 img에 넣기) */
+const COSTUMES={
+  pasri:[
+    {id:'pasri_suit',name:'블랙 수트',desc:'검은색 정장 · 흰 셔츠 · 파란 넥타이',cost:20000,img:null},
+    {id:'pasri_swim',name:'여름 수영복',desc:'한여름 바닷가를 위한 수영복',cost:30000,img:null}
+  ]
+};
+const cosOf=id=>{const c=P&&P.cos&&P.cos.eq&&P.cos.eq[id];return c?(COSTUMES[id]||[]).find(x=>x.id===c):null;};
+const allyImg=id=>{const c=cosOf(id);return c&&c.img?c.img:ALLY_IMG[id];};
 function allyFace(id,cls){
-  const im=ALLY_IMG[id];
+  const im=allyImg(id);
   return im?`<span class="aface ${cls||''}" style="background-image:url(${im.src});background-position:${im.face}${im.size?';background-size:'+im.size+' auto':''}"></span>`:`<span class="aemo ${cls||''}">${ALLIES[id].icon}</span>`;
 }
 function allyPortrait(id){
-  const im=ALLY_IMG[id];
+  const im=allyImg(id);
   return im?`<div class="aportrait"><img src="${im.src}" style="object-position:${im.pos}" alt=""></div>`:`<div class="sum-icon">${ALLIES[id].icon}</div>`;
 }
 const allyIds=star=>Object.keys(ALLIES).filter(k=>ALLIES[k].star===star);
@@ -1602,6 +1620,7 @@ function renderHub(msg){
         <button class="btn" id="rest" ${restLeft()>0?'disabled':''}>${restLabel()}</button>
         <button class="btn" id="shop">🕯 상점 · 동료 소환<small>소환권 ${P.tickets}장</small></button>
         <button class="btn" id="dex">📖 동료 도감<small>모든 동료의 이름·능력</small></button>
+        <button class="btn full" id="cos">👗 동료 코스튬<small>새 의상 해금 · 갈아입히기</small></button>
       </div>
     </div>
     <div class="panel"><div class="ptitle">📜 미션</div>${missionHTML}</div>
@@ -1614,6 +1633,7 @@ function renderHub(msg){
   document.querySelectorAll('[data-claim]').forEach(b=>b.onclick=()=>claim(b.dataset.claim));
   $('#allies').onclick=()=>renderAllies();
   $('#dex').onclick=()=>renderDex();
+  $('#cos').onclick=()=>renderCostume();
   $('#friends').onclick=()=>renderFriends();
   $('#hunt').onclick=()=>startBattle({area:P.cur,hunt:true});
   $('#map').onclick=()=>renderMap(P.cur);
@@ -1675,6 +1695,46 @@ function allyCard(id){
 }
 const topBack=()=>`<div class="backtop-row"><button class="backtop" data-backtop>← 돌아가기</button></div>`;
 document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('[data-backtop]');if(b){e.preventDefault();renderHub();}});
+/* 동료 코스튬 */
+function renderCostume(msg){
+  P.cos=P.cos||{owned:{},eq:{}};
+  const ids=Object.keys(COSTUMES);
+  const block=id=>{
+    const al=ALLIES[id],has=owned(id),cur=cosOf(id);
+    const base=ALLY_IMG[id];
+    const card=(c)=>{
+      const isBase=!c,own=isBase||P.cos.owned[c.id],on=isBase?!cur:(cur&&cur.id===c.id);
+      const im=isBase?base:(c.img||null);
+      const pic=im?`<div class="cospic" style="background-image:url(${im.src});background-position:${im.pos||'50% 20%'}"></div>`
+        :`<div class="cospic none"><span>🎨</span><small>의상 그림<br>준비 중</small></div>`;
+      let btn;
+      if(on)btn=`<button class="btn" disabled>착용 중</button>`;
+      else if(own)btn=`<button class="btn primary" data-coseq="${id}|${isBase?'':c.id}" ${has?'':'disabled'}>착용</button>`;
+      else if(!c.img)btn=`<button class="btn" disabled>🔒 ${fmt(c.cost)} G · 곧 공개</button>`;
+      else{const ok=has&&P.gold>=c.cost;btn=`<button class="btn ${ok?'danger':''}" data-cosbuy="${id}|${c.id}" ${ok?'':'disabled'}>🔓 ${fmt(c.cost)} G</button>`;}
+      return `<div class="coscard ${on?'on':''}">${pic}<div class="cosname">${isBase?'기본 의상':c.name}</div><div class="small cosdesc">${isBase?'처음 입고 있던 옷':c.desc}</div>${btn}</div>`;
+    };
+    return `<div class="panel"><div class="ptitle">${allyFace(id,'xs')} ${'★'.repeat(al.star)} ${al.name} ${has?'':'<span class="small">(미보유 — 동료를 얻어야 해금·착용 가능)</span>'}</div>
+      <div class="cosgrid">${card(null)}${COSTUMES[id].map(card).join('')}</div></div>`;
+  };
+  $('#app').innerHTML=`${statusHTML()}${topBack()}${msg?`<div class="notice">${msg}</div>`:''}
+    <div class="panel"><div class="ptitle">👗 동료 코스튬</div><div class="desc">골드로 새 의상을 해금하고 갈아입힐 수 있어요. 한 번 해금한 의상은 언제든 다시 입힐 수 있어요. 의상은 모습만 바뀌고 능력치는 그대로예요.</div></div>
+    ${ids.map(block).join('')}
+    <button class="btn" id="back">← 돌아가기</button>`;
+  document.querySelectorAll('[data-cosbuy]').forEach(b=>b.onclick=()=>{
+    const [id,cid]=b.dataset.cosbuy.split('|'),c=COSTUMES[id].find(x=>x.id===cid);
+    if(!c||!owned(id)||P.gold<c.cost||P.cos.owned[cid])return;
+    P.gold-=c.cost;P.cos.owned[cid]=true;P.cos.eq[id]=cid;save();
+    renderCostume(`🔓 ${ALLIES[id].name}의 「${c.name}」 해금! 바로 갈아입혔어요.${c.img?'':' (의상 그림은 곧 추가돼요)'}`);
+  });
+  document.querySelectorAll('[data-coseq]').forEach(b=>b.onclick=()=>{
+    const [id,cid]=b.dataset.coseq.split('|');
+    if(cid)P.cos.eq[id]=cid;else delete P.cos.eq[id];save();
+    renderCostume(`👗 ${ALLIES[id].name} — ${cid?COSTUMES[id].find(x=>x.id===cid).name:'기본 의상'}으로 갈아입었어요.`);
+  });
+  $('#back').onclick=()=>renderHub();
+  window.scrollTo(0,0);
+}
 /* 동료 도감: 모든 동료의 이름과 능력 */
 let dexStar='all';
 function renderDex(){
