@@ -310,6 +310,18 @@ body.title-mode{overflow:hidden}
 .sum.s4 .sum-stars{color:#cfa8ff;text-shadow:0 0 14px #b07cff}
 @keyframes shine{0%{transform:translateX(-60%)}60%,100%{transform:translateX(60%)}}
 
+.aface{border-radius:50%;vertical-align:middle;display:inline-block;background-color:#0d1530;background-size:300% auto;background-repeat:no-repeat}
+.aface.xs{width:22px;height:22px;margin-right:2px;border:1px solid #4a6fb8}
+.aface.sm{width:40px;height:40px;border-radius:10px}
+.aface.md{width:48px;height:48px;border-radius:12px;border:1.5px solid #3a5fae;box-shadow:0 0 10px rgba(77,163,255,.25)}
+.aface.pv{width:40px;height:40px;border-radius:8px}
+.ally .ic{width:auto;min-width:36px}
+.aportrait{width:170px;height:230px;margin:8px auto;border-radius:14px;overflow:hidden;animation:pop .5s ease-out;box-shadow:0 0 18px rgba(77,163,255,.35)}
+.aportrait img{width:100%;height:100%;object-fit:cover;display:block}
+.sum.s4 .aportrait{box-shadow:0 0 24px #b07cff,0 0 50px rgba(176,124,255,.4)}
+.sum.s5 .aportrait{box-shadow:0 0 28px #ffd24a,0 0 70px rgba(255,210,74,.45);border:2px solid #ffe9a0}
+.sumcell .ic{font-size:26px;display:flex;justify-content:center;min-height:40px;align-items:center}
+
 /* FX */
 #fx{position:fixed;inset:0;pointer-events:none;z-index:50}
 .float{position:fixed;transform:translate(-50%,-50%);font-weight:900;font-size:26px;text-shadow:0 2px 6px #000;animation:up .9s ease-out forwards}
@@ -388,6 +400,22 @@ const ALLIES={
   asiris:  {star:5,name:'아시리스 사제', icon:'🌟', role:'신의 은총', kit:'asiris',
             desc:'신의 은총(거대한 피해 + 적을 1턴 봉인) · 대가로 2턴 행동 불가 · 이후 반복'}
 };
+/* 동료 일러스트 */
+const ALLY_IMG={
+  guseju:{src:'ally_guseju.jpg',pos:'50% 26%',face:'50% 20%'},
+  ayoung:{src:'ally_ayoung.jpg',pos:'50% 22%',face:'42% 24%'},
+  isabel:{src:'ally_isabel.jpg',pos:'58% 22%',face:'60% 27%'},
+  karuta:{src:'ally_karuta.jpg',pos:'50% 18%',face:'50% 28%'},
+  agato:{src:'ally_agato.jpg',pos:'50% 16%',face:'50% 12%'}
+};
+function allyFace(id,cls){
+  const im=ALLY_IMG[id];
+  return im?`<span class="aface ${cls||''}" style="background-image:url(${im.src});background-position:${im.face}"></span>`:`<span class="aemo ${cls||''}">${ALLIES[id].icon}</span>`;
+}
+function allyPortrait(id){
+  const im=ALLY_IMG[id];
+  return im?`<div class="aportrait"><img src="${im.src}" style="object-position:${im.pos}" alt=""></div>`:`<div class="sum-icon">${ALLIES[id].icon}</div>`;
+}
 const allyIds=star=>Object.keys(ALLIES).filter(k=>ALLIES[k].star===star);
 
 /* 유물 (보스 인장) */
@@ -1118,7 +1146,7 @@ async function renderFriends(msg){
 /* ===================== 친구 대결 (비동기: 친구가 마지막으로 저장한 팀을 AI가 조종) ===================== */
 const PVP_DAILY=5, PVP_HP=1.25;
 const pvpCl=(v,lo,hi)=>Math.max(lo,Math.min(hi,Number(v)||lo));
-function teamIconsHTML(party){return party.map(x=>`<span class="pvpa" title="${ALLIES[x.id].name}">${ALLIES[x.id].icon}<i>Lv${x.lv}</i></span>`).join('');}
+function teamIconsHTML(party){return party.map(x=>`<span class="pvpa" title="${ALLIES[x.id].name}">${allyFace(x.id,'pv')}<i>Lv${x.lv}</i></span>`).join('');}
 function startPvp(f){
   const t=f&&f.team;if(!t)return;
   const hero={atk:pvpCl(t.atk,1,9999),def:pvpCl(t.def,0,9999),maxHp:pvpCl(t.maxHp,1,99999),lv:pvpCl(t.lv,1,99)};
@@ -1223,7 +1251,7 @@ function renderHub(msg){
     return `<div class="mission"><div class="info">${tag}${m.title}<small>${m.desc}<br>보상: ${m.rewardText}</small></div>${right}</div>`;
   }).join(''):'<div class="desc">이 지역에는 미션이 없다.</div>';
 
-  const allyHTML=`<div class="party" style="justify-content:flex-start">${partyIds().map(id=>`<span class="chip">${ALLIES[id].icon} ${ALLIES[id].name} <span class="small">Lv${aData(id).lv}</span></span>`).join('')}</div>
+  const allyHTML=`<div class="party" style="justify-content:flex-start">${partyIds().map(id=>`<span class="chip">${allyFace(id,'xs')} ${ALLIES[id].name} <span class="small">Lv${aData(id).lv}</span></span>`).join('')}</div>
     <div class="teamcp">⚔ 팀 전투력 <b>${fmt(teamCP())}</b> <span class="small">주인공 ${fmt(heroCP())} + 동료 ${fmt(teamCP()-heroCP())}</span></div>
     <div class="grid"><button class="btn" id="allies">🤝 동료 관리<small>출전·레벨업·합성·각성</small></button>
     <button class="btn" id="friends">👥 친구<small>전투력 순위 · 친구 추가</small></button></div>`;
@@ -1302,7 +1330,7 @@ function allyCard(id){
   if(needSyn)btns.push(`<button class="btn ${cnt>=needSyn?'danger':''}" data-syn="${id}" ${cnt<needSyn?'disabled':''}>합성 ${cnt}/${needSyn}</button>`);
   if(al.star===5)btns.push(aw>=AWAKEN_MAX?`<button class="btn" disabled>각성 완료</button>`
     :`<button class="btn ${P.items.stone>=1?'danger':''}" data-awk="${id}" ${P.items.stone<1?'disabled':''}>각성 ${aw}/${AWAKEN_MAX} · ${AWAKEN_ITEM.icon}1</button>`);
-  return `<div class="acard ${isFixed?'fixed':''}"><div class="ally"><div class="ic">${al.icon}</div><div style="flex:1">
+  return `<div class="acard ${isFixed?'fixed':''}"><div class="ally"><div class="ic">${allyFace(id,'md')}</div><div style="flex:1">
     ${isFixed?'<span class="tag t-ally">고정 조력자</span>':`<span class="gold">${'★'.repeat(al.star)}</span>`} ${al.name}${aw?` <span class="gold">각성 ${aw}</span>`:''}
     <span class="small">Lv ${d.lv}/${cap} · ⚔ ${fmt(allyCP(id))}${!isFixed&&!needSyn?' · ×'+cnt:''}</span>
     <small>${al.role} · ${al.desc}</small></div></div>
@@ -1336,7 +1364,7 @@ function awaken(id){
   if(ALLIES[id].star!==5||P.items.stone<1||(P.awaken[id]||0)>=AWAKEN_MAX)return;
   P.items.stone--;P.awaken[id]=(P.awaken[id]||0)+1;save();
   const al=ALLIES[id];
-  showStory(`<div class="sum s5"><div class="sum-title">각성</div><div class="sum-stars">${'★'.repeat(5)}</div><div class="sum-icon">${al.icon}</div>
+  showStory(`<div class="sum s5"><div class="sum-title">각성</div><div class="sum-stars">${'★'.repeat(5)}</div>${allyPortrait(id)}
     <div class="sum-name">${al.name}</div><div class="small">각성 ${P.awaken[id]} / ${AWAKEN_MAX}</div>
     <div class="notice" style="margin-top:12px">${AWAKEN_ITEM.name}의 빛이 스며든다 — 능력 +${P.awaken[id]*20}%</div></div>`,
     ()=>renderAllies(`💠 ${al.name} 각성 ${P.awaken[id]}단계`),true);
@@ -1394,12 +1422,12 @@ function revealHTML(list,title){
   const best=Math.max(...list.map(x=>ALLIES[x.id].star));
   if(list.length===1){
     const {id,isNew}=list[0],al=ALLIES[id];
-    return `<div class="sum s${al.star}"><div class="sum-title">${title}</div><div class="sum-stars">${'★'.repeat(al.star)}</div><div class="sum-icon">${al.icon}</div>
+    return `<div class="sum s${al.star}"><div class="sum-title">${title}</div><div class="sum-stars">${'★'.repeat(al.star)}</div>${allyPortrait(id)}
       <div class="sum-name">${al.name}</div><div class="small">${al.role}</div><p class="sum-desc">${al.desc}</p>
       <div class="notice">${isNew?'새로운 동료가 합류했다!':'보유 수 +1 (합성 재료) · 현재 '+P.roster[id]+'개'}</div></div>`;
   }
   return `<div class="sum s${best}"><div class="sum-title">${title}</div><div class="sumgrid">${list.map(({id,isNew},i)=>{const al=ALLIES[id];
-    return `<div class="sumcell s${al.star}" style="animation-delay:${(i*0.09).toFixed(2)}s"><div class="ic">${al.icon}</div><div class="st">${'★'.repeat(al.star)}</div><div class="nm">${al.name}</div>${isNew?'<div class="new">NEW</div>':''}</div>`;}).join('')}</div></div>`;
+    return `<div class="sumcell s${al.star}" style="animation-delay:${(i*0.09).toFixed(2)}s"><div class="ic">${allyFace(id,'sm')}</div><div class="st">${'★'.repeat(al.star)}</div><div class="nm">${al.name}</div>${isNew?'<div class="new">NEW</div>':''}</div>`;}).join('')}</div></div>`;
 }
 /* 소환 연출: 최고 등급에 따라 화려해짐 */
 function summonFx(top,cb){
@@ -1550,7 +1578,7 @@ function renderBattle(){
   if(B.reflect)st.push('↩ 적 반사');
   if(B.defending)st.push('🛡 방어');
   const party=`<div class="party">${partyIds().map(id=>{const h=B.ahp[id];const p=h?Math.round(h.hp/h.max*100):100;
-    return `<span class="chip ${h&&h.hp<=0?'down':''}">${ALLIES[id].icon} ${ALLIES[id].name}<i class="mhp"><b style="width:${p}%"></b></i></span>`;}).join('')}</div>`;
+    return `<span class="chip ${h&&h.hp<=0?'down':''}">${allyFace(id,'xs')} ${ALLIES[id].name}<i class="mhp"><b style="width:${p}%"></b></i></span>`;}).join('')}</div>`;
   const tag=B.pvp?'<em class="el">DUEL</em>':B.stype==='boss'?`<em>${B.isFinal?'FINAL':'BOSS'}</em>`:B.stype==='mid'?'<em>DEMON</em>':B.stype==='elite'?'<em class="el">ELITE</em>':'';
   const t=-(performance.now()/1000).toFixed(2);
   const vis=e.pvp?`<div class="eicon pvpvis" id="eicon"><div class="pvphero">✝</div><div class="pvpteam">${teamIconsHTML(e.party)}</div></div>`:e.art?`<div class="eicon art ${B.charging?'charge':''}" id="eicon" style="--t:${t}s">${bossSVG(e.art)}</div>`
