@@ -448,11 +448,13 @@ const ALLIES={
             desc:'색이 다른 꽃의 보호막(주인공 피해 흡수 · 동료 피해 절반, 2턴) · 꽃의 속박(적 1턴 행동 불가, 4턴마다) · 꽃잎 공격'},
   kirie:   {star:5,name:'키리에',        icon:'🪶', role:'폭풍의 날개', kit:'storm',
             desc:'날갯짓으로 폭풍을 일으켜 5초 동안 주인공 치명타 확률 2배 · 전투에서 처음 쓰러진 동료를 HP 50%로 부활(1회) · 폭풍 중엔 깃털 칼날 공격'},
+  mikael:  {star:5,name:'미카엘',        icon:'🛡️', role:'정화의 날개', kit:'purify',
+            desc:'정화(걸려 있는 모든 디버프 제거 + 주인공 현재 HP의 절반만큼 방어막, 3턴마다) · 평소엔 날개 베기'},
   siren:   {star:5,name:'세이렌 사제',   icon:'💎', role:'보석의 빛', kit:'prism',
             desc:'보석처럼 반짝이는 광선 공격 · 적이 힘을 모으거나 3턴마다 프리즘 굴절(다음 적 공격 피해 절반, 절반은 적에게 반사)'}
 };
 /* ★5 티어 — 신화 제외 최대 전투력: 1티어 4000 · 2티어 3300 · 3티어 2700 */
-const TIER5={guseju:1,asiris:1,karma:1,danian:2,elia:2,kirie:2,siren:3};
+const TIER5={guseju:1,asiris:1,karma:1,danian:2,elia:2,kirie:2,siren:3,mikael:3};
 const TIER5_CP={1:4000,2:3300,3:2700};
 /* 신화: 최대 레벨에서 열림 · 능력치 2배 */
 const MYTH_COST={1:3000,2:5000,3:5000,4:10000,5:30000}, MYTH_STONE5=2;
@@ -463,6 +465,7 @@ const MYTH_SKILL={
   danian:{name:'천지개벽',desc:'대지 가르기가 방어 무시 · 주인공도 20% 확률로 적 공격 회피'},
   elia:  {name:'사계의 화원',desc:'보호막을 펼칠 때 주인공·동료 HP 회복 · 속박 2턴'},
   kirie: {name:'폭풍의 수호천사',desc:'부활을 두 번까지 · 폭풍 중 치명타 피해 2배'},
+  mikael:{name:'대천사의 가호',desc:'방어막이 현재 HP 전부만큼 · 정화 주기 2턴'},
   siren: {name:'천광의 프리즘',desc:'반사 피해 2배 · 광선이 방어 무시'}
 };
 /* 동료 일러스트 */
@@ -476,6 +479,7 @@ const ALLY_IMG={
   elia:{src:'ally_elia.jpg',pos:'55% 30%',face:'58% 34%'},
   danian:{src:'ally_danian.jpg',pos:'55% 14%',face:'58% 14%'},
   kirie:{src:'ally_kirie.jpg',pos:'50% 18%',face:'50% 19%'},
+  mikael:{src:'ally_mikael.jpg',pos:'45% 28%',face:'38% 33%',size:'240%'},
   karma:{src:'ally_karma.jpg',pos:'42% 22%',face:'35% 24%'},
   gubeomju:{src:'ally_gubeomju.jpg',pos:'50% 26%',face:'48% 38%',size:'220%'}
 };
@@ -1323,6 +1327,7 @@ function pvpEnemyActs(e){
       case 'flower':   if(e.hp<e.maxHp*0.6&&Math.random()<0.5)heal(0.14);else dmg(8+lv*3.4,0.5,`${nm}의 꽃잎`);break;
       case 'prism':    dmg(12+lv*4.2,0.3,`${nm}의 보석 광선`);break;
       case 'storm':    dmg(11+lv*3.8,0.4,`${nm}의 깃털 칼날`);break;
+      case 'purify':   if(e.hp<e.maxHp*0.5&&Math.random()<0.4)heal(0.12);else dmg(10+lv*3.6,0.4,`${nm}의 날개 베기`);break;
       case 'monk_holy':dmg(8+lv*2.8,0,`${nm}의 성수 투척`);break;
       case 'civ_atk':  dmg(6+lv*2,0.5,`${nm}의 ${al.skill}`);break;
       default:         dmg(10+lv*3,0.5,`${nm}의 공격`);
@@ -1713,7 +1718,7 @@ function startBattle(spec){
   B={e:{...t,maxHp:t.hp},spec,area:a,stage:spec.hunt?0:s,stype:type,baseName:t.name,isBoss,isFinal:!!t.final,
      charging:false,chargeName:'',chargeKind:null,phase:1,tornadoCD:0,
      buff:0,aura:0,hex:0,immune:0,reflect:0,curAlly:null,stun:{},stunWhy:{},ahp,agatoUsed:false,curse:0,silence:0,weak:0,ward:false,rage:0,turn:0,
-     party,healCut:0,st:{dmg:{},heal:{}},dot:null,evade:false,sealed:0,over:false,won:false,shield:0,ashield:0,prism:0,negate:0,blind:0,eburn:null,eliaCD:0,sirenT:0,danT:0,
+     party,healCut:0,mikaCD:0,mshield:0,st:{dmg:{},heal:{}},dot:null,evade:false,sealed:0,over:false,won:false,shield:0,ashield:0,prism:0,negate:0,blind:0,eburn:null,eliaCD:0,sirenT:0,danT:0,
      defending:false,busy:false,menu:'main',log:[],fxq:[]};
   if(benched.length)addLog(`⚠ 출전 조건 — ${benched.map(id=>ALLIES[id].name).join(', ')} 출전 불가 (${sortieRule(a).text})`);
   const begin=()=>{
@@ -1818,6 +1823,7 @@ function renderBattle(){
   if(B.immune)st.push('⏸ 적 피해 무효');
   if(B.reflect)st.push('↩ 적 반사');
   if(B.shield>0)st.push(`🌹 보호막 ${B.shield}`);
+  if(B.mshield>0)st.push(`🛡 방어막 ${B.mshield}`);
   if(B.prism)st.push('💎 프리즘');
   if(B.negate)st.push('🗡 무력화');
   if(B.blind)st.push(`📜 시야 차단 ${B.blind}`);
@@ -2012,6 +2018,21 @@ function alliesAct(){
         if(!stormOn()){B.stormUntil=Date.now()+5000;addLog(`${nm}의 날갯짓 — 폭풍이 몰아친다! 5초 동안 주인공 치명타 확률 2배`);queueFx('player','🌪 치명타×2','mpf');}
         else allyHit(11+lv*3.8,`${nm}의 깃털 칼날`,0.4);
         break;
+      case 'purify':{ // 미카엘: 디버프 제거 + 현재 HP 절반 방어막
+        if(B.mikaCD>0)B.mikaCD--;
+        const debuffs=[];
+        if(B.curse){debuffs.push('방어력 감소');B.curse=0;}
+        if(B.dot){debuffs.push(B.dot.name);B.dot=null;}
+        if(B.silence){debuffs.push('봉인');B.silence=0;}
+        if(B.healCut){debuffs.push('회복 감소');B.healCut=0;}
+        partyIds().forEach(x=>{if(B.stun[x]>0&&B.stunWhy[x]==='불화'){B.stun[x]=0;debuffs.push(`${ALLIES[x].name} 불화`);}});
+        if(debuffs.length||(B.mikaCD<=0&&!B.mshield)){
+          if(B.mikaCD<=0){
+            const sh=Math.max(1,Math.round(P.hp*(isMyth(id)?1:0.5)));B.mshield=Math.max(B.mshield||0,sh);B.mikaCD=isMyth(id)?2:3;
+            addLog(`${nm}의 정화 — ${debuffs.length?debuffs.join(', ')+' 제거 · ':''}방어막 ${B.mshield}`);queueFx('player','🛡'+B.mshield,'mpf');
+          }else addLog(`${nm}의 정화 — ${debuffs.join(', ')} 제거`);
+        }else allyHit(10+lv*3.6,`${nm}의 날개 베기`,0.4);
+        break;}
       case 'prism':{ // 세이렌: 보석 광선 · 프리즘 굴절 반사
         B.sirenT++;
         if(!B.prism&&(B.charging||B.sirenT%3===0)){B.prism=1;B.prismM=m*(isMyth(id)?2:1);addLog(`${nm}의 프리즘 굴절 — 다음 적 공격의 절반을 굴절시켜 되돌린다`);}
@@ -2047,8 +2068,9 @@ function hitPlayer(mult,label){
   }
   let absorbed=0;
   if(B.shield>0){absorbed=Math.min(B.shield,d);B.shield-=absorbed;d-=absorbed;stat('heal','elia',absorbed);}
+  if(B.mshield>0&&d>0){const a2=Math.min(B.mshield,d);B.mshield-=a2;d-=a2;absorbed+=a2;stat('heal','mikael',a2);}
   P.hp=Math.max(0,P.hp-d);
-  addLog(`${label}! ${d} 피해${B.defending?' (방어)':''}${B.ward?' (결계)':''}${absorbed?` (🌹 보호막 ${absorbed} 흡수)`:''}`);
+  addLog(`${label}! ${d} 피해${B.defending?' (방어)':''}${B.ward?' (결계)':''}${absorbed?` (🛡 보호막 ${absorbed} 흡수)`:''}`);
   queueFx('player','-'+d,'pdmg');
   if(e.bleedOnHit&&Math.random()<0.35){B.dot={name:'출혈',dmg:Math.max(5,Math.round(e.atk*0.3)),turns:3};addLog('🩸 독사의 이빨 — 출혈 (3턴)');}
   return d;
@@ -2302,7 +2324,7 @@ function battleReport(r,cb){
   showStory(`<div class="report"><div class="sum-title">📊 ${AREAS[r.area].flag} ${esc(r.name)} 토벌 기록</div>
     <div class="rp-h">⚔ 준 피해</div>${chart('dmg','d')}
     <div class="rp-h">✚ 회복 · 보호</div>${chart('heal','h')}
-    <div class="small rp-note">회복에는 성수 사용과 엘리아의 보호막 흡수량이 포함됩니다.</div></div>`,cb,true);
+    <div class="small rp-note">회복에는 성수 사용, 엘리아·미카엘의 보호막 흡수량, 키리에의 부활이 포함됩니다.</div></div>`,cb,true);
 }
 /* 최초 클리어 → 다음 스테이지 자동 출전 (3초, 취소 가능) */
 let autoT=null;
