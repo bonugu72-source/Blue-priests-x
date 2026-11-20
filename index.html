@@ -949,6 +949,8 @@ const RELICS={
   seal_andras: {name:'안드라스의 인장',         icon:'⚪', desc:'방어력 +6 · 최대 HP +20',        apply:p=>{p.def+=6;p.maxHp+=20;p.hp+=20;}},
   seal_furfur: {name:'푸르푸르의 인장',         icon:'🔵', desc:'최대 HP +40 · 공격력 +4',        apply:p=>{p.maxHp+=40;p.hp+=40;p.atk+=4;}},
   time_belt:{name:'시간에 갇힌 벨트', icon:'⏳', desc:'희귀 아이템 · 전투마다 주인공 HP가 처음으로 절반 이하가 되면 남은 HP만큼 보호막',apply:p=>{}},
+  yujun_suit:{name:'유준이의 맞춤형 정장', icon:'🤵', desc:'희귀 아이템 · 주인공 공격력 +50 (챌린저 800 LP 이스터에그)',apply:p=>{p.atk+=50;}},
+  gonggu_paper:{name:'공구방 롤링페이퍼', icon:'📜', desc:'희귀 아이템 · 주인공 공격력 +50 (챌린저 1000 LP 이스터에그)',apply:p=>{p.atk+=50;}},
   bonu_staff:{name:'보누 지팡이', icon:'🪄', desc:'희귀 아이템 · 주인공 공격력 +50 (챌린저 500 LP 이스터에그)',apply:p=>{p.atk+=50;}},
   merem_feather:{name:'메르엠의 보랏빛 깃털', icon:'🪶', desc:'희귀 아이템 · 주인공 최대 HP +300',apply:p=>{p.maxHp+=300;p.hp+=300;}},
   our_memory:{name:'우리들의 추억', icon:'📸', img:'memory.jpg', desc:'희귀한 유물 · 효과 없음 — 시간 속에 잠긴 추억 (눌러서 보기)',apply:p=>{}},
@@ -2675,7 +2677,8 @@ const RANKS=[
 ];
 const RANK_REWARD={1:{stone:1},2:{gold:20000},3:{stone:3},4:{gold:40000},5:{stone:5},6:{ally:'roa'}}; // 티어 승급 보상 (티어당 1회)
 const rankRewardText=t=>{const w=RANK_REWARD[t];if(!w)return '';return w.ally?`★5 ${ALLIES[w.ally].name} (챌린저 전용)`:w.stone?`💠 천상의 성유물 ×${w.stone}`:`${fmt(w.gold)} 코인`;};
-const RANK_LP=100, RANK_WIN=20, RANK_LOSS=15, RANK_MIN_LV=20, RANK_EGG_LP=500; // 플레이어 Lv 20부터 랭크전 개방
+const RANK_LP=100, RANK_WIN=20, RANK_LOSS=15, RANK_MIN_LV=20, RANK_EGG_LP=500;
+const RANK_EGGS=[[500,'bonu_staff'],[800,'yujun_suit'],[1000,'gonggu_paper']]; // 챌린저 LP 이스터에그 // 플레이어 Lv 20부터 랭크전 개방
 const RANK_AI_NAMES=['푸른 기사','심연의 사제','은빛 순례자','붉은 수도사','밤의 성가대','새벽의 파수꾼','잿빛 집행자','별빛 부제'];
 const rankState=()=>{P.rank=P.rank||{tier:0,lp:0,w:0,l:0,best:0};return P.rank;};
 const rankOf=()=>RANKS[Math.min(RANKS.length-1,rankState().tier)];
@@ -2720,7 +2723,7 @@ function rankEnd(win,e,pst,pparty){
       if(w.gold)P.gold+=w.gold;
       if(w.ally){addAlly(w.ally);aData(w.ally);}
       lines.push(`🎁 ${RANKS[t].n} 승급 보상: ${rankRewardText(t)}`);}}
-  if(r.tier>=RANKS.length-1&&r.lp>=RANK_EGG_LP&&!P.relics.includes('bonu_staff')){gainRelic('bonu_staff');lines.push(`🪄 이스터에그! 챌린저 ${RANK_EGG_LP} LP 달성 — 희귀 아이템 「보누 지팡이」 획득 (공격력 +50)`);}
+  if(r.tier>=RANKS.length-1)for(const [lp,id] of RANK_EGGS){if(r.lp>=lp&&!P.relics.includes(id)){gainRelic(id);const it=RELICS[id];lines.push(`${it.icon} 이스터에그! 챌린저 ${lp} LP 달성 — 희귀 아이템 「${it.name}」 획득 (공격력 +50)`);}}
   lines.push(`현재 ${rankOf().n} · ${r.lp}${r.tier<RANKS.length-1?'/'+RANK_LP:''} LP · ${r.w}승 ${r.l}패`);
   save();renderRank();
   showResult({title:`🏆 랭크전 — ${esc(e.heroName)}의 팀`,won:win,lines,st:pst,party:pparty},promo?()=>showStory(`<div class="sum s5"><div class="sum-title">승급</div><div class="rankbadge" style="--rc:${RANKS[r.tier].c}"><div class="ri">${RANKS[r.tier].icon}</div><b>${RANKS[r.tier].n}</b></div><p class="sum-desc">${RANKS[before].n}에서 ${RANKS[r.tier].n}(으)로 승급했다!${RANK_REWARD[r.tier]?`<br>🎁 승급 보상: ${rankRewardText(r.tier)}`:''}</p>${RANK_REWARD[r.tier]&&RANK_REWARD[r.tier].ally?`<div style="margin-top:8px">${allyPortrait(RANK_REWARD[r.tier].ally)}</div>`:''}</div>`,()=>renderRank(),true):null);
