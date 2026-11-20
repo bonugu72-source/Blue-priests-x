@@ -851,7 +851,7 @@ const AREAS=[
       moves:[{t:'atk',n:'사자의 포효'},{t:'multi',n:'거위발 할퀴기',hits:3,m:0.5},{t:'curse',n:'겁먹게 하는 눈'},{t:'sweep',n:'36군단의 돌격',m:0.16},{t:'charge',n:'운명의 선고'}]},
     boss:{name:'테라지오', art:'terazio', title:'마르바스의 수호자 · 붉은 번개의 용', hp:60000, exactHp:true, atk:150, def:44, xp:20000, gold:25000, goldFirst:0, goldRepeat:25000, stoneFirst:2, demon:true, drop:'seal_terazio',
       tick:6000, burnBleed:true, wave:5000,
-      madness:{at:20000,to:80000,atkMult:2,art:'terazio2',line:'"크아아아아아——!!"\n\n광기에 찬 분노가 사원 전체를 뒤흔든다. 꺾였던 날개가 다시 펼쳐지고, 붉은 번개가 테라지오의 몸으로 쏟아져 들어간다.\n\n— 광기: 체력 80,000 · 공격력 2배 —'},
+      madness:{at:20000,to:40000,atkMult:2,art:'terazio2',line:'"크아아아아아——!!"\n\n광기에 찬 분노가 사원 전체를 뒤흔든다. 꺾였던 날개가 다시 펼쳐지고, 붉은 번개가 테라지오의 몸으로 쏟아져 들어간다.\n\n— 광기: 체력 40,000 회복 · 공격력 2배 —'},
       pre:'사원 위를 뒤덮은 붉은 번개 속에서 거대한 용이 내려앉는다. 온몸에서 불길이 흘러넘치고, 입에서는 지옥불이 새어 나온다.\n\n"마르바스 님께 가는 길은 없다. 이 사원이 너희의 무덤이다."',
       moves:[{t:'atk',n:'불꽃 발톱'},{t:'strong',n:'지옥불 브레스'},{t:'sweep',n:'붉은 번개',m:0.18},{t:'multi',n:'꼬리 휩쓸기',hits:3,m:0.5},{t:'atk',n:'불꽃 발톱'},{t:'charge',n:'수호자의 업화'}]}
   },
@@ -2913,7 +2913,7 @@ function enemyTurn(){
   }
   B.defending=false;B.ward=false;
   if(e.burnBleed&&P.hp>0&&e.hp>0){ // 테라지오: 처음부터 끝까지 화상 + 출혈
-    const bd=Math.max(5,Math.round(e.atk*0.15)),bl=Math.max(5,Math.round(e.atk*0.15));
+    const bd=Math.max(3,Math.round(e.atk*0.075)),bl=Math.max(3,Math.round(e.atk*0.075));
     P.hp=Math.max(0,P.hp-bd-bl);addLog(`🔥 화상 ${bd} · 🩸 출혈 ${bl} — 끝나지 않는 상처`);queueFx('player','-'+(bd+bl),'pdmg');
     hitAllies(0.05,'🔥🩸 화상·출혈',true);
   }
