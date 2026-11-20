@@ -420,8 +420,21 @@ body.pfrozen #cmds .btn{filter:saturate(.2) brightness(1.2);background:linear-gr
 .mysk{display:block;margin-top:4px;color:#8f86b8}
 .mysk.on{color:#ffb6e1}
 .acard.mythc{border-color:#ff7cc8;box-shadow:0 0 16px rgba(255,79,163,.28),inset 0 0 20px rgba(122,60,255,.12)}
-.acard.aw4,.slot.aw4,.dexcell.aw4{border:1px solid rgba(176,120,255,.55);animation:auraP 3.2s ease-in-out infinite}
-.acard.aw5,.slot.aw5,.dexcell.aw5{border:1px solid rgba(255,80,80,.55);animation:auraR 3s ease-in-out infinite}
+.acard.aw4,.slot.aw4,.dexcell.aw4{border:1px solid rgba(176,120,255,.55);animation:auraP 3.2s ease-in-out infinite;position:relative;overflow:hidden;
+  background:linear-gradient(160deg,rgba(130,70,235,.42),rgba(40,22,80,.85) 50%,rgba(150,80,255,.34))}
+.acard.aw5,.slot.aw5,.dexcell.aw5{border:1px solid rgba(255,80,80,.55);animation:auraR 3s ease-in-out infinite;position:relative;overflow:hidden;
+  background:linear-gradient(160deg,rgba(230,50,60,.42),rgba(80,16,24,.85) 50%,rgba(255,90,60,.34))}
+/* 카드 전체 반짝임: 은은한 빛 번짐 + 빛줄기가 카드를 가로지름 + 반짝이는 별 */
+.acard.aw4::before,.slot.aw4::before,.dexcell.aw4::before,.acard.aw5::before,.slot.aw5::before,.dexcell.aw5::before{content:'';position:absolute;inset:0;pointer-events:none;z-index:0;
+  background:radial-gradient(circle at 20% 25%,var(--ac) 0 1.5px,transparent 2.5px),radial-gradient(circle at 78% 18%,var(--ac) 0 1.2px,transparent 2px),radial-gradient(circle at 62% 72%,var(--ac) 0 1.5px,transparent 2.5px),radial-gradient(circle at 32% 85%,var(--ac) 0 1px,transparent 2px),radial-gradient(circle at 90% 60%,var(--ac) 0 1.3px,transparent 2.2px),radial-gradient(ellipse at 50% 50%,var(--ag),transparent 70%);
+  animation:auraTwinkle 2.4s ease-in-out infinite}
+.acard.aw4::after,.slot.aw4::after,.dexcell.aw4::after,.acard.aw5::after,.slot.aw5::after,.dexcell.aw5::after{content:'';position:absolute;top:-50%;bottom:-50%;width:45%;left:-60%;pointer-events:none;z-index:0;
+  background:linear-gradient(105deg,transparent,var(--as),transparent);transform:skewX(-18deg);animation:auraSweep 3.6s ease-in-out infinite}
+.acard.aw4,.slot.aw4,.dexcell.aw4{--ac:rgba(225,200,255,.95);--ag:rgba(160,90,255,.22);--as:rgba(210,170,255,.35)}
+.acard.aw5,.slot.aw5,.dexcell.aw5{--ac:rgba(255,215,200,.95);--ag:rgba(255,60,50,.22);--as:rgba(255,170,150,.35)}
+.acard.aw4>*,.slot.aw4>*,.dexcell.aw4>*,.acard.aw5>*,.slot.aw5>*,.dexcell.aw5>*{position:relative;z-index:1}
+@keyframes auraTwinkle{0%,100%{opacity:.45}50%{opacity:1}}
+@keyframes auraSweep{0%{left:-60%}45%,100%{left:130%}}
 @keyframes auraP{0%,100%{box-shadow:0 0 8px rgba(160,90,255,.22),inset 0 0 12px rgba(140,70,255,.08)}50%{box-shadow:0 0 20px rgba(170,100,255,.5),inset 0 0 18px rgba(140,70,255,.16)}}
 @keyframes auraR{0%,100%{box-shadow:0 0 8px rgba(255,60,60,.22),inset 0 0 12px rgba(255,40,40,.08)}50%{box-shadow:0 0 22px rgba(255,70,60,.5),inset 0 0 18px rgba(255,40,40,.16)}}
 .acard.mythc .aface.md{border-color:#ff9ad6;box-shadow:0 0 12px #ff4fa3}
