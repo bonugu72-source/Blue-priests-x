@@ -466,6 +466,12 @@ body.pfrozen #cmds .btn{filter:saturate(.2) brightness(1.2);background:linear-gr
 .rs-rew{background:rgba(255,255,255,.04);border-radius:10px;padding:8px 10px;font-size:13px;line-height:1.6}
 .result .rp-h{margin:10px 0 4px;font-size:13px}
 .result .rp-row{margin:3px 0;grid-template-columns:86px 1fr 56px}
+/* 친구 대결 결과: 내 팀 / 친구 팀 그래프 전환 탭 (창 크기 그대로) */
+.rs-tabs{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:12px 0 0}
+.mbox .rs-tabs .btn{padding:7px 6px;font-size:13px;min-height:0}
+.rs-sides{display:grid}.rs-sides>div{grid-area:1/1;min-width:0} /* 두 그래프를 겹쳐 놓아 탭을 바꿔도 창 크기가 그대로 */
+/* 결과창 확인 · 한 번 더 버튼 나란히 */
+.mbtns{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .result .rp-bar{height:10px}
 .result .rp-row{grid-template-columns:86px 1fr 74px}
 .result .rp-v{white-space:nowrap}.result .rp-v small{display:inline;margin-left:4px}
@@ -2635,20 +2641,20 @@ function startPvp(f){
 function pvpEnemyActs(e){
   const h=e.hero,r=Math.random();
   if(e.hp<e.maxHp*0.4&&r<0.25){
-    const hh=Math.round(e.maxHp*0.12);e.hp=Math.min(e.maxHp,e.hp+hh);
+    const hh=Math.round(e.maxHp*0.12);estat('heal','hero',Math.min(hh,e.maxHp-e.hp));e.hp=Math.min(e.maxHp,e.hp+hh);
     addLog(`${e.heroName}의 치유의 기도 — 팀 HP ${hh} 회복`);queueFx('enemy','+'+hh,'heal');
-  }else if(h.lv>=8&&r<0.12)hitPlayer(2.5,`${e.heroName}의 대천사의 심판`);
-  else if(r<0.4)hitPlayer(1.6,`${e.heroName}의 성광 일격`);
-  else hitPlayer(1,`${e.heroName}의 공격`);
+  }else if(h.lv>=8&&r<0.12)estat('dmg','hero',hitPlayer(2.5,`${e.heroName}의 대천사의 심판`));
+  else if(r<0.4)estat('dmg','hero',hitPlayer(1.6,`${e.heroName}의 성광 일격`));
+  else estat('dmg','hero',hitPlayer(1,`${e.heroName}의 공격`));
   for(const a of e.party){
     if(P.hp<=0)break;
     const al=ALLIES[a.id],m=multOf(a.id,a.aw,a.my)*trustMultT(a.id,a.tr),lv=a.lv,nm=`${e.heroName}의 ${al.name}`;
     const dmg=(base,f,label)=>{
       let d=(base*m-P.def*(B.curse?0.6:1)*f)*rnd(0.9,1.1);
       if(B.defending)d*=0.6;if(B.ward)d*=0.5;
-      d=Math.max(1,Math.round(d));P.hp=Math.max(0,P.hp-d);addLog(`${label}! ${d} 피해`);queueFx('player','-'+d,'pdmg');
+      d=Math.max(1,Math.round(d));P.hp=Math.max(0,P.hp-d);estat('dmg',a.id,d);addLog(`${label}! ${d} 피해`);queueFx('player','-'+d,'pdmg');
     };
-    const heal=pct=>{const hh=Math.round((e.maxHp*pct*0.25+lv*2)*m);e.hp=Math.min(e.maxHp,e.hp+hh);addLog(`${nm} — 팀 HP ${hh} 회복`);queueFx('enemy','+'+hh,'heal');};
+    const heal=pct=>{const hh=Math.round((e.maxHp*pct*0.25+lv*2)*m);estat('heal',a.id,Math.min(hh,e.maxHp-e.hp));e.hp=Math.min(e.maxHp,e.hp+hh);addLog(`${nm} — 팀 HP ${hh} 회복`);queueFx('enemy','+'+hh,'heal');};
     switch(al.kit){
       case 'isabel': case 'monk_heal': case 'civ_heal':
         if(e.hp<e.maxHp*0.6)heal(al.kit==='monk_heal'?0.25:al.kit==='civ_heal'?0.12:0.11);
@@ -2666,15 +2672,15 @@ function pvpEnemyActs(e){
       case 'flower':   if(e.hp<e.maxHp*0.6&&Math.random()<0.5)heal(0.14);else dmg(8+lv*3.4,0.5,`${nm}의 꽃잎`);break;
       case 'prism':    dmg(12+lv*4.2,0.3,`${nm}의 보석 광선`);break;
       case 'storm':    dmg(11+lv*3.8,0.4,`${nm}의 깃털 칼날`);break;
-      case 'fixed':    {const d=Math.max(1,Math.round((20+lv*6)*m));P.hp=Math.max(0,P.hp-d);addLog(`${nm}의 등불 — 고정 피해! ${d} 피해`);queueFx('player','-'+d,'pdmg');}break;
-      case 'weakspot': if(Math.random()<(a.my?0.3:0.15)){const d=Math.max(1,Math.round((12+lv*4)*3*m));P.hp=Math.max(0,P.hp-d);addLog(`${nm}의 약점 일격 — 고정 피해! ${d} 피해`);queueFx('player','-'+d,'pdmg');}else dmg(12+lv*4,0.5,`${nm}의 창 찌르기`);break;
+      case 'fixed':    {const d=Math.max(1,Math.round((20+lv*6)*m));P.hp=Math.max(0,P.hp-d);estat('dmg',a.id,d);addLog(`${nm}의 등불 — 고정 피해! ${d} 피해`);queueFx('player','-'+d,'pdmg');}break;
+      case 'weakspot': if(Math.random()<(a.my?0.3:0.15)){const d=Math.max(1,Math.round((12+lv*4)*3*m));P.hp=Math.max(0,P.hp-d);estat('dmg',a.id,d);addLog(`${nm}의 약점 일격 — 고정 피해! ${d} 피해`);queueFx('player','-'+d,'pdmg');}else dmg(12+lv*4,0.5,`${nm}의 창 찌르기`);break;
       case 'judge':    dmg((12+lv*3.4)*(P.hp/P.maxHp>e.hp/e.maxHp?1.6:1),0.3,`${nm}의 심판의 창`);break;
       case 'sakura':   dmg(10+lv*3.6,0.4,`${nm}의 벚꽃 칼날`);break;
       case 'twin':     dmg(6+lv*1.8,0.5,`${nm}의 쌍검 ①`);dmg(6+lv*1.8,0.5,`${nm}의 쌍검 ②`);break;
       case 'guard':    if(e.hp<e.maxHp*0.5&&Math.random()<0.3)heal(0.06);else dmg(9+lv*2.8,0.4,`${nm}의 방패 강타`);break;
       case 'chant':    if(e.hp<e.maxHp*0.7&&Math.random()<0.4)heal(0.12);else dmg(7+lv*2.4,0.5,`${nm}의 빛의 음표`);break;
       case 'charm':    dmg((12+lv*3.6)*1.5,0.4,`${nm}의 하트 화살 (치명타)`);break;
-      case 'justice':  if(!B.pvpMuhee&&Date.now()-(B.startAt||0)>=(a.my?3000:5000)){B.pvpMuhee=true;const d=Math.floor(P.hp/2);P.hp-=d;addLog(`⚖️ ${nm}의 정의! 주인공 체력 절반(${d})을 앗아갔다`);queueFx('player','⚖️-'+d,'pdmg');}break;
+      case 'justice':  if(!B.pvpMuhee&&Date.now()-(B.startAt||0)>=(a.my?3000:5000)){B.pvpMuhee=true;const d=Math.floor(P.hp/2);P.hp-=d;estat('dmg',a.id,d);addLog(`⚖️ ${nm}의 정의! 주인공 체력 절반(${d})을 앗아갔다`);queueFx('player','⚖️-'+d,'pdmg');}break;
       case 'aora':     if(Math.random()<0.3){B.curse=Math.max(B.curse,2);addLog(`${nm}의 천사의 구원 — 주인공이 속박되어 방어력 감소`);}else dmg(16+lv*5,0.3,`${nm}의 천사의 심판`);break;
       case 'tide':     dmg(12+lv*4,0.5,`${nm}의 물살`);break;
       case 'train':    if(Math.random()<0.4)dmg(vistaBase(lv)*(a.my?3:2),0,`${nm}의 열차 관통`);else dmg(vistaBase(lv),0.5,`${nm}의 군도 베기`);break;
@@ -2688,7 +2694,7 @@ function pvpEnemyActs(e){
   }
 }
 function pvpEnd(win){
-  const e=B.e,pst=B.st,pparty=partyIds().slice();clearBattle();
+  const e=B.e,pst=B.st,pest=B.est,pparty=partyIds().slice();clearBattle();
   if(P._pvpRestore){P.hp=P._pvpRestore.hp;P.mp=P._pvpRestore.mp;delete P._pvpRestore;}
   if(e.ranked){rankEnd(win,e,pst,pparty);return;}
   const today=new Date().toISOString().slice(0,10);
@@ -2707,7 +2713,8 @@ function pvpEnd(win){
   }
   msg+=`<br>내 대결 전적: ${P.pvp.w}승 ${P.pvp.l}패`;
   save();renderFriends();
-  showResult({title:`⚔ ${esc(e.heroName)}의 팀과 대결`,won:win,lines:msg.split('<br>'),st:pst,party:pparty},null);
+  showResult({title:`⚔ ${esc(e.heroName)}의 팀과 대결`,won:win,lines:msg.split('<br>'),st:pst,party:pparty,
+    foe:{name:e.heroName,party:e.party.map(x=>x.id),st:pest||{dmg:{},heal:{}}}},null);
 }
 
 /* ===================== 랭크전 ===================== */
@@ -3446,7 +3453,7 @@ function startBattle(spec){
     renderBattle();
   };
   if(t.pvp){
-    B.pvp=true;
+    B.pvp=true;B.est={dmg:{},heal:{}}; // 상대(친구) 팀 딜·힐 기록
     addLog(`⚔ 친구 대결 — 「${t.name}」 (전투력 ${fmt(t.cp)})`);
     showStory(`<div class="sum s4"><div class="sum-title">⚔ 친구 대결</div><div class="pvpvs">${esc(P.name)} <span>VS</span> ${t.heroName}</div>
       <div class="pvpteam">✝ ${t.heroName} Lv ${t.hero.lv}</div><div class="pvpteam">${teamIconsHTML(t.party)}</div>
@@ -3610,6 +3617,7 @@ function allyDown(id){
   addLog(`🪶 키리에의 날개 — ${ALLIES[id].name} HP 50%로 부활!`);stat('heal','kirie',h.hp);return true;
 }
 function stat(kind,who,v){if(!B||!B.st||!who||!(v>0))return;const o=B.st[kind];o[who]=(o[who]||0)+Math.round(v);}
+function estat(kind,who,v){if(!B||!B.est||!who||!(v>0))return;const o=B.est[kind];o[who]=(o[who]||0)+Math.round(v);} // 친구 대결 상대 팀 기록
 function queueFx(target,txt,cls){B.fxq.push([target,txt,cls]);}
 const enemyDef=()=>B.e.def*(B.weak?0.5:1);
 
@@ -4437,33 +4445,61 @@ function victoryFlow(area,stype,first,wasFinal,fromHunt,msg,stage,rep){
   save();
   if(!fromHunt&&first&&stage<STAGES){mapSel={a:area,s:stage+1};autoNext(area,stage+1,rep);return;}
   if(fromHunt)renderHub();else renderMap(area);
-  if(rep)showResult(rep,null);
+  if(rep)showResult(rep,null,null,(!fromHunt&&stype==='boss'&&stage)?()=>startBattle({area,stage}):null);
 }
 /* 전투 결과: 보상 + 딜·힐 그래프 (모든 전투 후, 한 화면) */
 function resultHTML(r){
-  const who=['hero',...(r.party||[])];
-  const nm=w=>w==='hero'?esc(P.name):ALLIES[w].name;
   const ic=w=>w==='hero'?'<span class="aemo xs">✝</span>':allyFace(w,'xs');
-  const st=r.st||{dmg:{},heal:{}};
-  const total=kind=>who.reduce((s,w)=>s+(st[kind][w]||0),0);
-  const chart=(kind,cls)=>{
-    const rows=who.map(w=>({w,v:st[kind][w]||0})).sort((a,b)=>b.v-a.v);
-    const tot=total(kind),mx=Math.max(1,...rows.map(x=>x.v));
-    return rows.map(x=>`<div class="rp-row"><div class="rp-nm">${ic(x.w)}<span>${nm(x.w)}</span></div>
+  /* 한 팀의 딜·힐 그래프 (내 팀 · 친구 대결 상대 팀 공용) */
+  const charts=(who,nm,st)=>{
+    const total=kind=>who.reduce((s,w)=>s+(st[kind][w]||0),0);
+    const chart=(kind,cls)=>{
+      const rows=who.map(w=>({w,v:st[kind][w]||0})).sort((a,b)=>b.v-a.v);
+      const tot=total(kind),mx=Math.max(1,...rows.map(x=>x.v));
+      return rows.map(x=>`<div class="rp-row"><div class="rp-nm">${ic(x.w)}<span>${nm(x.w)}</span></div>
       <div class="rp-bar"><i class="${cls}" style="width:${(x.v/mx*100).toFixed(1)}%"></i></div>
       <div class="rp-v">${fmt(x.v)}<small>${tot?Math.round(x.v/tot*100):0}%</small></div></div>`).join('');
+    };
+    const ht=total('heal');
+    return `<div class="rp-h">⚔ 준 피해 <span>합계 ${fmt(total('dmg'))}</span></div>${chart('dmg','d')}
+    ${ht?`<div class="rp-h">✚ 회복 · 보호 <span>합계 ${fmt(ht)}</span></div>${chart('heal','h')}`:''}`;
   };
-  const ht=total('heal');
+  const mine=charts(['hero',...(r.party||[])],w=>w==='hero'?esc(P.name):ALLIES[w].name,r.st||{dmg:{},heal:{}});
+  let body=mine;
+  if(r.foe){
+    const f=r.foe,fst=f.st||{dmg:{},heal:{}};
+    const theirs=charts(['hero',...(f.party||[]).filter(id=>ALLIES[id])],w=>w==='hero'?esc(f.name):ALLIES[w].name,fst);
+    body=`<div class="rs-tabs"><button class="btn primary" data-rstab="me">내 팀</button><button class="btn" data-rstab="foe">${esc(f.name)}의 팀</button></div>
+    <div class="rs-sides"><div data-rsside="me">${mine}</div><div data-rsside="foe" style="visibility:hidden">${theirs}</div></div>`;
+  }
   return `<div class="report result"><div class="rs-head ${r.won?'win':'lose'}">${r.won?'🏆 승리':'💀 패배'}</div>
     <div class="sum-title">${r.title}</div>
     ${r.note?`<div class="rs-note">${r.note}</div>`:''}
     <div class="rs-rew">${(r.lines&&r.lines.length?r.lines:['획득한 보상 없음']).map(l=>`<div>${l}</div>`).join('')}</div>
-    <div class="rp-h">⚔ 준 피해 <span>합계 ${fmt(total('dmg'))}</span></div>${chart('dmg','d')}
-    ${ht?`<div class="rp-h">✚ 회복 · 보호 <span>합계 ${fmt(ht)}</span></div>${chart('heal','h')}`:''}</div>`;
+    ${body}</div>`;
 }
-function showResult(r,cb,label){
+function showResult(r,cb,label,again){
   showStory(resultHTML(r),cb,true);
   $('#mbtn').textContent=label||'확인';
+  /* 친구 대결: 내 팀 / 친구 팀 그래프 전환 */
+  const tabs=document.querySelectorAll('#mtext [data-rstab]');
+  tabs.forEach(b=>b.onclick=()=>{
+    tabs.forEach(x=>x.classList.toggle('primary',x===b));
+    document.querySelectorAll('#mtext [data-rsside]').forEach(d=>d.style.visibility=d.dataset.rsside===b.dataset.rstab?'':'hidden');
+  });
+  if(again)addAgainBtn(again);
+}
+/* 결과창 '확인' 옆에 '한 번 더' 버튼 (창이 닫히면 원래대로 되돌림) */
+function addAgainBtn(go){
+  const m=$('#mbtn'),modal=$('#modal'),row=document.createElement('div');
+  row.className='mbtns';m.parentNode.insertBefore(row,m);row.appendChild(m);
+  const b=document.createElement('button');b.className='btn danger';b.textContent='⚔ 한 번 더';row.appendChild(b);
+  let obs=null;
+  const undo=()=>{if(!row.parentNode)return;if(obs)obs.disconnect();m.removeEventListener('click',undo);row.parentNode.insertBefore(m,row);row.remove();};
+  m.addEventListener('click',undo);
+  obs=new MutationObserver(()=>{if(modal.classList.contains('hidden'))undo();});
+  obs.observe(modal,{attributes:true,attributeFilter:['class']});
+  b.onclick=()=>{modal.classList.add('hidden');undo();go();};
 }
 /* 최초 클리어 → 다음 스테이지 자동 출전 (3초, 취소 가능) */
 let autoT=null;
