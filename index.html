@@ -437,6 +437,8 @@ body.pfrozen #cmds .btn{filter:saturate(.2) brightness(1.2);background:linear-gr
 @keyframes auraSweep{0%{left:-60%}45%,100%{left:130%}}
 @keyframes auraP{0%,100%{box-shadow:0 0 8px rgba(160,90,255,.22),inset 0 0 12px rgba(140,70,255,.08)}50%{box-shadow:0 0 20px rgba(170,100,255,.5),inset 0 0 18px rgba(140,70,255,.16)}}
 @keyframes auraR{0%,100%{box-shadow:0 0 8px rgba(255,60,60,.22),inset 0 0 12px rgba(255,40,40,.08)}50%{box-shadow:0 0 22px rgba(255,70,60,.5),inset 0 0 18px rgba(255,40,40,.16)}}
+.mythname{color:#9fdcff;text-shadow:0 0 6px rgba(80,180,255,.9),0 0 14px rgba(60,140,255,.6);animation:mythGlow 2.2s ease-in-out infinite;font-weight:700}
+@keyframes mythGlow{0%,100%{text-shadow:0 0 4px rgba(80,180,255,.6),0 0 10px rgba(60,140,255,.35)}50%{text-shadow:0 0 8px rgba(120,210,255,1),0 0 20px rgba(60,150,255,.8)}}
 .acard.mythc .aface.md{border-color:#ff9ad6;box-shadow:0 0 12px #ff4fa3}
 .sum.smyth .aportrait{box-shadow:0 0 30px #ff4fa3,0 0 70px rgba(122,60,255,.55);border:2px solid #ffd9f0}
 .backtop-row{display:flex;justify-content:flex-start;margin:-4px 0 8px}
@@ -962,6 +964,8 @@ const COSTUMES={
 };
 const cosOf=id=>{const c=P&&P.cos&&P.cos.eq&&P.cos.eq[id];return c?(COSTUMES[id]||[]).find(x=>x.id===c):null;};
 const allyImg=id=>{const c=cosOf(id);return c&&c.img?c.img:ALLY_IMG[id];};
+/* 신화 승급 동료 이름: 푸른빛으로 빛남 */
+const nameHTML=id=>isMyth(id)?`<span class="mythname">${ALLIES[id].name}</span>`:ALLIES[id].name;
 function allyFace(id,cls){
   const im=allyImg(id);
   return im?`<span class="aface ${cls||''}" style="background-image:url(${im.src});background-position:${im.face}${im.size?';background-size:'+im.size+' auto':''}"></span>`:`<span class="aemo ${cls||''}">${ALLIES[id].icon}</span>`;
@@ -2890,7 +2894,7 @@ function sortieSlotsHTML(inMgmt){
     if(!id)return `<button class="slot empty" ${tap}><span class="sface">＋</span><b>비어있음</b><small>${inMgmt?'아래 카드에서 출전':'탭해서 편성'}</small></button>`;
     const al=ALLIES[id];
     return `<button class="slot ${(P.awaken[id]||0)>=5?'aw5':(P.awaken[id]||0)>=4?'aw4':''}" ${tap}>${allyFace(id,'sface')}<span class="sstar">${'★'.repeat(al.star)}${isMyth(id)?' 🔱':''}</span>
-      <b>${al.name}</b><small>Lv ${aData(id).lv} · ⚔ ${fmt(allyCP(id))}</small></button>`;
+      <b>${nameHTML(id)}</b><small>Lv ${aData(id).lv} · ⚔ ${fmt(allyCP(id))}</small></button>`;
   };
   return `<div class="slots">${[0,1,2].slice(0,MAX_ACTIVE).map(slot).join('')}</div>
     ${inMgmt?'':`<div class="fixedrow">${allyFace(FIXED,'xs')} 고정 조력자 <b>${ALLIES[FIXED].name}</b> <span class="small">Lv ${aData(FIXED).lv} · 항상 함께 출전</span></div>`}`;
@@ -2957,7 +2961,7 @@ function allyCard(id){
     :aw>=AWAKEN_BASE&&!worldCleared()?`<button class="btn" disabled>🔒 ${aw+1}각성<small>지역 이동의 모든 지역 클리어 필요 (${worldClearCount()}/${realmStart()})</small></button>`
     :(()=>{const c=awakenCost(id),ok=P.items.stone>=c.stone&&cnt>=1+c.card;if(c.rate<1)return `<button class="btn ${ok?'danger':''}" data-awk="${id}" ${ok?'':'disabled'}>각성 ${aw}/${awakenMax(id)} · 성공 ${Math.round(c.rate*100)}%<small>${AWAKEN_ITEM.icon}${c.stone}${c.card?` · 같은 카드 1장 (${Math.max(0,cnt-1)}/1)`:''} · 실패 시 성유물만 소모</small></button>`;return `<button class="btn ${ok?'danger':''}" data-awk="${id}" ${ok?'':'disabled'}>각성 ${aw}/${awakenMax(id)}<small>${c.card?`${AWAKEN_ITEM.icon}1 · 같은 카드 1장 (${Math.max(0,cnt-1)}/1)`:`${AWAKEN_ITEM.icon}${c.stone} (전용 캐릭터 · 카드 불필요)`}</small></button>`;})());
   return `<div class="acard ${isFixed?'fixed':''} ${my?'mythc':''} ${aw>=5?'aw5':aw>=4?'aw4':''}"><div class="ally"><div class="ic">${allyFace(id,'md')}</div><div style="flex:1">
-    ${isFixed?'<span class="tag t-ally">고정 조력자</span>':`<span class="gold">${'★'.repeat(al.star)}</span>`} ${al.name}${my?' <span class="mytag">신화</span>':''}${aw?` <span class="gold">각성 ${aw}</span>`:''}${TIER5[id]?` <span class="small">${TIER5[id]}티어</span>`:''}
+    ${isFixed?'<span class="tag t-ally">고정 조력자</span>':`<span class="gold">${'★'.repeat(al.star)}</span>`} ${nameHTML(id)}${my?' <span class="mytag">신화</span>':''}${aw?` <span class="gold">각성 ${aw}</span>`:''}${TIER5[id]?` <span class="small">${TIER5[id]}티어</span>`:''}
     <span class="small">Lv ${d.lv}/${cap} · ⚔ ${fmt(allyCP(id))}${!isFixed&&!needSyn?' · ×'+cnt:''}</span>
     ${trustHTML(id)}
     <small>${al.role} · ${al.desc}</small>${MYTH_SKILL[id]?`<small class="mysk ${my?'on':''}">🔱 신화 고유 능력 「${MYTH_SKILL[id].name}」 — ${MYTH_SKILL[id].desc}${my?'':' (신화 승급 시 해금)'}</small>`:''}</div></div>
@@ -3011,7 +3015,7 @@ let dexStar='all';
 function showDexDetail(id){
   const al=ALLIES[id],has=id===FIXED||owned(id),my=MYTH_SKILL[id],d=has?aData(id):null;
   showStory(`<div class="sum ${al.star>=4?'s'+al.star:''}"><div class="sum-title">📖 동료 도감</div>${allyPortrait(id)}
-    <div style="font-size:18px;font-weight:900">${al.name}</div>
+    <div style="font-size:18px;font-weight:900">${nameHTML(id)}</div>
     <div class="gold">${al.star?'★'.repeat(al.star):'고정 조력자'}${has&&isMyth(id)?' 🔱 신화':''}</div>
     <div class="small">${has?`보유${id===FIXED?'':' ×'+(P.roster[id]||0)} · Lv ${d.lv} · ⚔ ${fmt(allyCP(id))}`:'미보유'}${TIER5[id]?` · ${TIER5[id]}티어 (최대 전투력 3각성 ${fmt(TIER5_CP[TIER5[id]])} · 5각성 ${fmt(TIER5_CP[TIER5[id]]+1000)} · 신화 ${fmt((TIER5_CP[TIER5[id]]+1000)*2)} · 신뢰도 10 ${fmt(Math.round((TIER5_CP[TIER5[id]]+1000)*2*TRUST_TOP[TIER5[id]]))})`:ALLIES[id].star===6?` · ★6 (최대 전투력 ${fmt(STAR6_CP)} · 신화 ${fmt(STAR6_CP*2)} · 신뢰도 10 ${fmt(Math.round(STAR6_CP*2*TRUST_TOP6))})`:''}</div>
     <div class="dexd"><b>${al.role}</b><br>${al.desc}
@@ -3025,7 +3029,7 @@ function renderDex(){
   const own=Object.keys(ALLIES).filter(id=>id!==FIXED&&owned(id)).length;
   const cell=id=>{const al=ALLIES[id],has=id===FIXED||owned(id);
     return `<button class="dexcell ${has&&(P.awaken[id]||0)>=5?'aw5':has&&(P.awaken[id]||0)>=4?'aw4':''} ${has?'':'unown'} ${P.active.includes(id)?'mine':''}" data-dexid="${id}">${allyFace(id,'dface')}
-      <span class="dstar">${al.star?'★'.repeat(al.star):'조력자'}${isMyth(id)?' 🔱':''}</span><b>${al.name}</b></button>`;};
+      <span class="dstar">${al.star?'★'.repeat(al.star):'조력자'}${isMyth(id)?' 🔱':''}</span><b>${nameHTML(id)}</b></button>`;};
   $('#app').innerHTML=`${statusHTML()}${topBack()}
     <div class="panel"><div class="ptitle">📖 동료 도감 <span class="small">보유 ${own}/${Object.keys(ALLIES).length-1} · 눌러서 상세 보기</span></div>
       <div class="sortbar sticky">${tabs.map(([k,l])=>`<button class="sortbtn ${String(dexStar)===String(k)?'on':''}" data-dex="${k}">${l}</button>`).join('')}</div>
