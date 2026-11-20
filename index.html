@@ -464,6 +464,39 @@ body.battle .cmds .btn{min-height:44px;padding:6px 10px}
 .sum.s5 .aportrait{box-shadow:0 0 28px #ffd24a,0 0 70px rgba(255,210,74,.45);border:2px solid #ffe9a0}
 .sumcell .ic{font-size:26px;display:flex;justify-content:center;min-height:40px;align-items:center}
 
+/* 출전 동료 칸 */
+.slots{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.slot{border:none;border-radius:12px;background:#2a2230;padding:10px 4px 9px;display:flex;flex-direction:column;align-items:center;gap:3px;min-width:0}
+.slot .sface{width:64px;height:64px;border-radius:14px;margin:0 0 3px}
+.slot .aemo.sface{font-size:40px;display:flex;align-items:center;justify-content:center;background:#1a1424}
+.slot b{font-size:14px;max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.slot small{font-size:11px;color:var(--dim)}
+.slot .sstar{font-size:10px;color:var(--gold);letter-spacing:-1px;min-height:13px}
+.slot.empty{background:#0c1329;outline:1.5px dashed #2f3d63;outline-offset:-1.5px}
+.slot.empty .sface{display:flex;align-items:center;justify-content:center;font-size:26px;color:#4a5a86;background:#101a36}
+.slot.empty b{color:#7d8bb3;font-weight:700}
+.slot:active{transform:scale(.97)}
+.fixedrow{font-size:13px;display:flex;align-items:center;gap:4px;padding:2px 2px 0}
+/* 하단 탭 */
+#app:has(.tabbar){padding-bottom:calc(84px + env(safe-area-inset-bottom))}
+.tabbar{position:fixed;left:0;right:0;bottom:0;z-index:30;margin:0 auto;max-width:480px;display:grid;grid-template-columns:repeat(4,1fr);gap:4px;
+  padding:6px 8px calc(6px + env(safe-area-inset-bottom));background:rgba(8,12,26,.94);box-shadow:0 -8px 24px rgba(0,0,0,.45);
+  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.tab{border:none;background:none;border-radius:12px;padding:6px 0 5px;display:flex;flex-direction:column;align-items:center;gap:2px;
+  font-size:12px;font-weight:700;color:#7d8bb3;transition:background .15s,color .15s}
+.tab .ti{font-size:21px;line-height:1.1;filter:grayscale(.6) brightness(.85);transition:filter .15s}
+.tab.on .ti{filter:none}
+.tab.on{color:#eef3ff}
+.tab.t-shop.on{background:#3e3322}.tab.t-ally.on{background:#3d2a35}.tab.t-adv.on{background:#223a63}.tab.t-friend.on{background:#1f3b44}
+.tab:active{transform:scale(.95)}
+#app:has(.tabbar) .sheet{bottom:76px}
+/* 모험 탭 */
+.stagecur{display:flex;flex-direction:column;gap:2px;padding:10px 12px;border-radius:10px;background:#0c1329}
+.stagecur b{font-family:'Noto Serif KR',serif;font-size:18px;color:#dbe7ff}
+.areas{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.areas .area{flex-direction:column;align-items:flex-start;justify-content:center;gap:2px;padding:8px 9px;font-size:13px;min-width:0}
+.areas .area .an{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.areas .area .small{font-size:11px}
 /* FX */
 #fx{position:fixed;inset:0;pointer-events:none;z-index:50}
 .float{position:fixed;transform:translate(-50%,-50%);font-weight:900;font-size:26px;text-shadow:0 2px 6px #000;animation:up .9s ease-out forwards}
@@ -1736,7 +1769,7 @@ function startMotes(cv){
 function renderTitle(){
   BGM.play('lobby');
   leaveTitle();
-  const sv=load();overwriteArmed=false;
+  const sv=load();overwriteArmed=false;hubTab='adv';
   $('#app').innerHTML='';
   document.body.classList.add('title-mode');
   const cover=document.createElement('div');
@@ -1832,25 +1865,24 @@ async function fbAddFriend(raw){
 }
 async function renderFriends(msg,preList){
   if(friendsUnsub){try{friendsUnsub();}catch(e){}friendsUnsub=null;}
-  clearBattle();
+  clearBattle();hubTab='friend';
   if(!DBX||!myId){
     if(FB&&cloudState==='denied'&&!msg)msg='⚠ 이 기기는 아직 실시간 친구에 연결되지 않았어요. 다른 기기에서 쓰던 <b>최신 저장 코드</b>를 타이틀의 「저장 코드로 불러오기」로 한 번 불러오면 연결돼요.';
     renderFriendsCode(msg);return;}
-  const back=`<button class="btn" id="back">← 돌아가기</button>`;
+  const back=footHTML()+tabBar();
   let list=[];
   if(preList)list=preList;
   else{
-    $('#app').innerHTML=`${statusHTML()}${topBack()}<div class="panel"><div class="desc">친구 정보를 불러오는 중…</div></div>`+back;
-    $('#back').onclick=()=>renderHub();
+    $('#app').innerHTML=`${statusHTML()}<div class="panel" id="frload"><div class="desc">친구 정보를 불러오는 중…</div></div>`+back;bindFoot();
     publishProfile();
     try{
       const q=await withTimeout(DBX.collection('players').orderBy('cp','desc').limit(200).get());
       list=q.docs.filter(d=>d.exists).map(d=>({id:d.id,...d.data()}));
     }catch(e){
-      if(!$('#back'))return;
+      if(!$('#frload'))return;
       renderFriendsCode('친구 정보를 불러오지 못했어요. 잠시 뒤 다시 열어 주세요.');return;
     }
-    if(!$('#back'))return;
+    if(!$('#frload'))return;
   }
   P.friends=P.friends||[];
   const byId={};list.forEach(x=>byId[x.id]=x);
@@ -1883,7 +1915,7 @@ async function renderFriends(msg,preList){
       <div style="flex:1;min-width:0"><b>${esc(x.hero||'모험가')}</b><div class="small">Lv ${x.lv||1} · ${progressText(x)}${seen(x)}</div></div>
       <button class="btn primary fbtn" data-fadd="${esc(x.id)}">${label}</button></div>`;
   const nf=friends.length,myRank=ranking.findIndex(x=>x.me)+1;
-  $('#app').innerHTML=`${statusHTML()}${topBack()}${msg?`<div class="notice">${msg}</div>`:''}
+  $('#app').innerHTML=`${statusHTML()}${msg?`<div class="notice">${msg}</div>`:''}
     ${canShare===false?'<div class="notice">⚠ 내 정보를 친구들에게 올리지 못하고 있어요. 최신 저장 코드를 한 번 불러와 주세요.</div>':''}
     ${requests.length?`<div class="panel"><div class="ptitle">📨 친구 요청 <span class="small">${requests.length}명</span></div>
       <div class="desc">나를 친구로 추가한 모험가예요. 수락하면 서로 친구가 돼요.</div>
@@ -1904,6 +1936,7 @@ async function renderFriends(msg,preList){
     ${others.length?`<div class="panel"><div class="ptitle">🌐 다른 모험가 <span class="small">${others.length}명</span></div>
       ${others.slice(0,30).map(x=>simpleRow(x,'친구 추가')).join('')}</div>`:''}
     ${back}`;
+  bindFoot();
   $('#faddbtn').onclick=async()=>{const b=$('#faddbtn');b.disabled=true;b.textContent='확인 중…';const m=await fbAddFriend($('#fcodein').value);if($('#faddbtn'))renderFriends(m);};
   $('#fcopy').onclick=e=>copyText(myShortCode(),e.currentTarget);
   $('#fshare').onclick=async e=>{
@@ -1926,7 +1959,6 @@ async function renderFriends(msg,preList){
     if(!f||!f.team){renderFriends('이 친구는 아직 팀 정보가 없어요. 친구가 게임을 한 번 더 플레이하면 대결할 수 있어요.');return;}
     startPvp({...f,id:b.dataset.duel});
   });
-  $('#back').onclick=()=>renderHub();
   if(!preList)window.scrollTo(0,0);
   // 친구 화면이 열려 있는 동안 다른 모험가의 레벨·전투력이 바뀌면 바로 다시 그림
   if(FB&&DBX===FB){
@@ -1982,7 +2014,7 @@ function copyText(txt,btn){
   function fallback(){const ta=document.createElement('textarea');ta.value=txt;document.body.appendChild(ta);ta.select();try{document.execCommand('copy');done();}catch(e){}ta.remove();}
 }
 function renderFriendsCode(msg){
-  clearBattle();
+  clearBattle();hubTab='friend';
   P.fbook=P.fbook||{};
   const me={id:P.uid,me:true,hero:P.name,...myPublic()};
   const list=[me,...Object.values(P.fbook)].sort((a,b)=>(b.cp||0)-(a.cp||0));
@@ -1996,7 +2028,7 @@ function renderFriendsCode(msg){
       <div class="fcp">⚔ ${fmt(x.cp||0)}</div>
       ${x.me?'':`<div class="fbtns"><button class="btn danger fbtn" data-duel="${esc(x.id)}">⚔ 대결</button><button class="btn fbtn" data-fdel="${esc(x.id)}">삭제</button></div>`}
     </div>`;
-  $('#app').innerHTML=`${statusHTML()}${topBack()}${msg?`<div class="notice">${msg}</div>`:''}
+  $('#app').innerHTML=`${statusHTML()}${msg?`<div class="notice">${msg}</div>`:''}
     <div class="panel"><div class="ptitle">🏆 친구 랭킹 <span class="small">전투력 순 · 친구 ${nf}명 · 내 순위 ${myRank}/${list.length}</span></div>
       ${list.map(row).join('')}
       ${nf?'':'<div class="desc">아직 친구가 없어요. 아래에서 친구 코드를 주고받아 보세요.</div>'}
@@ -2009,7 +2041,8 @@ function renderFriendsCode(msg){
       <div class="desc">친구에게 링크나 코드를 보내면 서로 친구가 될 수 있어요. 레벨업·동료 강화 뒤에 다시 보내면 친구 쪽 정보도 최신이 돼요.</div>
       <div class="grid"><button class="btn primary" id="fshare">🔗 친구 링크 보내기</button><button class="btn" id="fcopy">📋 코드 복사</button></div>
       <textarea class="fcode" rows="2" readonly id="fmycode">${myFriendCode()}</textarea></div>
-    <button class="btn" id="back">← 돌아가기</button>`;
+    ${footHTML()}${tabBar()}`;
+  bindFoot();
   $('#faddbtn').onclick=()=>{const r=addFriendByCode($('#fcodein').value);renderFriendsCode(r.msg);};
   $('#fcopy').onclick=e=>copyText(myFriendCode(),e.currentTarget);
   $('#fshare').onclick=async e=>{
@@ -2022,7 +2055,6 @@ function renderFriendsCode(msg){
     delete P.fbook[b.dataset.fdel];save();renderFriendsCode(`${esc(f.hero)}님을 친구 목록에서 삭제했어요.`);
   });
   document.querySelectorAll('[data-duel]').forEach(b=>b.onclick=()=>{const f=P.fbook[b.dataset.duel];if(f)startPvp(f);});
-  $('#back').onclick=()=>renderHub();
   window.scrollTo(0,0);
 }
 /* 친구 링크(#f=…)로 들어왔을 때 */
@@ -2159,11 +2191,15 @@ function renderHub(msg){
   clearBattle();
   const opened=migrateSave();
   if(opened!=null){save();showStory(AREAS[opened].intro,()=>renderHub(`🔓 새 지역 개방: ${AREAS[opened].flag} ${AREAS[opened].name}`));return;}
-  const a=AREAS[P.cur];
-  const areas=AREAS.map((ar,i)=>{
+  if(hubTab==='shop'){renderShop(msg);return;}
+  if(hubTab==='ally'){renderAllyTab(msg);return;}
+  if(hubTab==='friend'){renderFriends(msg);return;}
+  const a=AREAS[P.cur],prog=P.prog[P.cur],cleared=prog>=STAGES,nxt=Math.min(STAGES,prog+1);
+  // 개방된 지역 + 다음 잠긴 지역 1곳만 보여 화면을 짧게 유지
+  const areas=AREAS.slice(0,Math.min(AREAS.length,P.unlocked+2)).map((ar,i)=>{
     const locked=i>P.unlocked;
     return `<button class="area ${i===P.cur?'on':''} ${locked?'lock':''}" data-i="${i}" ${locked?'disabled':''}>
-      <span>${i+1}. ${locked?'???':ar.flag+' '+ar.name}</span><span class="small">${locked?'🔒':P.prog[i]>=STAGES?'✔ 완료':P.prog[i]+'/'+STAGES}</span></button>`;
+      <span class="an">${locked?'🔒 ???':ar.flag+' '+ar.name}</span><span class="small">${locked?'다음 지역':P.prog[i]>=STAGES?'✔ 완료':P.prog[i]+'/'+STAGES}</span></button>`;
   }).join('');
 
   const ms=MISSIONS.filter(m=>m.area===P.cur&&!m.auto);
@@ -2178,40 +2214,22 @@ function renderHub(msg){
     return `<div class="mission"><div class="info">${tag}${m.title}<small>${m.desc}<br>보상: ${m.rewardText}</small></div>${right}</div>`;
   }).join(''):'<div class="desc">이 지역에는 미션이 없다.</div>';
 
-  const allyHTML=`<div class="party" style="justify-content:flex-start">${partyIds().map(id=>`<span class="chip">${allyFace(id,'xs')} ${ALLIES[id].name} <span class="small">Lv${aData(id).lv}</span></span>`).join('')}</div>
-    <div class="teamcp">⚔ 팀 전투력 <b>${fmt(teamCP())}</b> <span class="small">주인공 ${fmt(heroCP())} + 동료 ${fmt(teamCP()-heroCP())}</span></div>
-    <div class="grid"><button class="btn m-ally" id="allies">🤝 동료 관리<small>출전·레벨업·합성·각성</small></button>
-    <button class="btn m-ally" id="friends">👥 친구<small>친구 추가 · 대결 · 랭킹</small></button></div>`;
-
-  const relicHTML=P.relics.length
-    ?P.relics.map(r=>`<div class="ally"><div class="ic">${RELICS[r].icon}</div><div>${RELICS[r].name}<small>${RELICS[r].desc}</small></div></div>`).join('')
-    :'<div class="desc">보스를 쓰러뜨리거나 미션을 완료해 유물을 얻자.</div>';
-  const keyHTML='';
-
   $('#app').innerHTML=`${statusHTML()}
     ${msg?`<div class="notice">${msg}</div>`:''}
-    <div class="panel"><div class="ptitle">${a.flag} ${a.name} <span class="small">${a.country}</span></div><div class="desc">${a.desc}</div>
+    <div class="panel"><div class="ptitle">${a.flag} ${a.name} <span class="small">${a.country}</span></div>
+      <div class="stagecur"><span class="small">${cleared?'모든 스테이지 완료':'다음 스테이지 · '+nxt+'/'+STAGES}</span>
+        <b>${cleared?'✔ '+a.name+' 정화 완료':stageName(P.cur,nxt)}</b></div>
       <div class="grid">
-        <button class="btn m-adv main full" id="map">🗺 스테이지 지도<small>${P.prog[P.cur]}/${STAGES} · ${P.prog[P.cur]>=STAGES?'완료':'다음: '+stageName(P.cur,P.prog[P.cur]+1)}</small></button>
+        <button class="btn m-adv main full" id="map">🗺 스테이지 지도<small>진행 ${prog}/${STAGES}</small></button>
         <button class="btn m-adv" id="hunt">⚔ 자유 사냥<small>경험치·골드 모으기</small></button>
         <button class="btn m-rest" id="rest" ${restLeft()>0?'disabled':''}>${restLabel()}</button>
-        <button class="btn m-shop" id="shop">🕯 상점 · 동료 소환<small>소환권 ${P.tickets}장</small></button>
-        <button class="btn m-coll" id="dex">📖 동료 도감<small>모든 동료의 이름·능력</small></button>
-        <button class="btn m-coll full" id="cos">👗 동료 코스튬<small>새 의상 해금 · 갈아입히기</small></button>
       </div>
     </div>
+    <div class="panel"><div class="ptitle">🧭 지역 이동 <span class="small">개방 ${P.unlocked+1}/${AREAS.length}</span></div><div class="areas">${areas}</div></div>
     <div class="panel"><div class="ptitle">📜 미션</div>${missionHTML}</div>
-    <div class="panel"><div class="ptitle">🤝 파티 <span class="small">이사벨 + 출전 ${P.active.length}/${MAX_ACTIVE}</span></div>${allyHTML}</div>
-    <div class="panel"><div class="ptitle">🗺 지역 이동</div>${areas}</div>
-    <div class="panel"><div class="ptitle">✨ 유물 · 희귀 아이템</div>${relicHTML}${keyHTML}</div>
-    <div class="foot"><button class="link" id="savecode">💾 저장 코드 복사</button> · <button class="link" id="totitle">타이틀로</button>
-      <div class="small" style="margin-top:2px">${cloudState==='on'?'☁ 클라우드 자동 저장 중':'이 브라우저에 자동 저장 중 · 저장 코드로 백업하세요'}</div></div>`;
+    ${tabBar()}`;
   document.querySelectorAll('.area').forEach(b=>b.onclick=()=>{P.cur=+b.dataset.i;save();renderHub();});
   document.querySelectorAll('[data-claim]').forEach(b=>b.onclick=()=>claim(b.dataset.claim));
-  $('#allies').onclick=()=>renderAllies();
-  $('#dex').onclick=()=>renderDex();
-  $('#cos').onclick=()=>renderCostume();
-  $('#friends').onclick=()=>renderFriends();
   $('#hunt').onclick=()=>startBattle({area:P.cur,hunt:true});
   $('#map').onclick=()=>renderMap(P.cur);
   $('#rest').onclick=()=>{
@@ -2224,10 +2242,52 @@ function renderHub(msg){
     const b=$('#rest');if(!b){clearInterval(restTimer);return;}
     b.disabled=restLeft()>0;b.innerHTML=restLabel();
   },1000);
-  $('#shop').onclick=()=>renderShop();
-  $('#totitle').onclick=()=>{save();renderTitle();};
-  $('#savecode').onclick=showSaveCode;
-  window.scrollTo(0,0);
+}
+/* 하단 탭: 상점 · 동료 · 모험 · 친구 */
+let hubTab='adv';
+const TABS=[['shop','🕯','상점'],['ally','🤝','동료'],['adv','🗺','모험'],['friend','👥','친구']];
+const tabBar=()=>`<nav class="tabbar">${TABS.map(([k,ic,l])=>`<button class="tab t-${k} ${hubTab===k?'on':''}" data-tab="${k}"><span class="ti">${ic}</span>${l}</button>`).join('')}</nav>`;
+document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('[data-tab]');if(b){e.preventDefault();hubTab=b.dataset.tab;renderHub();window.scrollTo(0,0);}});
+const footHTML=()=>`<div class="foot"><button class="link" id="savecode">💾 저장 코드 복사</button> · <button class="link" id="totitle">타이틀로</button>
+  <div class="small" style="margin-top:2px">${cloudState==='on'?'☁ 클라우드 자동 저장 중':'이 브라우저에 자동 저장 중 · 저장 코드로 백업하세요'}</div></div>`;
+function bindFoot(){
+  if($('#totitle'))$('#totitle').onclick=()=>{save();renderTitle();};
+  if($('#savecode'))$('#savecode').onclick=showSaveCode;
+}
+/* 출전 동료 3칸: 아이콘 + 이름, 빈 칸은 '비어있음' */
+function sortieSlotsHTML(inMgmt){
+  const slot=i=>{
+    const id=P.active[i];
+    const tap=inMgmt?'':'data-slot';
+    if(!id)return `<button class="slot empty" ${tap}><span class="sface">＋</span><b>비어있음</b><small>${inMgmt?'아래 카드에서 출전':'탭해서 편성'}</small></button>`;
+    const al=ALLIES[id];
+    return `<button class="slot" ${tap}>${allyFace(id,'sface')}<span class="sstar">${'★'.repeat(al.star)}${isMyth(id)?' 🔱':''}</span>
+      <b>${al.name}</b><small>Lv ${aData(id).lv} · ⚔ ${fmt(allyCP(id))}</small></button>`;
+  };
+  return `<div class="slots">${[0,1,2].slice(0,MAX_ACTIVE).map(slot).join('')}</div>
+    ${inMgmt?'':`<div class="fixedrow">${allyFace(FIXED,'xs')} 고정 조력자 <b>${ALLIES[FIXED].name}</b> <span class="small">Lv ${aData(FIXED).lv} · 항상 함께 출전</span></div>`}`;
+}
+document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('[data-slot]');if(b){e.preventDefault();renderAllies();window.scrollTo(0,0);}});
+/* 동료 탭 */
+function renderAllyTab(msg){
+  hubTab='ally';
+  const relicHTML=P.relics.length
+    ?P.relics.map(r=>`<div class="ally"><div class="ic">${RELICS[r].icon}</div><div>${RELICS[r].name}<small>${RELICS[r].desc}</small></div></div>`).join('')
+    :'<div class="desc">보스를 쓰러뜨리거나 미션을 완료해 유물을 얻자.</div>';
+  $('#app').innerHTML=`${statusHTML()}
+    ${msg?`<div class="notice">${msg}</div>`:''}
+    <div class="panel"><div class="ptitle">⚔ 출전 동료 <span class="small">${P.active.length}/${MAX_ACTIVE}</span></div>
+      ${sortieSlotsHTML()}
+      <div class="teamcp">⚔ 팀 전투력 <b>${fmt(teamCP())}</b> <span class="small">주인공 ${fmt(heroCP())} + 동료 ${fmt(teamCP()-heroCP())}</span></div>
+      <div class="grid">
+        <button class="btn m-ally" id="allies">🤝 동료 관리<small>출전·레벨업·합성·각성</small></button>
+        <button class="btn m-coll" id="dex">📖 동료 도감<small>모든 동료의 이름·능력</small></button>
+      </div>
+    </div>
+    <div class="panel"><div class="ptitle">✨ 유물 · 희귀 아이템</div>${relicHTML}</div>
+    ${tabBar()}`;
+  $('#allies').onclick=()=>{renderAllies();window.scrollTo(0,0);};
+  $('#dex').onclick=()=>renderDex();
 }
 
 function claim(id){
@@ -2297,7 +2357,7 @@ function renderCostume(msg){
   $('#app').innerHTML=`${statusHTML()}${topBack()}${msg?`<div class="notice">${msg}</div>`:''}
     <div class="panel"><div class="ptitle">👗 동료 코스튬</div><div class="desc">골드로 새 의상을 해금하고 갈아입힐 수 있어요. 한 번 해금한 의상은 언제든 다시 입힐 수 있어요. 의상은 모습만 바뀌고 능력치는 그대로예요.</div></div>
     ${ids.map(block).join('')}
-    <button class="btn" id="back">← 돌아가기</button>`;
+    <button class="btn" id="back">← 돌아가기</button>${tabBar()}`;
   document.querySelectorAll('[data-cosbuy]').forEach(b=>b.onclick=()=>{
     const [id,cid]=b.dataset.cosbuy.split('|'),c=COSTUMES[id].find(x=>x.id===cid);
     if(!c||!owned(id)||P.gold<c.cost||P.cos.owned[cid])return;
@@ -2332,7 +2392,7 @@ function renderDex(){
     <div class="panel"><div class="ptitle">📖 동료 도감 <span class="small">보유 ${own}/${Object.keys(ALLIES).length-1}</span></div>
       <div class="sortbar">${tabs.map(([k,l])=>`<button class="sortbtn ${String(dexStar)===String(k)?'on':''}" data-dex="${k}">${l}</button>`).join('')}</div>
       ${list.map(card).join('')}</div>
-    <button class="btn" id="back">← 돌아가기</button>`;
+    <button class="btn" id="back">← 돌아가기</button>${tabBar()}`;
   document.querySelectorAll('[data-dex]').forEach(b=>b.onclick=()=>{dexStar=b.dataset.dex;renderDex();});
   $('#back').onclick=()=>renderHub();
   window.scrollTo(0,0);
@@ -2343,7 +2403,9 @@ function renderAllies(msg){
   const own=Object.keys(ALLIES).filter(owned).sort((x,y)=>key(y)-key(x)||allyCP(y)-allyCP(x)||ALLIES[y].star-ALLIES[x].star);
   $('#app').innerHTML=`${statusHTML()}${topBack()}
     ${msg?`<div class="notice">${msg}</div>`:''}
-    <div class="panel"><div class="teamcp">⚔ 팀 전투력 <b>${fmt(teamCP())}</b></div>
+    <div class="panel"><div class="ptitle">⚔ 출전 동료 <span class="small">${P.active.length}/${MAX_ACTIVE}</span></div>
+      ${sortieSlotsHTML(true)}
+      <div class="teamcp">⚔ 팀 전투력 <b>${fmt(teamCP())}</b></div>
       <div class="small cpbreak">주인공 ${fmt(heroCP())}${partyIds().map(id=>` · ${ALLIES[id].name} ${fmt(allyCP(id))}`).join('')}</div></div>
     <div class="panel"><div class="ptitle">🕊️ 고정 조력자</div>${allyCard(FIXED)}</div>
     <div class="panel"><div class="ptitle">🤝 보유 동료 <span class="small">도감 ${own.length}/${Object.keys(ALLIES).length-1} · 출전 ${P.active.length}/${MAX_ACTIVE} · ${AWAKEN_ITEM.icon} ${AWAKEN_ITEM.name} ${P.items.stone}개</span></div>
@@ -2351,7 +2413,7 @@ function renderAllies(msg){
       ${(()=>{const pl=synthPlan(),t=pl.reduce((s,x)=>s+x.n,0);return `<button class="btn ${t?'danger':''} synall" id="synall" ${t?'':'disabled'}>🔮 일괄 합성${t?` (${t}회 가능)`:''}<small>${t?'재료가 모인 모든 캐릭터를 한 번에 합성':'합성할 수 있는 캐릭터가 없음'}</small></button>`;})()}
       <div class="sortbar"><span class="small">정렬</span>${[['cp','⚔ 전투력'],['lv','레벨'],['cnt','카드 개수']].map(([k,l])=>`<button class="sortbtn ${allySort===k?'on':''}" data-sort="${k}">${l}</button>`).join('')}</div>
       ${own.length?own.map(allyCard).join(''):'<div class="desc">아직 동료가 없다. 상점에서 소환하자.</div>'}</div>
-    <button class="btn" id="back">← 돌아가기</button>`;
+    <button class="btn" id="back">← 돌아가기</button>${tabBar()}`;
   document.querySelectorAll('[data-sortie]').forEach(b=>b.onclick=()=>toggleSortie(b.dataset.sortie));
   document.querySelectorAll('[data-syn]').forEach(b=>b.onclick=()=>synthesize(b.dataset.syn));
   document.querySelectorAll('[data-alv]').forEach(b=>b.onclick=()=>allyLevelUp(b.dataset.alv));
@@ -2392,12 +2454,13 @@ function awaken(id){
 
 /* ===================== 상점 ===================== */
 function renderShop(msg){
+  hubTab='shop';
   const rows=[
     {id:'water', name:'성수',             info:'전투 중 HP 40% 회복 (최소 60)', cost:25},
     {id:'wpn',   name:`축성된 검 +${P.wpn+1}`,  info:'공격력 +4 (영구)',          cost:wpnCost()},
     {id:'arm',   name:`축성된 사제복 +${P.arm+1}`,info:'방어력 +3, 최대 HP +10 (영구)',cost:armCost()}
   ];
-  $('#app').innerHTML=`${statusHTML()}${topBack()}
+  $('#app').innerHTML=`${statusHTML()}
     ${msg?`<div class="notice">${msg}</div>`:''}
     <div class="panel"><div class="ptitle">🕯 교구 상점</div>
       ${rows.map(r=>`<div class="shopitem"><div class="info">${r.name}<small>${r.info}</small></div>
@@ -2413,13 +2476,14 @@ function renderShop(msg){
         <button class="btn danger full" id="sumG11" ${P.gold<SUMMON11_COST?'disabled':''}>💰 골드 11회 연속<small>${fmt(SUMMON11_COST)} G (${SUMMON_COST*11-SUMMON11_COST} G 할인)</small></button>
       </div>
     </div>
-    <button class="btn" id="back">← 돌아가기</button>`;
+    <button class="btn m-coll" id="cos">👗 동료 코스튬<small>새 의상 해금 · 갈아입히기</small></button>
+    ${tabBar()}`;
+  $('#cos').onclick=()=>{renderCostume();};
   $('#sumT1').onclick=()=>summon(1,true);
   $('#sumT10').onclick=()=>summon(10,true);
   $('#sumG1').onclick=()=>summon(1,false);
   $('#sumG11').onclick=()=>summon(11,false);
   document.querySelectorAll('[data-id]').forEach(b=>b.onclick=()=>buy(b.dataset.id));
-  $('#back').onclick=()=>renderHub();
 }
 function buy(id){
   let m='';
@@ -2588,6 +2652,7 @@ function karmaTick(){
 }
 function startBattle(spec){
   BGM.play('battle');
+  hubTab=spec.pvp?'friend':'adv';
   // spec: {area, stage} 스테이지 전투 / {area, hunt:true} 자유 사냥
   const a=spec.area;
   let s=spec.stage,t;
@@ -3555,7 +3620,7 @@ function renderMap(a,msg){
         <button class="btn ${t==='boss'||t==='mid'?'danger':'primary'}" id="go" ${open?'':'disabled'}>${open?'⚔ 출전':'🔒 이전 스테이지를 먼저 클리어'}</button>
         <button class="btn" id="back">← 거점으로</button>
       </div>
-    </div>`;
+    </div>${tabBar()}`;
   document.querySelectorAll('[data-st]').forEach(b=>b.onclick=()=>{mapSel={a,s:+b.dataset.st};renderMap(a);});
   $('#go').onclick=()=>startBattle({area:a,stage:s});
   $('#back').onclick=()=>renderHub();
