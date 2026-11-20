@@ -239,6 +239,15 @@ body.title-mode{overflow:hidden}
 body:has(.status) #bgmbtn{display:none}
 .bgmmini{background:none;border:none;font-size:14px;padding:0 0 0 8px;cursor:pointer;vertical-align:middle}
 #bgmbtn{position:fixed;top:10px;right:10px;z-index:60;width:34px;height:34px;border-radius:50%;border:1px solid #33508f;background:rgba(10,18,40,.75);font-size:16px;line-height:1;cursor:pointer;padding:0}
+.stoast{position:fixed;left:50%;transform:translateX(-50%);z-index:999;display:flex;align-items:center;gap:10px;min-width:250px;max-width:92vw;padding:10px 16px;border-radius:14px;
+  background:linear-gradient(135deg,rgba(40,70,140,.96),rgba(110,60,200,.96));border:1px solid #bfe0ff;color:#fff;box-shadow:0 0 24px rgba(140,190,255,.7),0 6px 20px rgba(0,0,0,.5);
+  animation:stin .45s cubic-bezier(.2,1.4,.4,1) both;transition:opacity .5s,transform .5s}
+.stoast.out{opacity:0;transform:translate(-50%,-14px)}
+.stoast b{display:block;font-size:15px}
+.stoast small{display:block;font-size:11px;color:#d8e6ff;margin-top:2px}
+.stoast .st-ic{font-size:30px;filter:drop-shadow(0 0 8px #9fd8ff);animation:stspin 1.6s ease-in-out infinite}
+@keyframes stin{from{opacity:0;transform:translate(-50%,-30px) scale(.8)}to{opacity:1;transform:translate(-50%,0) scale(1)}}
+@keyframes stspin{50%{transform:scale(1.18) rotate(12deg)}}
 .pf-laia{box-shadow:0 0 28px rgba(255,110,40,.7),0 0 90px rgba(255,60,0,.35)}
 .pf-laia .pglow{background:radial-gradient(ellipse at 50% 100%,rgba(255,110,30,.5),transparent 62%);animation:breathe 2.2s ease-in-out infinite}
 .pf-teria{box-shadow:0 0 28px rgba(140,210,255,.75),0 0 90px rgba(80,170,255,.35)}
@@ -624,6 +633,14 @@ const FIXED='isabel';                       // 게임 시작부터 함께하는 
 const LV_CAP={0:35,1:15,2:20,3:25,4:30,5:35}; // 등급별 최대 레벨 (임시)
 const COST_F={0:1.5,1:0.5,2:0.75,3:1,4:1.5,5:2};
 const AWAKEN_MAX=3, AWAKEN_ITEM={name:'천상의 성유물',icon:'💠'};
+/* 성유물 획득 알림 (화면 위에 잠시 떠오름) */
+function stoneToast(n,why){
+  const d=document.createElement('div');d.className='stoast';
+  d.innerHTML=`<div class="st-ic">${AWAKEN_ITEM.icon}</div><div><b>${AWAKEN_ITEM.name} ×${n} 획득!</b><small>${why||''} · 보유 ${P.items.stone}개</small></div>`;
+  const prev=document.querySelectorAll('.stoast').length;d.style.top=`${14+prev*70}px`;
+  document.body.appendChild(d);d.onclick=()=>d.remove();
+  setTimeout(()=>d.classList.add('out'),3200);setTimeout(()=>d.remove(),3800);
+}
 const ALLIES={
   /* 고정 조력자 */
   isabel:     {star:0,name:'이사벨 부제', icon:'🕊️', role:'천사의 의지 · 서포터', kit:'isabel',
@@ -1592,6 +1609,7 @@ function applyReward(m){
   if(r.rosary)P.items.water+=r.rosary;
   if(r.gold)P.gold+=r.gold;
   if(r.tickets)P.tickets+=r.tickets;
+  if(r.stone){P.items.stone+=r.stone;stoneToast(r.stone,'미션 보상');}
   if(r.relic)gainRelic(r.relic);
   if(m.type==='item')delete P.keys[m.item];
 }
@@ -3225,9 +3243,9 @@ function victory(){
   P.kills[tName]=(P.kills[tName]||0)+1;
   P.wins[area]=(P.wins[area]||0)+1;
   let extra=[];
-  if(firstClear&&e.stoneFirst){P.items.stone+=e.stoneFirst;extra.push(`🏁 첫 클리어 보상: ${AWAKEN_ITEM.icon} 「${AWAKEN_ITEM.name}」 ×${e.stoneFirst}`);}
+  if(firstClear&&e.stoneFirst){P.items.stone+=e.stoneFirst;stoneToast(e.stoneFirst,'첫 클리어 보상');extra.push(`🏁 첫 클리어 보상: ${AWAKEN_ITEM.icon} 「${AWAKEN_ITEM.name}」 ×${e.stoneFirst}`);}
   if(stype==='normal'&&Math.random()<0.15){P.items.water++;extra.push('성수 획득');}
-  if(stype==='normal'&&Math.random()<DROP.stoneNormal){P.items.stone++;extra.push(`${AWAKEN_ITEM.icon} 희귀 아이템 「${AWAKEN_ITEM.name}」 획득!`);}
+  if(stype==='normal'&&Math.random()<DROP.stoneNormal){P.items.stone++;stoneToast(1,'희귀 드랍');extra.push(`${AWAKEN_ITEM.icon} 희귀 아이템 「${AWAKEN_ITEM.name}」 획득!`);}
   const first=!fromHunt&&stage>P.prog[area];
   if(first){
     P.prog[area]=stage;
@@ -3237,9 +3255,9 @@ function victory(){
     if(stype==='boss'){P.tickets+=3;extra.push('🏁 첫 클리어: 🎫 소환권 ×3');}
   }
   // 희귀 유물: 확률 드롭 (재도전으로 다시 노릴 수 있음)
-  if(stype==='mid'&&Math.random()<DROP.stoneMid){P.items.stone++;extra.push(`${AWAKEN_ITEM.icon} 희귀 아이템 「${AWAKEN_ITEM.name}」 획득!`);}
+  if(stype==='mid'&&Math.random()<DROP.stoneMid){P.items.stone++;stoneToast(1,'솔로몬 72악마 드랍');extra.push(`${AWAKEN_ITEM.icon} 희귀 아이템 「${AWAKEN_ITEM.name}」 획득!`);}
   if(stype==='boss'){
-    if(Math.random()<DROP.stoneBoss){P.items.stone++;extra.push(`${AWAKEN_ITEM.icon} 희귀 아이템 「${AWAKEN_ITEM.name}」 획득!`);}
+    if(Math.random()<DROP.stoneBoss){P.items.stone++;stoneToast(1,'나라 보스 드랍');extra.push(`${AWAKEN_ITEM.icon} 희귀 아이템 「${AWAKEN_ITEM.name}」 획득!`);}
     const d=AREAS[area].boss.drop;
     if(d&&!P.relics.includes(d)){
       if(Math.random()<DROP.seal){gainRelic(d);extra.push(`${RELICS[d].icon} 희귀 유물 「${RELICS[d].name}」 획득! (${RELICS[d].desc})`);}
