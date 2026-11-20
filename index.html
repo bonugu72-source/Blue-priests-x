@@ -855,7 +855,7 @@ const ALLIES={
   mikael:  {star:5,name:'미카엘',        icon:'🛡️', role:'정화의 날개', kit:'purify',
             desc:'정화(걸려 있는 모든 디버프 제거 + 주인공 현재 HP의 절반만큼 방어막, 3턴마다) · 평소엔 날개 베기'},
   roa:     {star:5,name:'로아',          icon:'💗', role:'유혹', kit:'charm', exclusive:true,
-            desc:'유혹(적을 유혹해 5초간 적에게 가하는 모든 공격이 치명타 · 끝나면 5초 쉬었다가 다시 사용) · 3초마다 하트를 날려 주인공 HP 조금씩 회복 · 🏆 랭크전 챌린저 승급 보상으로만 획득'},
+            desc:'유혹(적을 유혹해 5초간 적에게 가하는 모든 공격이 치명타 · 끝나면 3초 쉬었다가 다시 사용) · 3초마다 하트를 날려 주인공 HP 조금씩 회복 · 🏆 랭크전 챌린저 승급 보상으로만 획득'},
   muhee:   {star:5,name:'무희',          icon:'⚖️', role:'정의', kit:'justice',
             desc:'정의: 전투 시작 5초 후 적의 현재 체력 절반을 앗아가고, 그 대가로 무희는 쓰러진다 (전투당 1회) · 그 외의 능력은 없음'},
   aora:    {star:6,name:'대천사 아오라',  icon:'👼', role:'대천사', kit:'aora', hpMul:1.5,
@@ -3450,7 +3450,7 @@ const paraOn=()=>!!(B&&B.paraUntil&&Date.now()<B.paraUntil);
 /* 테리아: 7초마다 주인공 빙결 (얼음을 깰 때까지 행동 불가) */
 const charmOn=()=>!!(B&&B.charmUntil&&Date.now()<B.charmUntil); // 로아: 유혹 중 모든 공격 치명타
 const charmCrit=()=>isMyth('roa')?2:1.5;
-const CHARM_MS=5000, CHARM_REST=5000; // 유혹 5초 → 쉬는 시간 5초 (가동률 50%)
+const CHARM_MS=5000, CHARM_REST=3000; // 유혹 5초 → 쉬는 시간 3초
 const salvOn=()=>!!(B&&B.salvUntil&&Date.now()<B.salvUntil); // 아오라: 천사의 구원
 const pFrozen=()=>!!(B&&B.pFrozenUntil&&Date.now()<B.pFrozenUntil);
 const aFrozen=()=>!!(B&&B.aFrozenUntil&&Date.now()<B.aFrozenUntil);
