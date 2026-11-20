@@ -1054,7 +1054,7 @@ const AREAS=[
       {name:'천상의 석상',    icon:'🗿', hp:470, atk:68, def:36, xp:162, gold:86, demon:true, moves:[{t:'atk',n:'돌주먹'},{t:'strong',n:'무너지는 석상'},{t:'atk',n:'돌주먹'}]},
       {name:'심판의 횃불',    icon:'🕯️', hp:380, atk:72, def:29, xp:158, gold:84, demon:true, moves:[{t:'atk',n:'횃불 내려치기'},{t:'dot',n:'심판의 불씨',dn:'화상'},{t:'atk',n:'횃불 내려치기'}]},
       {name:'재가 된 성가대',  icon:'🎶', hp:420, atk:70, def:31, xp:160, gold:85, demon:true, moves:[{t:'atk',n:'타오르는 찬송'},{t:'sweep',n:'재의 합창',m:0.13},{t:'curse',n:'불협화음'}]},
-      {name:'타오르는 순례자', icon:'🚶', hp:410, atk:76, def:30, xp:164, gold:87, demon:true, moves:[{t:'atk',n:'불붙은 지팡이'},{t:'drain',n:'순례의 갈증'},{t:'atk',n:'불붙은 지팡이'}]}
+      {name:'타오르는 순례자', icon:'🚶', huntW:2, hp:410, atk:76, def:30, xp:164, gold:87, demon:true, moves:[{t:'atk',n:'불붙은 지팡이'},{t:'drain',n:'순례의 갈증'},{t:'atk',n:'불붙은 지팡이'}]}
     ],
     elite:{name:'천계의 수문장', icon:'⚔️', hp:5600, atk:104, def:36, xp:880, gold:640, demon:true,
       moves:[{t:'strong',n:'문을 지키는 창'},{t:'multi',n:'세 번의 경고',hits:3,m:0.55},{t:'curse',n:'출입 금지'},{t:'charge',n:'닫힌 하늘'}]},
@@ -1226,6 +1226,8 @@ function scaledEnemy(a,s,base){
   const ar=AREAS[a];
   return scaleBase(base||ar.enemies[(s-1)%ar.enemies.length],a,s);
 }
+/* 자유 사냥: huntW(가중치)가 있는 적은 더 자주 등장 (기본 1) */
+function huntPick(list){const tot=list.reduce((t,x)=>t+(x.huntW||1),0);let r=Math.random()*tot;for(const x of list){r-=(x.huntW||1);if(r<0)return x;}return list[list.length-1];}
 function stageEnemy(a,s){
   const ar=AREAS[a],t=stageType(s);
   if(t==='boss')return JSON.parse(JSON.stringify(ar.boss));
@@ -2821,7 +2823,7 @@ function startBattle(spec){
   const a=spec.area;
   let s=spec.stage,t;
   if(spec.pvp){t=spec.pvp;s=0;}
-  else if(spec.hunt){s=Math.min(14,Math.max(1,P.prog[a]));if(stageType(s)!=='normal')s=Math.max(1,s-1);t=scaledEnemy(a,s,pick(AREAS[a].enemies));}
+  else if(spec.hunt){s=Math.min(14,Math.max(1,P.prog[a]));if(stageType(s)!=='normal')s=Math.max(1,s-1);t=scaledEnemy(a,s,huntPick(AREAS[a].enemies));}
   else t=stageEnemy(a,s);
   if(!spec.pvp){const em=(!spec.hunt&&stageType(s)==='boss'&&a>=4)?LATE_BOSS_MULT:ENEMY_MULT;t={...t,hp:t.exactHp?t.hp:Math.round(t.hp*em),atk:Math.round(t.atk*em)};} // 적 체력·공격력 배율 (exactHp: 체력 고정)
   const type=spec.pvp?'pvp':spec.hunt?'normal':stageType(s);
