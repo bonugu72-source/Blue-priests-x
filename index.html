@@ -2667,7 +2667,7 @@ const RANKS=[
   {n:'마스터',icon:'👑',c:'#c78bff',lv:60,alv:35,aw:3,my:1},
   {n:'챌린저',icon:'🏆',c:'#ff6a5a',lv:70,alv:35,aw:3,my:1}
 ];
-const RANK_LP=100, RANK_WIN=25, RANK_LOSS=15;
+const RANK_LP=100, RANK_WIN=25, RANK_LOSS=15, RANK_MIN_LV=20; // 플레이어 Lv 20부터 랭크전 개방
 const RANK_AI_NAMES=['푸른 기사','심연의 사제','은빛 순례자','붉은 수도사','밤의 성가대','새벽의 파수꾼','잿빛 집행자','별빛 부제'];
 const rankState=()=>{P.rank=P.rank||{tier:0,lp:0,w:0,l:0,best:0};return P.rank;};
 const rankOf=()=>RANKS[Math.min(RANKS.length-1,rankState().tier)];
@@ -2681,6 +2681,7 @@ function rankOpponent(){
 }
 function renderRank(msg){
   hubTab='adv';
+  if(P.lv<RANK_MIN_LV){renderHub(`🔒 랭크전은 Lv ${RANK_MIN_LV}부터 열린다 (현재 Lv ${P.lv})`);return;}
   const r=rankState(),R=rankOf(),top=r.tier>=RANKS.length-1;
   $('#app').innerHTML=`${statusHTML()}${topBack()}
     ${msg?`<div class="notice">${msg}</div>`:''}
@@ -2693,7 +2694,7 @@ function renderRank(msg){
         <button class="btn danger full" id="rgo">⚔ 랭크전 시작</button>
         <button class="btn full" id="back">← 거점으로</button>
       </div></div>${tabBar()}`;
-  $('#rgo').onclick=()=>startPvp(rankOpponent());
+  $('#rgo').onclick=()=>{if(P.lv<RANK_MIN_LV)return renderRank();startPvp(rankOpponent());};
   $('#back').onclick=()=>renderHub();
   window.scrollTo(0,0);
 }
@@ -2770,7 +2771,7 @@ function renderHub(msg){
         <b>${cleared?'✔ '+a.name+' 정화 완료':stageName(P.cur,nxt)}</b></div>
       <div class="grid">
         <button class="btn m-adv main full" id="map">🗺 스테이지 지도<small>진행 ${prog}/${STAGES}</small></button>
-        <button class="btn m-rank full" id="rank">${rankOf().icon} 랭크전<small>${rankOf().n}${rankState().tier<RANKS.length-1?` · ${rankState().lp}/${RANK_LP} LP`:` · ${rankState().lp} LP`} · ${rankState().w}승 ${rankState().l}패</small></button>
+        <button class="btn m-rank full" id="rank" ${P.lv<RANK_MIN_LV?'disabled':''}>${P.lv<RANK_MIN_LV?`🔒 랭크전<small>Lv ${RANK_MIN_LV}부터 열림 (현재 Lv ${P.lv})</small></button>`:`${rankOf().icon} 랭크전<small>${rankOf().n}${rankState().tier<RANKS.length-1?` · ${rankState().lp}/${RANK_LP} LP`:` · ${rankState().lp} LP`} · ${rankState().w}승 ${rankState().l}패</small></button>`}
         <button class="btn m-adv" id="hunt">⚔ 자유 사냥<small>경험치·골드 모으기</small></button>
         <button class="btn m-rest" id="rest" ${restLeft()>0?'disabled':''}>${restLabel()}</button>
       </div>
@@ -2784,7 +2785,7 @@ function renderHub(msg){
   document.querySelectorAll('[data-claim]').forEach(b=>b.onclick=()=>claim(b.dataset.claim));
   $('#hunt').onclick=()=>startBattle({area:P.cur,hunt:true});
   $('#map').onclick=()=>renderMap(P.cur);
-  $('#rank').onclick=()=>renderRank();
+  if($('#rank'))$('#rank').onclick=()=>renderRank();
   $('#rest').onclick=()=>{
     if(restLeft()>0)return;
     P.hp=P.maxHp;P.mp=P.maxMp;P.restAt=Date.now();save();
