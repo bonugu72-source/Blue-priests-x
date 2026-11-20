@@ -237,6 +237,8 @@ body.title-mode{overflow:hidden}
 .pf-naberius.p2{box-shadow:0 0 34px rgba(255,30,50,.85),0 0 100px rgba(255,0,30,.45)}
 .pf-naberius.p2 .pglow{background:radial-gradient(ellipse at 50% 100%,rgba(255,50,30,.7),transparent 70%);animation-duration:1.2s}
 .pf-naberius.p2 img{filter:saturate(1.3) contrast(1.1)}
+.pf-perta{box-shadow:0 0 30px rgba(220,225,255,.6),0 0 90px rgba(255,215,120,.3)}
+.pf-perta .pglow{background:radial-gradient(ellipse at 50% 100%,rgba(255,230,160,.35),transparent 65%);box-shadow:inset 0 0 50px rgba(30,30,60,.6);animation:breathe 3s ease-in-out infinite}
 .pf-mumyeong{box-shadow:0 0 30px rgba(160,90,255,.7),0 0 90px rgba(110,40,220,.4)}
 .pf-mumyeong .pglow{background:radial-gradient(ellipse at 50% 100%,rgba(150,80,255,.5),transparent 65%);box-shadow:inset 0 0 50px rgba(40,0,80,.7);animation:breathe 2.4s ease-in-out infinite}
 .pf-mumyeong .pembers i{background:#b07cff;box-shadow:0 0 6px #8a4dff,0 0 12px #6a2dff}
@@ -1274,7 +1276,7 @@ const AREAS=[
   { name:'저승의 언덕', realm:'demon', country:'마계 · 죽은 자들이 넘는 언덕', flag:'⏳', rec:58, recEnd:62, glow:'#c78bff', sortie:'one',
     desc:'마계로 이어지는 첫 관문. 시간이 흐르지 않는 언덕 꼭대기에서 시간을 수호하는 타락천사가 기다린다.',
     intro:'원단수의 가장 깊은 뿌리 아래, 아무도 본 적 없는 문이 열려 있었다.\n\n문 너머는 마계였다. 잿빛 하늘 아래 끝없이 이어진 언덕, 죽은 자들이 말없이 오르는 저승의 언덕.\n\n언덕 꼭대기에서 커다란 시계 소리가 울린다. 째깍, 째깍… 그리고 멈췄다.\n\n— 이곳에는 동료 단 한 명만 함께할 수 있다. (이사벨 부제도 함께할 수 없다)',
-    outro:'멈춰 있던 시계탑의 바늘이 다시 움직이기 시작했다.\n\n페르타는 부서진 날개를 접으며 조용히 웃었다.\n\n"…시간은 결국 흐르는구나. 네가 그것을 증명했다."\n\n— 저승의 언덕 해방 —',
+    outro:'멈춰 있던 시계탑의 바늘이 다시 움직이기 시작했다.\n\n휘몰아치던 폭풍이 잦아들고, 페르타는 흰 사제복 자락을 여미며 조용히 웃었다.\n\n"…시간은 결국 흐르는구나. 네가 그것을 증명했다."\n\n— 저승의 언덕 해방 —',
     enemies:[
       {name:'언덕을 오르는 망자',  icon:'🧟', hp:820, atk:128, def:60, xp:330, gold:165, demon:true, moves:[{t:'atk',n:'움켜쥐기'},{t:'drain',n:'생기 흡수'},{t:'atk',n:'움켜쥐기'}]},
       {name:'멈춘 시간의 파수꾼',  icon:'⏱️', hp:860, atk:126, def:62, xp:332, gold:166, demon:true, moves:[{t:'strong',n:'시곗바늘 창'},{t:'atk',n:'초침 베기'},{t:'curse',n:'느려지는 시간'}]},
@@ -1290,8 +1292,8 @@ const AREAS=[
     boss:{name:'페르타', art:'perta', title:'시간을 수호하는 타락천사', hp:60000, exactHp:true, atk:180, def:60, xp:40000, gold:40000, goldFirst:0, goldRepeat:40000, demon:true, itemFirst:'time_belt',
       critAll:1.5, slashes:2, timeStop:{every:6000,ms:3000,guardMs:1000},
       madness:{at:20000,to:60000,atkMult:1.5,art:'perta',title:'시간 역행',logName:'시간 역행',
-        line:'"…아직 끝이 아니다. 시간이여, 거꾸로 흘러라."\n\n페르타가 시계 바늘을 거꾸로 돌리자, 그녀의 상처가 처음부터 없었던 것처럼 사라진다.\n\n— 시간 역행: 체력 60,000 회복 · 공격력 1.5배 —'},
-      pre:'멈춘 시계탑 위, 부서진 검은 날개를 단 천사가 내려다본다. 그 등 뒤로 거대한 시계의 원이 천천히 돈다.\n\n"시간을 거스르는 자는 시간 속에 갇힌다. 너의 한 걸음은 나의 한순간도 되지 못한다."',
+        line:'"…아직 끝이 아니다. 시간이여, 거꾸로 흘러라."\n\n페르타의 금빛 눈이 빛나자 폭풍이 거꾸로 휘돌고, 그의 상처가 처음부터 없었던 것처럼 사라진다.\n\n— 시간 역행: 체력 60,000 회복 · 공격력 1.5배 —'},
+      pre:'언덕 꼭대기, 거대한 회오리가 하늘을 휘감고 깃털과 돌조각이 멈춘 채 허공에 떠 있다.\n그 한가운데, 흰 사제복을 입은 은발의 타락천사가 금빛 눈으로 내려다본다.\n\n"시간을 거스르는 자는 시간 속에 갇힌다. 너의 한 걸음은 나의 한순간도 되지 못한다."',
       moves:[{t:'atk',n:'시곗바늘 일격'},{t:'multi',n:'초침의 연격',hits:3,m:0.45},{t:'strong',n:'정오의 심판'},{t:'curse',n:'시간의 족쇄'},{t:'sweep',n:'시간의 파도',m:0.18},{t:'atk',n:'시곗바늘 일격'},{t:'charge',n:'영원의 종소리'}]}
   }
 
@@ -1545,6 +1547,7 @@ const PORTRAIT={
   naberius:{img:'naberius.jpg',cls:'pf-naberius',pos:'50% 24%'},
   naberius2:{img:'naberius.jpg',cls:'pf-naberius p2',pos:'50% 24%'},
   naberius3:{img:'naberius3.jpg',cls:'pf-naberius p2',pos:'50% 30%'},
+  perta:{img:'perta.jpg',cls:'pf-perta',pos:'50% 24%'},
   mumyeong:{img:'mumyeong.jpg',cls:'pf-mumyeong',pos:'55% 16%'},
   darklord:{img:'naberius3.jpg',cls:'pf-naberius',pos:'100% 50%',zoom:2.6},
   botis:{img:'botis.jpg',cls:'pf-botis',pos:'50% 20%'},
