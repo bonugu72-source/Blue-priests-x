@@ -486,10 +486,27 @@ body.battle .cmds .btn{min-height:44px;padding:6px 10px}
   font-size:12px;font-weight:700;color:#7d8bb3;transition:background .15s,color .15s}
 .tab .ti{font-size:21px;line-height:1.1;filter:grayscale(.6) brightness(.85);transition:filter .15s}
 .tab.on .ti{filter:none}
-.tab.on{color:#eef3ff}
-.tab.t-shop.on{background:#3e3322}.tab.t-ally.on{background:#3d2a35}.tab.t-adv.on{background:#223a63}.tab.t-friend.on{background:#1f3b44}
+/* 탭마다 고유 색: 꺼져 있어도 옅게 보이고, 선택되면 채워짐 */
+.tab{--tc:#8d9bc4;--tb:#1a2444;color:var(--tc);opacity:.62;position:relative}
+.tab.t-shop{--tc:#e0b56a;--tb:#4a3a1f}
+.tab.t-ally{--tc:#e59ab4;--tb:#4a2a39}
+.tab.t-adv{--tc:#7fb0f0;--tb:#22406e}
+.tab.t-friend{--tc:#6fd0c0;--tb:#1d4a47}
+.tab .ti{filter:grayscale(.3) brightness(.9)}
+.tab.on{opacity:1;background:var(--tb);color:#f3f6ff}
+.tab.on::before{content:'';position:absolute;top:-6px;left:28%;right:28%;height:3px;border-radius:0 0 3px 3px;background:var(--tc)}
 .tab:active{transform:scale(.95)}
 #app:has(.tabbar) .sheet{bottom:76px}
+/* 탭별 화면 테마: 배경 빛·패널·제목이 탭 색을 은은하게 띰 (탭바가 있는 화면에서만) */
+body[data-tab=shop]{--tc:#e0b56a}body[data-tab=ally]{--tc:#e59ab4}body[data-tab=adv]{--tc:#7fb0f0}body[data-tab=friend]{--tc:#6fd0c0}
+body:has(.tabbar){--panel:color-mix(in srgb,var(--tc) 14%,#0f162c);
+  background:radial-gradient(ellipse at 50% -10%,color-mix(in srgb,var(--tc) 42%,#0b1020) 0%,var(--bg) 65%) fixed;background-color:var(--bg)}
+body:has(.tabbar) .ptitle{color:color-mix(in srgb,var(--tc) 60%,#ffffff)}
+body:has(.tabbar) :is(.mission,.stagecur,.area:not(.on),.frow:not(.me),.acard:not(.mythc),.slot.empty,.coscard){background:color-mix(in srgb,var(--tc) 7%,#0a1024)}
+body:has(.tabbar) .btn:not(.primary):not(.danger):not(.myth):not([class*=m-]){background:color-mix(in srgb,var(--tc) 14%,#18213f)}
+body:has(.tabbar) .notice{background:color-mix(in srgb,var(--tc) 16%,#101831)}
+body:has(.tabbar) .backtop{background:color-mix(in srgb,var(--tc) 18%,#141d3b)}
+body:has(.tabbar) .tabbar{background:color-mix(in srgb,var(--tc) 6%,rgba(8,12,26,.95))}
 /* 모험 탭 */
 .stagecur{display:flex;flex-direction:column;gap:2px;padding:10px 12px;border-radius:10px;background:#0c1329}
 .stagecur b{font-family:'Noto Serif KR',serif;font-size:18px;color:#dbe7ff}
@@ -2246,7 +2263,7 @@ function renderHub(msg){
 /* 하단 탭: 상점 · 동료 · 모험 · 친구 */
 let hubTab='adv';
 const TABS=[['shop','🕯','상점'],['ally','🤝','동료'],['adv','🗺','모험'],['friend','👥','친구']];
-const tabBar=()=>`<nav class="tabbar">${TABS.map(([k,ic,l])=>`<button class="tab t-${k} ${hubTab===k?'on':''}" data-tab="${k}"><span class="ti">${ic}</span>${l}</button>`).join('')}</nav>`;
+const tabBar=()=>{document.body.dataset.tab=hubTab;return `<nav class="tabbar">${TABS.map(([k,ic,l])=>`<button class="tab t-${k} ${hubTab===k?'on':''}" data-tab="${k}"><span class="ti">${ic}</span>${l}</button>`).join('')}</nav>`;};
 document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('[data-tab]');if(b){e.preventDefault();hubTab=b.dataset.tab;renderHub();window.scrollTo(0,0);}});
 const footHTML=()=>`<div class="foot"><button class="link" id="savecode">💾 저장 코드 복사</button> · <button class="link" id="totitle">타이틀로</button>
   <div class="small" style="margin-top:2px">${cloudState==='on'?'☁ 클라우드 자동 저장 중':'이 브라우저에 자동 저장 중 · 저장 코드로 백업하세요'}</div></div>`;
