@@ -21,6 +21,8 @@ body{
   transition:background-color .15s;
 }
 body.flash{background-color:#3a0f16}
+body.holyflash{background-color:#2a3550}
+.awkc{display:block;font-size:11px;opacity:.85;margin-top:2px}.awkc.ready{color:#ffe08a;opacity:1;font-weight:700}
 #app{max-width:480px;margin:0 auto;padding:12px 12px 24px;min-height:100dvh;display:flex;flex-direction:column;gap:10px}
 button{font-family:inherit;color:inherit;cursor:pointer}
 button:disabled{cursor:default}
@@ -2705,7 +2707,7 @@ function cmdHTML(){
       <button class="btn full" data-back="1" ${dis}>← 뒤로</button></div>`;
   }
   return `${cdBar}<div class="grid">
-    <button class="btn primary full" data-act="attack" ${dis}>${pFrozen()?`🧊 얼음을 깨는 중… ${Math.ceil((B.pFrozenUntil-Date.now())/1000)}초`:'⚔ 공격'}</button>
+    <button class="btn primary full" data-act="attack" ${dis}>${pFrozen()?`🧊 얼음을 깨는 중… ${Math.ceil((B.pFrozenUntil-Date.now())/1000)}초`:`⚔ 공격<span class="awkc ${(B.atkN||0)===AWAKEN_SKILL.every-1?'ready':''}">✨ 각성 ${'●'.repeat(B.atkN||0)}${'○'.repeat(AWAKEN_SKILL.every-(B.atkN||0))} ${(B.atkN||0)===AWAKEN_SKILL.every-1?'다음 공격 발동!':''}</span>`}</button>
     <button class="btn ${B.defending?'guardon':''}" data-act="defend" ${B.defending||B.busy||pFrozen()?'disabled':''}>${B.defending?'🛡 방어 중':'🛡 방어'}<small>${B.defending?'공격하면 해제':'피해 40% 감소 · 동료도 공격 멈춤'}</small></button>
     <button class="btn" data-act="itemmenu" ${dis}>🧪 아이템</button>
     <button class="btn full" data-act="flee" ${(B.busy||B.isBoss)?'disabled':''}>${B.pvp?'대결 중에는 도망칠 수 없다':B.isBoss?'보스전에서는 도망칠 수 없다':'🏃 도망 (60%)'}</button>
@@ -2826,6 +2828,13 @@ function flushFx(){
   B.fxq=[];
 }
 
+// 주인공 각성 스킬: 공격 5회마다 자동 발동
+const AWAKEN_SKILL={every:5,mult:3,name:'대천사의 심판'};
+function awakenStrike(){
+  addLog(`✨ 각성 스킬 발동!`);
+  document.body.classList.add('holyflash');setTimeout(()=>document.body.classList.remove('holyflash'),350);
+  hitEnemy(AWAKEN_SKILL.mult,`✨ 「${AWAKEN_SKILL.name}」`);
+}
 function hitEnemy(mult,label){
   const e=B.e;
   if(B.evade){B.evade=false;addLog(`${label}! — 적이 모습을 감춰 빗나갔다`);queueFx('enemy','MISS','mpf');return;}
@@ -3087,6 +3096,8 @@ function act(kind,arg){
   if(kind==='attack'||kind==='item'){B.guard=false;B.defending=false;}
   if(kind==='attack'){
     hitEnemy(1,'공격');
+    B.atkN=(B.atkN||0)+1;
+    if(B.atkN>=AWAKEN_SKILL.every){B.atkN=0;if(e.hp>0)awakenStrike();}
   }else if(kind==='skill'){
     const s=SKILLS.find(x=>x.id===arg);
     if(!s||P.mp<s.mp||B.silence)return;
