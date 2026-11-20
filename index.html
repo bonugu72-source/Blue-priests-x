@@ -909,6 +909,7 @@ const ALLY_IMG={
   sakura:{src:'ally_sakura.jpg',pos:'50% 10%',face:'49% 11%',size:'450%'},
   kirie:{src:'ally_kirie.jpg',pos:'50% 18%',face:'50% 19%'},
   mikael:{src:'ally_mikael.jpg',pos:'45% 28%',face:'38% 33%',size:'240%'},
+  roa:{src:'ally_roa.jpg',pos:'50% 24%',face:'50% 31%',size:'400%'},
   muhee:{src:'ally_muhee.jpg',pos:'50% 20%',face:'50% 24%',size:'420%'},
   aora:{src:'ally_aora.jpg',pos:'50% 18%',face:'50% 24%',size:'420%'},
   miner:{src:'ally_miner.jpg',pos:'50% 15%',face:'50% 21%',size:'450%'},
@@ -2624,7 +2625,7 @@ function pvpEnemyActs(e){
       case 'twin':     dmg(6+lv*1.8,0.5,`${nm}의 쌍검 ①`);dmg(6+lv*1.8,0.5,`${nm}의 쌍검 ②`);break;
       case 'guard':    if(e.hp<e.maxHp*0.5&&Math.random()<0.3)heal(0.06);else dmg(9+lv*2.8,0.4,`${nm}의 방패 강타`);break;
       case 'chant':    if(e.hp<e.maxHp*0.7&&Math.random()<0.4)heal(0.12);else dmg(7+lv*2.4,0.5,`${nm}의 빛의 음표`);break;
-      case 'charm':    dmg((12+lv*3.6)*1.5,0.4,`${nm}의 하트 키스 (치명타)`);break;
+      case 'charm':    dmg((12+lv*3.6)*1.5,0.4,`${nm}의 하트 화살 (치명타)`);break;
       case 'justice':  if(!B.pvpMuhee&&Date.now()-(B.startAt||0)>=(a.my?3000:5000)){B.pvpMuhee=true;const d=Math.floor(P.hp/2);P.hp-=d;addLog(`⚖️ ${nm}의 정의! 주인공 체력 절반(${d})을 앗아갔다`);queueFx('player','⚖️-'+d,'pdmg');}break;
       case 'aora':     if(Math.random()<0.3){B.curse=Math.max(B.curse,2);addLog(`${nm}의 천사의 구원 — 주인공이 속박되어 방어력 감소`);}else dmg(16+lv*5,0.3,`${nm}의 천사의 심판`);break;
       case 'tide':     dmg(12+lv*4,0.5,`${nm}의 물살`);break;
@@ -3903,9 +3904,9 @@ function alliesAct(){
           }else addLog(`${nm}의 정화 — ${debuffs.join(', ')} 제거`);
         }else allyHit(10+lv*3.6,`${nm}의 날개 베기`,0.4);
         break;}
-      case 'charm':{ // 로아: 유혹 (5초간 모든 공격 치명타) · 평소엔 하트 키스
-        if(!charmOn()){B.charmUntil=Date.now()+5000;addLog(`💗 ${nm}의 유혹 — ${e.name}이(가) 넋을 잃었다! 5초간 모든 공격이 치명타`);queueFx('enemy','💗 유혹','mpf');}
-        else allyHit(12+lv*3.6,`${nm}의 하트 키스`,0.4);
+      case 'charm':{ // 로아: 유혹 (5초간 모든 공격 치명타) · 평소엔 하트 화살
+        if(!charmOn()){B.charmUntil=Date.now()+5000;addLog(`💗 ${nm}의 유혹 — ${e.name}이(가) 빈틈을 드러냈다! 5초간 모든 공격이 치명타`);queueFx('enemy','💗 유혹','mpf');}
+        else allyHit(12+lv*3.6,`${nm}의 하트 화살`,0.4);
         break;}
       case 'justice':{ // 무희: 정의 — 시작 5초 후 적 현재 체력 절반, 이후 무희 쓰러짐
         if(B.muheeDone)break;
