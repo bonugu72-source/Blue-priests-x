@@ -2669,12 +2669,12 @@ const RANKS=[
   {n:'골드',icon:'🥇',c:'#ffd24a',lv:30,alv:20,aw:1,my:0},
   {n:'플래티넘',icon:'💠',c:'#5fe0c8',lv:40,alv:25,aw:2,my:0},
   {n:'다이아',icon:'💎',c:'#7fb8ff',lv:50,alv:30,aw:3,my:0},
-  {n:'마스터',icon:'👑',c:'#c78bff',lv:60,alv:35,aw:3,my:1},
-  {n:'챌린저',icon:'🏆',c:'#ff6a5a',lv:70,alv:35,aw:3,my:1}
+  {n:'마스터',icon:'👑',c:'#c78bff',lv:60,alv:40,aw:3,my:1},
+  {n:'챌린저',icon:'🏆',c:'#ff6a5a',lv:70,alv:45,aw:3,my:1}
 ];
 const RANK_REWARD={1:{stone:1},2:{gold:20000},3:{stone:3},4:{gold:40000},5:{stone:5},6:{ally:'roa'}}; // 티어 승급 보상 (티어당 1회)
 const rankRewardText=t=>{const w=RANK_REWARD[t];if(!w)return '';return w.ally?`★5 ${ALLIES[w.ally].name} (챌린저 전용)`:w.stone?`💠 천상의 성유물 ×${w.stone}`:`${fmt(w.gold)} 코인`;};
-const RANK_LP=100, RANK_WIN=25, RANK_LOSS=15, RANK_MIN_LV=20, RANK_EGG_LP=500; // 플레이어 Lv 20부터 랭크전 개방
+const RANK_LP=100, RANK_WIN=20, RANK_LOSS=15, RANK_MIN_LV=20, RANK_EGG_LP=500; // 플레이어 Lv 20부터 랭크전 개방
 const RANK_AI_NAMES=['푸른 기사','심연의 사제','은빛 순례자','붉은 수도사','밤의 성가대','새벽의 파수꾼','잿빛 집행자','별빛 부제'];
 const rankState=()=>{P.rank=P.rank||{tier:0,lp:0,w:0,l:0,best:0};return P.rank;};
 const rankOf=()=>RANKS[Math.min(RANKS.length-1,rankState().tier)];
@@ -2684,7 +2684,7 @@ function rankOpponent(){
   const L=R.lv,u=Math.min(AREAS.length-1,Math.floor(L/4)); // 티어 레벨 기준 주인공 능력치 (장비·유물 포함 수준)
   return {id:'rank-ai',ranked:true,rtier:r.tier,hero:`${R.n} ${pick(RANK_AI_NAMES)}`,cp:0,
     team:{atk:12+3*(L-1)+6*u,def:5+2*(L-1)+5*u,maxHp:100+15*(L-1)+18*u,maxMp:30,lv:L,
-      party:party.map(id=>({id,lv:Math.min(LV_CAP[5],R.alv),aw:R.aw,my:R.my,tr:0}))}};
+      party:party.map(id=>({id,lv:R.alv,aw:R.aw,my:R.my,tr:0}))}};
 }
 function renderRank(msg){
   hubTab='adv';
