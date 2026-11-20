@@ -849,7 +849,7 @@ const ALLIES={
   gaia:    {star:5,name:'가이아 수도사',  icon:'🔷', role:'약점 간파', kit:'weakspot',
             desc:'약점: 15% 확률로 적의 약점을 찾아 공격력 3배의 고정 피해(방어력 무시) · 평소엔 창 찌르기 · 눈썰미: 출전 중 나라 보스 처치 시 💠 천상의 성유물 획득 확률 +10%'},
   sakura:  {star:5,name:'사쿠라',        icon:'🌸', role:'벚꽃바람', kit:'sakura',
-            desc:'3초마다 벚꽃바람(적의 치명타 확률 50% 감소) · 전투 중 쓰러져도 7초 후 HP 50%로 부활(전투가 끝날 때까지 계속) · 벚꽃 칼날 공격'},
+            desc:'3초마다 벚꽃바람(적의 치명타 확률 50% 감소) · 전투 중 쓰러져도 9초 후 HP 50%로 부활(전투가 끝날 때까지 계속) · 벚꽃 칼날 공격'},
   kirie:   {star:5,name:'키리에',        icon:'🪶', role:'폭풍의 날개', kit:'storm',
             desc:'날갯짓으로 폭풍을 일으켜 5초 동안 주인공 치명타 확률 2배 · 전투에서 처음 쓰러진 동료를 HP 50%로 부활(1회) · 폭풍 중엔 깃털 칼날 공격'},
   mikael:  {star:5,name:'미카엘',        icon:'🛡️', role:'정화의 날개', kit:'purify',
@@ -861,7 +861,7 @@ const ALLIES={
   aora:    {star:6,name:'대천사 아오라',  icon:'👼', role:'대천사', kit:'aora', hpMul:1.5,
             desc:'천사의 구원(적을 3초간 속박 · 그동안 적 공격력 1.5배 감소 · 주인공 피해 1.5배 증가) · 5초마다 시야를 가리는 안개(2턴간 적 공격 35% 빗나감) · 패시브 「천사의 심판」: 흡혈(준 피해의 50% 회복) + 5초마다 생명력 흡수 · 상점 소환으로만 획득 (합성 불가)'},
   miner:   {star:5,name:'미네르',        icon:'🌊', role:'물의 여신', kit:'tide', hpMul:0.6,
-            desc:'침몰(적을 물속으로 끌어내려 3턴간 적 공격력 감소) · 물보라(2턴간 동료가 받는 피해 절반) · 체력이 적어 쉽게 쓰러지지만, 쓰러지면 물의 여신 「미네르바」로 각성해 HP 100%로 부활(1회) — 이후 공격이 고정 피해 + 치명타'},
+            desc:'침몰(적을 물속으로 끌어내려 3턴간 적 공격력 감소) · 물보라(2턴간 동료가 받는 피해 절반) · 체력이 적어 쉽게 쓰러지지만, 쓰러지면 물의 여신 「미네르바」로 각성해 HP 60%로 부활(1회) — 이후 공격이 고정 피해 + 치명타'},
   vista5:  {star:5,name:'비스타',        icon:'🚂', role:'열차 소환', kit:'train',
             desc:'3초마다 열차를 소환해 적을 관통(기본 공격의 2배 · 방어력 무시) · 열차 폭파로 적의 시야 차단(2턴간 적 공격 35% 빗나감) · 평소엔 군도 베기'},
   elise:   {star:5,name:'엘리스',        icon:'🍂', role:'정화의 바람', kit:'breeze', hpMul:2.5,
@@ -870,7 +870,7 @@ const ALLIES={
             desc:'보석처럼 반짝이는 광선 공격 · 적이 힘을 모으거나 3턴마다 프리즘 굴절(다음 적 공격 피해 절반, 절반은 적에게 반사)'}
 };
 /* ★5 티어 — 신화 제외 최대 전투력: 1티어 4000 · 2티어 3300 · 3티어 2700 */
-const TIER5={guseju:1,asiris:1,karma:1,pasri:1,vista5:1,roa:1,danian:2,elia:2,kirie:2,gaia:2,elise:2,miner:2,muhee:3,siren:3,mikael:3,sakura:3};
+const TIER5={guseju:1,asiris:1,karma:1,pasri:1,vista5:1,roa:1,danian:2,elia:2,kirie:2,gaia:2,elise:2,miner:1,muhee:3,siren:3,mikael:3,sakura:3};
 const TIER5_CP={1:4000,2:3300,3:2700};
 /* 신화: 최대 레벨에서 열림 · 능력치 2배 */
 const MYTH_COST={1:3000,2:5000,3:5000,4:10000,5:30000,6:50000}, MYTH_STONE5=2;
@@ -882,7 +882,7 @@ const MYTH_SKILL={
   elia:  {name:'사계의 화원',desc:'보호막을 펼칠 때 주인공·동료 HP 회복 · 속박 2턴'},
   pasri: {name:'피의 등불',desc:'고정 피해를 줄 때마다 적에게 출혈(3턴간 매 턴 피해의 30%)'},
   gaia:  {name:'꿰뚫는 눈',desc:'약점을 찾을 확률이 15% → 30%로 강화'},
-  sakura:{name:'만개',desc:'부활 대기 7초 → 4초 · 벚꽃바람이 적의 치명타 확률을 75% 낮춤'},
+  sakura:{name:'만개',desc:'부활 대기 9초 → 4초 · 벚꽃바람이 적의 치명타 확률을 75% 낮춤'},
   kirie: {name:'폭풍의 수호천사',desc:'부활을 두 번까지 · 폭풍 중 치명타 피해 2배'},
   mikael:{name:'대천사의 가호',desc:'방어막이 현재 HP 전부만큼 · 정화 주기 2턴'},
   roa:   {name:'매혹의 여왕',desc:'하트 회복량 2배 · 유혹 중 치명타 피해 1.5배 → 2배'},
@@ -2919,7 +2919,7 @@ function allyCard(id){
     btns.push(`<button class="btn myth ${ok?'':'off'}" data-myth="${id}" ${ok?'':'disabled'}>🔱 신화 승급 ${fmt(mc)} G${st?` · ${AWAKEN_ITEM.icon}${st}`:''}</button>`);
   }
   if(al.star>=5)btns.push(aw>=AWAKEN_MAX?`<button class="btn" disabled>각성 완료</button>`
-    :(()=>{const ok=P.items.stone>=1&&cnt>=2;return `<button class="btn ${ok?'danger':''}" data-awk="${id}" ${ok?'':'disabled'}>각성 ${aw}/${AWAKEN_MAX}<small>${AWAKEN_ITEM.icon}1 · 같은 카드 1장 (${Math.max(0,cnt-1)}/1)</small></button>`;})());
+    :(()=>{const c=awakenCost(id),ok=P.items.stone>=c.stone&&cnt>=1+c.card;return `<button class="btn ${ok?'danger':''}" data-awk="${id}" ${ok?'':'disabled'}>각성 ${aw}/${AWAKEN_MAX}<small>${c.card?`${AWAKEN_ITEM.icon}1 · 같은 카드 1장 (${Math.max(0,cnt-1)}/1)`:`${AWAKEN_ITEM.icon}${c.stone} (전용 캐릭터 · 카드 불필요)`}</small></button>`;})());
   return `<div class="acard ${isFixed?'fixed':''} ${my?'mythc':''}"><div class="ally"><div class="ic">${allyFace(id,'md')}</div><div style="flex:1">
     ${isFixed?'<span class="tag t-ally">고정 조력자</span>':`<span class="gold">${'★'.repeat(al.star)}</span>`} ${al.name}${my?' <span class="mytag">신화</span>':''}${aw?` <span class="gold">각성 ${aw}</span>`:''}${TIER5[id]?` <span class="small">${TIER5[id]}티어</span>`:''}
     <span class="small">Lv ${d.lv}/${cap} · ⚔ ${fmt(allyCP(id))}${!isFixed&&!needSyn?' · ×'+cnt:''}</span>
@@ -3069,13 +3069,17 @@ function mythUp(id){
     ${sk?`<div class="notice" style="margin-top:12px">신화 고유 능력 「${sk.name}」 해금<br><span class="small">${sk.desc}</span></div>`:''}</div>`,
     ()=>renderAllies(`🔱 ${al.name} 신화 승급!`),true));
 }
+/* 전용 캐릭터(로아 등)는 같은 카드를 얻을 수 없어 카드 대신 천상의 성유물을 더 바친다 */
+const AWAKEN_EXCL_STONE=3;
+const awakenCost=id=>ALLIES[id].exclusive?{stone:AWAKEN_EXCL_STONE,card:0}:{stone:1,card:1};
 function awaken(id){
-  if(ALLIES[id].star<5||P.items.stone<1||(P.roster[id]||0)<2||(P.awaken[id]||0)>=AWAKEN_MAX)return;
-  P.items.stone--;P.roster[id]--;P.awaken[id]=(P.awaken[id]||0)+1;save();
+  const c=awakenCost(id);
+  if(ALLIES[id].star<5||P.items.stone<c.stone||(P.roster[id]||0)<1+c.card||(P.awaken[id]||0)>=AWAKEN_MAX)return;
+  P.items.stone-=c.stone;P.roster[id]-=c.card;P.awaken[id]=(P.awaken[id]||0)+1;save();
   const al=ALLIES[id];
   showStory(`<div class="sum s5"><div class="sum-title">각성</div><div class="sum-stars">${'★'.repeat(5)}</div>${allyPortrait(id)}
     <div class="sum-name">${al.name}</div><div class="small">각성 ${P.awaken[id]} / ${AWAKEN_MAX}</div>
-    <div class="notice" style="margin-top:12px">${AWAKEN_ITEM.name} 1개와 같은 카드 1장을 바쳤다 — 능력 +${P.awaken[id]*20}%</div></div>`,
+    <div class="notice" style="margin-top:12px">${c.card?`${AWAKEN_ITEM.name} 1개와 같은 카드 1장을`:`${AWAKEN_ITEM.name} ${c.stone}개를`} 바쳤다 — 능력 +${P.awaken[id]*20}%</div></div>`,
     ()=>renderAllies(`💠 ${al.name} 각성 ${P.awaken[id]}단계`),true);
 }
 
@@ -3239,15 +3243,16 @@ function isabelTick(){
   P.hp+=hh;stat('heal',FIXED,hh);addLog(`🕊️ 이사벨 부제의 치유 기도 — HP ${hh} 회복`);queueFx('player','+'+hh,'heal');
   renderBattle();
 }
-/* 사쿠라: 3초마다 벚꽃바람 · 쓰러지면 7초 후 HP 50% 부활 (전투 끝까지 반복) */
+/* 사쿠라: 3초마다 벚꽃바람 · 쓰러지면 9초 후 HP 50% 부활 (전투 끝까지 반복) */
+const SAKURA_REVIVE=9000;
 const sakuraWind=()=>!!(B&&B.windUntil&&Date.now()<B.windUntil);
 function sakuraTick(){
   if(!B||B.over||B.won||!$('#modal').classList.contains('hidden'))return;
   const h=B.ahp.sakura;if(!h)return;
   const now=Date.now();
   if(h.hp<=0){
-    if(!B.sakuraDeadAt){B.sakuraDeadAt=now;addLog(`🌸 사쿠라가 쓰러졌다… ${isMyth('sakura')?4:7}초 후 다시 피어난다`);}
-    else if(now-B.sakuraDeadAt>=(isMyth('sakura')?4000:7000)){
+    if(!B.sakuraDeadAt){B.sakuraDeadAt=now;addLog(`🌸 사쿠라가 쓰러졌다… ${isMyth('sakura')?4:SAKURA_REVIVE/1000}초 후 다시 피어난다`);}
+    else if(now-B.sakuraDeadAt>=(isMyth('sakura')?4000:SAKURA_REVIVE)){
       h.hp=Math.round(h.max*0.5);B.sakuraDeadAt=0;B.windTick=0;
       addLog(`🌸 벚꽃잎이 모여들어 사쿠라가 부활했다! (HP 50%)`);renderBattle();
     }
@@ -3288,7 +3293,8 @@ function aoraTick(){
 }
 const TRAIN_MS=3000;
 const PASRI_WAIT=9000; // 파스리 충전 시간 (10초 → 9초)
-const vistaBase=lv=>12.6+lv*4.0; // 기존 14+lv*4.4에서 약 9% 하향
+const KARMA_TAL=1.25; // 카르마 부적 피해 +25%
+const vistaBase=lv=>13.3+lv*4.2; // 14+lv*4.4 → 12.6+lv*4.0(하향) → 소폭 재상향
 function trainTick(){
   if(!B||B.over||B.won||!$('#modal').classList.contains('hidden'))return;
   const id='vista5',h=B.ahp[id],e=B.e;
@@ -3313,7 +3319,7 @@ function karmaTick(){
     else{
       if(B.immune){addLog('📜 카르마의 화염 부적 — ⏸ 피해 무효');continue;}
       if(B.vsil&&B.vsil.karma&&Math.random()<0.3){addLog('📜 카르마의 화염 부적 — 🔇 침묵에 막혀 무효');continue;}
-      const d=Math.max(1,Math.round((6+lv*2.2)*m*rnd(0.9,1.1)*(B.vslow&&B.vslow.karma?0.6:1)));stat('dmg','karma',Math.min(d,e.hp));e.hp=Math.max(0,e.hp-d);
+      const d=Math.max(1,Math.round((6+lv*2.2)*KARMA_TAL*m*rnd(0.9,1.1)*(B.vslow&&B.vslow.karma?0.6:1)));stat('dmg','karma',Math.min(d,e.hp));e.hp=Math.max(0,e.hp-d);
       B.eburn={dmg:Math.max(1,Math.round(d*0.4)),turns:2};
       addLog(`📜 카르마의 화염 부적 — ${d} 피해 · 불태움`);queueFx('enemy','🔥'+d,'dmg');
     }
@@ -3530,8 +3536,8 @@ const stormOn=()=>!!(B&&B.stormUntil&&Date.now()<B.stormUntil);
 /* 키리에: 처음 쓰러진 동료 부활 (신화 2회) */
 function allyDown(id){
   if(B&&id==='miner'&&!B.minerva&&B.ahp.miner){
-    const h=B.ahp.miner;B.minerva=true;h.hp=h.max;B.stun.miner=0;
-    addLog(`🌊 미네르가 쓰러지는 순간, 물기둥이 솟구친다 — 물의 여신 「미네르바」 각성! (HP 100% · 고정 피해 + 치명타)`);
+    const h=B.ahp.miner;B.minerva=true;h.hp=Math.round(h.max*0.6);B.stun.miner=0;
+    addLog(`🌊 미네르가 쓰러지는 순간, 물기둥이 솟구친다 — 물의 여신 「미네르바」 각성! (HP 60% · 고정 피해 + 치명타)`);
     queueFx('player','🌊 미네르바','mpf');document.body.classList.add('holyflash');setTimeout(()=>document.body.classList.remove('holyflash'),400);
     stat('heal','miner',h.hp);return true;
   }
@@ -3591,7 +3597,7 @@ function renderBattle(){
   if(paraOn())st.push('⚡ 동료 마비 (방어 -50%)');
   if(B.noHeal)st.push('🚫 회복 불가');
   if(sakuraWind())st.push('🌸 벚꽃바람');
-  if(B.sakuraDeadAt)st.push(`🌸 부활까지 ${Math.max(0,Math.ceil(((isMyth('sakura')?4000:7000)-(Date.now()-B.sakuraDeadAt))/1000))}초`);
+  if(B.sakuraDeadAt)st.push(`🌸 부활까지 ${Math.max(0,Math.ceil(((isMyth('sakura')?4000:SAKURA_REVIVE)-(Date.now()-B.sakuraDeadAt))/1000))}초`);
   if(B.tsAt)st.push(`⏳ 시간정지 ${Math.max(0,Math.ceil((B.tsAt-Date.now())/1000))}초`);
   if(charmOn())st.push(`💗 유혹 ${Math.ceil((B.charmUntil-Date.now())/1000)}초`);
   if(salvOn())st.push(`👼 천사의 구원 ${Math.ceil((B.salvUntil-Date.now())/1000)}초`);
@@ -3856,7 +3862,7 @@ function alliesAct(){
         break;
       case 'talisman': // 카르마: 시야 차단 부적 (실시간 부적은 karmaTick)
         if(!B.blind){B.blind=3;addLog(`${nm}의 봉인 부적 — 적의 시야를 가렸다 (3턴간 적 공격 35% 빗나감)`);}
-        else allyHit(10+lv*3.8,`${nm}의 부적 투척`,0.3);
+        else allyHit((10+lv*3.8)*KARMA_TAL,`${nm}의 부적 투척`,0.3);
         break;
       case 'earth':{ // 다니안: 대검 · 무력화 · 회피
         B.danT++;
@@ -3866,7 +3872,7 @@ function alliesAct(){
       case 'flower': // 엘리아: 꽃의 보호막 · 속박
         if(B.eliaCD>0)B.eliaCD--;
         if(!B.ashield){
-          B.shield=Math.round((P.maxHp*0.08+lv*2)*m);B.ashield=2;
+          B.shield=Math.round((P.maxHp*0.08+lv*2)*m*0.85);B.ashield=2; // 보호막량 15% 감소
           addLog(`${nm} — 색이 다른 꽃들이 피어나 보호막을 펼친다 (주인공 ${B.shield} 흡수 · 동료 피해 절반, 2턴)`);
           if(isMyth(id))heal(0.08,`🔱 사계의 화원`);
         }else if(B.eliaCD<=0&&!B.sealed){B.sealed=isMyth(id)?2:1;B.eliaCD=4;addLog(`${nm}의 꽃의 속박 — 덩굴과 꽃이 적을 휘감았다 (${B.sealed}턴간 행동 불가)`);}
