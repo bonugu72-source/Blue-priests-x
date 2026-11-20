@@ -875,6 +875,7 @@ const RELICS={
   seal_bune:   {name:'부네의 인장',             icon:'🟣', desc:'공격력 +8',                     apply:p=>{p.atk+=8;}},
   seal_andras: {name:'안드라스의 인장',         icon:'⚪', desc:'방어력 +6 · 최대 HP +20',        apply:p=>{p.def+=6;p.maxHp+=20;p.hp+=20;}},
   seal_furfur: {name:'푸르푸르의 인장',         icon:'🔵', desc:'최대 HP +40 · 공격력 +4',        apply:p=>{p.maxHp+=40;p.hp+=40;p.atk+=4;}},
+  seal_naberius3:{name:'각성한 나베리우스의 십자가',  icon:'✝️', desc:'공격 +26 · 방어 +22 · 최대 HP +200',apply:p=>{p.atk+=26;p.def+=22;p.maxHp+=200;p.hp+=200;}},
   seal_twins:{name:'쌍둥이의 반지',  icon:'💍', desc:'공격 +24 · 방어 +20 · 최대 HP +180',apply:p=>{p.atk+=24;p.def+=20;p.maxHp+=180;p.hp+=180;}},
   seal_agares:{name:'아가레스의 인장',  icon:'⚔️', desc:'공격 +22 · 방어 +18 · 최대 HP +160',apply:p=>{p.atk+=22;p.def+=18;p.maxHp+=160;p.hp+=160;}},
   seal_terazio:{name:'테라지오의 비늘',  icon:'🐉', desc:'공격 +20 · 방어 +16 · 최대 HP +140',apply:p=>{p.atk+=20;p.def+=16;p.maxHp+=140;p.hp+=140;}},
@@ -1171,6 +1172,33 @@ const AREAS=[
         moves:[{t:'atk',n:'얼음 송곳'},{t:'freezebreath',n:'얼어붙은 숨결'},{t:'multi',n:'빙정 난무',hits:4,m:0.35},{t:'sweep',n:'눈보라의 날개',m:0.15},{t:'charge',n:'절대 영도',kind:'zero'},{t:'atk',n:'얼음 송곳'},{t:'charge',n:'절대 영도',kind:'zero'}]},
       pre:'불타는 도시 쪽의 쌍둥이가 날개를 펼치며 일어선다. 손끝에서 불길이 치솟는다.\n\n"언니는 쉬고 있어. 이 정도는 나 혼자서도 충분하니까."',
       moves:[{t:'atk',n:'불꽃 손톱'},{t:'dot',n:'타오르는 낙인',dn:'화상'},{t:'curse',n:'약점의 각인'},{t:'strong',n:'지옥불 폭발'},{t:'multi',n:'불꽃 날개 연타',hits:3,m:0.45},{t:'charge',n:'업화의 날개'}]}
+  },
+  { name:'종말한 이차원', country:'끝나 버린 또 하나의 세계', flag:'🩸', rec:50, recEnd:54, glow:'#ff2a3a',
+    desc:'모든 것이 끝나 버린 이차원. 무너진 저택 앞에서 각성한 나베리우스가 흑기사 군단과 함께 기다린다.',
+    intro:'갈라졌던 두 세계가 하나로 이어지던 순간, 그 틈 너머로 또 하나의 세계가 보였다.\n\n하늘은 잿빛으로 멈춰 있고, 땅에는 핏빛 불길만이 타오르는 곳. 이미 끝나 버린 이차원이었다.\n\n무너진 저택 앞, 찢긴 정장을 피로 물들인 백발의 남자가 우리를 기다리고 있었다.\n\n"…돌아왔다. 이번에는 무릎 꿇게 해 주마, 작은 사제여."',
+    outro:'핏빛 불길이 꺼지고, 흑기사들의 붉은 눈이 하나둘 빛을 잃는다.\n\n각성한 나베리우스는 마지막까지 웃으며 무너진 저택의 그림자 속으로 사라졌다.\n\n"…기억해 두마. 너의 이름을."\n\n— 종말한 이차원 해방 —',
+    enemies:[
+      {name:'핏빛 갑옷의 흑기사', icon:'🛡️', hp:700, atk:112, def:52, xp:290, gold:145, demon:true, moves:[{t:'atk',n:'흑철 검'},{t:'strong',n:'핏빛 내려베기'},{t:'atk',n:'흑철 검'}]},
+      {name:'종말의 창기병',      icon:'🔱', hp:680, atk:116, def:50, xp:292, gold:146, demon:true, moves:[{t:'atk',n:'창 찌르기'},{t:'multi',n:'연속 찌르기',hits:3,m:0.45},{t:'dot',n:'핏빛 창끝',dn:'출혈'}]},
+      {name:'잿빛 망령',          icon:'👻', hp:640, atk:114, def:48, xp:288, gold:144, demon:true, moves:[{t:'atk',n:'잿빛 손길'},{t:'curse',n:'끝나 버린 세계의 저주'},{t:'drain',n:'생기 흡수'}]},
+      {name:'핏빛 불꽃 정령',     icon:'🔥', hp:620, atk:118, def:46, xp:289, gold:145, demon:true, moves:[{t:'atk',n:'불꽃 손톱'},{t:'dot',n:'핏빛 불길',dn:'화상'},{t:'sweep',n:'불꽃 폭발',m:0.15}]},
+      {name:'무너진 저택의 파수꾼', icon:'🗿', hp:740, atk:110, def:54, xp:294, gold:147, demon:true, moves:[{t:'strong',n:'돌 주먹'},{t:'atk',n:'짓밟기'},{t:'curse',n:'저택의 저주'}]}
+    ],
+    elite:{name:'19군단의 흑기사장', icon:'⚔️', hp:11000, atk:152, def:50, xp:1650, gold:1180, demon:true,
+      moves:[{t:'strong',n:'흑철 대검'},{t:'multi',n:'군단의 연격',hits:3,m:0.55},{t:'curse',n:'충성의 맹세'},{t:'charge',n:'군단 돌격 명령'}]},
+    mid:{name:'아스모데우스', art:'asmoday', title:'솔로몬 72악마 · 제32영 · 왕 · 72군단', hp:25000, atk:158, def:48, xp:6400, gold:4900, demon:true,
+      pre:'세 개의 머리를 가진 왕이 불을 뿜는 용을 타고 내려선다.\n\n"나베리우스의 손님인가. 저택의 문을 지나고 싶다면 나를 먼저 넘어라."',
+      moves:[{t:'atk',n:'왕의 창'},{t:'hellfire',n:'용의 불길'},{t:'multi',n:'세 머리의 포효',hits:3,m:0.5},{t:'curse',n:'왕의 저주'},{t:'charge',n:'72군단의 진군'}]},
+    boss:{name:'각성한 나베리우스', art:'naberius3', title:'솔로몬 72악마 · 제24영 · 후작 · 19군단의 주인 · 각성', hp:50000, exactHp:true, atk:266, def:60, xp:32000, gold:30000, goldFirst:50000, goldRepeat:30000, demon:true, drop:'seal_naberius3',
+      dimension:true, slashes:4,
+      relay:{at:10000,
+        lord:{name:'어둠의 군주',title:'나베리우스의 흑기사 군단',art:'darklord',hp:30000,atk:200,def:56,
+          line:'"…잠시 쉬겠다. 나의 군주들이여, 저 사제를 상대해라."\n\n나베리우스가 핏빛 불길 속으로 물러나자, 붉은 눈의 흑기사들이 일제히 검을 뽑아 든다.\n\n— 어둠의 군주 등장: 체력 30,000 —',
+          moves:[{t:'multi',n:'군주들의 일제 돌격',hits:4,m:0.45},{t:'strong',n:'흑철 대검'},{t:'sweep',n:'군단의 함성',m:0.2},{t:'atk',n:'흑철 검'},{t:'charge',n:'어둠의 진군'}]},
+        back:{hp:30000,vamp:0.5,drainEvery:5000,drainPct:0.08,drainMul:5,
+          line:'"충분히 쉬었다. 이제… 너희의 생명을 받아 가마."\n\n쓰러진 흑기사들의 핏빛 불길이 나베리우스에게 빨려 들어간다. 찢긴 상처가 순식간에 아물었다.\n\n— 나베리우스 귀환: 체력 30,000 · 흡혈 · 생명력 흡수 —'}},
+      pre:'무너진 저택 앞, 핏빛 불길이 치솟는다.\n찢기고 피로 물든 정장 차림의 백발 남자가 낡은 나무 십자가를 끌며 걸어 나온다.\n그 뒤로 붉은 눈의 흑기사들이 대열을 이룬다.\n\n"이번에는 봐주지 않는다. 19군단의 주인이 직접 상대해 주마."',
+      moves:[{t:'multi',n:'참격 난무',hits:12,m:0.32},{t:'curse',n:'쉰 목소리의 저주'},{t:'silence',n:'현혹의 언변'},{t:'sweep',n:'19군단의 참격',m:0.3},{t:'strong',n:'붉은 화염 참격'},{t:'multi',n:'흑기사 군단의 돌격',hits:6,m:0.65},{t:'charge',n:'후작의 위광'}]}
   }
 
 ];
@@ -1183,7 +1211,7 @@ const stageRec=(a,s)=>Math.round(AREAS[a].rec+(s-1)*(AREAS[a].recEnd-AREAS[a].re
 const RT={atkCd:1500,defCd:400,itemCd:1500,fleeCd:1000,allyMs:1500,bossMs:1500,midMs:1600,normalMs:1800};
 const DEF_FLOOR=0.3; // 방어력이 아무리 높아도 적 공격의 30%는 들어감
 const ENEMY_MULT=1.3, LATE_BOSS_MULT=1.1; // 적 공격력·체력 1.3배 (나베리우스·보티스는 1.1배)
-const NORMAL_HP=[2.4,4,4.5,5,5.5,6,6.5,7,7.5,8,8.5,9,9.5], NORMAL_REWARD=1.5; // 일반 적이 몇 턴은 버티며 공격하도록
+const NORMAL_HP=[2.4,4,4.5,5,5.5,6,6.5,7,7.5,8,8.5,9,9.5,10], NORMAL_REWARD=1.5; // 일반 적이 몇 턴은 버티며 공격하도록
 function scaleBase(base,a,s){
   const f=1+0.06*(s-1);
   return {...base,hp:Math.round(base.hp*f*NORMAL_HP[a]),atk:Math.round(base.atk*f),def:Math.round(base.def*(1+0.04*(s-1))),
@@ -1397,6 +1425,8 @@ const PORTRAIT={
   furfur:{img:'furfur.jpg',cls:'pf-furfur',pos:'50% 14%'},
   naberius:{img:'naberius.jpg',cls:'pf-naberius',pos:'50% 24%'},
   naberius2:{img:'naberius.jpg',cls:'pf-naberius p2',pos:'50% 24%'},
+  naberius3:{img:'naberius3.jpg',cls:'pf-naberius p2',pos:'50% 30%'},
+  darklord:{img:'naberius3.jpg',cls:'pf-naberius',pos:'100% 50%',zoom:2.6},
   botis:{img:'botis.jpg',cls:'pf-botis',pos:'50% 20%'},
   laia:{img:'twins.jpg',cls:'pf-laia',pos:'74% 46%',zoom:2.2},
   teria:{img:'twins.jpg',cls:'pf-teria',pos:'28% 46%',zoom:2.2},
@@ -1414,7 +1444,7 @@ const PORTRAIT={
 function portraitHTML(key,size){
   const p=PORTRAIT[key];
   const bolts=key==='furfur'?`<svg class="pbolts" viewBox="0 0 100 140" preserveAspectRatio="none"><path class="bolt" d="M7,0 L3,18 L9,17 L2,42"/><path class="bolt b2" d="M95,58 L99,76 L93,77 L99,100"/><path class="bolt b3" d="M90,0 L86,12 L92,12 L87,26"/></svg><div class="prain"></div>`:'';
-  const embers=(key.startsWith('naberius')||key.startsWith('amon')||key.startsWith('valefor')||key==='gamigin'||key==='barbatos'||key==='terazio'||key.startsWith('agares')||key==='laia')?`<div class="pembers">${Array.from({length:14},(_,i)=>`<i style="left:${(i*37)%100}%;animation-delay:${-(i*0.43).toFixed(2)}s;animation-duration:${(2.6+(i%5)*0.5).toFixed(1)}s"></i>`).join('')}</div>`:'';
+  const embers=(key.startsWith('naberius')||key==='darklord'||key.startsWith('amon')||key.startsWith('valefor')||key==='gamigin'||key==='barbatos'||key==='terazio'||key.startsWith('agares')||key==='laia')?`<div class="pembers">${Array.from({length:14},(_,i)=>`<i style="left:${(i*37)%100}%;animation-delay:${-(i*0.43).toFixed(2)}s;animation-duration:${(2.6+(i%5)*0.5).toFixed(1)}s"></i>`).join('')}</div>`:'';
   return `<div class="portrait ${p.cls} ${size||''}"><img src="${p.img}" alt="" style="object-position:${p.pos}${p.zoom?`;transform:scale(${p.zoom});transform-origin:${p.pos}`:''}">${bolts}${embers}<div class="pflash"></div><div class="pglow"></div></div>`;
 }
 let svgSeq=0;
@@ -2696,12 +2726,12 @@ function synthAll(){
 }
 
 /* ===================== 전투 ===================== */
-function clearBattle(){forcedMv=null;if(B&&B.enemyT)clearInterval(B.enemyT);if(B&&B.allyT)clearInterval(B.allyT);document.body.classList.remove('pfrozen');if(B&&B.freezeT)clearInterval(B.freezeT);if(B&&B.sakuraT)clearInterval(B.sakuraT);document.body.classList.remove('battle');if(B&&B.waveT)clearInterval(B.waveT);if(B&&B.soulT)clearInterval(B.soulT);if(B&&B.paraT)clearInterval(B.paraT);if(B&&B.zapT)clearInterval(B.zapT);if(B&&B.karmaT)clearInterval(B.karmaT);if(B&&B.isaT)clearInterval(B.isaT);B=null;}
+function clearBattle(){forcedMv=null;if(B&&B.enemyT)clearInterval(B.enemyT);if(B&&B.allyT)clearInterval(B.allyT);document.body.classList.remove('pfrozen');if(B&&B.freezeT)clearInterval(B.freezeT);if(B&&B.sakuraT)clearInterval(B.sakuraT);document.body.classList.remove('battle');if(B&&B.waveT)clearInterval(B.waveT);if(B&&B.soulT)clearInterval(B.soulT);if(B&&B.drainT)clearInterval(B.drainT);if(B&&B.paraT)clearInterval(B.paraT);if(B&&B.zapT)clearInterval(B.zapT);if(B&&B.karmaT)clearInterval(B.karmaT);if(B&&B.isaT)clearInterval(B.isaT);B=null;}
 /* 반사·부적 등으로 적이 턴 밖에서 쓰러졌을 때 */
 function winNow(){
   if(!B||B.won)return;
-  if((B.e.berserk&&!B.berserked)||(B.e.madness&&!B.maddened)||(B.e.awaken&&!B.awoke)||(B.e.twin&&!B.twinned)){B.e.hp=Math.max(1,B.e.hp);renderBattle();return;}
-  B.won=true;B.busy=true;if(B.enemyT)clearInterval(B.enemyT);if(B.allyT)clearInterval(B.allyT);if(B.freezeT)clearInterval(B.freezeT);document.body.classList.remove('pfrozen');if(B.sakuraT)clearInterval(B.sakuraT);if(B.paraT)clearInterval(B.paraT);if(B.waveT)clearInterval(B.waveT);if(B.soulT)clearInterval(B.soulT);
+  if((B.e.berserk&&!B.berserked)||(B.e.madness&&!B.maddened)||(B.e.awaken&&!B.awoke)||(B.e.twin&&!B.twinned)||(B.e.relay&&(B.relayStage||0)<2)){B.e.hp=Math.max(1,B.e.hp);renderBattle();return;}
+  B.won=true;B.busy=true;if(B.enemyT)clearInterval(B.enemyT);if(B.allyT)clearInterval(B.allyT);if(B.freezeT)clearInterval(B.freezeT);document.body.classList.remove('pfrozen');if(B.sakuraT)clearInterval(B.sakuraT);if(B.paraT)clearInterval(B.paraT);if(B.waveT)clearInterval(B.waveT);if(B.soulT)clearInterval(B.soulT);if(B.drainT)clearInterval(B.drainT);
   if(B.zapT)clearInterval(B.zapT);if(B.karmaT)clearInterval(B.karmaT);if(B.isaT)clearInterval(B.isaT);
   renderBattle();setTimeout(victory,750);
 }
@@ -2837,7 +2867,7 @@ function allyStep(){
   if(!B||B.over||B.won||B.busy||B.defending||!$('#modal').classList.contains('hidden'))return;
   const e=B.e;if(e.hp<=0)return;
   alliesAct();
-  if(e.hp<=0&&((e.berserk&&!B.berserked)||(e.madness&&!B.maddened)||(e.awaken&&!B.awoke)||(e.twin&&!B.twinned)))e.hp=1;
+  if(e.hp<=0&&((e.berserk&&!B.berserked)||(e.madness&&!B.maddened)||(e.awaken&&!B.awoke)||(e.twin&&!B.twinned)||(e.relay&&(B.relayStage||0)<2)))e.hp=1;
   if(P.hp<=0){P.hp=0;B.over=true;renderBattle();setTimeout(defeat,900);return;}
   if(e.hp<=0){winNow();return;}
   if(checkPhase())return;
@@ -2878,6 +2908,16 @@ const paraOn=()=>!!(B&&B.paraUntil&&Date.now()<B.paraUntil);
 /* 테리아: 7초마다 주인공 빙결 (얼음을 깰 때까지 행동 불가) */
 const pFrozen=()=>!!(B&&B.pFrozenUntil&&Date.now()<B.pFrozenUntil);
 const aFrozen=()=>!!(B&&B.aFrozenUntil&&Date.now()<B.aFrozenUntil);
+/* 각성한 나베리우스(귀환 후): 5초마다 주인공·동료의 생명력 흡수 */
+function drainTick(){
+  if(!B||B.over||B.won||P.hp<=0||!$('#modal').classList.contains('hidden')){if(B&&B.e.relay)B.drainAt=Date.now()+B.e.relay.back.drainEvery;return;}
+  const e=B.e,bk=e.relay.back;B.drainAt=Date.now()+bk.drainEvery;
+  let tot=0;const pd=Math.max(1,Math.round(P.maxHp*bk.drainPct));P.hp=Math.max(1,P.hp-pd);tot+=pd;
+  for(const id of partyIds()){const h=B.ahp&&B.ahp[id];if(h&&h.hp>0){const ad=Math.max(1,Math.round(h.max*bk.drainPct));h.hp=Math.max(1,h.hp-ad);tot+=ad;}}
+  const heal=Math.min(e.maxHp-e.hp,tot*bk.drainMul);e.hp+=heal;
+  addLog(`🩸 생명력 흡수 — 주인공 ${pd} · 동료 전원 HP ${Math.round(bk.drainPct*100)}% 흡수 · 나베리우스 ${heal} 회복`);queueFx('player','🩸-'+pd,'pdmg');
+  renderBattle();
+}
 const ZERO_FREEZE_MS=3000;
 function freezePlayer(ms){
   B.pFrozenUntil=Math.max(B.pFrozenUntil||0,Date.now()+ms);
@@ -2981,6 +3021,7 @@ function renderBattle(){
   if(B.noHeal)st.push('🚫 회복 불가');
   if(sakuraWind())st.push('🌸 벚꽃바람');
   if(B.sakuraDeadAt)st.push(`🌸 부활까지 ${Math.max(0,Math.ceil(((isMyth('sakura')?4000:7000)-(Date.now()-B.sakuraDeadAt))/1000))}초`);
+  if(B.drainAt)st.push(`🩸 흡수 ${Math.max(0,Math.ceil((B.drainAt-Date.now())/1000))}초`);
   if(B.freezeAt)st.push(pFrozen()?'🧊 주인공 빙결':`🧊 빙결 ${Math.max(0,Math.ceil((B.freezeAt-Date.now())/1000))}초`);
   if(aFrozen())st.push('❄ 동료 빙결');
   if(B.soulAt)st.push(`🗡 영혼 일격 ${Math.max(0,Math.ceil((B.soulAt-Date.now())/1000))}초${B.guard?' · 🛡 방어 태세':''}`);
@@ -3003,6 +3044,7 @@ function renderBattle(){
   if(B.reflect)passive.push('↩ 뒤집힌 시간: 준 피해의 50% 반사');
   if(e.bleedOnHit)passive.push('🩸 공격 시 출혈');
   if(e.burnHit)passive.push('🔥 공격 시 화상');
+  if(e.relay)passive.push((B.relayStage||0)===0?`🩸 HP ${fmt(e.relay.at)} 이하 어둠의 군주 교대`:B.relayStage===1?'🩸 어둠의 군주를 쓰러뜨리면 나베리우스 귀환':'🩸 흡혈 50% · 5초마다 생명력 흡수');
   if(e.twin)passive.push(B.twinned?'🧊 7초마다 빙결 · 얼어붙은 숨결 · ❄ 절대 영도(방어 필수)':`☯ HP ${fmt(e.twin.at)} 이하 쌍둥이 교대`);
   if(e.critAll)passive.push(`💥 모든 공격 치명타 ×${e.critAll*(B.awoke&&e.awaken?e.awaken.critMult:1)}`);
   if(e.awaken)passive.push(B.awoke?'💢 각성: 3초마다 영혼을 가르는 일격':`💢 HP ${fmt(e.awaken.at)} 이하 각성`);
@@ -3320,6 +3362,7 @@ function hitPlayer(mult,label){
   if(B.shield>0){absorbed=Math.min(B.shield,d);B.shield-=absorbed;d-=absorbed;stat('heal','elia',absorbed);}
   if(B.mshield>0&&d>0){const a2=Math.min(B.mshield,d);B.mshield-=a2;d-=a2;absorbed+=a2;stat('heal','mikael',a2);}
   P.hp=Math.max(0,P.hp-d);
+  if(B.vamp&&d>0&&e.hp>0){const vh=Math.min(e.maxHp-e.hp,Math.round(d*B.vamp));if(vh>0){e.hp+=vh;label+=` (🩸 흡혈 +${vh})`;}}
   addLog(`${label}!${critOn?' 💥치명타':''} ${d} 피해${B.defending?' (방어)':''}${B.ward?' (결계)':''}${absorbed?` (🛡 보호막 ${absorbed} 흡수)`:''}`);
   queueFx('player','-'+d,'pdmg');
   if(e.bleedOnHit&&Math.random()<0.35){B.dot={name:'출혈',dmg:Math.max(5,Math.round(e.atk*0.3)),turns:3};addLog('🩸 독사의 이빨 — 출혈 (3턴)');}
@@ -3369,7 +3412,7 @@ function act(kind,arg){
     }
     addLog('도망에 실패했다!');
   }
-  if(e.hp<=0&&((e.berserk&&!B.berserked)||(e.madness&&!B.maddened)||(e.awaken&&!B.awoke)||(e.twin&&!B.twinned)))e.hp=1; // 폭주·광기 전에는 쓰러지지 않음
+  if(e.hp<=0&&((e.berserk&&!B.berserked)||(e.madness&&!B.maddened)||(e.awaken&&!B.awoke)||(e.twin&&!B.twinned)||(e.relay&&(B.relayStage||0)<2)))e.hp=1; // 폭주·광기 전에는 쓰러지지 않음
   const cd=kind==='attack'||kind==='skill'?RT.atkCd:kind==='item'?RT.itemCd:kind==='flee'?RT.fleeCd:RT.defCd;
   B.cdUntil=Date.now()+cd;B.cdLen=cd;B.menu='main';
   setTimeout(()=>{if(B&&!B.over&&!B.won&&$('#modal').classList.contains('hidden'))renderBattle();},cd+30);
@@ -3381,6 +3424,27 @@ function act(kind,arg){
 
 function checkPhase(){
   const e=B.e;
+  if(e.relay&&!(B.relayStage>0)&&e.hp>0&&e.hp<=e.relay.at){
+    const w=e.relay.lord,em=LATE_BOSS_MULT;
+    B.relayStage=1;B.charging=false;B.chargeKind=null;
+    B.nab={name:e.name,title:e.title,art:e.art,atk:e.atk,def:e.def,moves:e.moves,slashes:e.slashes,dimension:e.dimension,maxHp:e.maxHp};
+    e.name=w.name;e.title=w.title;e.art=w.art;e.hp=w.hp;e.maxHp=w.hp;e.atk=Math.round(w.atk*em);e.def=w.def;e.moves=w.moves;e.slashes=0;e.dimension=false;
+    addLog(`🩸 나베리우스가 물러나고 「어둠의 군주」가 나섰다! (체력 ${fmt(w.hp)})`);
+    showStory(`<div class="sum s5"><div class="sum-title">어둠의 군주</div><div class="intro-art">${portraitHTML(w.art,'big')}</div><div class="sum-name">${w.name}</div><div class="small">${w.title}</div><p class="sum-desc" style="color:#ffb0b0">${esc(w.line).replace(/\n/g,'<br>')}</p></div>`,
+      ()=>{renderBattle();setTimeout(enemyTurn,500);},true);
+    return true;
+  }
+  if(e.relay&&B.relayStage===1&&e.hp<=1){
+    const n=B.nab,bk=e.relay.back;
+    B.relayStage=2;B.charging=false;B.chargeKind=null;
+    Object.assign(e,{name:n.name,title:n.title,art:n.art,atk:n.atk,def:n.def,moves:n.moves,slashes:n.slashes,dimension:n.dimension,maxHp:n.maxHp,hp:bk.hp});
+    B.vamp=bk.vamp;
+    addLog(`🩸 어둠의 군주 격파 — 나베리우스가 체력 ${fmt(bk.hp)}로 돌아왔다! (흡혈 · 생명력 흡수)`);
+    document.body.classList.add('flash');setTimeout(()=>document.body.classList.remove('flash'),400);
+    showStory(`<div class="sum s5"><div class="sum-title">귀환</div><div class="intro-art">${portraitHTML(n.art,'big')}</div><div class="sum-name">${n.name}</div><p class="sum-desc" style="color:#ffb0b0">${esc(bk.line).replace(/\n/g,'<br>')}</p></div>`,
+      ()=>{B.drainAt=Date.now()+bk.drainEvery;B.drainT=setInterval(drainTick,bk.drainEvery);renderBattle();setTimeout(enemyTurn,500);},true);
+    return true;
+  }
   if(e.twin&&!B.twinned&&e.hp>0&&e.hp<=e.twin.at){
     const w=e.twin,em=LATE_BOSS_MULT;
     B.twinned=true;B.charging=false;B.chargeKind=null;
