@@ -851,6 +851,8 @@ const ALLIES={
             desc:'날갯짓으로 폭풍을 일으켜 5초 동안 주인공 치명타 확률 2배 · 전투에서 처음 쓰러진 동료를 HP 50%로 부활(1회) · 폭풍 중엔 깃털 칼날 공격'},
   mikael:  {star:5,name:'미카엘',        icon:'🛡️', role:'정화의 날개', kit:'purify',
             desc:'정화(걸려 있는 모든 디버프 제거 + 주인공 현재 HP의 절반만큼 방어막, 3턴마다) · 평소엔 날개 베기'},
+  muhee:   {star:5,name:'무희',          icon:'⚖️', role:'정의', kit:'justice',
+            desc:'정의: 전투 시작 5초 후 적의 현재 체력 절반을 앗아가고, 그 대가로 무희는 쓰러진다 (전투당 1회) · 그 외의 능력은 없음'},
   aora:    {star:6,name:'대천사 아오라',  icon:'👼', role:'대천사', kit:'aora', hpMul:1.5,
             desc:'천사의 구원(적을 3초간 속박 · 그동안 적 공격력 1.5배 감소 · 주인공 피해 1.5배 증가) · 5초마다 시야를 가리는 안개(2턴간 적 공격 35% 빗나감) · 패시브 「천사의 심판」: 흡혈(준 피해의 50% 회복) + 5초마다 생명력 흡수 · 상점 소환으로만 획득 (합성 불가)'},
   miner:   {star:5,name:'미네르',        icon:'🌊', role:'물의 여신', kit:'tide', hpMul:0.6,
@@ -863,7 +865,7 @@ const ALLIES={
             desc:'보석처럼 반짝이는 광선 공격 · 적이 힘을 모으거나 3턴마다 프리즘 굴절(다음 적 공격 피해 절반, 절반은 적에게 반사)'}
 };
 /* ★5 티어 — 신화 제외 최대 전투력: 1티어 4000 · 2티어 3300 · 3티어 2700 */
-const TIER5={guseju:1,asiris:1,karma:1,pasri:1,vista5:1,danian:2,elia:2,kirie:2,gaia:2,elise:2,miner:2,siren:3,mikael:3,sakura:3};
+const TIER5={guseju:1,asiris:1,karma:1,pasri:1,vista5:1,danian:2,elia:2,kirie:2,gaia:2,elise:2,miner:2,muhee:3,siren:3,mikael:3,sakura:3};
 const TIER5_CP={1:4000,2:3300,3:2700};
 /* 신화: 최대 레벨에서 열림 · 능력치 2배 */
 const MYTH_COST={1:3000,2:5000,3:5000,4:10000,5:30000,6:50000}, MYTH_STONE5=2;
@@ -878,6 +880,7 @@ const MYTH_SKILL={
   sakura:{name:'만개',desc:'부활 대기 7초 → 4초 · 벚꽃바람이 적의 치명타 확률을 75% 낮춤'},
   kirie: {name:'폭풍의 수호천사',desc:'부활을 두 번까지 · 폭풍 중 치명타 피해 2배'},
   mikael:{name:'대천사의 가호',desc:'방어막이 현재 HP 전부만큼 · 정화 주기 2턴'},
+  muhee: {name:'심판의 춤',desc:'정의 발동까지 5초 → 3초'},
   aora:  {name:'대천사의 강림',desc:'천사의 구원 지속 3초 → 5초 · 생명력 흡수량 2배'},
   miner: {name:'바다의 여왕',desc:'물보라 보호막 2턴 → 3턴 · 미네르바의 치명타 피해 1.5배 → 2배'},
   vista5:{name:'특급 열차',desc:'열차 관통 피해가 기본 공격의 2배 → 3배 · 시야 차단 3턴'},
@@ -900,6 +903,7 @@ const ALLY_IMG={
   sakura:{src:'ally_sakura.jpg',pos:'50% 10%',face:'49% 11%',size:'450%'},
   kirie:{src:'ally_kirie.jpg',pos:'50% 18%',face:'50% 19%'},
   mikael:{src:'ally_mikael.jpg',pos:'45% 28%',face:'38% 33%',size:'240%'},
+  muhee:{src:'ally_muhee.jpg',pos:'50% 20%',face:'50% 24%',size:'420%'},
   aora:{src:'ally_aora.jpg',pos:'50% 18%',face:'50% 24%',size:'420%'},
   miner:{src:'ally_miner.jpg',pos:'50% 15%',face:'50% 21%',size:'450%'},
   vista5:{src:'ally_vista5.jpg',pos:'55% 18%',face:'57% 27%',size:'400%'},
@@ -2613,6 +2617,7 @@ function pvpEnemyActs(e){
       case 'twin':     dmg(6+lv*1.8,0.5,`${nm}의 쌍검 ①`);dmg(6+lv*1.8,0.5,`${nm}의 쌍검 ②`);break;
       case 'guard':    if(e.hp<e.maxHp*0.5&&Math.random()<0.3)heal(0.06);else dmg(9+lv*2.8,0.4,`${nm}의 방패 강타`);break;
       case 'chant':    if(e.hp<e.maxHp*0.7&&Math.random()<0.4)heal(0.12);else dmg(7+lv*2.4,0.5,`${nm}의 빛의 음표`);break;
+      case 'justice':  if(!B.pvpMuhee&&Date.now()-(B.startAt||0)>=(a.my?3000:5000)){B.pvpMuhee=true;const d=Math.floor(P.hp/2);P.hp-=d;addLog(`⚖️ ${nm}의 정의! 주인공 체력 절반(${d})을 앗아갔다`);queueFx('player','⚖️-'+d,'pdmg');}break;
       case 'aora':     if(Math.random()<0.3){B.curse=Math.max(B.curse,2);addLog(`${nm}의 천사의 구원 — 주인공이 속박되어 방어력 감소`);}else dmg(16+lv*5,0.3,`${nm}의 천사의 심판`);break;
       case 'tide':     dmg(12+lv*4,0.5,`${nm}의 물살`);break;
       case 'train':    if(Math.random()<0.4)dmg(vistaBase(lv)*(a.my?3:2),0,`${nm}의 열차 관통`);else dmg(vistaBase(lv),0.5,`${nm}의 군도 베기`);break;
@@ -3809,6 +3814,17 @@ function alliesAct(){
             addLog(`${nm}의 정화 — ${debuffs.length?debuffs.join(', ')+' 제거 · ':''}방어막 ${B.mshield}`);queueFx('player','🛡'+B.mshield,'mpf');
           }else addLog(`${nm}의 정화 — ${debuffs.join(', ')} 제거`);
         }else allyHit(10+lv*3.6,`${nm}의 날개 베기`,0.4);
+        break;}
+      case 'justice':{ // 무희: 정의 — 시작 5초 후 적 현재 체력 절반, 이후 무희 쓰러짐
+        if(B.muheeDone)break;
+        const wait=isMyth(id)?3000:5000,left=Math.ceil((wait-(Date.now()-(B.startAt||Date.now())))/1000);
+        if(left>0){addLog(`⚖️ ${nm} — 정의의 춤을 추는 중… (${left}초)`);break;}
+        B.muheeDone=true;
+        if(B.immune){addLog(`⚖️ ${nm}의 정의 — ⏸ 피해가 무효화됐다`);}
+        else{const d=Math.floor(e.hp/2);stat('dmg',id,Math.min(d,e.hp));e.hp=Math.max(0,e.hp-d);
+          addLog(`⚖️ ${nm}의 정의! ${e.name}의 체력 절반(${fmt(d)})을 앗아갔다`);queueFx('enemy','⚖️'+d,'crit');
+          document.body.classList.add('holyflash');setTimeout(()=>document.body.classList.remove('holyflash'),400);}
+        const h=B.ahp[id];if(h){h.hp=0;}addLog(`💀 ${nm} — 정의의 대가로 쓰러졌다`);
         break;}
       case 'aora':{ // 대천사 아오라: 천사의 구원 · 흡혈
         const base=16+lv*5;
