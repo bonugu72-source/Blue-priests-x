@@ -963,6 +963,9 @@ const COSTUMES={
     {id:'sakura_dress',name:'검은 원피스',desc:'검은 후드 원피스 · 갈색 부츠',cost:30000,img:{src:'cos_sakura_dress.jpg',pos:'50% 14%',face:'50% 13%',size:'450%'}},
     {id:'sakura_swim',name:'여름 수영복',desc:'꽃무늬 분홍 수영복',cost:50000,img:{src:'cos_sakura_swim.jpg',pos:'50% 14%',face:'50% 13%',size:'450%'}}
   ],
+  isabel:[
+    {id:'isabel_casual',name:'고양이와 휴일',desc:'갈색 재킷 · 검은 치마 · 검은 고양이',cost:50000,img:{src:'cos_isabel_casual.jpg',pos:'58% 22%',face:'56% 21%',size:'420%'}}
+  ],
   guseju:[
     {id:'guseju_jacket',name:'격전의 재킷',desc:'초록 재킷 · 흰 티셔츠 · 붉은 은총의 기운',cost:50000,img:{src:'cos_guseju_jacket.jpg',pos:'78% 40%',face:'71% 41%',size:'420%'}}
   ],
@@ -2995,7 +2998,7 @@ function renderCostume(msg){
   P.cos=P.cos||{owned:{},eq:{}};
   const ids=Object.keys(COSTUMES);
   const block=id=>{
-    const al=ALLIES[id],has=owned(id),cur=cosOf(id);
+    const al=ALLIES[id],has=id===FIXED||owned(id),cur=cosOf(id);
     const base=ALLY_IMG[id];
     const card=(c)=>{
       const isBase=!c,own=isBase||P.cos.owned[c.id],on=isBase?!cur:(cur&&cur.id===c.id);
@@ -3018,7 +3021,7 @@ function renderCostume(msg){
     <button class="btn" id="back">← 돌아가기</button>${tabBar()}`;
   document.querySelectorAll('[data-cosbuy]').forEach(b=>b.onclick=()=>{
     const [id,cid]=b.dataset.cosbuy.split('|'),c=COSTUMES[id].find(x=>x.id===cid);
-    if(!c||!owned(id)||P.gold<c.cost||P.cos.owned[cid])return;
+    if(!c||!(id===FIXED||owned(id))||P.gold<c.cost||P.cos.owned[cid])return;
     P.gold-=c.cost;P.cos.owned[cid]=true;P.cos.eq[id]=cid;save();
     renderCostume(`🔓 ${ALLIES[id].name}의 「${c.name}」 해금! 바로 갈아입혔어요.${c.img?'':' (의상 그림은 곧 추가돼요)'}`);
   });
