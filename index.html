@@ -1692,7 +1692,7 @@ const MISSIONS=[
 const SUMMON_COST=100, SUMMON11_COST=1000; // 11회 연속: 1회 가격×11보다 100 G 할인
 const BOSS_GOLD_MULT=1.25;
 const DROP={seal:0.30,stoneBoss:0.25,stoneMid:0.15,stoneNormal:0.01}; // 희귀 유물 확률 // 보스(솔로몬 72악마) 처치 골드 배율
-const STAR_RATE=[[6,0.0003],[5,0.003],[4,0.03],[3,0.14],[2,0.30],[1,0.5267]]; // ★6은 상점 소환에서만 (합성 불가)
+const STAR_RATE=[[6,0.0007],[5,0.003],[4,0.03],[3,0.14],[2,0.30],[1,0.5263]]; // ★6은 상점 소환에서만 (합성 불가)
 const SYN_NEED={1:6,2:5,3:4,4:3};   // 같은 캐릭터 N개 → 한 단계 위 무작위 캐릭터
 const RARE_DROPS={};
 
@@ -2067,11 +2067,12 @@ const baseMult=id=>{const al=ALLIES[id];if(al.star===6)return STAR6_CP/((80+LV_C
 const multOf=(id,aw,myth)=>baseMult(id)*(1+0.2*(aw||0))*(myth?2:1);
 /* 신뢰도: ★5 동료가 함께 전투에서 승리할수록 상승 (최대 10) — 신뢰도 10이면 최대 전투력 1티어 8,000→10,000 · 2티어 6,600→8,000 · 3티어 5,400→7,000 (신화 기준) */
 const TRUST_MAX=10, TRUST_REQ=[0,5,15,30,50,75,105,140,180,225,275], TRUST_GAIN={normal:1,elite:1,mid:2,boss:3};
-const TRUST_TOP={1:10000/8000,2:8000/6600,3:7000/5400};
+const TRUST_TOP={1:10000/8000,2:8000/6600,3:7000/5400}, TRUST_TOP6=17000/15000; // ★6: 신화 15,000 → 신뢰도 10 17,000
+const trustTop=id=>ALLIES[id].star===6?TRUST_TOP6:TRUST_TOP[TIER5[id]];
 const trustPts=id=>(P.trust&&P.trust[id])||0;
 const trustLv=id=>{const p=trustPts(id);let l=0;while(l<TRUST_MAX&&p>=TRUST_REQ[l+1])l++;return l;};
-const trustOn=id=>ALLIES[id]&&ALLIES[id].star===5&&!!TIER5[id];
-const trustMultT=(id,lv)=>trustOn(id)?1+(TRUST_TOP[TIER5[id]]-1)*Math.max(0,Math.min(TRUST_MAX,lv||0))/TRUST_MAX:1;
+const trustOn=id=>ALLIES[id]&&((ALLIES[id].star===5&&!!TIER5[id])||ALLIES[id].star===6);
+const trustMultT=(id,lv)=>trustOn(id)?1+(trustTop(id)-1)*Math.max(0,Math.min(TRUST_MAX,lv||0))/TRUST_MAX:1;
 const trustMult=id=>trustMultT(id,trustLv(id));
 function trustHTML(id){
   if(!trustOn(id))return '';
@@ -2864,7 +2865,7 @@ function showDexDetail(id){
   showStory(`<div class="sum ${al.star>=4?'s'+al.star:''}"><div class="sum-title">📖 동료 도감</div>${allyPortrait(id)}
     <div style="font-size:18px;font-weight:900">${al.name}</div>
     <div class="gold">${al.star?'★'.repeat(al.star):'고정 조력자'}${has&&isMyth(id)?' 🔱 신화':''}</div>
-    <div class="small">${has?`보유${id===FIXED?'':' ×'+(P.roster[id]||0)} · Lv ${d.lv} · ⚔ ${fmt(allyCP(id))}`:'미보유'}${TIER5[id]?` · ${TIER5[id]}티어 (최대 전투력 ${fmt(TIER5_CP[TIER5[id]])} · 신화 ${fmt(TIER5_CP[TIER5[id]]*2)} · 신뢰도 10 ${fmt(Math.round(TIER5_CP[TIER5[id]]*2*TRUST_TOP[TIER5[id]]))})`:''}</div>
+    <div class="small">${has?`보유${id===FIXED?'':' ×'+(P.roster[id]||0)} · Lv ${d.lv} · ⚔ ${fmt(allyCP(id))}`:'미보유'}${TIER5[id]?` · ${TIER5[id]}티어 (최대 전투력 ${fmt(TIER5_CP[TIER5[id]])} · 신화 ${fmt(TIER5_CP[TIER5[id]]*2)} · 신뢰도 10 ${fmt(Math.round(TIER5_CP[TIER5[id]]*2*TRUST_TOP[TIER5[id]]))})`:ALLIES[id].star===6?` · ★6 (최대 전투력 ${fmt(STAR6_CP)} · 신화 ${fmt(STAR6_CP*2)} · 신뢰도 10 ${fmt(Math.round(STAR6_CP*2*TRUST_TOP6))})`:''}</div>
     <div class="dexd"><b>${al.role}</b><br>${al.desc}
     ${my?`<small class="mysk ${has&&isMyth(id)?'on':''}">🔱 신화 고유 능력 「${my.name}」 — ${my.desc}</small>`:''}</div></div>`,null,true);
   $('#mbtn').textContent='← 뒤로';
