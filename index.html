@@ -2555,8 +2555,11 @@ function renderAllies(msg){
   };
   const listHTML=()=>{
     if(!shown.length)return '<div class="desc">이 등급의 동료가 아직 없다.</div>';
-    if(allyStar!=='all')return +allyStar===5?tierSplit(shown):shown.map(allyCard).join('');
-    return [5,4,3,2,1].map(st=>{const g=shown.filter(id=>ALLIES[id].star===st);
+    // 출전 중인 동료는 맨 위에 따로 모아 보여 줌
+    const act=P.active.filter(id=>shown.includes(id)),rest=shown.filter(id=>!P.active.includes(id));
+    const top=act.length?`<div class="stargrp actgrp">⚔ 출전 중 <span>${act.length}명</span></div>${act.map(allyCard).join('')}`:'';
+    if(allyStar!=='all')return top+(+allyStar===5?tierSplit(rest):rest.map(allyCard).join(''));
+    return top+[5,4,3,2,1].map(st=>{const g=rest.filter(id=>ALLIES[id].star===st);
       return g.length?`<div class="stargrp">${'★'.repeat(st)} <span>${st}성 · ${g.length}명</span></div>${st===5?tierSplit(g):g.map(allyCard).join('')}`:'';}).join('');
   };
   $('#app').innerHTML=`${statusHTML()}${topBack()}
