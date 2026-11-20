@@ -2,11 +2,15 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1,user-scalable=no,viewport-fit=cover">
 <title>푸른사제들</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&family=Noto+Serif+KR:wght@700;900&display=swap" rel="stylesheet">
 <style>
+/* 두 번 터치·핀치 확대 방지 */
+html,body{touch-action:manipulation;-webkit-text-size-adjust:100%;text-size-adjust:100%}
+button,a,input,select,textarea,[data-act],.btn{touch-action:manipulation}
+
 :root{
   --bg:#070b18;--panel:#101831;--panel2:#16213f;--line:#26345e;
   --text:#e6ecff;--dim:#8d9bc4;--blue:#4da3ff;--blue2:#2b6fd6;
@@ -581,6 +585,23 @@ body:has(.tabbar) .tabbar{background:color-mix(in srgb,var(--tc) 6%,rgba(8,12,26
 <div id="modal" class="hidden"><div class="mbox"><div id="mtext"></div><button class="btn primary" id="mbtn">계속</button></div></div>
 
 <script>
+/* 모바일 확대 방지: 두 번 터치(더블탭)·핀치 확대 차단 (iOS Safari는 user-scalable=no를 무시하므로 직접 막음) */
+(()=>{let last=0,sx=0,sy=0,moved=false;
+  document.addEventListener('touchstart',e=>{const t=e.touches[0];sx=t.clientX;sy=t.clientY;moved=false;},{passive:true});
+  document.addEventListener('touchmove',e=>{const t=e.touches[0];if(t&&(Math.abs(t.clientX-sx)>10||Math.abs(t.clientY-sy)>10))moved=true;},{passive:true});
+  document.addEventListener('touchend',e=>{
+    const now=Date.now(),tg=e.target;
+    if(now-last<=300&&!moved&&!(tg.closest&&tg.closest('input,textarea,select,label'))){
+      e.preventDefault(); // 두 번째 탭의 확대를 막고, 탭 자체는 그대로 눌리게 함
+      const el=tg.closest?tg.closest('button,a,[data-act],[onclick],summary')||tg:tg;
+      if(!(el.disabled||(el.closest&&el.closest('[disabled]'))))el.click&&el.click();
+    }
+    last=now;},{passive:false});
+  ['gesturestart','gesturechange','gestureend'].forEach(t=>document.addEventListener(t,e=>e.preventDefault(),{passive:false}));
+  document.addEventListener('touchmove',e=>{if(e.touches&&e.touches.length>1)e.preventDefault();},{passive:false});
+  document.addEventListener('dblclick',e=>e.preventDefault(),{passive:false});
+})();
+
 /* ===================== BGM (Web Audio로 직접 합성 — 외부 음원 없음) ===================== */
 const BGM=(()=>{
   let ctx=null,master,comp,echo,echoFb,echoOut,noiseBuf,wind=null,cur=null,want=null,timer=null,nextT=0,step=0;
