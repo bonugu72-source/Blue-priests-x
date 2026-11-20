@@ -1246,9 +1246,9 @@ const AREAS=[
       pre:'무너진 저택 앞, 핏빛 불길이 치솟는다.\n찢기고 피로 물든 정장 차림의 백발 남자가 낡은 나무 십자가를 끌며 걸어 나온다.\n그 뒤로 붉은 눈의 흑기사들이 대열을 이룬다.\n\n"이번에는 봐주지 않는다. 19군단의 주인이 직접 상대해 주마."',
       moves:[{t:'multi',n:'참격 난무',hits:12,m:0.32},{t:'curse',n:'쉰 목소리의 저주'},{t:'silence',n:'현혹의 언변'},{t:'sweep',n:'19군단의 참격',m:0.3},{t:'strong',n:'붉은 화염 참격'},{t:'multi',n:'흑기사 군단의 돌격',hits:6,m:0.65},{t:'charge',n:'후작의 위광'}]}
   },
-  { name:'고대 원단수', country:'이름 없는 악마가 잠든 태고의 숲', flag:'🌳', rec:54, recEnd:58, glow:'#9b6bff',
+  { name:'고대 원단수', country:'이름 없는 악마가 잠든 태고의 숲', flag:'🌳', rec:54, recEnd:58, glow:'#9b6bff', sortie:'noTier1',
     desc:'세상이 생기기 전부터 서 있던 거대한 나무들의 숲. 그 가장 깊은 곳에 이름조차 잊힌 고대 악마가 잠들어 있다.',
-    intro:'이차원의 핏빛 불길이 꺼지자, 발밑에서 오래된 뿌리들이 솟아올랐다.\n\n하늘을 가릴 만큼 거대한 나무들, 이끼에 뒤덮인 채 숨 쉬는 듯한 숲. 고대 원단수였다.\n\n숲 가장 깊은 곳, 한쪽은 천사의 날개를 달고 한쪽 얼굴은 악마로 뒤틀린 사제복의 남자가 검은 수정 지팡이를 짚고 서 있었다.\n\n"…이름을 묻지 마라. 그런 것은 오래전에 버렸다."',
+    intro:'이차원의 핏빛 불길이 꺼지자, 발밑에서 오래된 뿌리들이 솟아올랐다.\n\n하늘을 가릴 만큼 거대한 나무들, 이끼에 뒤덮인 채 숨 쉬는 듯한 숲. 고대 원단수였다.\n\n숲 가장 깊은 곳, 한쪽은 천사의 날개를 달고 한쪽 얼굴은 악마로 뒤틀린 사제복의 남자가 검은 수정 지팡이를 짚고 서 있었다.\n\n"…이름을 묻지 마라. 그런 것은 오래전에 버렸다."\n\n— 이곳에는 ★5 1티어 동료가 함께할 수 없다.',
     outro:'검은 수정이 산산이 부서지고, 숲을 휘감던 보랏빛 안개가 걷혔다.\n\n이름 없는 악마는 마지막으로 하늘을 올려다보며 희미하게 웃었다.\n\n"…언젠가 누군가 내 이름을 불러 주기를 바랐는지도 모르지."\n\n— 고대 원단수 해방 —',
     enemies:[
       {name:'이끼 덮인 수호목',   icon:'🌲', hp:780, atk:118, def:58, xp:310, gold:155, demon:true, moves:[{t:'strong',n:'뿌리 내려치기'},{t:'atk',n:'가지 휘두르기'},{t:'atk',n:'가지 휘두르기'}]},
@@ -1845,7 +1845,7 @@ function statusHTML(){
   </div>`;
 }
 const owned=id=>(P.roster[id]||0)>0;
-const SORTIE_RULES={star5x2:{text:'★5 동료 최대 2명만 출전 가능 (이사벨 부제 출전 불가)',ok:id=>ALLIES[id].star===5,noFixed:true,max:2},noIsabel:{text:'이사벨 부제 출전 불가 — 출전 동료만으로 싸워야 함',ok:id=>true,noFixed:true},myth:{text:'신화 승급 동료만 출전 가능 (이사벨 부제는 고정 동행)',ok:id=>isMyth(id)},myth4:{text:'신화 승급 동료 또는 ★4 동료만 출전 가능 (이사벨 부제는 고정 동행)',ok:id=>isMyth(id)||ALLIES[id].star===4}};
+const SORTIE_RULES={star5x2:{text:'★5 동료 최대 2명만 출전 가능 (이사벨 부제 출전 불가)',ok:id=>ALLIES[id].star===5,noFixed:true,max:2},noIsabel:{text:'이사벨 부제 출전 불가 — 출전 동료만으로 싸워야 함',ok:id=>true,noFixed:true},myth:{text:'신화 승급 동료만 출전 가능 (이사벨 부제는 고정 동행)',ok:id=>isMyth(id)},myth4:{text:'신화 승급 동료 또는 ★4 동료만 출전 가능 (이사벨 부제는 고정 동행)',ok:id=>isMyth(id)||ALLIES[id].star===4},noTier1:{text:'★5 1티어 동료 출전 금지 (이사벨 부제는 고정 동행)',ok:id=>!(ALLIES[id]&&ALLIES[id].star===5&&TIER5[id]===1)}};
 const sortieRule=a=>AREAS[a]&&SORTIE_RULES[AREAS[a].sortie];
 const sortieOk=(a,id)=>{const r=sortieRule(a);return !r||r.ok(id);};
 const partyIds=()=>(B&&B.party)?B.party:[FIXED,...P.active];
