@@ -217,6 +217,14 @@ body.title-mode{overflow:hidden}
 @keyframes bolt{0%,62%{opacity:0}64%,70%{opacity:1}72%,80%{opacity:0}82%,86%{opacity:1}88%{opacity:0}}
 .intro-art .bsvg{width:210px;height:210px;margin:0 auto}
 .sheet-art{display:flex;justify-content:center}.sheet-art .bsvg{width:170px;height:170px}
+/* 스테이지 정보창: 보스 이미지를 작은 썸네일로 → 지도가 가려지지 않게 */
+.sheet-head{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+.sheet-head .sheet-art{flex:0 0 auto}
+.sheet-head .sheet-txt{flex:1;min-width:0}
+.sheet-head .sheet-txt .ptitle{margin-bottom:2px}
+.sheet-head .portrait.small{width:62px;height:74px;border-radius:10px}
+.sheet-head .portrait.small .pglow{border-radius:10px}
+.sheet-head .sheet-art .bsvg{width:70px;height:70px}
 .chip .mhp{display:block;height:3px;background:#0a1024;border-radius:2px;margin-top:3px;overflow:hidden}
 .chip .mhp b{display:block;height:100%;background:linear-gradient(90deg,#c43c4c,#ef6a6a)}
 .chip.down{opacity:.35;text-decoration:line-through}
@@ -4469,9 +4477,10 @@ function renderMap(a,msg){
       </div></div>
     </div>
     <div class="panel sheet">
-      ${art}
+      <div class="${art?'sheet-head':''}">${art}<div class="${art?'sheet-txt':''}">
       <div class="ptitle">${s}. ${stageName(a,s)} <span class="tag ${t==='normal'?'done':t==='elite'?'item':'t-ally'}">${STYPE_LABEL[t]}</span>${t==='boss'?` <span class="small">☠ 처치 ${fmt(P.kills[ar.boss.name]||0)}회</span>`:''}</div>
       ${(t==='boss'||t==='mid')?`<div class="etitle" style="text-align:left">${(t==='boss'?ar.boss:ar.mid).title}</div>`:''}
+      </div></div>
       <div class="desc">권장 Lv ${stageRec(a,s)} · 첫 클리어 보상: ${STAGE_REWARD[t]}${s<=prog?' <span class="gold">(클리어 완료 · 재도전 가능)</span>':''}${t==='boss'&&ar.boss.drop?(P.relics.includes(ar.boss.drop)?' · 🔒 인장 보유':' · 인장 미획득'):''}</div>
       ${sortieRule(a)?(()=>{const ok=P.active.filter(id=>sortieOk(a,id)).slice(0,sortieRule(a).max||9),no=P.active.filter(id=>!ok.includes(id));
         return `<div class="notice sortie">⚠ 출전 조건 — ${sortieRule(a).text}<br><span class="small">출전 가능: ${ok.length?ok.map(id=>ALLIES[id].name).join(', '):'없음'}${no.length?` · 출전 불가: ${no.map(id=>ALLIES[id].name).join(', ')}`:''}</span></div>`;})():''}
