@@ -1,0 +1,32 @@
+rules_version = '2';
+// 푸른사제들 — GitHub Pages용 Firestore 보안 규칙
+// owners/{pid}            : 캐릭터 주인 키 (아무도 읽을 수 없음, 처음 한 번만 생성)
+// owners/{pid}/devices/{u}: 키를 아는 기기만 연결 가능
+// players/{pid}           : 친구 목록용 공개 프로필 (로그인하면 읽기, 연결된 기기만 쓰기)
+// saves/{pid}             : 클라우드 저장 (연결된 기기만)
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() { return request.auth != null; }
+    function linked(pid) {
+      return signedIn() && exists(/databases/$(database)/documents/owners/$(pid)/devices/$(request.auth.uid));
+    }
+    match /owners/{pid} {
+      allow create: if signedIn() && pid.size() <= 40
+        && request.resource.data.keys().hasOnly(['key'])
+        && request.resource.data.key is string && request.resource.data.key.size() >= 16;
+      match /devices/{uid} {
+        allow get: if signedIn() && request.auth.uid == uid;
+        allow create: if signedIn() && request.auth.uid == uid
+          && request.resource.data.keys().hasOnly(['key'])
+          && request.resource.data.key == get(/databases/$(database)/documents/owners/$(pid)).data.key;
+      }
+    }
+    match /players/{pid} {
+      allow read: if signedIn();
+      allow create, update: if linked(pid);
+    }
+    match /saves/{pid} {
+      allow read, create, update: if linked(pid);
+    }
+  }
+}

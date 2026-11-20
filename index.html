@@ -1465,6 +1465,7 @@ function newPlayer(name){
 let cloudRef=null,cloudState='checking',cloudBusy=false,cloudDirty=false;
 function save(){
   if(!P)return;
+  if(FB)fbBind(P);            // GitHub Pages: 이 캐릭터를 클라우드(Firebase)에 연결 (uid·skey를 먼저 채움)
   P.savedAt=Date.now();
   try{localStorage.setItem(SAVE_KEY,JSON.stringify(P))}catch(e){}
   cloudSave();
@@ -1473,21 +1474,91 @@ function save(){
 function load(){try{const s=localStorage.getItem(SAVE_KEY);return s?JSON.parse(s):null}catch(e){return null}}
 function cloudSave(){
   if(!cloudRef||!P)return;
+  if(FB&&P.uid!==fbPid)return;       // 다른 캐릭터로 바뀌는 중이면 덮어쓰지 않음
   cloudDirty=true;
   if(cloudBusy)return;
   cloudBusy=true;
   setTimeout(async()=>{
     while(cloudDirty&&cloudRef){
       cloudDirty=false;
+      if(FB&&(!P||P.uid!==fbPid))break;
       try{await cloudRef.set({json:JSON.stringify(P),savedAt:P.savedAt||Date.now(),key:SAVE_KEY});}
-      catch(e){if(e&&(e.code==='invalid_argument'||e.code==='revoked'||e.code==='quota_exceeded')){cloudRef=null;cloudState='off';}break;}
+      catch(e){if(e&&(e.code==='invalid_argument'||e.code==='revoked'||e.code==='quota_exceeded'||e.code==='permission-denied')){cloudRef=null;cloudState='off';}break;}
     }
     cloudBusy=false;
-  },1200);
+  },FB?8000:1200);                    // Firebase 무료 한도를 아끼려고 몇 초씩 모아서 저장
+}
+
+/* ===== GitHub Pages 등 Claude 밖: Firebase로 클라우드 저장 + 실시간 친구 ===== */
+const FB_CFG={apiKey:"AIzaSyAnBExW5ZvabDMlhR6rE29-x1usz5yegxc",authDomain:"blue-priests.firebaseapp.com",projectId:"blue-priests",
+  storageBucket:"blue-priests.firebasestorage.app",messagingSenderId:"625148180828",appId:"1:625148180828:web:2d8adcd1e48619f4786999"};
+const FB_VER='10.12.2';
+let FB=null,fbAuthUid=null,fbPid=null,fbBinding=null;
+const newUid=()=>'u'+Date.now().toString(36)+Math.random().toString(36).slice(2,8);
+const newKey=()=>{try{const a=new Uint8Array(16);crypto.getRandomValues(a);return Array.from(a,b=>b.toString(16).padStart(2,'0')).join('');}
+  catch(e){return (Math.random().toString(36).slice(2)+Math.random().toString(36).slice(2)+Date.now().toString(36)).slice(0,32);}};
+function loadScript(src){return new Promise((res,rej)=>{const s=document.createElement('script');s.src=src;s.onload=res;s.onerror=rej;document.head.appendChild(s);});}
+async function initFirebase(){
+  try{
+    for(const m of ['app','auth','firestore'])
+      await withTimeout(loadScript(`https://www.gstatic.com/firebasejs/${FB_VER}/firebase-${m}-compat.js`),15000);
+    firebase.initializeApp(FB_CFG);
+    const cred=await withTimeout(firebase.auth().signInAnonymously(),15000);
+    fbAuthUid=cred.user.uid;
+    FB=firebase.firestore();
+    cloudState='ready';
+    const local=P||load();
+    if(local)await fbBind(local);
+  }catch(e){if(!FB)cloudState='off';}
+  updateCloudNote();
+}
+/* 캐릭터(P.uid)를 클라우드에 연결. 비밀 키(P.skey)는 저장 코드 안에만 들어 있어서,
+   다른 기기에서는 최신 저장 코드를 한 번 불러오면 같은 캐릭터로 이어서 저장·친구 연결이 돼요. */
+function fbBind(p){
+  if(!FB||!fbAuthUid||!p)return;
+  if(!p.uid)p.uid=newUid();
+  if(fbPid===p.uid)return;
+  if(!p.skey)p.skey=newKey();
+  if(fbBinding)return fbBinding;
+  const pid=p.uid,key=p.skey,origAt=p.savedAt||0;   // 저장 코드로 불러온 직후엔 원래 저장 시각으로 비교
+  if(fbPid){fbPid=null;DBX=null;myId=null;cloudRef=null;}
+  if(!P){try{localStorage.setItem(SAVE_KEY,JSON.stringify(p))}catch(e){}}
+  fbBinding=(async()=>{
+    try{
+      const devRef=FB.doc(`owners/${pid}/devices/${fbAuthUid}`);
+      if(!(await withTimeout(devRef.get())).exists){
+        try{await withTimeout(FB.doc('owners/'+pid).set({key}));}catch(e){}   // 처음 쓰는 캐릭터면 주인 등록
+        await withTimeout(devRef.set({key}));                               // 키가 맞아야 이 기기 연결
+      }
+      fbPid=pid;DBX=FB;USERX=null;myId=pid;canShare=null;lastPub='';
+      cloudRef=FB.doc('saves/'+pid);cloudState='on';
+      const snap=await withTimeout(cloudRef.get());
+      let remote=null;
+      if(snap.exists){try{const d=snap.data();if(d&&d.key===SAVE_KEY)remote=JSON.parse(d.json);}catch(e){}}
+      const mine=(P&&P.uid===pid)?P:p;
+      if(remote&&remote.uid===pid&&(remote.savedAt||0)>origAt+1000){
+        if(!remote.skey)remote.skey=key;
+        try{localStorage.setItem(SAVE_KEY,JSON.stringify(remote))}catch(e){}
+        if(P&&P.uid===pid){P=remote;fbBinding=null;renderHub('☁ 다른 기기에서 더 최근에 저장한 기록을 불러왔어요.');}
+        else if(!P&&$('#cover'))renderTitle();
+      }else{
+        try{await cloudRef.set({json:JSON.stringify(mine),savedAt:mine.savedAt||Date.now(),key:SAVE_KEY});}catch(e){}
+      }
+      if(P&&P.uid===pid){fbMergeFriends();publishProfile();}
+    }catch(e){if(!fbPid)cloudState='denied';}
+    fbBinding=null;updateCloudNote();
+  })();
+  return fbBinding;
+}
+/* 예전에 코드로 추가한 친구(fbook)도 실시간 친구 목록에 넣기 */
+function fbMergeFriends(){
+  if(!P||!P.fbook)return;
+  P.friends=P.friends||[];
+  Object.keys(P.fbook).forEach(id=>{if(id!==myId&&!P.friends.includes(id)&&P.friends.length<100)P.friends.push(id);});
 }
 async function initCloud(){
   try{
-    if(!window.claude||typeof claude.use!=='function'){cloudState='off';updateCloudNote();return;}
+    if(!window.claude||typeof claude.use!=='function'){await initFirebase();return;}
     const [db,user]=await Promise.all([claude.use('db'),claude.use('user')]);
     const id=user?await user.id():null;
     if(!db||!id){cloudState='off';updateCloudNote();return;}
@@ -1508,7 +1579,10 @@ async function initCloud(){
 }
 function updateCloudNote(){
   const n=$('#cloudnote');if(!n)return;
-  n.textContent=cloudState==='on'?'☁ 클라우드 자동 저장 중 (이 계정)':cloudState==='checking'?'저장 공간 확인 중…':'이 브라우저에 저장 · 다른 기기·앱에서 이어하려면 저장 코드를 쓰세요';
+  n.textContent=cloudState==='on'?(FB?'☁ 클라우드 자동 저장 · 실시간 친구 연결됨':'☁ 클라우드 자동 저장 중 (이 계정)')
+    :cloudState==='ready'?'☁ 클라우드 연결됨 · 게임을 시작하면 자동 저장돼요'
+    :cloudState==='denied'?'⚠ 이 기기는 아직 클라우드에 연결되지 않았어요 · 다른 기기의 최신 저장 코드를 한 번 불러오면 연결돼요'
+    :cloudState==='checking'?'저장 공간 확인 중…':'이 브라우저에 저장 · 다른 기기·앱에서 이어하려면 저장 코드를 쓰세요';
 }
 const encodeSave=p=>'BP1:'+btoa(unescape(encodeURIComponent(JSON.stringify(p))));
 function decodeSave(code){
@@ -1710,34 +1784,43 @@ function myPublic(){
 }
 function publishProfile(){
   if(!DBX||!myId||!P||canShare===false)return;
+  if(FB&&P.uid!==myId)return;          // 다른 캐릭터로 바뀌는 중
   const pub=myPublic(),sig=JSON.stringify({...pub,updatedAt:0});
   if(sig===lastPub)return;
   lastPub=sig;pubDirty=true;
   if(pubBusy)return;
   pubBusy=true;
   setTimeout(async()=>{
-    while(pubDirty){
+    while(pubDirty&&DBX&&myId&&P){
       pubDirty=false;
+      if(FB&&P.uid!==myId)break;
       try{await DBX.doc('players/'+myId).set(myPublic());canShare=true;}
-      catch(e){if(e&&(e.code==='invalid_argument'||e.code==='revoked'))canShare=false;break;}
+      catch(e){if(e&&(e.code==='invalid_argument'||e.code==='revoked'||e.code==='permission-denied'))canShare=false;break;}
     }
     pubBusy=false;
-  },1500);
+  },FB?5000:1500);
 }
 const withTimeout=(p,ms=10000)=>Promise.race([p,new Promise((_,rej)=>setTimeout(()=>rej({code:'timeout'}),ms))]);
 
-async function renderFriends(msg){
+let friendsUnsub=null;
+const friendsSig=l=>JSON.stringify(l.map(x=>[x.id,x.hero,x.lv,x.cp,x.area,x.stage,x.ended,x.pvpW,x.pvpL,(x.friends||[]).join(',')]));
+async function renderFriends(msg,preList){
+  if(friendsUnsub){try{friendsUnsub();}catch(e){}friendsUnsub=null;}
   clearBattle();
   const head=`${statusHTML()}${topBack()}${msg?`<div class="notice">${msg}</div>`:''}
     <div class="panel"><div class="ptitle">👥 친구</div>
       <div class="frow me"><div class="fcp">⚔ ${fmt(teamCP())}</div><div><b>${esc(P.name)}</b> <span class="small">Lv ${P.lv} · ${progressText(myPublic())}</span>
       <div class="small">내 팀 전투력</div></div></div></div>`;
   const back=`<button class="btn" id="back">← 돌아가기</button>`;
-  if(!DBX||!myId){renderFriendsCode(msg);return;}
+  if(!DBX||!myId){
+    if(FB&&cloudState==='denied'&&!msg)msg='⚠ 이 기기는 아직 실시간 친구에 연결되지 않았어요. 다른 기기에서 쓰던 <b>최신 저장 코드</b>를 타이틀의 「저장 코드로 불러오기」로 한 번 불러오면 연결돼요.';
+    renderFriendsCode(msg);return;}
+  let list=[];
+  if(preList)list=preList;
+  else{
   $('#app').innerHTML=head+`<div class="panel"><div class="desc">모험가 목록을 불러오는 중…</div></div>`+back;
   $('#back').onclick=()=>renderHub();
   publishProfile();
-  let list=[];
   try{
     const q=await withTimeout(DBX.collection('players').orderBy('cp','desc').limit(200).get());
     list=q.docs.filter(d=>d.exists).map(d=>({id:d.id,...d.data()}));
@@ -1747,6 +1830,7 @@ async function renderFriends(msg){
     $('#back').onclick=()=>renderHub();return;
   }
   if(!$('#back'))return;
+  }
   const ps=USERX?await USERX.profiles(list.map(x=>x.id)):{};
   const mine=new Set(P.friends||[]);
   const others=list.filter(x=>x.id!==myId);
@@ -1767,6 +1851,7 @@ async function renderFriends(msg){
   $('#app').innerHTML=head+
     `${canShare===false?'<div class="notice">이 계정은 이 게임에 기록을 남길 권한이 없어 모험가 목록에 오를 수 없어요. 목록 보기만 가능해요.</div>':''}
     <div class="panel"><div class="ptitle">🤝 내 친구 <span class="small">${friends.length}명${myRank?` · 내 순위 #${myRank}/${list.length}`:''}</span></div>
+      ${FB?'<div class="desc">🔴 실시간 — 친구가 레벨업·강화하면 코드 없이 자동으로 바뀌어요.</div>':''}
       <div class="desc">⚔ 대결: 친구가 마지막으로 저장한 팀과 싸워요. 승리 보상은 하루 ${PVP_DAILY}번 · 내 전적 ${(P.pvp&&P.pvp.w)||0}승 ${(P.pvp&&P.pvp.l)||0}패</div>
       ${friends.length?friends.map(x=>row(x,delBtn(x.id))).join(''):'<div class="desc">아직 친구가 없어요. 아래 모험가 목록에서 추가해 보세요.</div>'}</div>
     ${addedMe.length?`<div class="panel"><div class="ptitle">📨 나를 친구로 추가한 모험가</div>${addedMe.map(x=>row(x,addBtn(x.id))).join('')}</div>`:''}
@@ -1788,6 +1873,17 @@ async function renderFriends(msg){
   });
   $('#frefresh').onclick=()=>renderFriends();
   $('#back').onclick=()=>renderHub();
+  // Firebase: 친구 화면이 열려 있는 동안 다른 모험가의 레벨·전투력이 바뀌면 바로 다시 그림
+  if(FB&&DBX===FB){
+    const sig=friendsSig(list);
+    try{
+      friendsUnsub=FB.collection('players').orderBy('cp','desc').limit(200).onSnapshot(q=>{
+        if(!$('#frefresh')){if(friendsUnsub){friendsUnsub();friendsUnsub=null;}return;}
+        const l=q.docs.filter(d=>d.exists).map(d=>({id:d.id,...d.data()}));
+        if(friendsSig(l)!==sig)renderFriends(msg,l);
+      },()=>{});
+    }catch(e){}
+  }
 }
 
 /* ===================== 친구 (코드·링크 방식: 서버 없이 어디서나) ===================== */
@@ -1880,7 +1976,13 @@ function takePendingFriend(){
   if(!pendingFriend||!P)return false;
   const code=pendingFriend;pendingFriend=null;
   try{history.replaceState(null,'',location.href.split('#')[0]);}catch(e){}
-  if(DBX&&myId)return false;
+  if(DBX&&myId){
+    const f=parseFriendCode(code);
+    if(!f||f.id===myId)return false;
+    P.friends=P.friends||[];
+    if(!P.friends.includes(f.id)&&P.friends.length<100)P.friends.push(f.id);
+    save();renderFriends(`🤝 ${esc(f.hero||'모험가')}님을 친구로 추가했어요!`);return true;
+  }
   const r=addFriendByCode(code);renderFriendsCode(r.msg);return true;
 }
 
@@ -3396,7 +3498,8 @@ function renderMap(a,msg){
   save();
 }
 
-document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'&&P){try{localStorage.setItem(SAVE_KEY,JSON.stringify(P))}catch(e){}}});
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'&&P){try{localStorage.setItem(SAVE_KEY,JSON.stringify(P))}catch(e){}
+  if(FB&&cloudRef&&P.uid===fbPid){try{cloudRef.set({json:JSON.stringify(P),savedAt:P.savedAt||Date.now(),key:SAVE_KEY});}catch(e){}}}});
 renderTitle();
 initCloud();
 
