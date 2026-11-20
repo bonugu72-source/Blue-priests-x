@@ -836,6 +836,8 @@ const ALLIES={
             desc:'날갯짓으로 폭풍을 일으켜 5초 동안 주인공 치명타 확률 2배 · 전투에서 처음 쓰러진 동료를 HP 50%로 부활(1회) · 폭풍 중엔 깃털 칼날 공격'},
   mikael:  {star:5,name:'미카엘',        icon:'🛡️', role:'정화의 날개', kit:'purify',
             desc:'정화(걸려 있는 모든 디버프 제거 + 주인공 현재 HP의 절반만큼 방어막, 3턴마다) · 평소엔 날개 베기'},
+  miner:   {star:5,name:'미네르',        icon:'🌊', role:'물의 여신', kit:'tide', hpMul:0.6,
+            desc:'침몰(적을 물속으로 끌어내려 3턴간 적 공격력 감소) · 물보라(2턴간 동료가 받는 피해 절반) · 체력이 적어 쉽게 쓰러지지만, 쓰러지면 물의 여신 「미네르바」로 각성해 HP 100%로 부활(1회) — 이후 공격이 고정 피해 + 치명타'},
   vista5:  {star:5,name:'비스타',        icon:'🚂', role:'열차 소환', kit:'train',
             desc:'3초마다 열차를 소환해 적을 관통(기본 공격의 2배 · 방어력 무시) · 열차 폭파로 적의 시야 차단(2턴간 적 공격 35% 빗나감) · 평소엔 군도 베기'},
   elise:   {star:5,name:'엘리스',        icon:'🍂', role:'정화의 바람', kit:'breeze', hpMul:2.5,
@@ -844,7 +846,7 @@ const ALLIES={
             desc:'보석처럼 반짝이는 광선 공격 · 적이 힘을 모으거나 3턴마다 프리즘 굴절(다음 적 공격 피해 절반, 절반은 적에게 반사)'}
 };
 /* ★5 티어 — 신화 제외 최대 전투력: 1티어 4000 · 2티어 3300 · 3티어 2700 */
-const TIER5={guseju:1,asiris:1,karma:1,pasri:1,vista5:1,danian:2,elia:2,kirie:2,gaia:2,elise:2,siren:3,mikael:3,sakura:3};
+const TIER5={guseju:1,asiris:1,karma:1,pasri:1,vista5:1,danian:2,elia:2,kirie:2,gaia:2,elise:2,miner:2,siren:3,mikael:3,sakura:3};
 const TIER5_CP={1:4000,2:3300,3:2700};
 /* 신화: 최대 레벨에서 열림 · 능력치 2배 */
 const MYTH_COST={1:3000,2:5000,3:5000,4:10000,5:30000}, MYTH_STONE5=2;
@@ -859,6 +861,7 @@ const MYTH_SKILL={
   sakura:{name:'만개',desc:'부활 대기 7초 → 4초 · 벚꽃바람이 적의 치명타 확률을 75% 낮춤'},
   kirie: {name:'폭풍의 수호천사',desc:'부활을 두 번까지 · 폭풍 중 치명타 피해 2배'},
   mikael:{name:'대천사의 가호',desc:'방어막이 현재 HP 전부만큼 · 정화 주기 2턴'},
+  miner: {name:'바다의 여왕',desc:'물보라 보호막 2턴 → 3턴 · 미네르바의 치명타 피해 1.5배 → 2배'},
   vista5:{name:'특급 열차',desc:'열차 관통 피해가 기본 공격의 2배 → 3배 · 시야 차단 3턴'},
   elise: {name:'만추의 축복',desc:'정화할 때도 주인공·동료 HP 10% 회복 · 응원 주기 3턴 → 2턴'},
   siren: {name:'천광의 프리즘',desc:'반사 피해 2배 · 광선이 방어 무시'}
@@ -879,6 +882,7 @@ const ALLY_IMG={
   sakura:{src:'ally_sakura.jpg',pos:'50% 10%',face:'49% 11%',size:'450%'},
   kirie:{src:'ally_kirie.jpg',pos:'50% 18%',face:'50% 19%'},
   mikael:{src:'ally_mikael.jpg',pos:'45% 28%',face:'38% 33%',size:'240%'},
+  miner:{src:'ally_miner.jpg',pos:'50% 15%',face:'50% 21%',size:'450%'},
   vista5:{src:'ally_vista5.jpg',pos:'55% 18%',face:'57% 27%',size:'400%'},
   elise:{src:'ally_elise.jpg',pos:'52% 62%',face:'52% 64%',size:'420%'},
   karma:{src:'ally_karma.jpg',pos:'42% 22%',face:'35% 24%'},
@@ -2328,6 +2332,7 @@ function pvpEnemyActs(e){
       case 'twin':     dmg(6+lv*1.8,0.5,`${nm}의 쌍검 ①`);dmg(6+lv*1.8,0.5,`${nm}의 쌍검 ②`);break;
       case 'guard':    if(e.hp<e.maxHp*0.5&&Math.random()<0.3)heal(0.06);else dmg(9+lv*2.8,0.4,`${nm}의 방패 강타`);break;
       case 'chant':    if(e.hp<e.maxHp*0.7&&Math.random()<0.4)heal(0.12);else dmg(7+lv*2.4,0.5,`${nm}의 빛의 음표`);break;
+      case 'tide':     dmg(12+lv*4,0.5,`${nm}의 물살`);break;
       case 'train':    if(Math.random()<0.4)dmg(vistaBase(lv)*(a.my?3:2),0,`${nm}의 열차 관통`);else dmg(vistaBase(lv),0.5,`${nm}의 군도 베기`);break;
       case 'breeze':   if(e.hp<e.maxHp*0.7&&Math.random()<0.45)heal(0.1);else dmg(6+lv*2.4,0.5,`${nm}의 낙엽 바람`);break;
       case 'purify':   if(e.hp<e.maxHp*0.5&&Math.random()<0.4)heal(0.12);else dmg(10+lv*3.6,0.4,`${nm}의 날개 베기`);break;
@@ -3026,7 +3031,7 @@ function hitAllies(pct,label,quiet){
   const down=[];
   partyIds().forEach(id=>{const h=B.ahp[id];if(!h||h.hp<=0)return;
     if(id==='danian'&&Math.random()<0.5)return; // 다니안 회피
-    const d=Math.max(1,Math.round(h.max*pct*(B.ashield?0.5:1)*(paraOn()?1.5:1)*rnd(0.9,1.1)));h.hp=Math.max(0,h.hp-d);
+    const d=Math.max(1,Math.round(h.max*pct*(B.ashield?0.5:1)*(B.splash?0.5:1)*(paraOn()?1.5:1)*rnd(0.9,1.1)));h.hp=Math.max(0,h.hp-d);
     if(h.hp<=0&&!allyDown(id))down.push(ALLIES[id].name);});
   if(!quiet)addLog(`${label} — 동료 전원 피해`);
   if(down.length)addLog(`💀 ${down.join(', ')} 쓰러짐 (이번 전투 행동 불가)`);
@@ -3095,6 +3100,12 @@ function paraTick(){
 const stormOn=()=>!!(B&&B.stormUntil&&Date.now()<B.stormUntil);
 /* 키리에: 처음 쓰러진 동료 부활 (신화 2회) */
 function allyDown(id){
+  if(B&&id==='miner'&&!B.minerva&&B.ahp.miner){
+    const h=B.ahp.miner;B.minerva=true;h.hp=h.max;B.stun.miner=0;
+    addLog(`🌊 미네르가 쓰러지는 순간, 물기둥이 솟구친다 — 물의 여신 「미네르바」 각성! (HP 100% · 고정 피해 + 치명타)`);
+    queueFx('player','🌊 미네르바','mpf');document.body.classList.add('holyflash');setTimeout(()=>document.body.classList.remove('holyflash'),400);
+    stat('heal','miner',h.hp);return true;
+  }
   if(!B||id==='kirie'||!inParty('kirie'))return false;
   const k=B.ahp.kirie;if(!k||k.hp<=0||(B.stun.kirie>0))return false;
   const max=isMyth('kirie')?2:1;if((B.revives||0)>=max)return false;
@@ -3454,6 +3465,13 @@ function alliesAct(){
           }else addLog(`${nm}의 정화 — ${debuffs.join(', ')} 제거`);
         }else allyHit(10+lv*3.6,`${nm}의 날개 베기`,0.4);
         break;}
+      case 'tide':{ // 미네르: 침몰(적 공격력 감소) · 물보라(동료 보호) · 미네르바 각성 후 고정 피해 + 치명타
+        B.minerT=(B.minerT||0)+1;const base=12+lv*4;
+        if(!B.hex){B.hex=3;addLog(`🌊 ${B.minerva?'미네르바':nm}의 침몰 — 적을 물속으로 끌어내렸다 (3턴간 적 공격력 감소)`);}
+        else if(!B.splash&&B.minerT%3===0){B.splash=isMyth(id)?3:2;addLog(`💦 ${B.minerva?'미네르바':nm}의 물보라 — 물의 보호막이 동료들을 감싼다 (${B.splash}턴간 동료 피해 절반)`);}
+        else if(B.minerva)allyHit(base*(isMyth(id)?2:1.5),`🌊 미네르바의 해일 — 고정 피해 · 💥치명타`,0,true);
+        else allyHit(base,`${nm}의 물살`,0.5);
+        break;}
       case 'train': allyHit(vistaBase(lv),`${nm}의 군도 베기`,0.5);break; // 비스타: 열차는 trainTick
       case 'breeze':{ // 엘리스: 디버프 제거 · 응원 서포트 (공격은 약함)
         if(B.eliseCD>0)B.eliseCD--;
@@ -3787,6 +3805,7 @@ function enemyTurn(){
   if(B.negate)B.negate--;
   if(B.blind)B.blind--;
   if(B.ashield){B.ashield--;if(!B.ashield)B.shield=0;}
+  if(B.splash)B.splash--;
   if(B.tornadoCD>0)B.tornadoCD--;
   if(B.immune)B.immune--;
   if(B.healCut&&mv.t!=='barrage')B.healCut--;
