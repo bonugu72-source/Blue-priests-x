@@ -918,6 +918,7 @@ const RELICS={
   seal_bune:   {name:'부네의 인장',             icon:'🟣', desc:'공격력 +8',                     apply:p=>{p.atk+=8;}},
   seal_andras: {name:'안드라스의 인장',         icon:'⚪', desc:'방어력 +6 · 최대 HP +20',        apply:p=>{p.def+=6;p.maxHp+=20;p.hp+=20;}},
   seal_furfur: {name:'푸르푸르의 인장',         icon:'🔵', desc:'최대 HP +40 · 공격력 +4',        apply:p=>{p.maxHp+=40;p.hp+=40;p.atk+=4;}},
+  blood_orb:{name:'피로 얼룩진 구슬', icon:'🩸', desc:'희귀 아이템 · 주인공 흡혈 10% (주인공이 준 피해의 10%만큼 HP 회복)',apply:p=>{}},
   seal_mumyeong:{name:'무명의 검은 수정',  icon:'🔮', desc:'공격 +28 · 방어 +24 · 최대 HP +220',apply:p=>{p.atk+=28;p.def+=24;p.maxHp+=220;p.hp+=220;}},
   seal_naberius3:{name:'각성한 나베리우스의 십자가',  icon:'✝️', desc:'공격 +26 · 방어 +22 · 최대 HP +200',apply:p=>{p.atk+=26;p.def+=22;p.maxHp+=200;p.hp+=200;}},
   seal_twins:{name:'쌍둥이의 반지',  icon:'💍', desc:'공격 +24 · 방어 +20 · 최대 HP +180',apply:p=>{p.atk+=24;p.def+=20;p.maxHp+=180;p.hp+=180;}},
@@ -2711,18 +2712,20 @@ function awaken(id){
 }
 
 /* ===================== 상점 ===================== */
+const BLOOD_ORB_COST=200000, BLOOD_ORB_PCT=0.10;
 function renderShop(msg){
   hubTab='shop';
   const rows=[
     {id:'water', name:'성수',             info:'전투 중 HP 40% 회복 (최소 60)', cost:25},
     {id:'wpn',   name:`축성된 검 +${P.wpn+1}`,  info:'공격력 +4 (영구)',          cost:wpnCost()},
-    {id:'arm',   name:`축성된 사제복 +${P.arm+1}`,info:'방어력 +3, 최대 HP +10 (영구)',cost:armCost()}
+    {id:'arm',   name:`축성된 사제복 +${P.arm+1}`,info:'방어력 +3, 최대 HP +10 (영구)',cost:armCost()},
+    {id:'blood_orb', name:'🩸 피로 얼룩진 구슬 <span class="small">희귀 아이템</span>', info:'주인공 흡혈 10% — 적에게 준 피해의 10%만큼 HP 회복 (영구 · 1회 구매)', cost:BLOOD_ORB_COST, owned:P.relics.includes('blood_orb')}
   ];
   $('#app').innerHTML=`${statusHTML()}
     ${msg?`<div class="notice">${msg}</div>`:''}
     <div class="panel"><div class="ptitle">🕯 교구 상점</div>
       ${rows.map(r=>`<div class="shopitem"><div class="info">${r.name}<small>${r.info}</small></div>
-        <button class="btn ${P.gold>=r.cost?'primary':''}" data-id="${r.id}" ${P.gold<r.cost?'disabled':''}>${r.cost} G</button></div>`).join('')}
+        ${r.owned?'<button class="btn" disabled>보유 중</button>':`<button class="btn ${P.gold>=r.cost?'primary':''}" data-id="${r.id}" ${P.gold<r.cost?'disabled':''}>${fmt(r.cost)} G</button>`}</div>`).join('')}
     </div>
     <div class="panel"><div class="ptitle">✝ 동료 소환</div>
       <div class="desc">${STAR_RATE.map(([st,r])=>'★'+st+' '+(Math.round(r*1000)/10)+'%').join(' · ')}<br>
@@ -2748,6 +2751,7 @@ function buy(id){
   if(id==='water'&&P.gold>=25){P.gold-=25;P.items.water++;m='성수를 구입했다.';}
   else if(id==='rosary'&&P.gold>=30){P.gold-=30;P.items.rosary++;m='묵주를 구입했다.';}
   else if(id==='wpn'&&P.gold>=wpnCost()){P.gold-=wpnCost();P.wpn++;P.atk+=4;m='검이 축성되었다. 공격력 +4';}
+  else if(id==='blood_orb'&&!P.relics.includes('blood_orb')&&P.gold>=BLOOD_ORB_COST){P.gold-=BLOOD_ORB_COST;gainRelic('blood_orb');m='🩸 희귀 아이템 「피로 얼룩진 구슬」을 손에 넣었다 — 주인공 흡혈 10%';}
   else if(id==='arm'&&P.gold>=armCost()){P.gold-=armCost();P.arm++;P.def+=3;P.maxHp+=10;P.hp+=10;m='사제복이 축성되었다. 방어력 +3, 최대 HP +10';}
   save();renderShop(m);
 }
@@ -3274,6 +3278,7 @@ function hitEnemy(mult,label){
   e.hp=Math.max(0,e.hp-d);
   addLog(`${label}! ${e.name}에게 ${d} 피해${crit?' (치명타!)':''}`);
   queueFx('enemy',(crit?'💥':'')+d,crit?'crit':'dmg');
+  if(P.relics.includes('blood_orb')&&d>0&&P.hp>0){const vh=Math.min(P.maxHp-P.hp,Math.round(d*BLOOD_ORB_PCT*pHealMul()));if(vh>0){P.hp+=vh;stat('heal','hero',vh);queueFx('player','🩸+'+vh,'heal');}}
   if(B.reflect){const r=Math.round(d*0.5);P.hp=Math.max(0,P.hp-r);addLog(`↩ 뒤집힌 시간 — 주인공에게 ${r} 반사`);queueFx('player','↩-'+r,'pdmg');}
   else if(e.reflectHero&&d>0){const r=Math.max(1,Math.round(d*e.reflectHero));P.hp=Math.max(0,P.hp-r);addLog(`🔮 ${e.name}의 반사 — 주인공에게 ${r} 되돌아왔다`);queueFx('player','🔮-'+r,'pdmg');}
 }
