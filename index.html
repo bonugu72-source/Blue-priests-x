@@ -413,6 +413,29 @@ body.pfrozen #cmds .btn{filter:saturate(.2) brightness(1.2);background:linear-gr
 .acard.dex .dexdesc{font-size:13px;color:#c9d5f5;margin-top:4px;line-height:1.5}
 .acard.dex.unown{opacity:.72}
 .acard.dex.unown .aface{filter:grayscale(.7) brightness(.8)}
+.relicbox{background:var(--panel);border-radius:14px;padding:12px}
+.relicbox>summary{list-style:none;cursor:pointer;display:flex;align-items:center;justify-content:space-between;font-weight:700}
+.relicbox>summary::-webkit-details-marker{display:none}
+.relicbox>summary .chev{transition:transform .2s;color:var(--dim)}
+.relicbox[open]>summary .chev{transform:rotate(180deg)}
+.relicbox[open]>summary{margin-bottom:8px}
+.relicbox .rlist{display:flex;flex-direction:column;gap:8px}
+.dexgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.dexcell{border:none;border-radius:12px;background:#141d3b;padding:10px 4px 8px;display:flex;flex-direction:column;align-items:center;gap:3px;min-width:0;color:inherit;font-family:inherit;cursor:pointer}
+.dexcell .dface{width:52px;height:52px;border-radius:12px;margin-bottom:2px}
+.dexcell .aemo.dface{font-size:32px;display:flex;align-items:center;justify-content:center;background:#1a1424}
+.dexcell b{font-size:13px;max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dexcell .dstar{font-size:10px;color:var(--gold);letter-spacing:-1px;min-height:13px}
+.dexcell.unown{opacity:.6}
+.dexcell.unown .dface{filter:grayscale(.8) brightness(.75)}
+.dexcell.mine{box-shadow:inset 0 0 0 1px #2f5fae}
+.dexd{text-align:left;font-size:13px;line-height:1.55;color:#c9d5f5;margin-top:6px}
+.dexd .mysk{display:block;margin-top:6px}
+.sortbar.sticky{position:sticky;top:0;z-index:6;background:var(--panel);margin:0 -12px 6px;padding:8px 12px;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}
+.sortbar.sticky::-webkit-scrollbar{display:none}
+.sortbar.sticky .sortbtn{flex:none;padding:5px 10px}
+.stargrp{font-size:13px;font-weight:700;color:var(--gold);margin:8px 0 2px;display:flex;align-items:center;gap:6px}
+.stargrp span{color:var(--dim);font-weight:400}
 .dexown{float:right;font-size:11px;padding:1px 7px;border-radius:9px;background:#1a2547;color:#8494c0}
 .dexown.on{background:#1f5a3a;color:#9ff0c4}
 /* 전투 화면: 모바일 한 화면 고정 */
@@ -2291,6 +2314,7 @@ function sortieSlotsHTML(inMgmt){
 }
 document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('[data-slot]');if(b){e.preventDefault();renderAllies();window.scrollTo(0,0);}});
 /* 동료 탭 */
+let relicOpen=false;
 function renderAllyTab(msg){
   hubTab='ally';
   const relicHTML=P.relics.length
@@ -2306,8 +2330,10 @@ function renderAllyTab(msg){
         <button class="btn m-coll" id="dex">📖 동료 도감<small>모든 동료의 이름·능력</small></button>
       </div>
     </div>
-    <div class="panel"><div class="ptitle">✨ 유물 · 희귀 아이템</div>${relicHTML}</div>
+    <details class="relicbox" id="relicbox" ${relicOpen?'open':''}><summary><span>✨ 유물 · 희귀 아이템 <span class="small">${P.relics.length}개</span></span><span class="chev">▾</span></summary>
+      <div class="rlist">${relicHTML}</div></details>
     ${tabBar()}`;
+  $('#relicbox').ontoggle=e=>{relicOpen=e.target.open;};
   $('#allies').onclick=()=>{renderAllies();window.scrollTo(0,0);};
   $('#dex').onclick=()=>renderDex();
 }
@@ -2394,35 +2420,50 @@ function renderCostume(msg){
   $('#back').onclick=()=>renderHub();
   window.scrollTo(0,0);
 }
-/* 동료 도감: 모든 동료의 이름과 능력 */
+/* 동료 도감: 3열 아이콘 목록, 눌러서 상세 */
 let dexStar='all';
+function showDexDetail(id){
+  const al=ALLIES[id],has=id===FIXED||owned(id),my=MYTH_SKILL[id],d=has?aData(id):null;
+  showStory(`<div class="sum ${al.star>=4?'s'+al.star:''}"><div class="sum-title">📖 동료 도감</div>${allyPortrait(id)}
+    <div style="font-size:18px;font-weight:900">${al.name}</div>
+    <div class="gold">${al.star?'★'.repeat(al.star):'고정 조력자'}${has&&isMyth(id)?' 🔱 신화':''}</div>
+    <div class="small">${has?`보유${id===FIXED?'':' ×'+(P.roster[id]||0)} · Lv ${d.lv} · ⚔ ${fmt(allyCP(id))}`:'미보유'}${TIER5[id]?` · ${TIER5[id]}티어 (최대 전투력 ${fmt(TIER5_CP[TIER5[id]])})`:''}</div>
+    <div class="dexd"><b>${al.role}</b><br>${al.desc}
+    ${my?`<small class="mysk ${has&&isMyth(id)?'on':''}">🔱 신화 고유 능력 「${my.name}」 — ${my.desc}</small>`:''}</div></div>`,null,true);
+  $('#mbtn').textContent='닫기';
+}
 function renderDex(){
   const ids=Object.keys(ALLIES).sort((x,y)=>ALLIES[y].star-ALLIES[x].star||(TIER5[x]||0)-(TIER5[y]||0));
   const tabs=[['all','전체'],[5,'★5'],[4,'★4'],[3,'★3'],[2,'★2'],[1,'★1'],[0,'조력자']];
   const list=ids.filter(id=>dexStar==='all'||ALLIES[id].star===+dexStar);
   const own=Object.keys(ALLIES).filter(id=>id!==FIXED&&owned(id)).length;
-  const card=id=>{const al=ALLIES[id],has=id===FIXED||owned(id),my=MYTH_SKILL[id];
-    return `<div class="acard dex ${has?'':'unown'}"><div class="ally"><div class="ic">${allyFace(id,'md')}</div><div style="flex:1">
-      ${al.star?`<span class="gold">${'★'.repeat(al.star)}</span>`:'<span class="tag t-ally">고정 조력자</span>'} <b>${al.name}</b>
-      ${TIER5[id]?`<span class="small">${TIER5[id]}티어 · 최대 전투력 ${fmt(TIER5_CP[TIER5[id]])}</span>`:''}
-      <span class="dexown ${has?'on':''}">${has?'보유':'미보유'}</span>
-      <small>${al.role}</small>
-      <div class="dexdesc">${al.desc}</div>
-      ${my?`<small class="mysk ${has&&isMyth(id)?'on':''}">🔱 신화 고유 능력 「${my.name}」 — ${my.desc}</small>`:''}
-    </div></div></div>`;};
+  const cell=id=>{const al=ALLIES[id],has=id===FIXED||owned(id);
+    return `<button class="dexcell ${has?'':'unown'} ${P.active.includes(id)?'mine':''}" data-dexid="${id}">${allyFace(id,'dface')}
+      <span class="dstar">${al.star?'★'.repeat(al.star):'조력자'}${isMyth(id)?' 🔱':''}</span><b>${al.name}</b></button>`;};
   $('#app').innerHTML=`${statusHTML()}${topBack()}
-    <div class="panel"><div class="ptitle">📖 동료 도감 <span class="small">보유 ${own}/${Object.keys(ALLIES).length-1}</span></div>
-      <div class="sortbar">${tabs.map(([k,l])=>`<button class="sortbtn ${String(dexStar)===String(k)?'on':''}" data-dex="${k}">${l}</button>`).join('')}</div>
-      ${list.map(card).join('')}</div>
+    <div class="panel"><div class="ptitle">📖 동료 도감 <span class="small">보유 ${own}/${Object.keys(ALLIES).length-1} · 눌러서 상세 보기</span></div>
+      <div class="sortbar sticky">${tabs.map(([k,l])=>`<button class="sortbtn ${String(dexStar)===String(k)?'on':''}" data-dex="${k}">${l}</button>`).join('')}</div>
+      <div class="dexgrid">${list.map(cell).join('')}</div></div>
     <button class="btn" id="back">← 돌아가기</button>${tabBar()}`;
   document.querySelectorAll('[data-dex]').forEach(b=>b.onclick=()=>{dexStar=b.dataset.dex;renderDex();});
+  document.querySelectorAll('[data-dexid]').forEach(b=>b.onclick=()=>showDexDetail(b.dataset.dexid));
   $('#back').onclick=()=>renderHub();
   window.scrollTo(0,0);
 }
 let allySort=(()=>{try{return localStorage.getItem('bp_ally_sort')||'cp'}catch(e){return 'cp'}})();
+let allyStar='all';
 function renderAllies(msg){
   const key={lv:id=>aData(id).lv,cp:id=>allyCP(id),cnt:id=>P.roster[id]||0}[allySort]||(id=>allyCP(id));
-  const own=Object.keys(ALLIES).filter(owned).sort((x,y)=>key(y)-key(x)||allyCP(y)-allyCP(x)||ALLIES[y].star-ALLIES[x].star);
+  const own=Object.keys(ALLIES).filter(id=>owned(id)&&id!==FIXED).sort((x,y)=>ALLIES[y].star-ALLIES[x].star||key(y)-key(x)||allyCP(y)-allyCP(x));
+  const shown=own.filter(id=>allyStar==='all'||ALLIES[id].star===+allyStar);
+  const cntStar=st=>own.filter(id=>ALLIES[id].star===st).length;
+  const starTabs=[['all','전체'],[5,'★5'],[4,'★4'],[3,'★3'],[2,'★2'],[1,'★1']];
+  const listHTML=()=>{
+    if(!shown.length)return '<div class="desc">이 등급의 동료가 아직 없다.</div>';
+    if(allyStar!=='all')return shown.map(allyCard).join('');
+    return [5,4,3,2,1].map(st=>{const g=shown.filter(id=>ALLIES[id].star===st);
+      return g.length?`<div class="stargrp">${'★'.repeat(st)} <span>${st}성 · ${g.length}명</span></div>${g.map(allyCard).join('')}`:'';}).join('');
+  };
   $('#app').innerHTML=`${statusHTML()}${topBack()}
     ${msg?`<div class="notice">${msg}</div>`:''}
     <div class="panel"><div class="ptitle">⚔ 출전 동료 <span class="small">${P.active.length}/${MAX_ACTIVE}</span></div>
@@ -2433,8 +2474,9 @@ function renderAllies(msg){
     <div class="panel"><div class="ptitle">🤝 보유 동료 <span class="small">도감 ${own.length}/${Object.keys(ALLIES).length-1} · 출전 ${P.active.length}/${MAX_ACTIVE} · ${AWAKEN_ITEM.icon} ${AWAKEN_ITEM.name} ${P.items.stone}개</span></div>
       <div class="desc">출전 동료와 이사벨은 전투 경험치를 함께 얻는다. 골드로 바로 레벨업할 수도 있다.</div>
       ${(()=>{const pl=synthPlan(),t=pl.reduce((s,x)=>s+x.n,0);return `<button class="btn ${t?'danger':''} synall" id="synall" ${t?'':'disabled'}>🔮 일괄 합성${t?` (${t}회 가능)`:''}<small>${t?'재료가 모인 모든 캐릭터를 한 번에 합성':'합성할 수 있는 캐릭터가 없음'}</small></button>`;})()}
-      <div class="sortbar"><span class="small">정렬</span>${[['cp','⚔ 전투력'],['lv','레벨'],['cnt','카드 개수']].map(([k,l])=>`<button class="sortbtn ${allySort===k?'on':''}" data-sort="${k}">${l}</button>`).join('')}</div>
-      ${own.length?own.map(allyCard).join(''):'<div class="desc">아직 동료가 없다. 상점에서 소환하자.</div>'}</div>
+      <div class="sortbar sticky">${starTabs.map(([k,l])=>`<button class="sortbtn ${String(allyStar)===String(k)?'on':''}" data-astar="${k}">${l}${k==='all'?'':` <span class="small">${cntStar(k)}</span>`}</button>`).join('')}</div>
+      <div class="sortbar" style="margin-top:0"><span class="small">같은 등급 안 정렬</span>${[['cp','⚔ 전투력'],['lv','레벨'],['cnt','카드 개수']].map(([k,l])=>`<button class="sortbtn ${allySort===k?'on':''}" data-sort="${k}">${l}</button>`).join('')}</div>
+      ${own.length?listHTML():'<div class="desc">아직 동료가 없다. 상점에서 소환하자.</div>'}</div>
     <button class="btn" id="back">← 돌아가기</button>${tabBar()}`;
   document.querySelectorAll('[data-sortie]').forEach(b=>b.onclick=()=>toggleSortie(b.dataset.sortie));
   document.querySelectorAll('[data-syn]').forEach(b=>b.onclick=()=>synthesize(b.dataset.syn));
@@ -2442,6 +2484,8 @@ function renderAllies(msg){
   document.querySelectorAll('[data-awk]').forEach(b=>b.onclick=()=>awaken(b.dataset.awk));
   document.querySelectorAll('[data-myth]').forEach(b=>b.onclick=()=>mythUp(b.dataset.myth));
   if($('#synall'))$('#synall').onclick=synthAllAsk;
+  document.querySelectorAll('[data-astar]').forEach(b=>b.onclick=()=>{allyStar=b.dataset.astar;
+    const pn=b.closest('.panel'),y=pn?pn.offsetTop:window.scrollY;renderAllies();window.scrollTo(0,Math.min(window.scrollY,y));});
   document.querySelectorAll('[data-sort]').forEach(b=>b.onclick=()=>{allySort=b.dataset.sort;try{localStorage.setItem('bp_ally_sort',allySort)}catch(e){}
     const y=window.scrollY;renderAllies();window.scrollTo(0,y);});
   $('#back').onclick=()=>renderHub();
