@@ -232,6 +232,10 @@ body.title-mode{overflow:hidden}
 @keyframes ember{0%{transform:translate(0,0);opacity:0}10%{opacity:1}100%{transform:translate(18px,-320px);opacity:0}}
 
 .intro-art.berserk{animation:ragequake .25s ease-in-out infinite;filter:drop-shadow(0 0 20px #ff2a2a)}
+.cdbar{height:5px;border-radius:3px;background:rgba(255,255,255,.06);margin:0 0 6px;overflow:hidden}
+.cdbar i{display:block;height:100%;background:linear-gradient(90deg,#4da3ff,#9fd0ff);animation:cdshrink linear forwards}
+@keyframes cdshrink{from{width:100%}to{width:0}}
+.btn.guardon{background:linear-gradient(135deg,#2b6a4a,#3fae78)!important;color:#eafff3!important;opacity:1!important;box-shadow:0 0 12px rgba(63,174,120,.5)}
 .pf-laia{box-shadow:0 0 28px rgba(255,110,40,.7),0 0 90px rgba(255,60,0,.35)}
 .pf-laia .pglow{background:radial-gradient(ellipse at 50% 100%,rgba(255,110,30,.5),transparent 62%);animation:breathe 2.2s ease-in-out infinite}
 .pf-teria{box-shadow:0 0 28px rgba(140,210,255,.75),0 0 90px rgba(80,170,255,.35)}
@@ -919,6 +923,8 @@ const AREAS=[
 const stageType=s=>s===15?'boss':s===10?'mid':s===5?'elite':'normal';
 const STYPE_LABEL={normal:'일반',elite:'정예',mid:'솔로몬 72악마',boss:'나라 보스'};
 const stageRec=(a,s)=>Math.round(AREAS[a].rec+(s-1)*(AREAS[a].recEnd-AREAS[a].rec)/(STAGES-1));
+/* 실시간 전투 속도 (ms) */
+const RT={atkCd:1500,defCd:400,itemCd:1500,fleeCd:1000,allyMs:1500,bossMs:1500,midMs:1600,normalMs:1800};
 const DEF_FLOOR=0.3; // 방어력이 아무리 높아도 적 공격의 30%는 들어감
 const ENEMY_MULT=1.3, LATE_BOSS_MULT=1.1; // 적 공격력·체력 1.3배 (나베리우스·보티스는 1.1배)
 const NORMAL_HP=[2.4,4,4.5,5,5.5,6,6.5,7,7.5,8,8.5,9,9.5], NORMAL_REWARD=1.5; // 일반 적이 몇 턴은 버티며 공격하도록
@@ -2187,12 +2193,12 @@ function synthAll(){
 }
 
 /* ===================== 전투 ===================== */
-function clearBattle(){forcedMv=null;document.body.classList.remove('pfrozen');if(B&&B.freezeT)clearInterval(B.freezeT);if(B&&B.sakuraT)clearInterval(B.sakuraT);document.body.classList.remove('battle');if(B&&B.waveT)clearInterval(B.waveT);if(B&&B.soulT)clearInterval(B.soulT);if(B&&B.paraT)clearInterval(B.paraT);if(B&&B.zapT)clearInterval(B.zapT);if(B&&B.karmaT)clearInterval(B.karmaT);if(B&&B.isaT)clearInterval(B.isaT);B=null;}
+function clearBattle(){forcedMv=null;if(B&&B.enemyT)clearInterval(B.enemyT);if(B&&B.allyT)clearInterval(B.allyT);document.body.classList.remove('pfrozen');if(B&&B.freezeT)clearInterval(B.freezeT);if(B&&B.sakuraT)clearInterval(B.sakuraT);document.body.classList.remove('battle');if(B&&B.waveT)clearInterval(B.waveT);if(B&&B.soulT)clearInterval(B.soulT);if(B&&B.paraT)clearInterval(B.paraT);if(B&&B.zapT)clearInterval(B.zapT);if(B&&B.karmaT)clearInterval(B.karmaT);if(B&&B.isaT)clearInterval(B.isaT);B=null;}
 /* 반사·부적 등으로 적이 턴 밖에서 쓰러졌을 때 */
 function winNow(){
   if(!B||B.won)return;
   if((B.e.berserk&&!B.berserked)||(B.e.madness&&!B.maddened)||(B.e.awaken&&!B.awoke)||(B.e.twin&&!B.twinned)){B.e.hp=Math.max(1,B.e.hp);renderBattle();return;}
-  B.won=true;B.busy=true;if(B.freezeT)clearInterval(B.freezeT);document.body.classList.remove('pfrozen');if(B.sakuraT)clearInterval(B.sakuraT);if(B.paraT)clearInterval(B.paraT);if(B.waveT)clearInterval(B.waveT);if(B.soulT)clearInterval(B.soulT);
+  B.won=true;B.busy=true;if(B.enemyT)clearInterval(B.enemyT);if(B.allyT)clearInterval(B.allyT);if(B.freezeT)clearInterval(B.freezeT);document.body.classList.remove('pfrozen');if(B.sakuraT)clearInterval(B.sakuraT);if(B.paraT)clearInterval(B.paraT);if(B.waveT)clearInterval(B.waveT);if(B.soulT)clearInterval(B.soulT);
   if(B.zapT)clearInterval(B.zapT);if(B.karmaT)clearInterval(B.karmaT);if(B.isaT)clearInterval(B.isaT);
   renderBattle();setTimeout(victory,750);
 }
@@ -2295,8 +2301,9 @@ function startBattle(spec){
     if(B&&inParty('sakura')){B.sakuraT=setInterval(sakuraTick,1000);sakuraTick();}
     if(B)B.isaT=setInterval(isabelTick,ISABEL_TICK);
     if(B&&isBoss&&!t.pvp){B.tickMs=t.zap?3000:t.tick?t.tick:t.final?4500:type==='boss'?5000:6000;B.zapT=setInterval(bossTick,B.tickMs);}
+    if(B){B.cdUntil=0;B.enemyT=setInterval(enemyStep,t.pvp?RT.midMs:type==='boss'?RT.bossMs:isBoss?RT.midMs:RT.normalMs);B.allyT=setInterval(allyStep,RT.allyMs);}
     if(B&&!isBoss&&Math.random()<0.4){
-      addLog(`⚠ 기습! ${t.name}이(가) 먼저 덤벼든다`);B.busy=true;renderBattle();setTimeout(enemyTurn,700);return;
+      addLog(`⚠ 기습! ${t.name}이(가) 먼저 덤벼든다`);renderBattle();setTimeout(enemyStep,300);return;
     }
     renderBattle();
   };
@@ -2316,10 +2323,25 @@ function startBattle(spec){
     begin();
   }
 }
+/* 실시간 루프: 적·동료가 각자 속도로 행동 */
+function enemyStep(){
+  if(!B||B.over||B.won||B.busy||!$('#modal').classList.contains('hidden'))return;
+  enemyTurn();
+}
+function allyStep(){
+  if(!B||B.over||B.won||B.busy||B.defending||!$('#modal').classList.contains('hidden'))return;
+  const e=B.e;if(e.hp<=0)return;
+  alliesAct();
+  if(e.hp<=0&&((e.berserk&&!B.berserked)||(e.madness&&!B.maddened)||(e.awaken&&!B.awoke)||(e.twin&&!B.twinned)))e.hp=1;
+  if(P.hp<=0){P.hp=0;B.over=true;renderBattle();setTimeout(defeat,900);return;}
+  if(e.hp<=0){winNow();return;}
+  if(checkPhase())return;
+  renderBattle();
+}
 function bossTick(){
   if(!B||B.over||B.won||!$('#modal').classList.contains('hidden'))return;
   if(B.e.zap){zapTick();return;}
-  // 중간 보스·나라 보스: 몇 초마다 몰아붙이는 맹공
+  return; // 실시간 전투: 적이 스스로 계속 공격하므로 별도의 맹공은 없음
   hitPlayer(0.3,`⏱ ${B.e.name}의 맹공`);
   if(B.e.hp<=0&&P.hp>0){winNow();return;}
   if(P.hp<=0){P.hp=0;B.over=true;clearInterval(B.zapT);renderBattle();setTimeout(defeat,800);return;}
@@ -2402,15 +2424,17 @@ function queueFx(target,txt,cls){B.fxq.push([target,txt,cls]);}
 const enemyDef=()=>B.e.def*(B.weak?0.5:1);
 
 function cmdHTML(){
-  const dis=(B.busy||pFrozen())?'disabled':'';
+  const cdLeft=Math.max(0,(B.cdUntil||0)-Date.now());
+  const dis=(B.busy||pFrozen()||cdLeft>0)?'disabled':'';
+  const cdBar=cdLeft>0?`<div class="cdbar"><i style="animation-duration:${B.cdLen}ms;animation-delay:-${B.cdLen-cdLeft}ms"></i></div>`:'<div class="cdbar"></div>';
   if(B.menu==='item'){
     return `<div class="grid">
-      <button class="btn full" data-item="water" ${(B.busy||!P.items.water)?'disabled':''}>성수 ×${P.items.water}<small>HP 40% 회복 (최소 60)</small></button>
+      ${cdBar}<button class="btn full" data-item="water" ${(B.busy||!P.items.water||cdLeft>0||pFrozen())?'disabled':''}>성수 ×${P.items.water}<small>HP 40% 회복 (최소 60)</small></button>
       <button class="btn full" data-back="1" ${dis}>← 뒤로</button></div>`;
   }
-  return `<div class="grid">
+  return `${cdBar}<div class="grid">
     <button class="btn primary full" data-act="attack" ${dis}>${pFrozen()?`🧊 얼음을 깨는 중… ${Math.ceil((B.pFrozenUntil-Date.now())/1000)}초`:'⚔ 공격'}</button>
-    <button class="btn" data-act="defend" ${dis}>🛡 방어<small>피해 40% 감소 · 공격 없음</small></button>
+    <button class="btn ${B.defending?'guardon':''}" data-act="defend" ${B.defending||B.busy||pFrozen()?'disabled':''}>${B.defending?'🛡 방어 중':'🛡 방어'}<small>${B.defending?'공격하면 해제':'피해 40% 감소 · 동료도 공격 멈춤'}</small></button>
     <button class="btn" data-act="itemmenu" ${dis}>🧪 아이템</button>
     <button class="btn full" data-act="flee" ${(B.busy||B.isBoss)?'disabled':''}>${B.pvp?'대결 중에는 도망칠 수 없다':B.isBoss?'보스전에서는 도망칠 수 없다':'🏃 도망 (60%)'}</button>
   </div>`;
@@ -2783,10 +2807,12 @@ function hitPlayer(mult,label){
 }
 
 function act(kind,arg){
-  if(!B||B.busy||B.over)return;
+  if(!B||B.busy||B.over||B.won)return;
+  if(kind==='itemmenu'||kind==='skillmenu'||kind==='back'){B.menu=kind==='itemmenu'?'item':'main';renderBattle();return;}
+  if(Date.now()<(B.cdUntil||0))return;
   if(pFrozen()){addLog(`🧊 얼어붙어 움직일 수 없다… (${Math.ceil((B.pFrozenUntil-Date.now())/1000)}초)`);renderBattle();return;}
   const e=B.e;
-  if(kind==='attack'||kind==='item')B.guard=false;
+  if(kind==='attack'||kind==='item'){B.guard=false;B.defending=false;}
   if(kind==='attack'){
     hitEnemy(1,'공격');
   }else if(kind==='skill'){
@@ -2802,7 +2828,8 @@ function act(kind,arg){
       B.buff=4;addLog(`${s.name} — 3턴간 공격력 1.5배`);
     }
   }else if(kind==='defend'){
-    B.defending=true;B.guard=true;addLog('방어 태세를 갖췄다. (이번 턴은 공격하지 않는다)');
+    if(B.defending)return;
+    B.defending=true;B.guard=true;addLog('🛡 방어 태세 — 공격하거나 아이템을 쓰기 전까지 피해 40% 감소 (동료도 공격을 멈춘다)');
   }else if(kind==='item'){
     if(arg==='water'&&P.items.water>0&&B.noHeal){addLog('🧪 가미긴의 괴성이 상처를 벌려 놓았다 — 회복할 수 없다');renderBattle();return;}
     else if(arg==='water'&&P.items.water>0){
@@ -2820,14 +2847,14 @@ function act(kind,arg){
     }
     addLog('도망에 실패했다!');
   }
-  if(e.hp>0&&kind==='attack')alliesAct(); // 동료는 '공격'을 누른 턴에만 행동
   if(e.hp<=0&&((e.berserk&&!B.berserked)||(e.madness&&!B.maddened)||(e.awaken&&!B.awoke)||(e.twin&&!B.twinned)))e.hp=1; // 폭주·광기 전에는 쓰러지지 않음
-  B.menu='main';B.busy=true;
+  const cd=kind==='attack'||kind==='skill'?RT.atkCd:kind==='item'?RT.itemCd:kind==='flee'?RT.fleeCd:RT.defCd;
+  B.cdUntil=Date.now()+cd;B.cdLen=cd;B.menu='main';
+  setTimeout(()=>{if(B&&!B.over&&!B.won&&$('#modal').classList.contains('hidden'))renderBattle();},cd+30);
   if(P.hp<=0&&e.hp>0){P.hp=0;B.over=true;renderBattle();setTimeout(defeat,900);return;}
-  renderBattle();
-  if(e.hp<=0){setTimeout(victory,750);return;}
+  if(e.hp<=0){winNow();return;}
   if(checkPhase())return;
-  setTimeout(enemyTurn,750);
+  renderBattle();
 }
 
 function checkPhase(){
@@ -2906,8 +2933,8 @@ function enemyTurn(){
   switch(mv.t){
     case 'sealed':  addLog(`${e.name} — 봉인되어 움직일 수 없다!`);break;
     case 'pvp':     pvpEnemyActs(e);break;
-    case 'nullify': B.immune=2;addLog(`${label} — ⏸ 다음 턴 동안 모든 피해가 무효화된다!`);break;
-    case 'reflect': B.reflect=2;addLog(`${label} — ↩ 다음 턴 동안 준 피해의 절반이 되돌아온다!`);break;
+    case 'nullify': B.immune=2;addLog(`${label} — ⏸ 잠시 동안 모든 피해가 무효화된다!`);break;
+    case 'reflect': B.reflect=2;addLog(`${label} — ↩ 잠시 동안 준 피해의 절반이 되돌아온다!`);break;
     case 'atk':     hitPlayer(1,label);break;
     case 'strong':  hitPlayer(1.5,label);break;
     case 'hellfire':hitPlayer(1.8,label);break;
@@ -2982,7 +3009,7 @@ function enemyTurn(){
       addLog(mv.kind==='jeongyeok'?`⚠ ${e.name} — 「전격」 충전! 방어하지 않으면 HP 절반을 잃는다`
         :mv.kind==='tornado'?`⚠ ${e.name} — 「스파크 토네이도」의 전조! 방어해도 HP 1/3을 잃는다`
         :mv.kind==='deathblow'?`⚠ ${e.name} — 「죽음의 일격」 준비! 방어하지 않으면 동료 한 명이 죽는다`
-        :`⚠ ${e.name} — 「${mv.n}」 준비! 다음 턴에 방어하자.`);
+        :`⚠ ${e.name} — 「${mv.n}」 준비! 곧 날아온다 — 방어하자!`);
       break;
   }
   // 나베리우스: 숨 쉴 틈 없는 추격 참격
@@ -2990,7 +3017,7 @@ function enemyTurn(){
   if(e.slashes&&mv.t!=='sealed'&&P.hp>0){
     for(let i=0;i<e.slashes;i++)hitPlayer(0.35,`🗡 추격 참격 ${i+1}`);
   }
-  B.defending=false;B.ward=false;
+  B.ward=false;
   if(e.burnBleed&&P.hp>0&&e.hp>0){ // 테라지오: 처음부터 끝까지 화상 + 출혈
     const bd=Math.max(3,Math.round(e.atk*0.075)),bl=Math.max(3,Math.round(e.atk*0.075));
     P.hp=Math.max(0,P.hp-bd-bl);addLog(`🔥 화상 ${bd} · 🩸 출혈 ${bl} — 끝나지 않는 상처`);queueFx('player','-'+(bd+bl),'pdmg');
@@ -3028,7 +3055,6 @@ function enemyTurn(){
   if(B.weak)B.weak--;
   if(P.hp<=0){P.hp=0;B.over=true;renderBattle();setTimeout(defeat,900);return;}
   if(e.hp<=0){winNow();return;}
-  B.busy=false;
   renderBattle();
 }
 
