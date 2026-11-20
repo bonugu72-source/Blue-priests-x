@@ -4,6 +4,7 @@ rules_version = '2';
 // owners/{pid}/devices/{u}: 키를 아는 기기만 연결 가능
 // players/{pid}           : 친구 목록용 공개 프로필 (로그인하면 읽기, 연결된 기기만 쓰기)
 // saves/{pid}             : 클라우드 저장 (연결된 기기만)
+// links/{code}            : 기기 연결용 8자리 코드 (10분짜리, 한 번 쓰면 삭제)
 service cloud.firestore {
   match /databases/{database}/documents {
     function signedIn() { return request.auth != null; }
@@ -27,6 +28,17 @@ service cloud.firestore {
     }
     match /saves/{pid} {
       allow read, create, update: if linked(pid);
+    }
+    // links/{code}: 기기 연결용 8자리 코드 (연결된 기기만 만들고, 최대 15분 동안만 읽을 수 있음, 쓰고 나면 삭제)
+    match /links/{code} {
+      allow get: if signedIn() && (resource == null || resource.data.exp > request.time.toMillis());
+      allow create: if code.size() == 8
+        && linked(request.resource.data.pid)
+        && request.resource.data.keys().hasOnly(['pid', 'key', 'exp'])
+        && request.resource.data.key == get(/databases/$(database)/documents/owners/$(request.resource.data.pid)).data.key
+        && request.resource.data.exp is int
+        && request.resource.data.exp <= request.time.toMillis() + 900000;
+      allow delete: if signedIn();
     }
   }
 }

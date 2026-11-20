@@ -1665,7 +1665,152 @@ async function initFirebase(){
     if(local)await fbBind(local);
   }catch(e){if(!FB)cloudState='off';}
   updateCloudNote();
+  if(pendingDevice)takePendingDevice();
 }
+/* ===== 기기 연결: 짧은 연결 코드(10분, 한 번만) 또는 연결 링크로 다른 기기에서 같은 캐릭터 이어하기 ===== */
+const DLINK_ABC='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';   // 헷갈리는 0·O·1·I 는 뺀 32자
+const DLINK_MIN=10;
+function newLinkCode(){
+  let a;try{a=new Uint8Array(8);crypto.getRandomValues(a);}catch(e){a=Array.from({length:8},()=>Math.floor(Math.random()*256));}
+  return Array.from(a,b=>DLINK_ABC[b%32]).join('');
+}
+const fmtLinkCode=c=>c.slice(0,4)+'-'+c.slice(4);
+function myDeviceLink(){return location.href.split('#')[0]+'#d='+encodeURIComponent(P.uid+'.'+(P.skey||fbKey));}
+/* 입력 해석: 연결 링크(#d=…) · 8자리 연결 코드 · 예전 저장 코드(BP1:) */
+function parseDeviceInput(raw){
+  const t=String(raw||'').trim();
+  if(!t)return null;
+  const m=t.match(/#d=([^\s#&]+)/);
+  if(m){try{const v=decodeURIComponent(m[1]),i=v.lastIndexOf('.'),pid=v.slice(0,i),key=v.slice(i+1);
+    if(i>0&&key.length>=16)return {pid,key};}catch(e){}return null;}
+  if(t.replace(/\s+/g,'').startsWith('BP1:')){const p=decodeSave(t);return p?{save:p}:null;}
+  const c=t.toUpperCase().replace(/[\s-]/g,'');
+  if(c.length===8&&[...c].every(ch=>DLINK_ABC.includes(ch)))return {code:c};
+  return null;
+}
+/* 이 기기를 캐릭터(pid)에 연결하고 클라우드의 최신 기록을 가져오기 */
+async function fbLinkDevice(pid,key){
+  if(fbBinding){try{await fbBinding;}catch(e){}}
+  const devRef=FB.doc(`owners/${pid}/devices/${fbAuthUid}`);
+  let linked=false;
+  try{linked=(await withTimeout(devRef.get())).exists;}catch(e){}
+  if(!linked){
+    try{await withTimeout(devRef.set({key}));}
+    catch(e){throw {msg:e&&e.code==='permission-denied'?'연결 정보가 맞지 않아요. 쓰던 기기에서 새 연결 코드나 링크를 받아 주세요.':'연결하지 못했어요. 인터넷 연결을 확인하고 다시 시도해 주세요.'};}
+  }
+  let snap;
+  try{snap=await withTimeout(FB.doc('saves/'+pid).get());}catch(e){throw {msg:'클라우드 기록을 불러오지 못했어요. 잠시 뒤 다시 시도해 주세요.'};}
+  let remote=null;
+  if(snap.exists){try{const d=snap.data();if(d&&d.key===SAVE_KEY)remote=JSON.parse(d.json);}catch(e){}}
+  if(!remote||!remote.name||!remote.lv||!Array.isArray(remote.prog))
+    throw {msg:'클라우드에 저장된 기록이 없어요. 쓰던 기기에서 게임을 한 번 열어 두고 다시 시도해 주세요.'};
+  remote.uid=pid;remote.skey=key;
+  P=remote;
+  try{localStorage.setItem(SAVE_KEY,JSON.stringify(P))}catch(e){}
+  await fbBind(P);
+  return P;
+}
+/* 쓰던 기기: 연결 코드·링크 보여 주기 */
+let dlTimer=null;
+async function showDeviceLink(){
+  if(!P)return;
+  save();
+  if(dlTimer){clearInterval(dlTimer);dlTimer=null;}
+  showStory(`<div class="sum" id="dlbox"><div class="sum-title">📱 다른 기기 연결</div><p class="sum-desc">연결 준비 중…</p></div>`,null,true);
+  $('#mbtn').textContent='닫기';
+  if(!FB||cloudState!=='on'||fbPid!==P.uid){
+    $('#dlbox').innerHTML=`<div class="sum-title">📱 다른 기기 연결</div>
+      <p class="sum-desc">${cloudState==='checking'||cloudState==='ready'?'아직 클라우드에 연결하는 중이에요. 잠시 뒤 다시 눌러 주세요.'
+        :'⚠ 이 기기가 클라우드에 연결되어 있지 않아요. 인터넷 연결을 확인하고 새로고침해 주세요.<br>급하면 「💾 저장 코드 복사」를 써도 돼요.'}</p>`;
+    return;
+  }
+  // 새 기기가 바로 최신 기록을 받도록 지금 상태를 먼저 올려 두기
+  try{await withTimeout(cloudRef.set({json:JSON.stringify(P),savedAt:P.savedAt||Date.now(),key:SAVE_KEY}));}catch(e){}
+  const exp=Date.now()+DLINK_MIN*60000;let code=null;
+  for(let i=0;i<2&&!code;i++){
+    const c=newLinkCode();
+    try{await withTimeout(FB.doc('links/'+c).set({pid:P.uid,key:P.skey||fbKey,exp}));code=c;}
+    catch(e){if(e&&e.code==='permission-denied')break;}
+  }
+  const box=$('#dlbox');if(!box||$('#modal').classList.contains('hidden'))return;
+  box.innerHTML=`<div class="sum-title">📱 다른 기기 연결</div>
+    ${code?`<p class="sum-desc">새 기기에서 게임을 열고 타이틀의 <b>「📱 다른 기기에서 이어하기」</b>를 누른 뒤 이 코드를 넣으세요.</p>
+      <div style="font:900 30px/1.3 monospace;letter-spacing:4px;text-align:center;color:#cfe0ff;background:#080d1e;border:1px solid var(--line);border-radius:10px;padding:12px;margin:6px 0">${fmtLinkCode(code)}</div>
+      <div class="small" id="dlleft" style="text-align:center">남은 시간 ${DLINK_MIN}:00 · 한 번만 쓸 수 있어요</div>
+      <p class="sum-desc" style="margin-top:10px">또는 연결 링크를 나에게 보내서(예: 카톡 나와의 채팅) 새 기기에서 열어도 돼요.</p>`
+     :`<p class="sum-desc">연결 링크를 나에게 보내서(예: 카톡 나와의 채팅) 새 기기에서 열기만 하면 돼요. 같은 캐릭터로 이어서 하고, 친구도 그대로예요.</p>`}
+    <button class="btn primary" id="dlshare" style="width:100%;margin-top:6px">🔗 연결 링크 보내기</button>
+    <div class="small" style="margin-top:8px;color:#ffb3b3">⚠ 코드나 링크를 받은 사람은 내 캐릭터로 플레이할 수 있어요. 다른 사람에게는 보내지 마세요.</div>`;
+  $('#dlshare').onclick=async e=>{
+    const link=myDeviceLink(),txt=`『푸른사제들』 ${P.name} 기기 연결 링크 (나만 쓰기)`;
+    if(navigator.share){try{await navigator.share({title:'푸른사제들 기기 연결',text:txt,url:link});return;}catch(err){if(err&&err.name==='AbortError')return;}}
+    copyText(link,e.currentTarget);
+  };
+  if(code)dlTimer=setInterval(()=>{
+    const el=$('#dlleft');
+    if(!el||$('#modal').classList.contains('hidden')){clearInterval(dlTimer);dlTimer=null;return;}
+    const s=Math.max(0,Math.round((exp-Date.now())/1000));
+    el.textContent=s?`남은 시간 ${Math.floor(s/60)}:${String(s%60).padStart(2,'0')} · 한 번만 쓸 수 있어요`:'시간이 지났어요. 닫고 다시 눌러 새 코드를 받으세요.';
+    if(!s){clearInterval(dlTimer);dlTimer=null;}
+  },1000);
+}
+/* 새 기기: 연결 코드·링크 넣기 */
+function showDeviceJoin(prefill){
+  const cur=P||load();
+  showStory(`<div class="sum"><div class="sum-title">📱 다른 기기에서 이어하기</div>
+    ${prefill?'<p class="sum-desc">🔗 연결 링크로 들어왔어요. 「연결하기」를 누르면 이 기기에서 같은 캐릭터로 이어서 할 수 있어요.</p>'
+      :'<p class="sum-desc">쓰던 기기에서 <b>친구 탭 맨 아래 「📱 기기 연결」</b>을 누르면 나오는 <b>8자리 연결 코드</b>를 넣으세요. 연결 링크나 예전 저장 코드(BP1:)를 붙여 넣어도 돼요.</p>'}
+    <input id="djin" class="fcode" type="${prefill?'hidden':'text'}" style="font:900 20px/1.3 monospace;text-align:center;letter-spacing:2px;text-transform:uppercase" placeholder="ABCD-EFGH" autocomplete="off" autocapitalize="characters" spellcheck="false">
+    ${cur?`<div class="small" style="color:#ffd27a">⚠ 이 기기에 있던 「${esc(cur.name)} · Lv ${cur.lv}」 기록은 연결한 캐릭터로 바뀌어요.</div>`:''}
+    <button class="btn primary" id="djgo" style="width:100%;margin-top:8px">연결하기</button>
+    <div class="small" id="djmsg" style="margin-top:6px;color:#ff9a9a"></div></div>`,null,true);
+  $('#mbtn').textContent='닫기';
+  if(prefill)$('#djin').value=prefill;
+  const msg=t=>{const m=$('#djmsg');if(m)m.textContent=t;};
+  $('#djgo').onclick=async()=>{
+    const btn=$('#djgo'),r=parseDeviceInput($('#djin').value);
+    if(!r){msg('코드를 읽지 못했어요. 8자리 연결 코드(예: ABCD-EFGH)나 연결 링크를 그대로 넣어 주세요.');return;}
+    if(r.save){
+      P=r.save;save();$('#modal').classList.add('hidden');leaveTitle();
+      renderHub(`📥 저장 코드를 불러왔어요 — ${esc(P.name)} · Lv ${P.lv}`);return;
+    }
+    if(!FB){msg(cloudState==='checking'?'클라우드에 연결하는 중이에요. 잠시 뒤 다시 눌러 주세요.':'클라우드에 연결하지 못했어요. 인터넷 연결을 확인하고 새로고침해 주세요.');return;}
+    btn.disabled=true;btn.textContent='연결 중…';msg('');
+    try{
+      let pid=r.pid,key=r.key,ref=null;
+      if(r.code){
+        ref=FB.doc('links/'+r.code);
+        let snap;
+        try{snap=await withTimeout(ref.get());}
+        catch(e){throw {msg:e&&e.code==='permission-denied'?'연결 코드의 시간이 지났어요. 쓰던 기기에서 새 코드를 받아 주세요.':'연결 코드를 확인하지 못했어요. 인터넷 연결을 확인해 주세요.'};}
+        if(!snap.exists)throw {msg:'그 연결 코드를 찾지 못했어요. 글자를 다시 확인하거나 새 코드를 받아 주세요.'};
+        const d=snap.data()||{};pid=d.pid;key=d.key;
+        if(!pid||!key)throw {msg:'연결 코드가 올바르지 않아요. 새 코드를 받아 주세요.'};
+      }
+      const p=await fbLinkDevice(pid,key);
+      if(ref)ref.delete().catch(()=>{});        // 연결 코드는 한 번만 쓰기
+      $('#modal').classList.add('hidden');leaveTitle();hubTab='adv';
+      renderHub(`📱 이 기기를 연결했어요 — ${esc(p.name)} · Lv ${p.lv}. 이제 두 기기 모두 자동으로 저장돼요.`);
+    }catch(e){
+      msg((e&&e.msg)||'연결하지 못했어요. 잠시 뒤 다시 시도해 주세요.');
+      const b=$('#djgo');if(b){b.disabled=false;b.textContent='연결하기';}
+    }
+  };
+}
+/* 연결 링크(#d=…)로 들어왔을 때 */
+let pendingDevice=(()=>{try{return location.hash.startsWith('#d=')?location.hash:null}catch(e){return null}})();
+function takePendingDevice(){
+  const h=pendingDevice;pendingDevice=null;
+  try{history.replaceState(null,'',location.href.split('#')[0]);}catch(e){}
+  const r=parseDeviceInput(h);if(!r)return;
+  const cur=P||load();
+  if(r.pid&&cur&&cur.uid===r.pid&&fbPid===r.pid){   // 이미 이 기기에 연결된 캐릭터면 그냥 이어하기
+    if(!P){P=cur;leaveTitle();}
+    renderHub('📱 이미 이 기기에 연결된 캐릭터예요. 이어서 시작해요.');return;
+  }
+  showDeviceJoin(h);
+}
+const hasFirebaseHost=()=>!(window.claude&&typeof claude.use==='function');   // Claude 밖(GitHub Pages 등)
 /* 캐릭터(P.uid)를 클라우드에 연결. 비밀 키(P.skey)는 저장 코드 안에만 들어 있어서,
    다른 기기에서는 최신 저장 코드를 한 번 불러오면 같은 캐릭터로 이어서 저장·친구 연결이 돼요. */
 function fbBind(p){
@@ -1735,7 +1880,7 @@ function updateCloudNote(){
   const n=$('#cloudnote');if(!n)return;
   n.textContent=cloudState==='on'?(FB?'☁ 클라우드 자동 저장 · 실시간 친구 연결됨':'☁ 클라우드 자동 저장 중 (이 계정)')
     :cloudState==='ready'?'☁ 클라우드 연결됨 · 게임을 시작하면 자동 저장돼요'
-    :cloudState==='denied'?'⚠ 이 기기는 아직 클라우드에 연결되지 않았어요 · 다른 기기의 최신 저장 코드를 한 번 불러오면 연결돼요'
+    :cloudState==='denied'?'⚠ 이 기기는 아직 클라우드에 연결되지 않았어요 · 「📱 다른 기기에서 이어하기」로 연결해 주세요'
     :cloudState==='checking'?'저장 공간 확인 중…':'이 브라우저에 저장 · 다른 기기·앱에서 이어하려면 저장 코드를 쓰세요';
 }
 const encodeSave=p=>'BP1:'+btoa(unescape(encodeURIComponent(JSON.stringify(p))));
@@ -1919,6 +2064,7 @@ function renderTitle(){
       <input id="nm" maxlength="8" placeholder="주인공 이름 (최대 8자)" autocomplete="off">
       <button class="btn primary" id="newg">새 게임</button>
       ${sv?`<button class="btn" id="cont">이어하기<small>${esc(sv.name)} · Lv ${sv.lv} · ${esc(AREAS[sv.cur].name)}</small></button>`:''}
+      ${hasFirebaseHost()?'<button class="btn" id="devjoin">📱 다른 기기에서 이어하기<small>연결 코드나 링크로 같은 캐릭터 이어서</small></button>':''}
       <button class="link" id="loadcode" style="color:#bcd0ff">📥 저장 코드로 불러오기</button>
       <div class="hint">서울 → 도쿄 → 런던 → 로마 → 부서져 내린 서울<br><span id="cloudnote"></span></div>
     </div>`;
@@ -1932,6 +2078,7 @@ function renderTitle(){
   };
   if(sv)$('#cont').onclick=()=>{P=sv;leaveTitle();renderHub();};
   $('#loadcode').onclick=showLoadCode;
+  if($('#devjoin'))$('#devjoin').onclick=()=>showDeviceJoin();
   updateCloudNote();
 }
 
@@ -2004,7 +2151,7 @@ async function renderFriends(msg,preList){
   if(friendsUnsub){try{friendsUnsub();}catch(e){}friendsUnsub=null;}
   clearBattle();hubTab='friend';
   if(!DBX||!myId){
-    if(FB&&cloudState==='denied'&&!msg)msg='⚠ 이 기기는 아직 실시간 친구에 연결되지 않았어요. 다른 기기에서 쓰던 <b>최신 저장 코드</b>를 타이틀의 「저장 코드로 불러오기」로 한 번 불러오면 연결돼요.';
+    if(FB&&cloudState==='denied'&&!msg)msg='⚠ 이 기기는 아직 실시간 친구에 연결되지 않았어요. 쓰던 기기에서 친구 탭 맨 아래 <b>「📱 기기 연결」</b>을 눌러 받은 코드를, 이 기기 타이틀의 <b>「📱 다른 기기에서 이어하기」</b>에 넣으면 연결돼요.';
     renderFriendsCode(msg);return;}
   const back=footHTML()+tabBar();
   let list=[];
@@ -2053,7 +2200,7 @@ async function renderFriends(msg,preList){
       <button class="btn primary fbtn" data-fadd="${esc(x.id)}">${label}</button></div>`;
   const nf=friends.length,myRank=ranking.findIndex(x=>x.me)+1;
   $('#app').innerHTML=`${statusHTML()}${msg?`<div class="notice">${msg}</div>`:''}
-    ${canShare===false?'<div class="notice">⚠ 내 정보를 친구들에게 올리지 못하고 있어요. 최신 저장 코드를 한 번 불러와 주세요.</div>':''}
+    ${canShare===false?'<div class="notice">⚠ 내 정보를 친구들에게 올리지 못하고 있어요. 쓰던 기기의 「📱 기기 연결」 코드로 이 기기를 연결해 주세요.</div>':''}
     ${requests.length?`<div class="panel"><div class="ptitle">📨 친구 요청 <span class="small">${requests.length}명</span></div>
       <div class="desc">나를 친구로 추가한 모험가예요. 수락하면 서로 친구가 돼요.</div>
       ${requests.map(x=>simpleRow(x,'수락')).join('')}</div>`:''}
@@ -2409,11 +2556,12 @@ let hubTab='adv';
 const TABS=[['shop','🕯','상점'],['ally','🤝','동료'],['adv','🗺','모험'],['friend','👥','친구']];
 const tabBar=()=>{document.body.dataset.theme=hubTab;return `<nav class="tabbar">${TABS.map(([k,ic,l])=>`<button class="tab t-${k} ${hubTab===k?'on':''}" data-tab="${k}"><span class="ti">${ic}</span>${l}</button>`).join('')}</nav>`;};
 document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('.tabbar [data-tab]');if(b){e.preventDefault();hubTab=b.dataset.tab;renderHub();window.scrollTo(0,0);}});
-const footHTML=()=>`<div class="foot"><button class="link" id="savecode">💾 저장 코드 복사</button> · <button class="link" id="totitle">타이틀로</button>
+const footHTML=()=>`<div class="foot">${FB?'<button class="link" id="devlink">📱 기기 연결</button> · ':''}<button class="link" id="savecode">💾 저장 코드 복사</button> · <button class="link" id="totitle">타이틀로</button>
   <div class="small" style="margin-top:2px">${cloudState==='on'?'☁ 클라우드 자동 저장 중':'이 브라우저에 자동 저장 중 · 저장 코드로 백업하세요'}</div></div>`;
 function bindFoot(){
   if($('#totitle'))$('#totitle').onclick=()=>{save();renderTitle();};
   if($('#savecode'))$('#savecode').onclick=showSaveCode;
+  if($('#devlink'))$('#devlink').onclick=showDeviceLink;
 }
 /* 출전 동료 3칸: 아이콘 + 이름, 빈 칸은 '비어있음' */
 /* 출전 파티 저장 (파티 1 · 파티 2) */
