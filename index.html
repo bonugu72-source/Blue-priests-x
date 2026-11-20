@@ -396,6 +396,20 @@ body.pfrozen #cmds .btn{filter:saturate(.2) brightness(1.2);background:linear-gr
 .report{text-align:left}
 .report .sum-title{text-align:center;margin-bottom:6px}
 .rp-h{font-weight:700;margin:14px 0 6px;color:#dfe8ff}
+.fdetail .rp-h{text-align:left;margin:12px 0 6px}
+.fbtns .fbtn{white-space:nowrap}
+.tiergrp{font-size:12px;font-weight:700;color:#e8c76a;margin:8px 2px 4px;padding-left:8px;border-left:3px solid #8a6a1f}
+.tiergrp span{font-weight:400;color:var(--dim);margin-left:4px}
+.rp-h span{font-weight:400;font-size:11px;color:#8fa3d6;margin-left:6px}
+.result .rs-head{text-align:center;font-family:'Noto Serif KR',serif;font-weight:900;font-size:22px;margin-bottom:2px}
+.result .rs-head.win{color:var(--gold)}.result .rs-head.lose{color:#ff8a8a}
+.result .rs-note{font-size:12px;color:var(--dim);text-align:center;margin:-2px 0 8px;line-height:1.5}
+.rs-rew{background:rgba(255,255,255,.04);border-radius:10px;padding:8px 10px;font-size:13px;line-height:1.6}
+.result .rp-h{margin:10px 0 4px;font-size:13px}
+.result .rp-row{margin:3px 0;grid-template-columns:86px 1fr 56px}
+.result .rp-bar{height:10px}
+.result .rp-row{grid-template-columns:86px 1fr 74px}
+.result .rp-v{white-space:nowrap}.result .rp-v small{display:inline;margin-left:4px}
 .rp-tot{font-size:12px;color:#8fa3d6;margin:-4px 0 6px}
 .rp-row{display:grid;grid-template-columns:92px 1fr 62px;align-items:center;gap:6px;margin:5px 0}
 .rp-nm{display:flex;align-items:center;gap:4px;font-size:12px;white-space:nowrap;overflow:hidden}
@@ -547,7 +561,7 @@ body:has(.tabbar) .tabbar{background:color-mix(in srgb,var(--tc) 6%,rgba(8,12,26
 /* Modal */
 #modal{position:fixed;inset:0;background:rgba(3,6,15,.86);display:flex;align-items:center;justify-content:center;padding:20px;z-index:40}
 #modal.hidden{display:none}
-.mbox{max-width:440px;width:100%;background:linear-gradient(180deg,#152048,#0d1531);border:1px solid #263866;border-radius:18px;padding:24px 20px 18px;
+.mbox{max-width:440px;width:100%;max-height:calc(100dvh - 24px);overflow-y:auto;background:linear-gradient(180deg,#152048,#0d1531);border:1px solid #263866;border-radius:18px;padding:24px 20px 18px;
   box-shadow:0 12px 40px rgba(0,0,0,.55);animation:fadein .3s}
 #mtext{font-family:'Noto Serif KR',serif;font-size:16px;line-height:1.9;margin-bottom:18px;white-space:normal}
 .mbox .btn{width:100%}
@@ -1954,7 +1968,7 @@ async function renderFriends(msg,preList){
       <div class="small">${x.missing?'':`Lv ${x.lv||1} · ${progressText(x)}${x.ended?' · ✝':''}`}</div>
       <div class="small">${sub}</div></div>
       <div class="fcp">⚔ ${fmt(x.cp||0)}</div>
-      <div class="fbtns">${x.team&&!x.missing?`<button class="btn danger fbtn" data-duel="${esc(x.id)}">⚔ 대결</button>`:''}<button class="btn fbtn" data-fdel="${esc(x.id)}">삭제</button></div></div>`;
+      <div class="fbtns">${x.team&&!x.missing?`<button class="btn danger fbtn" data-duel="${esc(x.id)}">⚔ 배틀</button>`:''}<button class="btn fbtn" data-finfo="${esc(x.id)}">🔍 자세히 보기</button></div></div>`;
   };
   const simpleRow=(x,label)=>`<div class="frow"><div class="fcp">⚔ ${fmt(x.cp||0)}</div>
       <div style="flex:1;min-width:0"><b>${esc(x.hero||'모험가')}</b><div class="small">Lv ${x.lv||1} · ${progressText(x)}${seen(x)}</div></div>
@@ -1993,17 +2007,18 @@ async function renderFriends(msg,preList){
     if(!P.friends.includes(b.dataset.fadd)&&P.friends.length<100)P.friends.push(b.dataset.fadd);
     const x=byId[b.dataset.fadd];save();renderFriends(`🤝 ${esc((x&&x.hero)||'모험가')}님을 친구로 추가했어요!`,list);
   });
-  document.querySelectorAll('[data-fdel]').forEach(b=>b.onclick=()=>{
-    const id=b.dataset.fdel,x=byId[id]||(P.fbook&&P.fbook[id]);
-    if(b.dataset.armed!=='1'){b.dataset.armed='1';b.textContent='한 번 더 누르면 삭제';return;}
-    P.friends=P.friends.filter(v=>v!==id);if(P.fbook)delete P.fbook[id];
-    save();renderFriends(`${esc((x&&x.hero)||'모험가')}님을 친구 목록에서 삭제했어요.`,list);
-  });
-  document.querySelectorAll('[data-duel]').forEach(b=>b.onclick=()=>{
-    const f=byId[b.dataset.duel]||(P.fbook&&P.fbook[b.dataset.duel]);
+  const duelF=id=>{
+    const f=byId[id]||(P.fbook&&P.fbook[id]);
     if(!f||!f.team){renderFriends('이 친구는 아직 팀 정보가 없어요. 친구가 게임을 한 번 더 플레이하면 대결할 수 있어요.');return;}
-    startPvp({...f,id:b.dataset.duel});
+    startPvp({...f,id});
+  };
+  document.querySelectorAll('[data-finfo]').forEach(b=>b.onclick=()=>{
+    const id=b.dataset.finfo,x=byId[id]||(P.fbook&&P.fbook[id]?{...P.fbook[id],id}:{id,hero:'모험가'});
+    showFriendDetail(x,{rec:vsRec(id),duel:x.team&&!x.missing?()=>duelF(id):null,del:()=>{
+      P.friends=P.friends.filter(v=>v!==id);if(P.fbook)delete P.fbook[id];
+      save();renderFriends(`${esc(x.hero||'모험가')}님을 친구 목록에서 삭제했어요.`,list);}});
   });
+  document.querySelectorAll('[data-duel]').forEach(b=>b.onclick=()=>duelF(b.dataset.duel));
   if(!preList)window.scrollTo(0,0);
   // 친구 화면이 열려 있는 동안 다른 모험가의 레벨·전투력이 바뀌면 바로 다시 그림
   if(FB&&DBX===FB){
@@ -2071,7 +2086,7 @@ function renderFriendsCode(msg){
         <div class="small">Lv ${x.lv||1} · ${progressText(x)}${x.ended?' · ✝':''}</div>
         <div class="small">${x.me?`대결 전적 ${(P.pvp&&P.pvp.w)||0}승 ${(P.pvp&&P.pvp.l)||0}패`:`나와의 대결 ${x.w||0}승 ${x.l||0}패 · 정보 ${agoText(x.updatedAt||x.addedAt||Date.now())}`}</div></div>
       <div class="fcp">⚔ ${fmt(x.cp||0)}</div>
-      ${x.me?'':`<div class="fbtns"><button class="btn danger fbtn" data-duel="${esc(x.id)}">⚔ 대결</button><button class="btn fbtn" data-fdel="${esc(x.id)}">삭제</button></div>`}
+      ${x.me?'':`<div class="fbtns"><button class="btn danger fbtn" data-duel="${esc(x.id)}">⚔ 배틀</button><button class="btn fbtn" data-finfo="${esc(x.id)}">🔍 자세히 보기</button></div>`}
     </div>`;
   $('#app').innerHTML=`${statusHTML()}${msg?`<div class="notice">${msg}</div>`:''}
     <div class="panel"><div class="ptitle">🏆 친구 랭킹 <span class="small">전투력 순 · 친구 ${nf}명 · 내 순위 ${myRank}/${list.length}</span></div>
@@ -2095,9 +2110,10 @@ function renderFriendsCode(msg){
     if(navigator.share){try{await navigator.share({title:'푸른사제들 친구 추가',text:txt,url:link});return;}catch(err){if(err&&err.name==='AbortError')return;}}
     copyText(link,e.currentTarget);
   };
-  document.querySelectorAll('[data-fdel]').forEach(b=>b.onclick=()=>{
-    const f=P.fbook[b.dataset.fdel];if(!f)return;
-    delete P.fbook[b.dataset.fdel];save();renderFriendsCode(`${esc(f.hero)}님을 친구 목록에서 삭제했어요.`);
+  document.querySelectorAll('[data-finfo]').forEach(b=>b.onclick=()=>{
+    const id=b.dataset.finfo,f=P.fbook[id];if(!f)return;
+    showFriendDetail({...f,id},{rec:{w:f.w||0,l:f.l||0},duel:f.team?()=>startPvp(f):null,
+      del:()=>{delete P.fbook[id];save();renderFriendsCode(`${esc(f.hero)}님을 친구 목록에서 삭제했어요.`);}});
   });
   document.querySelectorAll('[data-duel]').forEach(b=>b.onclick=()=>{const f=P.fbook[b.dataset.duel];if(f)startPvp(f);});
   window.scrollTo(0,0);
@@ -2123,6 +2139,26 @@ function takePendingFriend(){
 /* ===================== 친구 대결 (비동기: 친구가 마지막으로 저장한 팀을 AI가 조종) ===================== */
 const PVP_DAILY=5, PVP_HP=1.25;
 const pvpCl=(v,lo,hi)=>Math.max(lo,Math.min(hi,Number(v)||lo));
+/* 친구 자세히 보기: 레벨·전투력·팀·전적 + 배틀 / 삭제 */
+function showFriendDetail(x,o){
+  const t=x.team||{};
+  const party=(Array.isArray(t.party)?t.party:[]).filter(a=>a&&ALLIES[a.id]).slice(0,4).map(a=>({id:a.id,lv:pvpCl(a.lv,1,60)}));
+  showStory(`<div class="sum fdetail"><div class="sum-title">👤 친구 정보</div>
+    <div class="sum-name">${esc(x.hero||'모험가')}</div>
+    <div class="small">Lv ${x.lv||1} · ${progressText(x)}${x.ended?' · ✝ 엔딩':''}</div>
+    <div class="teamcp">⚔ 전투력 <b>${fmt(x.cp||0)}</b></div>
+    ${t.atk?`<div class="small">주인공 · 공격 ${pvpCl(t.atk,1,9999)} · 방어 ${pvpCl(t.def,0,9999)} · HP ${fmt(pvpCl(t.maxHp,1,99999))}</div>`:''}
+    <div class="rp-h">🤝 출전 동료</div>
+    ${party.length?`<div class="pvpteam">${teamIconsHTML(party)}</div>`:'<div class="desc">팀 정보가 아직 없어요.</div>'}
+    <div class="small" style="margin-top:8px">나와의 배틀 ${o.rec.w||0}승 ${o.rec.l||0}패${x.updatedAt?` · ${agoText(x.updatedAt)} 갱신`:''}</div>
+    <div class="grid" style="margin-top:12px">${o.duel?'<button class="btn danger" id="fdduel">⚔ 배틀</button>':'<button class="btn" disabled>⚔ 배틀<small>팀 정보 없음</small></button>'}
+      <button class="btn" id="fddel">친구 삭제</button></div></div>`,null,true);
+  $('#mbtn').textContent='← 뒤로';
+  if($('#fdduel'))$('#fdduel').onclick=()=>{$('#modal').classList.add('hidden');o.duel();};
+  $('#fddel').onclick=e=>{const b=e.currentTarget;
+    if(b.dataset.armed!=='1'){b.dataset.armed='1';b.textContent='한 번 더 누르면 삭제';return;}
+    $('#modal').classList.add('hidden');o.del();};
+}
 function teamIconsHTML(party){return party.map(x=>`<span class="pvpa" title="${ALLIES[x.id].name}">${allyFace(x.id,'pv')}<i>Lv${x.lv}</i></span>`).join('');}
 function startPvp(f){
   const t=f&&f.team;if(!t)return;
@@ -2187,7 +2223,7 @@ function pvpEnemyActs(e){
   }
 }
 function pvpEnd(win){
-  const e=B.e;clearBattle();
+  const e=B.e,pst=B.st,pparty=partyIds().slice();clearBattle();
   if(P._pvpRestore){P.hp=P._pvpRestore.hp;P.mp=P._pvpRestore.mp;delete P._pvpRestore;}
   const today=new Date().toISOString().slice(0,10);
   P.pvp=P.pvp||{w:0,l:0,day:'',n:0};
@@ -2204,7 +2240,8 @@ function pvpEnd(win){
     P.pvp.l++;msg=`${esc(e.heroName)}의 팀에 패배했다… 대결은 연습 경기라 잃은 것은 없다.`;
   }
   msg+=`<br>내 대결 전적: ${P.pvp.w}승 ${P.pvp.l}패`;
-  save();renderFriends(msg);
+  save();renderFriends();
+  showResult({title:`⚔ ${esc(e.heroName)}의 팀과 대결`,won:win,lines:msg.split('<br>'),st:pst,party:pparty},null);
 }
 
 /* ===================== 거점 ===================== */
@@ -2430,7 +2467,7 @@ function showDexDetail(id){
     <div class="small">${has?`보유${id===FIXED?'':' ×'+(P.roster[id]||0)} · Lv ${d.lv} · ⚔ ${fmt(allyCP(id))}`:'미보유'}${TIER5[id]?` · ${TIER5[id]}티어 (최대 전투력 ${fmt(TIER5_CP[TIER5[id]])})`:''}</div>
     <div class="dexd"><b>${al.role}</b><br>${al.desc}
     ${my?`<small class="mysk ${has&&isMyth(id)?'on':''}">🔱 신화 고유 능력 「${my.name}」 — ${my.desc}</small>`:''}</div></div>`,null,true);
-  $('#mbtn').textContent='닫기';
+  $('#mbtn').textContent='← 뒤로';
 }
 function renderDex(){
   const ids=Object.keys(ALLIES).sort((x,y)=>ALLIES[y].star-ALLIES[x].star||(TIER5[x]||0)-(TIER5[y]||0));
@@ -2453,16 +2490,23 @@ function renderDex(){
 let allySort=(()=>{try{return localStorage.getItem('bp_ally_sort')||'cp'}catch(e){return 'cp'}})();
 let allyStar='all';
 function renderAllies(msg){
-  const key={lv:id=>aData(id).lv,cp:id=>allyCP(id),cnt:id=>P.roster[id]||0}[allySort]||(id=>allyCP(id));
+  const tierRank=id=>TIER5[id]?(10-TIER5[id]):0;   // 1티어가 가장 위
+  const key={tier:id=>tierRank(id)*1e7+allyCP(id),lv:id=>aData(id).lv,cp:id=>allyCP(id),cnt:id=>P.roster[id]||0}[allySort]||(id=>allyCP(id));
   const own=Object.keys(ALLIES).filter(id=>owned(id)&&id!==FIXED).sort((x,y)=>ALLIES[y].star-ALLIES[x].star||key(y)-key(x)||allyCP(y)-allyCP(x));
   const shown=own.filter(id=>allyStar==='all'||ALLIES[id].star===+allyStar);
   const cntStar=st=>own.filter(id=>ALLIES[id].star===st).length;
   const starTabs=[['all','전체'],[5,'★5'],[4,'★4'],[3,'★3'],[2,'★2'],[1,'★1']];
+  // 티어순일 때 ★5는 1·2·3티어로 나눠 보여 줌
+  const tierSplit=g=>{
+    if(allySort!=='tier')return g.map(allyCard).join('');
+    return [1,2,3,0].map(t=>{const h=g.filter(id=>(TIER5[id]||0)===t);
+      return h.length?`<div class="tiergrp">${t?t+'티어':'티어 없음'} <span>${h.length}명</span></div>${h.map(allyCard).join('')}`:'';}).join('');
+  };
   const listHTML=()=>{
     if(!shown.length)return '<div class="desc">이 등급의 동료가 아직 없다.</div>';
-    if(allyStar!=='all')return shown.map(allyCard).join('');
+    if(allyStar!=='all')return +allyStar===5?tierSplit(shown):shown.map(allyCard).join('');
     return [5,4,3,2,1].map(st=>{const g=shown.filter(id=>ALLIES[id].star===st);
-      return g.length?`<div class="stargrp">${'★'.repeat(st)} <span>${st}성 · ${g.length}명</span></div>${g.map(allyCard).join('')}`:'';}).join('');
+      return g.length?`<div class="stargrp">${'★'.repeat(st)} <span>${st}성 · ${g.length}명</span></div>${st===5?tierSplit(g):g.map(allyCard).join('')}`:'';}).join('');
   };
   $('#app').innerHTML=`${statusHTML()}${topBack()}
     ${msg?`<div class="notice">${msg}</div>`:''}
@@ -2475,7 +2519,7 @@ function renderAllies(msg){
       <div class="desc">출전 동료와 이사벨은 전투 경험치를 함께 얻는다. 골드로 바로 레벨업할 수도 있다.</div>
       ${(()=>{const pl=synthPlan(),t=pl.reduce((s,x)=>s+x.n,0);return `<button class="btn ${t?'danger':''} synall" id="synall" ${t?'':'disabled'}>🔮 일괄 합성${t?` (${t}회 가능)`:''}<small>${t?'재료가 모인 모든 캐릭터를 한 번에 합성':'합성할 수 있는 캐릭터가 없음'}</small></button>`;})()}
       <div class="sortbar sticky">${starTabs.map(([k,l])=>`<button class="sortbtn ${String(allyStar)===String(k)?'on':''}" data-astar="${k}">${l}${k==='all'?'':` <span class="small">${cntStar(k)}</span>`}</button>`).join('')}</div>
-      <div class="sortbar" style="margin-top:0"><span class="small">같은 등급 안 정렬</span>${[['cp','⚔ 전투력'],['lv','레벨'],['cnt','카드 개수']].map(([k,l])=>`<button class="sortbtn ${allySort===k?'on':''}" data-sort="${k}">${l}</button>`).join('')}</div>
+      <div class="sortbar" style="margin-top:0"><span class="small">같은 등급 안 정렬</span>${[['tier','🏅 티어'],['cp','⚔ 전투력'],['lv','레벨'],['cnt','카드 개수']].map(([k,l])=>`<button class="sortbtn ${allySort===k?'on':''}" data-sort="${k}">${l}</button>`).join('')}</div>
       ${own.length?listHTML():'<div class="desc">아직 동료가 없다. 상점에서 소환하자.</div>'}</div>
     <button class="btn" id="back">← 돌아가기</button>${tabBar()}`;
   document.querySelectorAll('[data-sortie]').forEach(b=>b.onclick=()=>toggleSortie(b.dataset.sortie));
@@ -3590,57 +3634,65 @@ function victory(){
   partyIds().forEach(id=>{if(allyGainXp(id,e.xp))allyUps.push(`${ALLIES[id].name} Lv ${aData(id).lv}`);});
   const ups=gainXp(e.xp);
   if(allyUps.length)ups.push('🤝 동료 레벨업: '+allyUps.join(', '));
-  let msg=`<b>${esc(tName)} 처치!</b> EXP +${e.xp}${gold===0?'':` · ${fmt(gold)} G`}${gold===0?'':e.goldRepeat!=null?(firstClear?' (첫 클리어 보상)':' (재도전 보상)'):gold!==e.gold?' (보스 보너스 ×1.25)':''}`;
-  if(extra.length)msg+='<br>'+extra.join('<br>');
-  if(ups.length)msg+='<br>'+ups.join('<br>');
-  const report=stype==='boss'?{st:B.st,party:partyIds().slice(),name:e.twin?`${tName} · ${e.twin.name}`:tName,area}:null;
+  const lines=[`✨ 경험치 +${fmt(e.xp)}`];
+  if(gold)lines.push(`💰 ${fmt(gold)} G${e.goldRepeat!=null?(firstClear?' (첫 클리어 보상)':' (재도전 보상)'):gold!==e.gold?' (보스 보너스 ×1.25)':''}`);
+  const rep={title:`${AREAS[area].flag} ${esc(e.twin?`${tName} · ${e.twin.name}`:tName)} 처치`,won:true,lines:[...lines,...extra,...ups],st:B.st,party:partyIds().slice()};
   clearBattle();
-  if(report){battleReport(report,()=>victoryFlow(area,stype,first,wasFinal,fromHunt,msg,stage));return;}
-  victoryFlow(area,stype,first,wasFinal,fromHunt,msg,stage);
+  victoryFlow(area,stype,first,wasFinal,fromHunt,'',stage,rep);
 }
-function victoryFlow(area,stype,first,wasFinal,fromHunt,msg,stage){
+function victoryFlow(area,stype,first,wasFinal,fromHunt,msg,stage,rep){
+  if(rep&&stype==='boss'&&first){showResult(rep,()=>victoryFlow(area,stype,first,wasFinal,fromHunt,msg,stage));return;}
   if(stype==='boss'&&first){
     P.cleared[area]=true;
     if(wasFinal){
       P.ended=true;P.unlocked=Math.max(P.unlocked,area+1);P.cur=area+1;save();
-      storyChain([ENDING,AREAS[area+1].intro],()=>renderMap(area+1,msg+`<br>✝ 나베리우스 토벌 완료!<br>🔓 새 지역 개방: ${AREAS[area+1].flag} ${AREAS[area+1].name}`));
+      storyChain([ENDING,AREAS[area+1].intro],()=>renderMap(area+1,`✝ 나베리우스 토벌 완료!<br>🔓 새 지역 개방: ${AREAS[area+1].flag} ${AREAS[area+1].name}`));
       return;
     }
-    if(area>=AREAS.length-1){save();storyChain([AREAS[area].outro],()=>renderMap(area,msg));return;}
+    if(area>=AREAS.length-1){save();storyChain([AREAS[area].outro],()=>renderMap(area));return;}
     P.unlocked=Math.max(P.unlocked,area+1);
     P.cur=area+1;save();
     storyChain([AREAS[area].outro,AREAS[area+1].intro],
-      ()=>renderMap(area+1,msg+`<br>🔓 새 나라 개방: ${AREAS[area+1].flag} ${AREAS[area+1].name}`));
+      ()=>renderMap(area+1,`🔓 새 나라 개방: ${AREAS[area+1].flag} ${AREAS[area+1].name}`));
     return;
   }
   save();
-  if(fromHunt)renderHub(msg);
-  else if(first&&stage<STAGES){mapSel={a:area,s:stage+1};autoNext(area,stage+1,msg);}
-  else renderMap(area,msg);
+  if(!fromHunt&&first&&stage<STAGES){mapSel={a:area,s:stage+1};autoNext(area,stage+1,rep);return;}
+  if(fromHunt)renderHub();else renderMap(area);
+  if(rep)showResult(rep,null);
 }
-/* 나라 보스 처치 리포트: 딜·힐 그래프 */
-function battleReport(r,cb){
-  const who=['hero',...r.party];
+/* 전투 결과: 보상 + 딜·힐 그래프 (모든 전투 후, 한 화면) */
+function resultHTML(r){
+  const who=['hero',...(r.party||[])];
   const nm=w=>w==='hero'?esc(P.name):ALLIES[w].name;
   const ic=w=>w==='hero'?'<span class="aemo xs">✝</span>':allyFace(w,'xs');
+  const st=r.st||{dmg:{},heal:{}};
+  const total=kind=>who.reduce((s,w)=>s+(st[kind][w]||0),0);
   const chart=(kind,cls)=>{
-    const rows=who.map(w=>({w,v:r.st[kind][w]||0})).sort((a,b)=>b.v-a.v);
-    const tot=rows.reduce((s,x)=>s+x.v,0),mx=Math.max(1,...rows.map(x=>x.v));
-    return `<div class="rp-tot">합계 <b>${fmt(tot)}</b></div>`+rows.map(x=>`<div class="rp-row"><div class="rp-nm">${ic(x.w)}<span>${nm(x.w)}</span></div>
+    const rows=who.map(w=>({w,v:st[kind][w]||0})).sort((a,b)=>b.v-a.v);
+    const tot=total(kind),mx=Math.max(1,...rows.map(x=>x.v));
+    return rows.map(x=>`<div class="rp-row"><div class="rp-nm">${ic(x.w)}<span>${nm(x.w)}</span></div>
       <div class="rp-bar"><i class="${cls}" style="width:${(x.v/mx*100).toFixed(1)}%"></i></div>
       <div class="rp-v">${fmt(x.v)}<small>${tot?Math.round(x.v/tot*100):0}%</small></div></div>`).join('');
   };
-  showStory(`<div class="report"><div class="sum-title">📊 ${AREAS[r.area].flag} ${esc(r.name)} 토벌 기록</div>
-    <div class="rp-h">⚔ 준 피해</div>${chart('dmg','d')}
-    <div class="rp-h">✚ 회복 · 보호</div>${chart('heal','h')}
-    <div class="small rp-note">회복에는 성수 사용, 엘리아·미카엘의 보호막 흡수량, 키리에의 부활이 포함됩니다.</div></div>`,cb,true);
+  const ht=total('heal');
+  return `<div class="report result"><div class="rs-head ${r.won?'win':'lose'}">${r.won?'🏆 승리':'💀 패배'}</div>
+    <div class="sum-title">${r.title}</div>
+    ${r.note?`<div class="rs-note">${r.note}</div>`:''}
+    <div class="rs-rew">${(r.lines&&r.lines.length?r.lines:['획득한 보상 없음']).map(l=>`<div>${l}</div>`).join('')}</div>
+    <div class="rp-h">⚔ 준 피해 <span>합계 ${fmt(total('dmg'))}</span></div>${chart('dmg','d')}
+    ${ht?`<div class="rp-h">✚ 회복 · 보호 <span>합계 ${fmt(ht)}</span></div>${chart('heal','h')}`:''}</div>`;
+}
+function showResult(r,cb,label){
+  showStory(resultHTML(r),cb,true);
+  $('#mbtn').textContent=label||'확인';
 }
 /* 최초 클리어 → 다음 스테이지 자동 출전 (3초, 취소 가능) */
 let autoT=null;
-function autoNext(a,s,msg){
+function autoNext(a,s,rep){
   renderMap(a);
-  let n=3;const t=stageType(s);
-  $('#mtext').innerHTML=`<div class="autonext"><div class="sum-title">🏁 스테이지 클리어</div><div class="notice">${msg}</div>
+  let n=5;const t=stageType(s);
+  $('#mtext').innerHTML=`<div class="autonext">${rep?resultHTML(rep):''}
     <div class="anext">다음 → <b>${s}. ${stageName(a,s)}</b> <span class="tag ${t==='normal'?'done':t==='elite'?'item':'t-ally'}">${STYPE_LABEL[t]}</span>
     <div class="small">HP ${P.hp}/${P.maxHp} · 성수 ${P.items.water}</div></div>
     <button class="btn" id="anstop">🗺 멈추고 지도로</button></div>`;
@@ -3649,17 +3701,21 @@ function autoNext(a,s,msg){
   $('#modal').classList.remove('hidden');
   const go=()=>{clearInterval(autoT);autoT=null;$('#modal').classList.add('hidden');startBattle({area:a,stage:s});};
   $('#mbtn').onclick=go;
-  $('#anstop').onclick=()=>{clearInterval(autoT);autoT=null;$('#modal').classList.add('hidden');renderMap(a,msg);};
+  $('#anstop').onclick=()=>{clearInterval(autoT);autoT=null;$('#modal').classList.add('hidden');renderMap(a);};
   clearInterval(autoT);
   autoT=setInterval(()=>{n--;if(n<=0)go();else $('#mbtn').textContent=lbl();},1000);
 }
 
 function defeat(){
   if(B&&B.pvp){pvpEnd(false);return;}
+  const rep=B?{title:`${esc(B.baseName||B.e.name)}에게 패배`,won:false,st:B.st,party:partyIds().slice()}:null;
   clearBattle();
   const lost=Math.floor(P.gold/2);
   P.gold-=lost;P.hp=Math.round(P.maxHp*0.5);P.mp=Math.round(P.maxMp*0.5);save();
-  showStory(`눈앞이 어두워진다…\n\n교구의 사제들이 쓰러진 {name}을(를) 성당으로 옮겼다.\n\n(소지금 ${lost} G를 잃었다)`,()=>renderHub('정신을 차렸다. 성당에서 휴식하고 다시 도전하자.'));
+  const note=`눈앞이 어두워진다… 교구의 사제들이 쓰러진 ${esc(P.name)}을(를) 성당으로 옮겼다.`;
+  const after=()=>renderHub('정신을 차렸다. 성당에서 휴식하고 다시 도전하자.');
+  if(rep){rep.note=note;rep.lines=[`💸 소지금 ${fmt(lost)} G를 잃었다`,'🩹 HP 절반으로 깨어남'];showResult(rep,after,'계속');}
+  else showStory(note+`\n\n(소지금 ${lost} G를 잃었다)`,after);
 }
 
 /* ===================== 지도 ===================== */
