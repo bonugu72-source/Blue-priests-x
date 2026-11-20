@@ -22,6 +22,7 @@ body{
 }
 body.flash{background-color:#3a0f16}
 body.holyflash{background-color:#2a3550}
+.trust{display:flex;flex-wrap:wrap;align-items:center;gap:2px 6px;margin:3px 0 2px}.trust .hearts{font-size:11px;letter-spacing:-1px;white-space:nowrap}
 .awkc{display:block;font-size:11px;opacity:.85;margin-top:2px}.awkc.ready{color:#ffe08a;opacity:1;font-weight:700}
 #app{max-width:480px;margin:0 auto;padding:12px 12px 24px;min-height:100dvh;display:flex;flex-direction:column;gap:10px}
 button{font-family:inherit;color:inherit;cursor:pointer}
@@ -1781,7 +1782,21 @@ const isMyth=id=>!!(P.myth&&P.myth[id]);
 /* 등급 배율: ★5는 티어별 (최대 레벨·각성 3 기준 전투력이 TIER5_CP가 되도록) */
 const baseMult=id=>{const al=ALLIES[id];return al.star===5&&TIER5[id]?TIER5_CP[TIER5[id]]/((80+LV_CAP[5]*30)*(1+0.2*AWAKEN_MAX)):STAR_MULT[al.star];};
 const multOf=(id,aw,myth)=>baseMult(id)*(1+0.2*(aw||0))*(myth?2:1);
-const allyMult=id=>multOf(id,P.awaken[id],isMyth(id));
+/* 신뢰도: ★5 동료가 함께 전투에서 승리할수록 상승 (최대 10) — 신뢰도 10이면 최대 전투력 1티어 8,000→10,000 · 2티어 6,600→8,000 · 3티어 5,400→7,000 (신화 기준) */
+const TRUST_MAX=10, TRUST_REQ=[0,5,15,30,50,75,105,140,180,225,275], TRUST_GAIN={normal:1,elite:1,mid:2,boss:3};
+const TRUST_TOP={1:10000/8000,2:8000/6600,3:7000/5400};
+const trustPts=id=>(P.trust&&P.trust[id])||0;
+const trustLv=id=>{const p=trustPts(id);let l=0;while(l<TRUST_MAX&&p>=TRUST_REQ[l+1])l++;return l;};
+const trustOn=id=>ALLIES[id]&&ALLIES[id].star===5&&!!TIER5[id];
+const trustMultT=(id,lv)=>trustOn(id)?1+(TRUST_TOP[TIER5[id]]-1)*Math.max(0,Math.min(TRUST_MAX,lv||0))/TRUST_MAX:1;
+const trustMult=id=>trustMultT(id,trustLv(id));
+function trustHTML(id){
+  if(!trustOn(id))return '';
+  const l=trustLv(id),p=trustPts(id);
+  const nxt=l<TRUST_MAX?` · 다음 ${p-TRUST_REQ[l]}/${TRUST_REQ[l+1]-TRUST_REQ[l]}`:' · 최대';
+  return `<div class="trust"><span class="hearts">${'❤️'.repeat(l)}${'🤍'.repeat(TRUST_MAX-l)}</span><span class="small">신뢰도 ${l}/${TRUST_MAX}${nxt}${l?` · 전투력 +${Math.round((trustMult(id)-1)*100)}%`:''}</span></div>`;
+}
+const allyMult=id=>multOf(id,P.awaken[id],isMyth(id))*trustMult(id);
 function allyGainXp(id,n){
   const d=aData(id);let c=0;
   if(d.lv>=aCap(id)){d.xp=0;return 0;}
@@ -1903,7 +1918,7 @@ function myPublic(){
   let area=0;for(let i=0;i<AREAS.length;i++)if(i<=P.unlocked)area=i;
   return {hero:String(P.name).slice(0,8),lv:P.lv,cp:teamCP(),area,stage:P.prog[area]||0,
     ended:!!P.ended,friends:(P.friends||[]).slice(0,100),
-    team:{atk:P.atk,def:P.def,maxHp:P.maxHp,maxMp:P.maxMp,lv:P.lv,party:partyIds().map(id=>({id,lv:aData(id).lv,aw:P.awaken[id]||0,my:isMyth(id)?1:0}))},
+    team:{atk:P.atk,def:P.def,maxHp:P.maxHp,maxMp:P.maxMp,lv:P.lv,party:partyIds().map(id=>({id,lv:aData(id).lv,aw:P.awaken[id]||0,my:isMyth(id)?1:0,tr:trustLv(id)}))},
     pvpW:(P.pvp&&P.pvp.w)||0,pvpL:(P.pvp&&P.pvp.l)||0,updatedAt:Date.now()};
 }
 function publishProfile(){
@@ -2194,7 +2209,7 @@ function startPvp(f){
   const t=f&&f.team;if(!t)return;
   const hero={atk:pvpCl(t.atk,1,9999),def:pvpCl(t.def,0,9999),maxHp:pvpCl(t.maxHp,1,99999),lv:pvpCl(t.lv,1,9999)};
   const party=(Array.isArray(t.party)?t.party:[]).filter(x=>x&&ALLIES[x.id]).slice(0,4)
-    .map(x=>({id:x.id,lv:pvpCl(x.lv,1,60),aw:pvpCl(x.aw,0,AWAKEN_MAX),my:x.my?1:0}));
+    .map(x=>({id:x.id,lv:pvpCl(x.lv,1,60),aw:pvpCl(x.aw,0,AWAKEN_MAX),my:x.my?1:0,tr:pvpCl(x.tr||0,0,TRUST_MAX)}));
   const allyHp=party.reduce((s,x)=>s+Math.round((50+x.lv*10)*(0.7+0.15*ALLIES[x.id].star)*(x.my?2:1)),0);
   const heroName=(String(f.hero||'').replace(/[<>&"'`]/g,'').slice(0,8))||'모험가';
   const e={name:`${heroName}의 팀`,heroName,hp:Math.round(hero.maxHp*PVP_HP+allyHp*0.35),atk:hero.atk,def:hero.def,xp:0,gold:0,
@@ -2213,7 +2228,7 @@ function pvpEnemyActs(e){
   else hitPlayer(1,`${e.heroName}의 공격`);
   for(const a of e.party){
     if(P.hp<=0)break;
-    const al=ALLIES[a.id],m=multOf(a.id,a.aw,a.my),lv=a.lv,nm=`${e.heroName}의 ${al.name}`;
+    const al=ALLIES[a.id],m=multOf(a.id,a.aw,a.my)*trustMultT(a.id,a.tr),lv=a.lv,nm=`${e.heroName}의 ${al.name}`;
     const dmg=(base,f,label)=>{
       let d=(base*m-P.def*(B.curse?0.6:1)*f)*rnd(0.9,1.1);
       if(B.defending)d*=0.6;if(B.ward)d*=0.5;
@@ -2441,6 +2456,7 @@ function allyCard(id){
   return `<div class="acard ${isFixed?'fixed':''} ${my?'mythc':''}"><div class="ally"><div class="ic">${allyFace(id,'md')}</div><div style="flex:1">
     ${isFixed?'<span class="tag t-ally">고정 조력자</span>':`<span class="gold">${'★'.repeat(al.star)}</span>`} ${al.name}${my?' <span class="mytag">신화</span>':''}${aw?` <span class="gold">각성 ${aw}</span>`:''}${TIER5[id]?` <span class="small">${TIER5[id]}티어</span>`:''}
     <span class="small">Lv ${d.lv}/${cap} · ⚔ ${fmt(allyCP(id))}${!isFixed&&!needSyn?' · ×'+cnt:''}</span>
+    ${trustHTML(id)}
     <small>${al.role} · ${al.desc}</small>${MYTH_SKILL[id]?`<small class="mysk ${my?'on':''}">🔱 신화 고유 능력 「${MYTH_SKILL[id].name}」 — ${MYTH_SKILL[id].desc}${my?'':' (신화 승급 시 해금)'}</small>`:''}</div></div>
     ${d.lv<cap?bar(d.xp,need(d.lv),'xp','EXP'):''}
     <div class="abtns">${btns.join('')}</div></div>`;
@@ -2494,7 +2510,7 @@ function showDexDetail(id){
   showStory(`<div class="sum ${al.star>=4?'s'+al.star:''}"><div class="sum-title">📖 동료 도감</div>${allyPortrait(id)}
     <div style="font-size:18px;font-weight:900">${al.name}</div>
     <div class="gold">${al.star?'★'.repeat(al.star):'고정 조력자'}${has&&isMyth(id)?' 🔱 신화':''}</div>
-    <div class="small">${has?`보유${id===FIXED?'':' ×'+(P.roster[id]||0)} · Lv ${d.lv} · ⚔ ${fmt(allyCP(id))}`:'미보유'}${TIER5[id]?` · ${TIER5[id]}티어 (최대 전투력 ${fmt(TIER5_CP[TIER5[id]])})`:''}</div>
+    <div class="small">${has?`보유${id===FIXED?'':' ×'+(P.roster[id]||0)} · Lv ${d.lv} · ⚔ ${fmt(allyCP(id))}`:'미보유'}${TIER5[id]?` · ${TIER5[id]}티어 (최대 전투력 ${fmt(TIER5_CP[TIER5[id]])} · 신화 ${fmt(TIER5_CP[TIER5[id]]*2)} · 신뢰도 10 ${fmt(Math.round(TIER5_CP[TIER5[id]]*2*TRUST_TOP[TIER5[id]]))})`:''}</div>
     <div class="dexd"><b>${al.role}</b><br>${al.desc}
     ${my?`<small class="mysk ${has&&isMyth(id)?'on':''}">🔱 신화 고유 능력 「${my.name}」 — ${my.desc}</small>`:''}</div></div>`,null,true);
   $('#mbtn').textContent='← 뒤로';
@@ -3672,6 +3688,9 @@ function victory(){
   P.kills[tName]=(P.kills[tName]||0)+1;
   P.wins[area]=(P.wins[area]||0)+1;
   let extra=[];
+  {P.trust=P.trust||{};const g=TRUST_GAIN[stype]||1;
+   partyIds().filter(trustOn).forEach(id=>{const l0=trustLv(id);P.trust[id]=Math.min(TRUST_REQ[TRUST_MAX],trustPts(id)+g);const l1=trustLv(id);
+     if(l1>l0)extra.push(`💗 ${ALLIES[id].name} 신뢰도 ${l1}/${TRUST_MAX} — 전투력 +${Math.round((trustMult(id)-1)*100)}%`);});}
   if(firstClear&&e.stoneFirst){P.items.stone+=e.stoneFirst;stoneToast(e.stoneFirst,'첫 클리어 보상');extra.push(`🏁 첫 클리어 보상: ${AWAKEN_ITEM.icon} 「${AWAKEN_ITEM.name}」 ×${e.stoneFirst}`);}
   if(stype==='normal'&&Math.random()<0.15){P.items.water++;extra.push('성수 획득');}
   if(stype==='normal'&&Math.random()<DROP.stoneNormal){P.items.stone++;stoneToast(1,'희귀 드랍');extra.push(`${AWAKEN_ITEM.icon} 희귀 아이템 「${AWAKEN_ITEM.name}」 획득!`);}
