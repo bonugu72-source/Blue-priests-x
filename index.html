@@ -232,6 +232,11 @@ body.title-mode{overflow:hidden}
 @keyframes ember{0%{transform:translate(0,0);opacity:0}10%{opacity:1}100%{transform:translate(18px,-320px);opacity:0}}
 
 .intro-art.berserk{animation:ragequake .25s ease-in-out infinite;filter:drop-shadow(0 0 20px #ff2a2a)}
+.pf-laia{box-shadow:0 0 28px rgba(255,110,40,.7),0 0 90px rgba(255,60,0,.35)}
+.pf-laia .pglow{background:radial-gradient(ellipse at 50% 100%,rgba(255,110,30,.5),transparent 62%);animation:breathe 2.2s ease-in-out infinite}
+.pf-teria{box-shadow:0 0 28px rgba(140,210,255,.75),0 0 90px rgba(80,170,255,.35)}
+.pf-teria .pglow{background:radial-gradient(ellipse at 50% 100%,rgba(170,230,255,.45),transparent 62%);box-shadow:inset 0 0 50px rgba(0,40,80,.6);animation:breathe 2.8s ease-in-out infinite}
+body.pfrozen #cmds .btn{filter:saturate(.2) brightness(1.2);background:linear-gradient(135deg,#bfe8ff,#7fb8e0)!important;color:#103050!important}
 .pf-agares{box-shadow:0 0 28px rgba(170,80,255,.7),0 0 90px rgba(120,40,255,.35)}
 .pf-agares .pglow{background:radial-gradient(ellipse at 50% 100%,rgba(160,80,255,.5),transparent 62%);box-shadow:inset 0 0 50px rgba(40,0,80,.75);animation:breathe 2.4s ease-in-out infinite}
 .pf-agares .pembers i{background:#d0a0ff;box-shadow:0 0 6px #a050ff,0 0 12px #7020ff}
@@ -607,6 +612,7 @@ const RELICS={
   seal_bune:   {name:'부네의 인장',             icon:'🟣', desc:'공격력 +8',                     apply:p=>{p.atk+=8;}},
   seal_andras: {name:'안드라스의 인장',         icon:'⚪', desc:'방어력 +6 · 최대 HP +20',        apply:p=>{p.def+=6;p.maxHp+=20;p.hp+=20;}},
   seal_furfur: {name:'푸르푸르의 인장',         icon:'🔵', desc:'최대 HP +40 · 공격력 +4',        apply:p=>{p.maxHp+=40;p.hp+=40;p.atk+=4;}},
+  seal_twins:{name:'쌍둥이의 반지',  icon:'💍', desc:'공격 +24 · 방어 +20 · 최대 HP +180',apply:p=>{p.atk+=24;p.def+=20;p.maxHp+=180;p.hp+=180;}},
   seal_agares:{name:'아가레스의 인장',  icon:'⚔️', desc:'공격 +22 · 방어 +18 · 최대 HP +160',apply:p=>{p.atk+=22;p.def+=18;p.maxHp+=160;p.hp+=160;}},
   seal_terazio:{name:'테라지오의 비늘',  icon:'🐉', desc:'공격 +20 · 방어 +16 · 최대 HP +140',apply:p=>{p.atk+=20;p.def+=16;p.maxHp+=140;p.hp+=140;}},
   seal_gamigin:{name:'가미긴의 인장',  icon:'🐴', desc:'공격 +18 · 방어 +14 · 최대 HP +120',apply:p=>{p.atk+=18;p.def+=14;p.maxHp+=120;p.hp+=120;}},
@@ -877,6 +883,30 @@ const AREAS=[
         line:'"…좋다. 진짜 검을 보여 주지."\n\n갈라진 투구 틈으로 붉은 눈이 타오른다. 보랏빛 불길이 검 끝까지 번지며, 쓰러졌던 상처가 모두 닫힌다.\n\n— 각성: 체력 50,000 · 「영혼을 가르는 일격」 3초마다 · 치명타 피해 2배 —'},
       pre:'성당의 종이 멈추자, 보랏빛 불길을 두른 검은 정장의 기사가 걸어 나온다. 투구 틈으로 붉은 눈이 빛난다.\n\n"도망치는 자는 쫓지 않는다. 다만, 맞서는 자의 목숨은 반드시 거둔다."',
       moves:[{t:'atk',n:'보랏빛 일섬'},{t:'strong',n:'왕의 검'},{t:'charge',n:'죽음의 일격',kind:'deathblow'},{t:'multi',n:'망자의 연격',hits:3,m:0.45},{t:'atk',n:'보랏빛 일섬'},{t:'charge',n:'죽음의 일격',kind:'deathblow'}]}
+  },
+  { name:'엇갈린 세계', country:'불과 얼음이 갈라놓은 도시', flag:'☯️', rec:46, recEnd:50, glow:'#7fd0ff', sortie:'noIsabel',
+    desc:'한쪽은 얼어붙고 한쪽은 불타는 도시. 두 세계가 엇갈리는 경계에 쌍둥이 자매가 앉아 있다.',
+    intro:'망자의 도시를 벗어나자, 세상이 둘로 갈라져 있었다.\n\n왼쪽의 도시는 끝없이 얼어붙었고, 오른쪽의 도시는 꺼지지 않는 불길에 타오른다.\n\n두 세계가 맞닿은 빌딩 꼭대기에, 뿔과 날개를 가진 쌍둥이가 나란히 앉아 우리를 내려다보고 있었다.\n\n— 이곳에는 이사벨 부제가 함께할 수 없다.',
+    outro:'얼음과 불꽃이 동시에 사그라들며, 갈라졌던 두 도시가 천천히 하나로 이어지기 시작했다.\n\n쌍둥이는 서로의 손을 잡은 채 빛 속으로 사라졌다.\n\n"…언니, 이제 따뜻해."\n\n— 엇갈린 세계 해방 —',
+    enemies:[
+      {name:'얼음 갑옷의 기사',  icon:'🧊', hp:660, atk:104, def:48, xp:270, gold:135, demon:true, moves:[{t:'atk',n:'얼음 도끼'},{t:'strong',n:'빙결 내려찍기'},{t:'atk',n:'얼음 도끼'}]},
+      {name:'불꽃 갑옷의 기사',  icon:'🔥', hp:640, atk:108, def:46, xp:272, gold:136, demon:true, moves:[{t:'atk',n:'불꽃 창'},{t:'dot',n:'불붙은 창끝',dn:'화상'},{t:'multi',n:'연속 찌르기',hits:3,m:0.45}]},
+      {name:'눈보라 정령',       icon:'❄️', hp:600, atk:106, def:44, xp:268, gold:134, demon:true, moves:[{t:'atk',n:'얼음 칼날'},{t:'sweep',n:'눈보라',m:0.15},{t:'curse',n:'얼어붙는 냉기'}]},
+      {name:'잿불 박쥐떼',       icon:'🦇', hp:580, atk:110, def:42, xp:269, gold:135, demon:true, moves:[{t:'multi',n:'떼 지어 물기',hits:3,m:0.45},{t:'dot',n:'잿불',dn:'화상'},{t:'drain',n:'피 빨기'}]},
+      {name:'갈라진 경계의 망령', icon:'👻', hp:680, atk:102, def:50, xp:274, gold:137, demon:true, moves:[{t:'atk',n:'경계의 손길'},{t:'curse',n:'엇갈린 저주'},{t:'strong',n:'차원 균열'}]}
+    ],
+    elite:{name:'경계의 쌍두 기사', icon:'⚔️', hp:10000, atk:144, def:48, xp:1550, gold:1100, demon:true,
+      moves:[{t:'strong',n:'불꽃 도끼'},{t:'multi',n:'얼음 연격',hits:3,m:0.55},{t:'curse',n:'엇갈린 맹세'},{t:'charge',n:'불과 얼음의 교차'}]},
+    mid:{name:'포칼로르', art:'focalor', title:'솔로몬 72악마 · 제41영 · 공작 · 30군단', hp:23000, atk:150, def:46, xp:6000, gold:4600, demon:true,
+      pre:'그리핀의 날개를 단 자가 얼어붙은 바다 위에 내려선다.\n\n"바람과 파도를 다스리는 것은 나다. 너희를 깊은 물속에 가라앉혀 주마."',
+      moves:[{t:'atk',n:'날개 베기'},{t:'sweep',n:'폭풍 해일',m:0.17},{t:'multi',n:'바람 칼날',hits:4,m:0.35},{t:'curse',n:'익사의 저주'},{t:'charge',n:'30군단의 폭풍'}]},
+    boss:{name:'라이아', art:'laia', title:'엇갈린 세계의 쌍둥이 · 불꽃의 동생', hp:40000, exactHp:true, atk:150, def:46, xp:28000, gold:35000, goldFirst:0, goldRepeat:35000, stoneFirst:2, demon:true, drop:'seal_twins',
+      tick:6000, burnHit:true,
+      twin:{at:10000,name:'테리아',title:'엇갈린 세계의 쌍둥이 · 얼음의 언니',art:'teria',hp:70000,atk:110,def:50,freezeEvery:7000,freezeMs:3000,
+        line:'"라이아, 물러나. 이제 언니가 할게."\n\n쓰러지려던 라이아를 감싸며 하얀 머리의 쌍둥이가 내려선다. 순식간에 불길이 얼어붙고, 도시 전체가 하얗게 질린다.\n\n— 테리아 등장: 체력 70,000 · 얼어붙은 숨결 · 7초마다 빙결 —',
+        moves:[{t:'atk',n:'얼음 송곳'},{t:'freezebreath',n:'얼어붙은 숨결'},{t:'multi',n:'빙정 난무',hits:4,m:0.35},{t:'sweep',n:'눈보라의 날개',m:0.15},{t:'atk',n:'얼음 송곳'},{t:'charge',n:'절대 영도'}]},
+      pre:'불타는 도시 쪽의 쌍둥이가 날개를 펼치며 일어선다. 손끝에서 불길이 치솟는다.\n\n"언니는 쉬고 있어. 이 정도는 나 혼자서도 충분하니까."',
+      moves:[{t:'atk',n:'불꽃 손톱'},{t:'dot',n:'타오르는 낙인',dn:'화상'},{t:'curse',n:'약점의 각인'},{t:'strong',n:'지옥불 폭발'},{t:'multi',n:'불꽃 날개 연타',hits:3,m:0.45},{t:'charge',n:'업화의 날개'}]}
   }
 
 ];
@@ -887,7 +917,7 @@ const STYPE_LABEL={normal:'일반',elite:'정예',mid:'솔로몬 72악마',boss:
 const stageRec=(a,s)=>Math.round(AREAS[a].rec+(s-1)*(AREAS[a].recEnd-AREAS[a].rec)/(STAGES-1));
 const DEF_FLOOR=0.3; // 방어력이 아무리 높아도 적 공격의 30%는 들어감
 const ENEMY_MULT=1.3, LATE_BOSS_MULT=1.1; // 적 공격력·체력 1.3배 (나베리우스·보티스는 1.1배)
-const NORMAL_HP=[2.4,4,4.5,5,5.5,6,6.5,7,7.5,8,8.5,9], NORMAL_REWARD=1.5; // 일반 적이 몇 턴은 버티며 공격하도록
+const NORMAL_HP=[2.4,4,4.5,5,5.5,6,6.5,7,7.5,8,8.5,9,9.5], NORMAL_REWARD=1.5; // 일반 적이 몇 턴은 버티며 공격하도록
 function scaleBase(base,a,s){
   const f=1+0.06*(s-1);
   return {...base,hp:Math.round(base.hp*f*NORMAL_HP[a]),atk:Math.round(base.atk*f),def:Math.round(base.def*(1+0.04*(s-1))),
@@ -1034,6 +1064,11 @@ const ART={
     eyes:`<circle cx="58" cy="100" r="2.2"/><circle cx="72" cy="99" r="2.2"/><path d="M58,116 C64,113 70,113 76,116" stroke="#c8f4ff" stroke-width="1.2" fill="none"/>
       <path d="M93,95 L99,97 L93,99 Z"/><path d="M107,95 L101,97 L107,99 Z"/>
       <ellipse cx="130" cy="107" rx="1.3" ry="3.2"/><ellipse cx="138" cy="107" rx="1.3" ry="3.2"/>`},
+  focalor:{c:'#7fd0ff',eye:'#e0f6ff',latin:'FOCALOR · SPIRITVS XLI · DVX · ',
+    body:`${wing('M96,104 C76,80 46,66 14,72 C26,80 30,90 28,98 C38,96 46,102 46,110 C56,104 66,108 70,116 C78,110 88,108 96,114 Z',96,104)}
+      <path d="M80,190 C80,150 84,124 92,112 C86,100 88,82 100,76 C112,82 114,100 108,112 C116,124 120,150 120,190 Z"/>
+      <path d="M90,80 L92,66 L98,74 L102,62 L106,74 L110,66 L112,80 Z"/>`,
+    eyes:`<path d="M93,92 L99,94 L93,96 Z"/><path d="M107,92 L101,94 L107,96 Z"/>`},
   marbas:{c:'#d48cff',eye:'#ffe6a0',latin:'MARBAS · SPIRITVS V · PRAESES · ',
     body:`<path d="M30,148 C30,130 46,120 66,118 L124,116 L140,150 C138,160 134,166 128,170 L128,192 L116,192 L114,172 L78,172 L76,192 L64,192 L62,170 C44,166 30,160 30,148 Z"/>
       <path d="M150,62 L158,76 L172,68 L172,84 L188,84 L180,98 L194,108 L180,116 L186,132 L170,130 L166,146 L154,136 L142,148 L138,132 L122,134 L128,118 L114,110 L128,100 L120,86 L136,86 L136,70 L150,78 Z"/>
@@ -1097,6 +1132,8 @@ const PORTRAIT={
   naberius:{img:'naberius.jpg',cls:'pf-naberius',pos:'50% 24%'},
   naberius2:{img:'naberius.jpg',cls:'pf-naberius p2',pos:'50% 24%'},
   botis:{img:'botis.jpg',cls:'pf-botis',pos:'50% 20%'},
+  laia:{img:'twins.jpg',cls:'pf-laia',pos:'74% 46%',zoom:2.2},
+  teria:{img:'twins.jpg',cls:'pf-teria',pos:'28% 46%',zoom:2.2},
   agares:{img:'agares.jpg',cls:'pf-agares',pos:'50% 10%'},
   agares2:{img:'agares.jpg',cls:'pf-agares awk',pos:'50% 10%'},
   terazio:{img:'terazio.jpg',cls:'pf-terazio',pos:'45% 30%'},
@@ -1111,8 +1148,8 @@ const PORTRAIT={
 function portraitHTML(key,size){
   const p=PORTRAIT[key];
   const bolts=key==='furfur'?`<svg class="pbolts" viewBox="0 0 100 140" preserveAspectRatio="none"><path class="bolt" d="M7,0 L3,18 L9,17 L2,42"/><path class="bolt b2" d="M95,58 L99,76 L93,77 L99,100"/><path class="bolt b3" d="M90,0 L86,12 L92,12 L87,26"/></svg><div class="prain"></div>`:'';
-  const embers=(key.startsWith('naberius')||key.startsWith('amon')||key.startsWith('valefor')||key==='gamigin'||key==='barbatos'||key==='terazio'||key.startsWith('agares'))?`<div class="pembers">${Array.from({length:14},(_,i)=>`<i style="left:${(i*37)%100}%;animation-delay:${-(i*0.43).toFixed(2)}s;animation-duration:${(2.6+(i%5)*0.5).toFixed(1)}s"></i>`).join('')}</div>`:'';
-  return `<div class="portrait ${p.cls} ${size||''}"><img src="${p.img}" alt="" style="object-position:${p.pos}">${bolts}${embers}<div class="pflash"></div><div class="pglow"></div></div>`;
+  const embers=(key.startsWith('naberius')||key.startsWith('amon')||key.startsWith('valefor')||key==='gamigin'||key==='barbatos'||key==='terazio'||key.startsWith('agares')||key==='laia')?`<div class="pembers">${Array.from({length:14},(_,i)=>`<i style="left:${(i*37)%100}%;animation-delay:${-(i*0.43).toFixed(2)}s;animation-duration:${(2.6+(i%5)*0.5).toFixed(1)}s"></i>`).join('')}</div>`:'';
+  return `<div class="portrait ${p.cls} ${size||''}"><img src="${p.img}" alt="" style="object-position:${p.pos}${p.zoom?`;transform:scale(${p.zoom});transform-origin:${p.pos}`:''}">${bolts}${embers}<div class="pflash"></div><div class="pglow"></div></div>`;
 }
 let svgSeq=0;
 ART.amon2={...ART.amon,c:'#ff6a2a',eye:'#fff0a0',latin:'AMON · SPIRITVS VII · MARCHIO · XL LEGIONES · '};
@@ -1173,6 +1210,12 @@ const MISSIONS=[
   {id:'viper', area:5, type:'kill', target:'모래시계 독사', count:8, title:'독사 소탕',
    desc:'모래시계 독사 8마리를 처치하라.', reward:{water:6,gold:600}, rewardText:'성수 ×6 · 600 G',
    story:'독사들이 사라지자 모래시계의 모래가 다시 흘러내렸다.'},
+  {id:'iceknight', area:12, type:'kill', target:'얼음 갑옷의 기사', count:8, title:'얼어붙은 기사단',
+   desc:'얼음 갑옷의 기사 8명을 쓰러뜨려라.', reward:{tickets:6}, rewardText:'소환권 ×6',
+   story:'녹아내린 갑옷 사이에서 소환권이 나왔다.'},
+  {id:'fireknight', area:12, type:'kill', target:'불꽃 갑옷의 기사', count:8, title:'불타는 기사단',
+   desc:'불꽃 갑옷의 기사 8명을 쓰러뜨려라.', reward:{water:8,stone:1}, rewardText:'성수 ×8 · 천상의 성유물 ×1',
+   story:'꺼진 불씨 속에서 성유물이 빛나고 있었다.'},
   {id:'skelknight', area:11, type:'kill', target:'해골 기사', count:8, title:'잠들지 못한 기사단',
    desc:'망자의 도시를 지키는 해골 기사 8명을 쓰러뜨려라.', reward:{tickets:6}, rewardText:'소환권 ×6',
    story:'기사들의 녹슨 갑옷 속에서 소환권이 발견되었다.'},
@@ -2140,12 +2183,12 @@ function synthAll(){
 }
 
 /* ===================== 전투 ===================== */
-function clearBattle(){forcedMv=null;if(B&&B.sakuraT)clearInterval(B.sakuraT);document.body.classList.remove('battle');if(B&&B.waveT)clearInterval(B.waveT);if(B&&B.soulT)clearInterval(B.soulT);if(B&&B.paraT)clearInterval(B.paraT);if(B&&B.zapT)clearInterval(B.zapT);if(B&&B.karmaT)clearInterval(B.karmaT);if(B&&B.isaT)clearInterval(B.isaT);B=null;}
+function clearBattle(){forcedMv=null;document.body.classList.remove('pfrozen');if(B&&B.freezeT)clearInterval(B.freezeT);if(B&&B.sakuraT)clearInterval(B.sakuraT);document.body.classList.remove('battle');if(B&&B.waveT)clearInterval(B.waveT);if(B&&B.soulT)clearInterval(B.soulT);if(B&&B.paraT)clearInterval(B.paraT);if(B&&B.zapT)clearInterval(B.zapT);if(B&&B.karmaT)clearInterval(B.karmaT);if(B&&B.isaT)clearInterval(B.isaT);B=null;}
 /* 반사·부적 등으로 적이 턴 밖에서 쓰러졌을 때 */
 function winNow(){
   if(!B||B.won)return;
-  if((B.e.berserk&&!B.berserked)||(B.e.madness&&!B.maddened)||(B.e.awaken&&!B.awoke)){B.e.hp=Math.max(1,B.e.hp);renderBattle();return;}
-  B.won=true;B.busy=true;if(B.sakuraT)clearInterval(B.sakuraT);if(B.paraT)clearInterval(B.paraT);if(B.waveT)clearInterval(B.waveT);if(B.soulT)clearInterval(B.soulT);
+  if((B.e.berserk&&!B.berserked)||(B.e.madness&&!B.maddened)||(B.e.awaken&&!B.awoke)||(B.e.twin&&!B.twinned)){B.e.hp=Math.max(1,B.e.hp);renderBattle();return;}
+  B.won=true;B.busy=true;if(B.freezeT)clearInterval(B.freezeT);document.body.classList.remove('pfrozen');if(B.sakuraT)clearInterval(B.sakuraT);if(B.paraT)clearInterval(B.paraT);if(B.waveT)clearInterval(B.waveT);if(B.soulT)clearInterval(B.soulT);
   if(B.zapT)clearInterval(B.zapT);if(B.karmaT)clearInterval(B.karmaT);if(B.isaT)clearInterval(B.isaT);
   renderBattle();setTimeout(victory,750);
 }
@@ -2187,7 +2230,7 @@ function sakuraTick(){
 function karmaTick(){
   if(!B||B.over||B.won||!$('#modal').classList.contains('hidden'))return;
   const id='karma',h=B.ahp[id];
-  if(!inParty(id)||(h&&h.hp<=0)||(B.stun[id]>0))return;
+  if(!inParty(id)||(h&&h.hp<=0)||(B.stun[id]>0)||aFrozen())return;
   const m=allyMult(id),lv=aData(id).lv,e=B.e,n=isMyth(id)?2:1;
   for(let i=0;i<n&&e.hp>0;i++){
     const r=Math.floor(Math.random()*3);
@@ -2301,6 +2344,18 @@ function addLog(s){B.log.push(s);if(B.log.length>40)B.log.shift();}
 const healMul=()=>(B&&B.healCut)?0.9:1;
 const pHealMul=()=>(B&&B.noHeal)?0:healMul(); // 주인공 회복 배율 (가미긴 폭주 후 0)
 const paraOn=()=>!!(B&&B.paraUntil&&Date.now()<B.paraUntil);
+/* 테리아: 7초마다 주인공 빙결 (얼음을 깰 때까지 행동 불가) */
+const pFrozen=()=>!!(B&&B.pFrozenUntil&&Date.now()<B.pFrozenUntil);
+const aFrozen=()=>!!(B&&B.aFrozenUntil&&Date.now()<B.aFrozenUntil);
+function freezeTick(){
+  if(!B||B.over||B.won||P.hp<=0||!$('#modal').classList.contains('hidden')){if(B&&B.e.twin)B.freezeAt=Date.now()+B.e.twin.freezeEvery;return;}
+  const w=B.e.twin;B.freezeAt=Date.now()+w.freezeEvery;
+  B.pFrozenUntil=Date.now()+w.freezeMs;
+  const d=Math.max(1,Math.round(B.e.atk*0.3));P.hp=Math.max(1,P.hp-d);
+  addLog(`🧊 테리아의 빙결 — 주인공이 얼어붙었다! (${d} 피해 · 얼음을 깨는 데 ${w.freezeMs/1000}초)`);queueFx('player','🧊','pdmg');
+  document.body.classList.add('pfrozen');renderBattle();
+  setTimeout(()=>{if(B&&!pFrozen()){document.body.classList.remove('pfrozen');addLog('🧊 얼음을 깨고 빠져나왔다!');renderBattle();}},w.freezeMs+50);
+}
 /* 아가레스 각성: 3초마다 영혼을 가르는 일격 — 방어 태세가 아니면 주인공·동료 모두 현재 HP 절반 */
 function soulTick(){
   if(!B||B.over||B.won||P.hp<=0||!$('#modal').classList.contains('hidden')){if(B&&B.e.awaken)B.soulAt=Date.now()+B.e.awaken.soulTick;return;}
@@ -2343,14 +2398,14 @@ function queueFx(target,txt,cls){B.fxq.push([target,txt,cls]);}
 const enemyDef=()=>B.e.def*(B.weak?0.5:1);
 
 function cmdHTML(){
-  const dis=B.busy?'disabled':'';
+  const dis=(B.busy||pFrozen())?'disabled':'';
   if(B.menu==='item'){
     return `<div class="grid">
       <button class="btn full" data-item="water" ${(B.busy||!P.items.water)?'disabled':''}>성수 ×${P.items.water}<small>HP 40% 회복 (최소 60)</small></button>
       <button class="btn full" data-back="1" ${dis}>← 뒤로</button></div>`;
   }
   return `<div class="grid">
-    <button class="btn primary full" data-act="attack" ${dis}>⚔ 공격</button>
+    <button class="btn primary full" data-act="attack" ${dis}>${pFrozen()?`🧊 얼음을 깨는 중… ${Math.ceil((B.pFrozenUntil-Date.now())/1000)}초`:'⚔ 공격'}</button>
     <button class="btn" data-act="defend" ${dis}>🛡 방어<small>피해 40% 감소 · 공격 없음</small></button>
     <button class="btn" data-act="itemmenu" ${dis}>🧪 아이템</button>
     <button class="btn full" data-act="flee" ${(B.busy||B.isBoss)?'disabled':''}>${B.pvp?'대결 중에는 도망칠 수 없다':B.isBoss?'보스전에서는 도망칠 수 없다':'🏃 도망 (60%)'}</button>
@@ -2386,6 +2441,8 @@ function renderBattle(){
   if(B.noHeal)st.push('🚫 회복 불가');
   if(sakuraWind())st.push('🌸 벚꽃바람');
   if(B.sakuraDeadAt)st.push(`🌸 부활까지 ${Math.max(0,Math.ceil(((isMyth('sakura')?4000:7000)-(Date.now()-B.sakuraDeadAt))/1000))}초`);
+  if(B.freezeAt)st.push(pFrozen()?'🧊 주인공 빙결':`🧊 빙결 ${Math.max(0,Math.ceil((B.freezeAt-Date.now())/1000))}초`);
+  if(aFrozen())st.push('❄ 동료 빙결');
   if(B.soulAt)st.push(`🗡 영혼 일격 ${Math.max(0,Math.ceil((B.soulAt-Date.now())/1000))}초${B.guard?' · 🛡 방어 태세':''}`);
   if(B.e.wave&&B.waveAt)st.push(`🌀 파동 ${Math.max(0,Math.ceil((B.waveAt-Date.now())/1000))}초${B.guard?' · 🛡 방어 태세':''}`);
   if(stormOn())st.push(`🌪 폭풍 ${Math.ceil((B.stormUntil-Date.now())/1000)}초`);
@@ -2405,6 +2462,8 @@ function renderBattle(){
   if(B.immune)passive.push('⏸ 시간 정지: 이번 턴 피해 무효 — 회복·방어 추천');
   if(B.reflect)passive.push('↩ 뒤집힌 시간: 준 피해의 50% 반사');
   if(e.bleedOnHit)passive.push('🩸 공격 시 출혈');
+  if(e.burnHit)passive.push('🔥 공격 시 화상');
+  if(e.twin)passive.push(B.twinned?'🧊 7초마다 빙결 · 얼어붙은 숨결':`☯ HP ${fmt(e.twin.at)} 이하 쌍둥이 교대`);
   if(e.critAll)passive.push(`💥 모든 공격 치명타 ×${e.critAll*(B.awoke&&e.awaken?e.awaken.critMult:1)}`);
   if(e.awaken)passive.push(B.awoke?'💢 각성: 3초마다 영혼을 가르는 일격':`💢 HP ${fmt(e.awaken.at)} 이하 각성`);
   if(e.burnBleed)passive.push('🔥🩸 끝없는 화상·출혈');
@@ -2508,6 +2567,7 @@ function alliesAct(){
     const al=ALLIES[id],nm=al.name,m=allyMult(id),lv=aData(id).lv;
     B.am=m;B.curAlly=id;
     if(B.ahp[id]&&B.ahp[id].hp<=0)continue;
+    if(aFrozen()){addLog(`❄ ${nm} — 얼어붙어 움직일 수 없다`);continue;}
     if(B.stun[id]>0){
       B.stun[id]--;
       addLog(`${nm} — 행동 불가 (${B.stunWhy[id]||'대가'})`);
@@ -2720,6 +2780,7 @@ function hitPlayer(mult,label){
 
 function act(kind,arg){
   if(!B||B.busy||B.over)return;
+  if(pFrozen()){addLog(`🧊 얼어붙어 움직일 수 없다… (${Math.ceil((B.pFrozenUntil-Date.now())/1000)}초)`);renderBattle();return;}
   const e=B.e;
   if(kind==='attack'||kind==='item')B.guard=false;
   if(kind==='attack'){
@@ -2756,7 +2817,7 @@ function act(kind,arg){
     addLog('도망에 실패했다!');
   }
   if(e.hp>0&&kind==='attack')alliesAct(); // 동료는 '공격'을 누른 턴에만 행동
-  if(e.hp<=0&&((e.berserk&&!B.berserked)||(e.madness&&!B.maddened)||(e.awaken&&!B.awoke)))e.hp=1; // 폭주·광기 전에는 쓰러지지 않음
+  if(e.hp<=0&&((e.berserk&&!B.berserked)||(e.madness&&!B.maddened)||(e.awaken&&!B.awoke)||(e.twin&&!B.twinned)))e.hp=1; // 폭주·광기 전에는 쓰러지지 않음
   B.menu='main';B.busy=true;
   if(P.hp<=0&&e.hp>0){P.hp=0;B.over=true;renderBattle();setTimeout(defeat,900);return;}
   renderBattle();
@@ -2767,6 +2828,15 @@ function act(kind,arg){
 
 function checkPhase(){
   const e=B.e;
+  if(e.twin&&!B.twinned&&e.hp>0&&e.hp<=e.twin.at){
+    const w=e.twin,em=LATE_BOSS_MULT;
+    B.twinned=true;B.charging=false;B.chargeKind=null;
+    e.name=w.name;e.title=w.title;e.art=w.art;e.hp=w.hp;e.maxHp=w.hp;e.atk=Math.round(w.atk*em);e.def=w.def;e.moves=w.moves;e.burnHit=false;
+    addLog(`❄ 라이아가 물러나고 쌍둥이 언니 「테리아」가 나섰다! (체력 ${fmt(w.hp)})`);
+    showStory(`<div class="sum s5"><div class="sum-title">쌍둥이 교대</div><div class="intro-art">${portraitHTML(w.art,'big')}</div><div class="sum-name">${w.name}</div><div class="small">${w.title}</div><p class="sum-desc" style="color:#cfeaff">${esc(w.line).replace(/\n/g,'<br>')}</p></div>`,
+      ()=>{B.freezeAt=Date.now()+w.freezeEvery;B.freezeT=setInterval(freezeTick,w.freezeEvery);renderBattle();setTimeout(enemyTurn,500);},true);
+    return true;
+  }
   if(e.awaken&&!B.awoke&&e.hp>0&&e.hp<=e.awaken.at){
     const w=e.awaken;
     B.awoke=true;e.hp=w.to;e.maxHp=Math.max(e.maxHp,w.to);e.art=w.art;B.charging=false;B.chargeKind=null;
@@ -2877,6 +2947,10 @@ function enemyTurn(){
       else{B.curse=3;addLog(`${label} — 3턴간 방어력 감소`);}
       break;}
     case 'storm':   hitPlayer(mv.m,label);hitAllies(0.12,label);break;
+    case 'freezebreath':
+      addLog(`${label}!`);hitAllies(0.08,label);
+      B.aFrozenUntil=Date.now()+4000;addLog('❄ 동료 전원이 얼어붙었다! (4초간 행동 불가)');
+      break;
     case 'invisslash':
       if(B.defending){hitPlayer(1.2,`${e.name}의 「보이지 않는 참격」 — 간신히 막아냈다`);}
       else{const d=Math.round(P.maxHp*0.5);P.hp=Math.max(0,P.hp-d);addLog(`${e.name}의 「보이지 않는 참격」! 방어하지 못했다 — HP ${d} 소멸`);queueFx('player','-'+d,'pdmg');
@@ -2908,6 +2982,7 @@ function enemyTurn(){
       break;
   }
   // 나베리우스: 숨 쉴 틈 없는 추격 참격
+  if(e.burnHit&&mv.t!=='sealed'&&P.hp>0&&Math.random()<0.4&&!(B.dot&&B.dot.name==='화상')){B.dot={name:'화상',dmg:Math.max(5,Math.round(e.atk*0.12)),turns:3};addLog('🔥 라이아의 불길 — 화상');}
   if(e.slashes&&mv.t!=='sealed'&&P.hp>0){
     for(let i=0;i<e.slashes;i++)hitPlayer(0.35,`🗡 추격 참격 ${i+1}`);
   }
@@ -3003,7 +3078,7 @@ function victory(){
   let msg=`<b>${esc(tName)} 처치!</b> EXP +${e.xp}${gold===0?'':` · ${fmt(gold)} G`}${gold===0?'':e.goldRepeat!=null?(firstClear?' (첫 클리어 보상)':' (재도전 보상)'):gold!==e.gold?' (보스 보너스 ×1.25)':''}`;
   if(extra.length)msg+='<br>'+extra.join('<br>');
   if(ups.length)msg+='<br>'+ups.join('<br>');
-  const report=stype==='boss'?{st:B.st,party:partyIds().slice(),name:tName,area}:null;
+  const report=stype==='boss'?{st:B.st,party:partyIds().slice(),name:e.twin?`${tName} · ${e.twin.name}`:tName,area}:null;
   clearBattle();
   if(report){battleReport(report,()=>victoryFlow(area,stype,first,wasFinal,fromHunt,msg,stage));return;}
   victoryFlow(area,stype,first,wasFinal,fromHunt,msg,stage);
