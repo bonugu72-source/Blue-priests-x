@@ -2668,9 +2668,9 @@ const RANKS=[
   {n:'실버',icon:'🥈',c:'#c9d3e0',lv:20,alv:15,aw:1,my:0},
   {n:'골드',icon:'🥇',c:'#ffd24a',lv:30,alv:20,aw:1,my:0},
   {n:'플래티넘',icon:'💠',c:'#5fe0c8',lv:40,alv:25,aw:2,my:0},
-  {n:'다이아',icon:'💎',c:'#7fb8ff',lv:50,alv:30,aw:3,my:0},
-  {n:'마스터',icon:'👑',c:'#c78bff',lv:60,alv:40,aw:3,my:1},
-  {n:'챌린저',icon:'🏆',c:'#ff6a5a',lv:70,alv:45,aw:3,my:1}
+  {n:'다이아',icon:'💎',c:'#7fb8ff',lv:50,alv:40,aw:3,my:0},
+  {n:'마스터',icon:'👑',c:'#c78bff',lv:60,alv:45,aw:3,my:1},
+  {n:'챌린저',icon:'🏆',c:'#ff6a5a',lv:70,alv:50,aw:3,my:1}
 ];
 const RANK_REWARD={1:{stone:1},2:{gold:20000},3:{stone:3},4:{gold:40000},5:{stone:5},6:{ally:'roa'}}; // 티어 승급 보상 (티어당 1회)
 const rankRewardText=t=>{const w=RANK_REWARD[t];if(!w)return '';return w.ally?`★5 ${ALLIES[w.ally].name} (챌린저 전용)`:w.stone?`💠 천상의 성유물 ×${w.stone}`:`${fmt(w.gold)} 코인`;};
