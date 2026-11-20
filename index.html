@@ -708,7 +708,7 @@ const ALLIES={
   pasri:   {star:5,name:'파스리',        icon:'🏮', role:'고정 피해', kit:'fixed',
             desc:'전투 시작 후 10초 동안 공격하지 못함 · 10초가 지나면 모든 공격이 적의 방어력을 무시하는 고정 피해'},
   gaia:    {star:5,name:'가이아 수도사',  icon:'🔷', role:'약점 간파', kit:'weakspot',
-            desc:'약점: 15% 확률로 적의 약점을 찾아 공격력 3배의 고정 피해(방어력 무시) · 평소엔 창 찌르기'},
+            desc:'약점: 15% 확률로 적의 약점을 찾아 공격력 3배의 고정 피해(방어력 무시) · 평소엔 창 찌르기 · 눈썰미: 출전 중 나라 보스 처치 시 💠 천상의 성유물 획득 확률 +10%'},
   sakura:  {star:5,name:'사쿠라',        icon:'🌸', role:'벚꽃바람', kit:'sakura',
             desc:'3초마다 벚꽃바람(적의 치명타 확률 50% 감소) · 전투 중 쓰러져도 7초 후 HP 50%로 부활(전투가 끝날 때까지 계속) · 벚꽃 칼날 공격'},
   kirie:   {star:5,name:'키리에',        icon:'🪶', role:'폭풍의 날개', kit:'storm',
@@ -1117,7 +1117,7 @@ function stageName(a,s){
   if(t==='elite')return ar.elite.name;
   return ar.enemies[(s-1)%ar.enemies.length].name;
 }
-const STAGE_REWARD={normal:'보너스 골드',elite:'소환권 ×1',mid:'소환권 ×2 · 처치할 때마다 15% 확률로 💠 천상의 성유물',boss:'소환권 ×3 · 처치할 때마다 30% 확률로 인장(유물), 25% 확률로 💠 천상의 성유물'};
+const STAGE_REWARD={normal:'보너스 골드',elite:'소환권 ×1',mid:'소환권 ×2 · 처치할 때마다 15% 확률로 💠 천상의 성유물',boss:'소환권 ×3 · 처치할 때마다 30% 확률로 인장(유물), 25% 확률로(가이아 수도사 출전 시 35%) 💠 천상의 성유물'};
 
 /* ===================== 악마 일러스트 (SVG) ===================== */
 const MIR='transform="translate(200,0) scale(-1,1)"';
@@ -3264,7 +3264,8 @@ function victory(){
   // 희귀 유물: 확률 드롭 (재도전으로 다시 노릴 수 있음)
   if(stype==='mid'&&Math.random()<DROP.stoneMid){P.items.stone++;stoneToast(1,'솔로몬 72악마 드랍');extra.push(`${AWAKEN_ITEM.icon} 희귀 아이템 「${AWAKEN_ITEM.name}」 획득!`);}
   if(stype==='boss'){
-    if(Math.random()<DROP.stoneBoss){P.items.stone++;stoneToast(1,'나라 보스 드랍');extra.push(`${AWAKEN_ITEM.icon} 희귀 아이템 「${AWAKEN_ITEM.name}」 획득!`);}
+    const gaiaB=inParty('gaia')?0.10:0; // 가이아 수도사 출전 시 성유물 확률 +10%p
+    if(Math.random()<DROP.stoneBoss+gaiaB){P.items.stone++;stoneToast(1,gaiaB?'나라 보스 드랍 · 🔷 가이아의 눈썰미':'나라 보스 드랍');extra.push(`${AWAKEN_ITEM.icon} 희귀 아이템 「${AWAKEN_ITEM.name}」 획득!`);}
     const d=AREAS[area].boss.drop;
     if(d&&!P.relics.includes(d)){
       if(Math.random()<DROP.seal){gainRelic(d);extra.push(`${RELICS[d].icon} 희귀 유물 「${RELICS[d].name}」 획득! (${RELICS[d].desc})`);}
