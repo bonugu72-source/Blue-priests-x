@@ -1877,6 +1877,7 @@ async function initCloud(){
   updateCloudNote();
 }
 function updateCloudNote(){
+  if(P&&!B&&hubTab==='friend'&&$('#frwait'))setTimeout(()=>{if(P&&!B&&hubTab==='friend'&&$('#frwait'))renderFriends();},0);   // 연결이 끝나면 친구 화면 다시 그리기
   const n=$('#cloudnote');if(!n)return;
   n.textContent=cloudState==='on'?(FB?'☁ 클라우드 자동 저장 · 실시간 친구 연결됨':'☁ 클라우드 자동 저장 중 (이 계정)')
     :cloudState==='ready'?'☁ 클라우드 연결됨 · 게임을 시작하면 자동 저장돼요'
@@ -2150,6 +2151,12 @@ async function fbAddFriend(raw){
 async function renderFriends(msg,preList){
   if(friendsUnsub){try{friendsUnsub();}catch(e){}friendsUnsub=null;}
   clearBattle();hubTab='friend';
+  if((!DBX||!myId)&&hasFirebaseHost()&&(cloudState==='checking'||cloudState==='ready'||fbBinding)){
+    // 클라우드 연결이 아직 끝나지 않음: 예전 코드 화면 대신 잠깐 기다렸다가 실시간 친구 화면으로
+    if(FB&&P&&!fbBinding&&fbPid!==P.uid)fbBind(P);
+    $('#app').innerHTML=`${statusHTML()}${msg?`<div class="notice">${msg}</div>`:''}<div class="panel" id="frwait"><div class="desc">☁ 실시간 친구에 연결하는 중… 잠시만 기다려 주세요.</div></div>${footHTML()}${tabBar()}`;
+    bindFoot();window.scrollTo(0,0);return;
+  }
   if(!DBX||!myId){
     if(FB&&cloudState==='denied'&&!msg)msg='⚠ 이 기기는 아직 실시간 친구에 연결되지 않았어요. 쓰던 기기에서 친구 탭 맨 아래 <b>「📱 기기 연결」</b>을 눌러 받은 코드를, 이 기기 타이틀의 <b>「📱 다른 기기에서 이어하기」</b>에 넣으면 연결돼요.';
     renderFriendsCode(msg);return;}
