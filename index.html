@@ -854,6 +854,8 @@ const ALLIES={
             desc:'날갯짓으로 폭풍을 일으켜 5초 동안 주인공 치명타 확률 2배 · 전투에서 처음 쓰러진 동료를 HP 50%로 부활(1회) · 폭풍 중엔 깃털 칼날 공격'},
   mikael:  {star:5,name:'미카엘',        icon:'🛡️', role:'정화의 날개', kit:'purify',
             desc:'정화(걸려 있는 모든 디버프 제거 + 주인공 현재 HP의 절반만큼 방어막, 3턴마다) · 평소엔 날개 베기'},
+  roa:     {star:5,name:'로아',          icon:'💗', role:'유혹', kit:'charm', exclusive:true,
+            desc:'유혹(적을 유혹해 5초간 적에게 가하는 모든 공격이 치명타) · 3초마다 하트를 날려 주인공 HP 조금씩 회복 · 🏆 랭크전 챌린저 승급 보상으로만 획득'},
   muhee:   {star:5,name:'무희',          icon:'⚖️', role:'정의', kit:'justice',
             desc:'정의: 전투 시작 5초 후 적의 현재 체력 절반을 앗아가고, 그 대가로 무희는 쓰러진다 (전투당 1회) · 그 외의 능력은 없음'},
   aora:    {star:6,name:'대천사 아오라',  icon:'👼', role:'대천사', kit:'aora', hpMul:1.5,
@@ -868,7 +870,7 @@ const ALLIES={
             desc:'보석처럼 반짝이는 광선 공격 · 적이 힘을 모으거나 3턴마다 프리즘 굴절(다음 적 공격 피해 절반, 절반은 적에게 반사)'}
 };
 /* ★5 티어 — 신화 제외 최대 전투력: 1티어 4000 · 2티어 3300 · 3티어 2700 */
-const TIER5={guseju:1,asiris:1,karma:1,pasri:1,vista5:1,danian:2,elia:2,kirie:2,gaia:2,elise:2,miner:2,muhee:3,siren:3,mikael:3,sakura:3};
+const TIER5={guseju:1,asiris:1,karma:1,pasri:1,vista5:1,roa:1,danian:2,elia:2,kirie:2,gaia:2,elise:2,miner:2,muhee:3,siren:3,mikael:3,sakura:3};
 const TIER5_CP={1:4000,2:3300,3:2700};
 /* 신화: 최대 레벨에서 열림 · 능력치 2배 */
 const MYTH_COST={1:3000,2:5000,3:5000,4:10000,5:30000,6:50000}, MYTH_STONE5=2;
@@ -883,6 +885,7 @@ const MYTH_SKILL={
   sakura:{name:'만개',desc:'부활 대기 7초 → 4초 · 벚꽃바람이 적의 치명타 확률을 75% 낮춤'},
   kirie: {name:'폭풍의 수호천사',desc:'부활을 두 번까지 · 폭풍 중 치명타 피해 2배'},
   mikael:{name:'대천사의 가호',desc:'방어막이 현재 HP 전부만큼 · 정화 주기 2턴'},
+  roa:   {name:'매혹의 여왕',desc:'하트 회복량 2배 · 유혹 중 치명타 피해 1.5배 → 2배'},
   muhee: {name:'심판의 춤',desc:'정의 발동까지 5초 → 3초'},
   aora:  {name:'대천사의 강림',desc:'천사의 구원 지속 3초 → 5초 · 생명력 흡수량 2배'},
   miner: {name:'바다의 여왕',desc:'물보라 보호막 2턴 → 3턴 · 미네르바의 치명타 피해 1.5배 → 2배'},
@@ -936,7 +939,7 @@ function allyPortrait(id){
   const im=allyImg(id);
   return im?`<div class="aportrait"><img src="${im.src}" style="object-position:${im.pos}" alt=""></div>`:`<div class="sum-icon">${ALLIES[id].icon}</div>`;
 }
-const allyIds=star=>Object.keys(ALLIES).filter(k=>ALLIES[k].star===star);
+const allyIds=star=>Object.keys(ALLIES).filter(k=>ALLIES[k].star===star&&!ALLIES[k].exclusive); // exclusive: 보상으로만 획득
 
 /* 유물 (보스 인장) */
 const RELICS={
@@ -2620,6 +2623,7 @@ function pvpEnemyActs(e){
       case 'twin':     dmg(6+lv*1.8,0.5,`${nm}의 쌍검 ①`);dmg(6+lv*1.8,0.5,`${nm}의 쌍검 ②`);break;
       case 'guard':    if(e.hp<e.maxHp*0.5&&Math.random()<0.3)heal(0.06);else dmg(9+lv*2.8,0.4,`${nm}의 방패 강타`);break;
       case 'chant':    if(e.hp<e.maxHp*0.7&&Math.random()<0.4)heal(0.12);else dmg(7+lv*2.4,0.5,`${nm}의 빛의 음표`);break;
+      case 'charm':    dmg((12+lv*3.6)*1.5,0.4,`${nm}의 하트 키스 (치명타)`);break;
       case 'justice':  if(!B.pvpMuhee&&Date.now()-(B.startAt||0)>=(a.my?3000:5000)){B.pvpMuhee=true;const d=Math.floor(P.hp/2);P.hp-=d;addLog(`⚖️ ${nm}의 정의! 주인공 체력 절반(${d})을 앗아갔다`);queueFx('player','⚖️-'+d,'pdmg');}break;
       case 'aora':     if(Math.random()<0.3){B.curse=Math.max(B.curse,2);addLog(`${nm}의 천사의 구원 — 주인공이 속박되어 방어력 감소`);}else dmg(16+lv*5,0.3,`${nm}의 천사의 심판`);break;
       case 'tide':     dmg(12+lv*4,0.5,`${nm}의 물살`);break;
@@ -2667,6 +2671,8 @@ const RANKS=[
   {n:'마스터',icon:'👑',c:'#c78bff',lv:60,alv:35,aw:3,my:1},
   {n:'챌린저',icon:'🏆',c:'#ff6a5a',lv:70,alv:35,aw:3,my:1}
 ];
+const RANK_REWARD={1:{stone:1},2:{gold:20000},3:{stone:3},4:{gold:40000},5:{stone:5},6:{ally:'roa'}}; // 티어 승급 보상 (티어당 1회)
+const rankRewardText=t=>{const w=RANK_REWARD[t];if(!w)return '';return w.ally?`★5 ${ALLIES[w.ally].name} (챌린저 전용)`:w.stone?`💠 천상의 성유물 ×${w.stone}`:`${fmt(w.gold)} 코인`;};
 const RANK_LP=100, RANK_WIN=25, RANK_LOSS=15, RANK_MIN_LV=20; // 플레이어 Lv 20부터 랭크전 개방
 const RANK_AI_NAMES=['푸른 기사','심연의 사제','은빛 순례자','붉은 수도사','밤의 성가대','새벽의 파수꾼','잿빛 집행자','별빛 부제'];
 const rankState=()=>{P.rank=P.rank||{tier:0,lp:0,w:0,l:0,best:0};return P.rank;};
@@ -2689,6 +2695,7 @@ function renderRank(msg){
       <div class="rankbadge" style="--rc:${R.c}"><div class="ri">${R.icon}</div><b>${R.n}</b></div>
       ${top?`<div class="desc" style="text-align:center">${fmt(r.lp)} LP · 최고 티어 도달</div>`:bar(r.lp,RANK_LP,'xp','LP')}
       <div class="ranklad">${RANKS.map((x,i)=>`<span class="${i===r.tier?'on':i<r.tier?'done':''}">${x.icon}<br>${x.n}</span>`).join('')}</div>
+      <div class="desc"><b>승급 보상</b> ${RANKS.map((x,i)=>RANK_REWARD[i]?`${x.icon} ${x.n}: ${rankRewardText(i)}${(r.got||{})[i]?' ✔':''}`:'').filter(Boolean).join(' · ')}</div>
       <div class="desc">★5 동료 무작위 3명을 데려온 AI 상대와 대결한다. 승리 +${RANK_WIN} LP · 패배 −${RANK_LOSS} LP. ${RANK_LP} LP를 모으면 다음 티어로 승급!<br>이번 티어 상대: 주인공 Lv ${R.lv} · ★5 동료 3명 Lv ${R.alv}${R.aw?` · 각성 ${R.aw}`:''}${R.my?' · 신화':''}</div>
       <div class="grid">
         <button class="btn danger full" id="rgo">⚔ 랭크전 시작</button>
@@ -2704,10 +2711,16 @@ function rankEnd(win,e,pst,pparty){
   else{r.l++;const lost=Math.min(r.lp,RANK_LOSS);r.lp-=lost;lines.push(`패배… −${lost} LP`);}
   let promo=false;
   while(r.tier<RANKS.length-1&&r.lp>=RANK_LP){r.lp-=RANK_LP;r.tier++;promo=true;}
-  if(promo){r.lp=0;r.best=Math.max(r.best||0,r.tier);lines.push(`${RANKS[r.tier].icon} ${RANKS[before].n} → ${RANKS[r.tier].n} 승급!`);}
+  if(promo){r.lp=0;r.best=Math.max(r.best||0,r.tier);lines.push(`${RANKS[r.tier].icon} ${RANKS[before].n} → ${RANKS[r.tier].n} 승급!`);
+    r.got=r.got||{};
+    for(let t=before+1;t<=r.tier;t++){const w=RANK_REWARD[t];if(!w||r.got[t])continue;r.got[t]=true;
+      if(w.stone){P.items.stone+=w.stone;stoneToast(w.stone,`${RANKS[t].n} 승급 보상`);}
+      if(w.gold)P.gold+=w.gold;
+      if(w.ally){addAlly(w.ally);aData(w.ally);}
+      lines.push(`🎁 ${RANKS[t].n} 승급 보상: ${rankRewardText(t)}`);}}
   lines.push(`현재 ${rankOf().n} · ${r.lp}${r.tier<RANKS.length-1?'/'+RANK_LP:''} LP · ${r.w}승 ${r.l}패`);
   save();renderRank();
-  showResult({title:`🏆 랭크전 — ${esc(e.heroName)}의 팀`,won:win,lines,st:pst,party:pparty},promo?()=>showStory(`<div class="sum s5"><div class="sum-title">승급</div><div class="rankbadge" style="--rc:${RANKS[r.tier].c}"><div class="ri">${RANKS[r.tier].icon}</div><b>${RANKS[r.tier].n}</b></div><p class="sum-desc">${RANKS[before].n}에서 ${RANKS[r.tier].n}(으)로 승급했다!</p></div>`,()=>renderRank(),true):null);
+  showResult({title:`🏆 랭크전 — ${esc(e.heroName)}의 팀`,won:win,lines,st:pst,party:pparty},promo?()=>showStory(`<div class="sum s5"><div class="sum-title">승급</div><div class="rankbadge" style="--rc:${RANKS[r.tier].c}"><div class="ri">${RANKS[r.tier].icon}</div><b>${RANKS[r.tier].n}</b></div><p class="sum-desc">${RANKS[before].n}에서 ${RANKS[r.tier].n}(으)로 승급했다!${RANK_REWARD[r.tier]?`<br>🎁 승급 보상: ${rankRewardText(r.tier)}`:''}</p>${RANK_REWARD[r.tier]&&RANK_REWARD[r.tier].ally?`<div style="margin-top:8px">${allyPortrait(RANK_REWARD[r.tier].ally)}</div>`:''}</div>`,()=>renderRank(),true):null);
 }
 
 /* ===================== 거점 ===================== */
@@ -3202,13 +3215,13 @@ function synthAll(){
 }
 
 /* ===================== 전투 ===================== */
-function clearBattle(){forcedMv=null;if(B&&B.enemyT)clearInterval(B.enemyT);if(B&&B.allyT)clearInterval(B.allyT);document.body.classList.remove('pfrozen');if(B&&B.freezeT)clearInterval(B.freezeT);if(B&&B.sakuraT)clearInterval(B.sakuraT);document.body.classList.remove('battle');if(B&&B.waveT)clearInterval(B.waveT);if(B&&B.soulT)clearInterval(B.soulT);if(B&&B.drainT)clearInterval(B.drainT);if(B&&B.tsT)clearInterval(B.tsT);if(B&&B.paraT)clearInterval(B.paraT);if(B&&B.zapT)clearInterval(B.zapT);if(B&&B.karmaT)clearInterval(B.karmaT);if(B&&B.trainT)clearInterval(B.trainT);if(B&&B.aoraT)clearInterval(B.aoraT);if(B&&B.halfT)clearInterval(B.halfT);if(B&&B.isaT)clearInterval(B.isaT);B=null;}
+function clearBattle(){forcedMv=null;if(B&&B.enemyT)clearInterval(B.enemyT);if(B&&B.allyT)clearInterval(B.allyT);document.body.classList.remove('pfrozen');if(B&&B.freezeT)clearInterval(B.freezeT);if(B&&B.sakuraT)clearInterval(B.sakuraT);document.body.classList.remove('battle');if(B&&B.waveT)clearInterval(B.waveT);if(B&&B.soulT)clearInterval(B.soulT);if(B&&B.drainT)clearInterval(B.drainT);if(B&&B.tsT)clearInterval(B.tsT);if(B&&B.paraT)clearInterval(B.paraT);if(B&&B.zapT)clearInterval(B.zapT);if(B&&B.karmaT)clearInterval(B.karmaT);if(B&&B.trainT)clearInterval(B.trainT);if(B&&B.aoraT)clearInterval(B.aoraT);if(B&&B.heartT)clearInterval(B.heartT);if(B&&B.halfT)clearInterval(B.halfT);if(B&&B.isaT)clearInterval(B.isaT);B=null;}
 /* 반사·부적 등으로 적이 턴 밖에서 쓰러졌을 때 */
 function winNow(){
   if(!B||B.won)return;
   if((B.e.berserk&&!B.berserked)||(B.e.madness&&!B.maddened)||(B.e.awaken&&!B.awoke)||(B.e.twin&&!B.twinned)||(B.e.relay&&(B.relayStage||0)<2)){B.e.hp=Math.max(1,B.e.hp);renderBattle();return;}
   B.won=true;B.busy=true;if(B.enemyT)clearInterval(B.enemyT);if(B.allyT)clearInterval(B.allyT);if(B.freezeT)clearInterval(B.freezeT);document.body.classList.remove('pfrozen');if(B.sakuraT)clearInterval(B.sakuraT);if(B.paraT)clearInterval(B.paraT);if(B.waveT)clearInterval(B.waveT);if(B.soulT)clearInterval(B.soulT);if(B.drainT)clearInterval(B.drainT);if(B.tsT)clearInterval(B.tsT);
-  if(B.zapT)clearInterval(B.zapT);if(B.karmaT)clearInterval(B.karmaT);if(B.trainT)clearInterval(B.trainT);if(B.aoraT)clearInterval(B.aoraT);if(B.halfT)clearInterval(B.halfT);if(B.isaT)clearInterval(B.isaT);
+  if(B.zapT)clearInterval(B.zapT);if(B.karmaT)clearInterval(B.karmaT);if(B.trainT)clearInterval(B.trainT);if(B.aoraT)clearInterval(B.aoraT);if(B.heartT)clearInterval(B.heartT);if(B.halfT)clearInterval(B.halfT);if(B.isaT)clearInterval(B.isaT);
   renderBattle();setTimeout(victory,750);
 }
 /* 이사벨 부제: 5초마다 주인공 HP 40% 회복 */
@@ -3247,6 +3260,14 @@ function sakuraTick(){
 }
 /* 카르마: 5초마다 무작위 부적 (주인공 치유 / 적 저주 / 적 불태움) */
 /* 비스타: 3초마다 열차 소환 — 관통(기본 공격 2배, 방어 무시) + 폭파로 시야 차단 */
+const HEART_MS=3000;
+function heartTick(){
+  if(!B||B.over||B.won||!$('#modal').classList.contains('hidden'))return;
+  const id='roa',h=B.ahp[id];
+  if(!inParty(id)||(h&&h.hp<=0)||(B.stun[id]>0)||aFrozen()||P.hp<=0)return;
+  const lv=aData(id).lv,hh=Math.min(P.maxHp-P.hp,Math.round((P.maxHp*0.03+lv)*(isMyth(id)?2:1)*pHealMul()));
+  if(hh>0){P.hp+=hh;stat('heal',id,hh);addLog(`💗 로아의 하트 — 주인공 HP ${hh} 회복`);queueFx('player','💗+'+hh,'heal');renderBattle();}
+}
 const AORA_MS=5000;
 function aoraTick(){
   if(!B||B.over||B.won||!$('#modal').classList.contains('hidden'))return;
@@ -3342,6 +3363,7 @@ function startBattle(spec){
     if(B&&inParty('karma'))B.karmaT=setInterval(karmaTick,5000);
     if(B&&inParty('vista5'))B.trainT=setInterval(trainTick,TRAIN_MS);
     if(B&&inParty('aora'))B.aoraT=setInterval(aoraTick,AORA_MS);
+    if(B&&inParty('roa'))B.heartT=setInterval(heartTick,HEART_MS);
     if(B&&t.halfTick&&!t.pvp){B.halfAt=Date.now()+t.halfTick;B.halfT=setInterval(halfTick,t.halfTick);}
     if(B&&inParty('sakura')){B.sakuraT=setInterval(sakuraTick,1000);sakuraTick();}
     if(B)B.isaT=setInterval(isabelTick,ISABEL_TICK);
@@ -3417,6 +3439,8 @@ const healMul=()=>(B&&B.healCut)?0.9:1;
 const pHealMul=()=>(B&&B.noHeal)?0:healMul(); // 주인공 회복 배율 (가미긴 폭주 후 0)
 const paraOn=()=>!!(B&&B.paraUntil&&Date.now()<B.paraUntil);
 /* 테리아: 7초마다 주인공 빙결 (얼음을 깰 때까지 행동 불가) */
+const charmOn=()=>!!(B&&B.charmUntil&&Date.now()<B.charmUntil); // 로아: 유혹 중 모든 공격 치명타
+const charmCrit=()=>isMyth('roa')?2:1.5;
 const salvOn=()=>!!(B&&B.salvUntil&&Date.now()<B.salvUntil); // 아오라: 천사의 구원
 const pFrozen=()=>!!(B&&B.pFrozenUntil&&Date.now()<B.pFrozenUntil);
 const aFrozen=()=>!!(B&&B.aFrozenUntil&&Date.now()<B.aFrozenUntil);
@@ -3566,6 +3590,7 @@ function renderBattle(){
   if(sakuraWind())st.push('🌸 벚꽃바람');
   if(B.sakuraDeadAt)st.push(`🌸 부활까지 ${Math.max(0,Math.ceil(((isMyth('sakura')?4000:7000)-(Date.now()-B.sakuraDeadAt))/1000))}초`);
   if(B.tsAt)st.push(`⏳ 시간정지 ${Math.max(0,Math.ceil((B.tsAt-Date.now())/1000))}초`);
+  if(charmOn())st.push(`💗 유혹 ${Math.ceil((B.charmUntil-Date.now())/1000)}초`);
   if(salvOn())st.push(`👼 천사의 구원 ${Math.ceil((B.salvUntil-Date.now())/1000)}초`);
   if(B.drainAt)st.push(`🩸 흡수 ${Math.max(0,Math.ceil((B.drainAt-Date.now())/1000))}초`);
   if(B.freezeAt)st.push(pFrozen()?'🧊 주인공 빙결':`🧊 빙결 ${Math.max(0,Math.ceil((B.freezeAt-Date.now())/1000))}초`);
@@ -3677,8 +3702,8 @@ function hitEnemy(mult,label){
   if(e.voidHero&&Math.random()<e.voidHero){addLog(`${label}! — 🔥 아몬의 업화에 삼켜져 무효화됐다`);queueFx('enemy','무효','mpf');return;}
   let d=(P.atk*(B.buff?1.5:1)*(B.aura?1.2:1)*mult-enemyDef()/2)*rnd(0.9,1.1)*(salvOn()?1.5:1);
   d=Math.max(1,Math.round(d));
-  const crit=Math.random()<0.1*(stormOn()?2:1);
-  if(crit)d=Math.round(d*(stormOn()&&isMyth('kirie')?2:1.5));
+  const crit=charmOn()||Math.random()<0.1*(stormOn()?2:1);
+  if(crit)d=Math.round(d*(charmOn()?Math.max(charmCrit(),stormOn()&&isMyth('kirie')?2:1.5):(stormOn()&&isMyth('kirie')?2:1.5)));
   stat('dmg','hero',Math.min(d,e.hp));
   e.hp=Math.max(0,e.hp-d);
   addLog(`${label}! ${e.name}에게 ${d} 피해${crit?' (치명타!)':''}`);
@@ -3693,10 +3718,11 @@ function allyHit(base,label,defFactor,fixed){
   if(B.vsil&&B.vsil[B.curAlly]&&Math.random()<0.3){addLog(`${label}! — 🔇 침묵에 막혀 무효`);queueFx('enemy','침묵','mpf');return 0;}
   let d=fixed?Math.max(1,Math.round(base*(B.am||1))):Math.max(1,Math.round((base*(B.am||1)-enemyDef()*defFactor)*rnd(0.9,1.1)));
   if(B.vslow&&B.vslow[B.curAlly])d=Math.max(1,Math.round(d*0.6));
+  const ch=charmOn();if(ch)d=Math.round(d*charmCrit()); // 로아의 유혹: 동료 공격도 치명타
   stat('dmg',B.curAlly,Math.min(d,e.hp));
   e.hp=Math.max(0,e.hp-d);
-  addLog(`${label}! ${d} 피해`);
-  queueFx('enemy',d,'dmg');
+  addLog(`${label}! ${d} 피해${ch?' 💗(치명타!)':''}`);
+  queueFx('enemy',(ch?'💥':'')+d,ch?'crit':'dmg');
   if(B.reflect&&B.curAlly&&B.ahp[B.curAlly]){
     const h=B.ahp[B.curAlly],r=Math.round(d*0.5);h.hp=Math.max(0,h.hp-r);
     addLog(`↩ 반사 — ${ALLIES[B.curAlly].name} ${r} 피해${h.hp<=0?' · 쓰러짐':''}`);if(h.hp<=0)allyDown(B.curAlly);
@@ -3874,6 +3900,10 @@ function alliesAct(){
             addLog(`${nm}의 정화 — ${debuffs.length?debuffs.join(', ')+' 제거 · ':''}방어막 ${B.mshield}`);queueFx('player','🛡'+B.mshield,'mpf');
           }else addLog(`${nm}의 정화 — ${debuffs.join(', ')} 제거`);
         }else allyHit(10+lv*3.6,`${nm}의 날개 베기`,0.4);
+        break;}
+      case 'charm':{ // 로아: 유혹 (5초간 모든 공격 치명타) · 평소엔 하트 키스
+        if(!charmOn()){B.charmUntil=Date.now()+5000;addLog(`💗 ${nm}의 유혹 — ${e.name}이(가) 넋을 잃었다! 5초간 모든 공격이 치명타`);queueFx('enemy','💗 유혹','mpf');}
+        else allyHit(12+lv*3.6,`${nm}의 하트 키스`,0.4);
         break;}
       case 'justice':{ // 무희: 정의 — 시작 5초 후 적 현재 체력 절반, 이후 무희 쓰러짐
         if(B.muheeDone)break;
