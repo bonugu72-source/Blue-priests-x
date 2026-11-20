@@ -1311,9 +1311,9 @@ const AREAS=[
       pre:'언덕 꼭대기, 거대한 회오리가 하늘을 휘감고 깃털과 돌조각이 멈춘 채 허공에 떠 있다.\n그 한가운데, 흰 사제복을 입은 은발의 타락천사가 금빛 눈으로 내려다본다.\n\n"시간을 거스르는 자는 시간 속에 갇힌다. 너의 한 걸음은 나의 한순간도 되지 못한다."',
       moves:[{t:'atk',n:'시곗바늘 일격'},{t:'multi',n:'초침의 연격',hits:3,m:0.45},{t:'strong',n:'정오의 심판'},{t:'curse',n:'시간의 족쇄'},{t:'sweep',n:'시간의 파도',m:0.18},{t:'atk',n:'시곗바늘 일격'},{t:'charge',n:'영원의 종소리'}]}
   },
-  { name:'저승 우물', realm:'demon', country:'마계 · 죽은 자의 기억이 고이는 우물', flag:'🔮', rec:62, recEnd:66, glow:'#a55cff',
+  { name:'저승 우물', realm:'demon', country:'마계 · 죽은 자의 기억이 고이는 우물', flag:'🔮', rec:62, recEnd:66, glow:'#a55cff', sortie:'myth2',
     desc:'마계의 갈라진 대지 한가운데, 바닥이 보이지 않는 우물. 그 위에서 악의의 마법사가 보랏빛 마법진을 펼친다.',
-    intro:'저승의 언덕을 넘자, 메마른 대지가 거미줄처럼 갈라져 있었다.\n\n갈라진 틈 사이로 보랏빛 안개가 피어오르고, 그 한가운데 바닥이 보이지 않는 우물이 입을 벌리고 있다.\n\n우물 위, 두건을 쓴 소녀가 금빛 마법진을 손끝에 띄운 채 웃고 있었다.\n\n"어서 와. 네 기억도 이 우물에 가라앉혀 줄게."',
+    intro:'저승의 언덕을 넘자, 메마른 대지가 거미줄처럼 갈라져 있었다.\n\n갈라진 틈 사이로 보랏빛 안개가 피어오르고, 그 한가운데 바닥이 보이지 않는 우물이 입을 벌리고 있다.\n\n우물 위, 두건을 쓴 소녀가 금빛 마법진을 손끝에 띄운 채 웃고 있었다.\n\n"어서 와. 네 기억도 이 우물에 가라앉혀 줄게."\n\n— 이곳에는 신화 승급 동료 단 두 명만 함께할 수 있다. (이사벨 부제도 함께할 수 없다)',
     outro:'금빛 마법진이 산산이 부서지고, 보랏빛 깃털이 비처럼 흩날렸다.\n\n메르엠은 갈라진 땅 위에 주저앉아 하늘을 올려다보았다.\n\n"…이상하네. 마법이 다 사라졌는데, 이렇게 홀가분할 줄은 몰랐어."\n\n— 저승 우물 해방 —',
     enemies:[
       {name:'우물에서 기어 나온 망령', icon:'👻', hp:880, atk:136, def:64, xp:350, gold:175, demon:true, moves:[{t:'atk',n:'차가운 손길'},{t:'drain',n:'기억 흡수'},{t:'atk',n:'차가운 손길'}]},
@@ -1327,7 +1327,7 @@ const AREAS=[
     mid:{name:'바인', art:'vine', title:'솔로몬 72악마 · 제45영 · 왕 겸 백작 · 36군단', hp:31000, atk:182, def:56, xp:7600, gold:5800, demon:true,
       pre:'검은 말을 탄 사자 머리의 왕이 독사를 손에 쥐고 우물가에 선다.\n\n"숨겨진 것을 드러내는 것이 나의 힘. 네가 숨긴 두려움도 모두 꺼내 주마."',
       moves:[{t:'atk',n:'사자의 발톱'},{t:'dot',n:'독사의 이빨',dn:'출혈'},{t:'multi',n:'폭풍의 돌진',hits:3,m:0.5},{t:'sweep',n:'성벽을 무너뜨리는 바람',m:0.17},{t:'charge',n:'36군단의 습격'}]},
-    boss:{name:'메르엠', art:'merem', title:'악의의 마법사 · 타락천사', hp:50000, exactHp:true, atk:190, def:58, xp:44000, gold:55000, goldFirst:70000, goldRepeat:55000, demon:true,
+    boss:{name:'메르엠', art:'merem', title:'악의의 마법사 · 타락천사', hp:50000, exactHp:true, atk:210, def:58, xp:44000, gold:55000, goldFirst:70000, goldRepeat:55000, demon:true,
       magic:true, magicGrow:1, halfTick:3000, itemAt:{n:10,id:'merem_feather'},
       pre:'우물 위로 금빛 마법진이 떠오르고, 보랏빛 깃털이 소용돌이친다.\n두건을 쓴 소녀가 손끝으로 마법진을 돌리며 웃는다.\n\n"검으로는 마법을 막을 수 없어. 3초마다 네 목숨을 절반씩 가져갈 테니까… 잘 막아 봐."',
       moves:[{t:'atk',n:'마력 탄환'},{t:'strong',n:'금빛 마법진 폭발'},{t:'multi',n:'보랏빛 깃털 비',hits:4,m:0.35},{t:'curse',n:'악의의 저주'},{t:'sweep',n:'갈라지는 대지',m:0.18},{t:'atk',n:'마력 탄환'},{t:'charge',n:'저승 우물의 대마법'}]}
@@ -2083,7 +2083,7 @@ function statusHTML(){
   </div>`;
 }
 const owned=id=>(P.roster[id]||0)>0;
-const SORTIE_RULES={star5x2:{text:'★5 동료 최대 2명만 출전 가능 (이사벨 부제 출전 불가)',ok:id=>ALLIES[id].star===5,noFixed:true,max:2},noIsabel:{text:'이사벨 부제 출전 불가 — 출전 동료만으로 싸워야 함',ok:id=>true,noFixed:true},myth:{text:'신화 승급 동료만 출전 가능 (이사벨 부제는 고정 동행)',ok:id=>isMyth(id)},myth4:{text:'신화 승급 동료 또는 ★4 동료만 출전 가능 (이사벨 부제는 고정 동행)',ok:id=>isMyth(id)||ALLIES[id].star===4},one:{text:'동료 1명만 출전 가능 (이사벨 부제 출전 불가)',ok:id=>true,noFixed:true,max:1},noTier1:{text:'★5 1티어 동료 출전 금지 (이사벨 부제는 고정 동행)',ok:id=>!(ALLIES[id]&&ALLIES[id].star===5&&TIER5[id]===1)}};
+const SORTIE_RULES={star5x2:{text:'★5 동료 최대 2명만 출전 가능 (이사벨 부제 출전 불가)',ok:id=>ALLIES[id].star===5,noFixed:true,max:2},noIsabel:{text:'이사벨 부제 출전 불가 — 출전 동료만으로 싸워야 함',ok:id=>true,noFixed:true},myth:{text:'신화 승급 동료만 출전 가능 (이사벨 부제는 고정 동행)',ok:id=>isMyth(id)},myth4:{text:'신화 승급 동료 또는 ★4 동료만 출전 가능 (이사벨 부제는 고정 동행)',ok:id=>isMyth(id)||ALLIES[id].star===4},one:{text:'동료 1명만 출전 가능 (이사벨 부제 출전 불가)',ok:id=>true,noFixed:true,max:1},myth2:{text:'신화 승급 동료 최대 2명만 출전 가능 (이사벨 부제 출전 불가)',ok:id=>isMyth(id),noFixed:true,max:2},noTier1:{text:'★5 1티어 동료 출전 금지 (이사벨 부제는 고정 동행)',ok:id=>!(ALLIES[id]&&ALLIES[id].star===5&&TIER5[id]===1)}};
 const sortieRule=a=>AREAS[a]&&SORTIE_RULES[AREAS[a].sortie];
 const sortieOk=(a,id)=>{const r=sortieRule(a);return !r||r.ok(id);};
 const partyIds=()=>(B&&B.party)?B.party:[FIXED,...P.active];
