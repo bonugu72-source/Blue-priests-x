@@ -477,6 +477,7 @@ body.battle .cmds .btn{min-height:44px;padding:6px 10px}
 .slot.empty b{color:#7d8bb3;font-weight:700}
 .slot:active{transform:scale(.97)}
 .fixedrow{font-size:13px;display:flex;align-items:center;gap:4px;padding:2px 2px 0}
+.status.mini{padding:9px 12px}
 /* 하단 탭 */
 #app:has(.tabbar){padding-bottom:calc(84px + env(safe-area-inset-bottom))}
 .tabbar{position:fixed;left:0;right:0;bottom:0;z-index:30;margin:0 auto;max-width:480px;display:grid;grid-template-columns:repeat(4,1fr);gap:4px;
@@ -1689,6 +1690,10 @@ function bar(cur,max,cls,label){
   return `<div class="bar ${cls}"><i style="width:${p}%"></i><span>${label?label+' ':''}${Math.ceil(cur)} / ${max}</span></div>`;
 }
 function statusHTML(){
+  // 상점·동료·친구 탭(전투 밖)에서는 이름·레벨·골드만 간단히
+  if(!B&&hubTab!=='adv')return `<div class="status mini" id="pstatus">
+    <div class="row"><b>✝ ${esc(P.name)}</b><span>Lv ${P.lv}</span><span><span class="gold">${P.gold} G</span><button class="bgmmini" data-bgm>${BGM.isOn()?'🔊':'🔇'}</button></span></div>
+  </div>`;
   return `<div class="status" id="pstatus">
     <div class="row"><b>✝ ${esc(P.name)}</b><span>Lv ${P.lv}</span><span><span class="gold">${P.gold} G</span><button class="bgmmini" data-bgm>${BGM.isOn()?'🔊':'🔇'}</button></span></div>
     ${bar(P.hp,P.maxHp,'hp','HP')}
