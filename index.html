@@ -836,13 +836,15 @@ const ALLIES={
             desc:'날갯짓으로 폭풍을 일으켜 5초 동안 주인공 치명타 확률 2배 · 전투에서 처음 쓰러진 동료를 HP 50%로 부활(1회) · 폭풍 중엔 깃털 칼날 공격'},
   mikael:  {star:5,name:'미카엘',        icon:'🛡️', role:'정화의 날개', kit:'purify',
             desc:'정화(걸려 있는 모든 디버프 제거 + 주인공 현재 HP의 절반만큼 방어막, 3턴마다) · 평소엔 날개 베기'},
+  vista5:  {star:5,name:'비스타',        icon:'🚂', role:'열차 소환', kit:'train',
+            desc:'3초마다 열차를 소환해 적을 관통(기본 공격의 2배 · 방어력 무시) · 열차 폭파로 적의 시야 차단(2턴간 적 공격 35% 빗나감) · 평소엔 군도 베기'},
   elise:   {star:5,name:'엘리스',        icon:'🍂', role:'정화의 바람', kit:'breeze', hpMul:2.5,
             desc:'정화의 바람(주인공·동료의 디버프 제거: 방어력 감소·지속 피해·봉인·회복 감소·불화·둔화·침묵) · 디버프가 없으면 3턴마다 가을바람의 응원(주인공·동료 HP 10% 회복 + 3턴간 주인공 공격력 1.2배) · 공격은 약하지만 체력이 다른 동료의 2.5배'},
   siren:   {star:5,name:'세이렌 사제',   icon:'💎', role:'보석의 빛', kit:'prism',
             desc:'보석처럼 반짝이는 광선 공격 · 적이 힘을 모으거나 3턴마다 프리즘 굴절(다음 적 공격 피해 절반, 절반은 적에게 반사)'}
 };
 /* ★5 티어 — 신화 제외 최대 전투력: 1티어 4000 · 2티어 3300 · 3티어 2700 */
-const TIER5={guseju:1,asiris:1,karma:1,pasri:1,danian:2,elia:2,kirie:2,gaia:2,elise:2,siren:3,mikael:3,sakura:3};
+const TIER5={guseju:1,asiris:1,karma:1,pasri:1,vista5:1,danian:2,elia:2,kirie:2,gaia:2,elise:2,siren:3,mikael:3,sakura:3};
 const TIER5_CP={1:4000,2:3300,3:2700};
 /* 신화: 최대 레벨에서 열림 · 능력치 2배 */
 const MYTH_COST={1:3000,2:5000,3:5000,4:10000,5:30000}, MYTH_STONE5=2;
@@ -857,6 +859,7 @@ const MYTH_SKILL={
   sakura:{name:'만개',desc:'부활 대기 7초 → 4초 · 벚꽃바람이 적의 치명타 확률을 75% 낮춤'},
   kirie: {name:'폭풍의 수호천사',desc:'부활을 두 번까지 · 폭풍 중 치명타 피해 2배'},
   mikael:{name:'대천사의 가호',desc:'방어막이 현재 HP 전부만큼 · 정화 주기 2턴'},
+  vista5:{name:'특급 열차',desc:'열차 관통 피해가 기본 공격의 2배 → 3배 · 시야 차단 3턴'},
   elise: {name:'만추의 축복',desc:'정화할 때도 주인공·동료 HP 10% 회복 · 응원 주기 3턴 → 2턴'},
   siren: {name:'천광의 프리즘',desc:'반사 피해 2배 · 광선이 방어 무시'}
 };
@@ -876,6 +879,7 @@ const ALLY_IMG={
   sakura:{src:'ally_sakura.jpg',pos:'50% 10%',face:'49% 11%',size:'450%'},
   kirie:{src:'ally_kirie.jpg',pos:'50% 18%',face:'50% 19%'},
   mikael:{src:'ally_mikael.jpg',pos:'45% 28%',face:'38% 33%',size:'240%'},
+  vista5:{src:'ally_vista5.jpg',pos:'55% 18%',face:'57% 27%',size:'400%'},
   elise:{src:'ally_elise.jpg',pos:'52% 62%',face:'52% 64%',size:'420%'},
   karma:{src:'ally_karma.jpg',pos:'42% 22%',face:'35% 24%'},
   gubeomju:{src:'ally_gubeomju.jpg',pos:'50% 26%',face:'48% 38%',size:'220%'}
@@ -2324,6 +2328,7 @@ function pvpEnemyActs(e){
       case 'twin':     dmg(6+lv*1.8,0.5,`${nm}의 쌍검 ①`);dmg(6+lv*1.8,0.5,`${nm}의 쌍검 ②`);break;
       case 'guard':    if(e.hp<e.maxHp*0.5&&Math.random()<0.3)heal(0.06);else dmg(9+lv*2.8,0.4,`${nm}의 방패 강타`);break;
       case 'chant':    if(e.hp<e.maxHp*0.7&&Math.random()<0.4)heal(0.12);else dmg(7+lv*2.4,0.5,`${nm}의 빛의 음표`);break;
+      case 'train':    if(Math.random()<0.4)dmg((14+lv*4.4)*(a.my?3:2),0,`${nm}의 열차 관통`);else dmg(14+lv*4.4,0.5,`${nm}의 군도 베기`);break;
       case 'breeze':   if(e.hp<e.maxHp*0.7&&Math.random()<0.45)heal(0.1);else dmg(6+lv*2.4,0.5,`${nm}의 낙엽 바람`);break;
       case 'purify':   if(e.hp<e.maxHp*0.5&&Math.random()<0.4)heal(0.12);else dmg(10+lv*3.6,0.4,`${nm}의 날개 베기`);break;
       case 'monk_holy':dmg(8+lv*2.8,0,`${nm}의 성수 투척`);break;
@@ -2834,13 +2839,13 @@ function synthAll(){
 }
 
 /* ===================== 전투 ===================== */
-function clearBattle(){forcedMv=null;if(B&&B.enemyT)clearInterval(B.enemyT);if(B&&B.allyT)clearInterval(B.allyT);document.body.classList.remove('pfrozen');if(B&&B.freezeT)clearInterval(B.freezeT);if(B&&B.sakuraT)clearInterval(B.sakuraT);document.body.classList.remove('battle');if(B&&B.waveT)clearInterval(B.waveT);if(B&&B.soulT)clearInterval(B.soulT);if(B&&B.drainT)clearInterval(B.drainT);if(B&&B.paraT)clearInterval(B.paraT);if(B&&B.zapT)clearInterval(B.zapT);if(B&&B.karmaT)clearInterval(B.karmaT);if(B&&B.isaT)clearInterval(B.isaT);B=null;}
+function clearBattle(){forcedMv=null;if(B&&B.enemyT)clearInterval(B.enemyT);if(B&&B.allyT)clearInterval(B.allyT);document.body.classList.remove('pfrozen');if(B&&B.freezeT)clearInterval(B.freezeT);if(B&&B.sakuraT)clearInterval(B.sakuraT);document.body.classList.remove('battle');if(B&&B.waveT)clearInterval(B.waveT);if(B&&B.soulT)clearInterval(B.soulT);if(B&&B.drainT)clearInterval(B.drainT);if(B&&B.paraT)clearInterval(B.paraT);if(B&&B.zapT)clearInterval(B.zapT);if(B&&B.karmaT)clearInterval(B.karmaT);if(B&&B.trainT)clearInterval(B.trainT);if(B&&B.isaT)clearInterval(B.isaT);B=null;}
 /* 반사·부적 등으로 적이 턴 밖에서 쓰러졌을 때 */
 function winNow(){
   if(!B||B.won)return;
   if((B.e.berserk&&!B.berserked)||(B.e.madness&&!B.maddened)||(B.e.awaken&&!B.awoke)||(B.e.twin&&!B.twinned)||(B.e.relay&&(B.relayStage||0)<2)){B.e.hp=Math.max(1,B.e.hp);renderBattle();return;}
   B.won=true;B.busy=true;if(B.enemyT)clearInterval(B.enemyT);if(B.allyT)clearInterval(B.allyT);if(B.freezeT)clearInterval(B.freezeT);document.body.classList.remove('pfrozen');if(B.sakuraT)clearInterval(B.sakuraT);if(B.paraT)clearInterval(B.paraT);if(B.waveT)clearInterval(B.waveT);if(B.soulT)clearInterval(B.soulT);if(B.drainT)clearInterval(B.drainT);
-  if(B.zapT)clearInterval(B.zapT);if(B.karmaT)clearInterval(B.karmaT);if(B.isaT)clearInterval(B.isaT);
+  if(B.zapT)clearInterval(B.zapT);if(B.karmaT)clearInterval(B.karmaT);if(B.trainT)clearInterval(B.trainT);if(B.isaT)clearInterval(B.isaT);
   renderBattle();setTimeout(victory,750);
 }
 /* 이사벨 부제: 5초마다 주인공 HP 40% 회복 */
@@ -2878,6 +2883,21 @@ function sakuraTick(){
   }
 }
 /* 카르마: 5초마다 무작위 부적 (주인공 치유 / 적 저주 / 적 불태움) */
+/* 비스타: 3초마다 열차 소환 — 관통(기본 공격 2배, 방어 무시) + 폭파로 시야 차단 */
+const TRAIN_MS=3000;
+const vistaBase=lv=>14+lv*4.4;
+function trainTick(){
+  if(!B||B.over||B.won||!$('#modal').classList.contains('hidden'))return;
+  const id='vista5',h=B.ahp[id],e=B.e;
+  if(!inParty(id)||(h&&h.hp<=0)||(B.stun[id]>0)||aFrozen()||e.hp<=0)return;
+  const lv=aData(id).lv,my=isMyth(id);
+  B.curAlly=id;B.am=allyMult(id);
+  addLog(`🚂 비스타 — 열차 소환!`);
+  allyHit(vistaBase(lv)*(my?3:2),`🚂 비스타의 열차 관통`,0);
+  const bl=my?3:2;if((B.blind||0)<bl){B.blind=bl;addLog(`💥 열차 폭파 — 적의 시야를 가렸다 (${bl}턴간 적 공격 35% 빗나감)`);}
+  if(e.hp<=0){winNow();return;}
+  renderBattle();
+}
 function karmaTick(){
   if(!B||B.over||B.won||!$('#modal').classList.contains('hidden'))return;
   const id='karma',h=B.ahp[id];
@@ -2941,6 +2961,7 @@ function startBattle(spec){
     }
     if(B)B.startAt=Date.now();
     if(B&&inParty('karma'))B.karmaT=setInterval(karmaTick,5000);
+    if(B&&inParty('vista5'))B.trainT=setInterval(trainTick,TRAIN_MS);
     if(B&&inParty('sakura')){B.sakuraT=setInterval(sakuraTick,1000);sakuraTick();}
     if(B)B.isaT=setInterval(isabelTick,ISABEL_TICK);
     if(B&&isBoss&&!t.pvp){B.tickMs=t.zap?3000:t.tick?t.tick:t.final?4500:type==='boss'?5000:6000;B.zapT=setInterval(bossTick,B.tickMs);}
@@ -3432,6 +3453,7 @@ function alliesAct(){
           }else addLog(`${nm}의 정화 — ${debuffs.join(', ')} 제거`);
         }else allyHit(10+lv*3.6,`${nm}의 날개 베기`,0.4);
         break;}
+      case 'train': allyHit(vistaBase(lv),`${nm}의 군도 베기`,0.5);break; // 비스타: 열차는 trainTick
       case 'breeze':{ // 엘리스: 디버프 제거 · 응원 서포트 (공격은 약함)
         if(B.eliseCD>0)B.eliseCD--;
         const db=[];
