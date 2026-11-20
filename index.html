@@ -1647,23 +1647,25 @@ function cloudSave(){
 const FB_CFG={apiKey:"AIzaSyAnBExW5ZvabDMlhR6rE29-x1usz5yegxc",authDomain:"blue-priests.firebaseapp.com",projectId:"blue-priests",
   storageBucket:"blue-priests.firebasestorage.app",messagingSenderId:"625148180828",appId:"1:625148180828:web:2d8adcd1e48619f4786999"};
 const FB_VER='10.12.2';
-let FB=null,fbAuthUid=null,fbPid=null,fbBinding=null,fbKey=null;
+let FB=null,fbAuthUid=null,fbPid=null,fbBinding=null,fbKey=null,fbErr='';
 const newUid=()=>'u'+Date.now().toString(36)+Math.random().toString(36).slice(2,8);
 const newKey=()=>{try{const a=new Uint8Array(16);crypto.getRandomValues(a);return Array.from(a,b=>b.toString(16).padStart(2,'0')).join('');}
   catch(e){return (Math.random().toString(36).slice(2)+Math.random().toString(36).slice(2)+Date.now().toString(36)).slice(0,32);}};
-function loadScript(src){return new Promise((res,rej)=>{const s=document.createElement('script');s.src=src;s.onload=res;s.onerror=rej;document.head.appendChild(s);});}
+function loadScript(src){return new Promise((res,rej)=>{const s=document.createElement('script');s.src=src;s.onload=res;s.onerror=()=>rej({code:'script-blocked'});document.head.appendChild(s);});}
 async function initFirebase(){
   try{
-    for(const m of ['app','auth','firestore'])
-      await withTimeout(loadScript(`https://www.gstatic.com/firebasejs/${FB_VER}/firebase-${m}-compat.js`),15000);
-    firebase.initializeApp(FB_CFG);
+    fbErr='';
+    if(!(window.firebase&&firebase.firestore))       // 다시 연결할 땐 이미 받은 스크립트 그대로 쓰기
+      for(const m of ['app','auth','firestore'])
+        await withTimeout(loadScript(`https://www.gstatic.com/firebasejs/${FB_VER}/firebase-${m}-compat.js`),15000);
+    if(!(firebase.apps&&firebase.apps.length))firebase.initializeApp(FB_CFG);
     const cred=await withTimeout(firebase.auth().signInAnonymously(),15000);
     fbAuthUid=cred.user.uid;
     FB=firebase.firestore();
     cloudState='ready';
     const local=P||load();
     if(local)await fbBind(local);
-  }catch(e){if(!FB)cloudState='off';}
+  }catch(e){if(!FB){cloudState='off';fbErr=(e&&(e.code||e.message))||'unknown';}}
   updateCloudNote();
   if(pendingDevice)takePendingDevice();
 }
@@ -2158,6 +2160,13 @@ async function renderFriends(msg,preList){
     bindFoot();window.scrollTo(0,0);return;
   }
   if(!DBX||!myId){
+    if(hasFirebaseHost()&&!FB&&cloudState==='off'){
+      renderFriendsCode(`⚠ 실시간 친구 서버에 연결하지 못해서 예전 코드 방식 화면이 보이고 있어요. 인터넷 연결을 확인하고 다시 연결해 보세요.
+        <button class="btn primary" id="fbretry" style="width:100%;margin-top:8px">🔄 다시 연결</button>
+        <div class="small" style="margin-top:4px;opacity:.7">원인: ${esc(fbErr==='timeout'?'응답 시간 초과':fbErr==='script-blocked'?'Firebase 스크립트를 받지 못함 (광고 차단·콘텐츠 차단 앱 확인)':fbErr||'알 수 없음')}</div>${msg?'<br>'+msg:''}`);
+      if($('#fbretry'))$('#fbretry').onclick=()=>{cloudState='checking';renderFriends();initFirebase();};
+      return;
+    }
     if(FB&&cloudState==='denied'&&!msg)msg='⚠ 이 기기는 아직 실시간 친구에 연결되지 않았어요. 쓰던 기기에서 친구 탭 맨 아래 <b>「📱 기기 연결」</b>을 눌러 받은 코드를, 이 기기 타이틀의 <b>「📱 다른 기기에서 이어하기」</b>에 넣으면 연결돼요.';
     renderFriendsCode(msg);return;}
   const back=footHTML()+tabBar();
