@@ -492,6 +492,7 @@ body.battle .cmds .btn{min-height:44px;padding:6px 10px}
 .synrow .synnm{flex:1;text-align:left}
 .synrow .aface,.synrow .aemo{flex:none}
 .synrow b{font-size:12px;color:#ffd27a;white-space:nowrap}
+.pres.on{color:#7ee2a0;font-weight:700}
 .fcode{width:100%;box-sizing:border-box;background:#080d1e;color:#cfe0ff;border:1px solid var(--line);border-radius:10px;padding:8px;font-size:11px;font-family:monospace;margin:6px 0 8px;resize:none;word-break:break-all}
 .frow.rk{flex-wrap:wrap}
 .frank{width:34px;text-align:center;font-weight:700;font-size:15px;flex:none}
@@ -2102,12 +2103,12 @@ function myPublic(){
   return {hero:String(P.name).slice(0,8),lv:P.lv,cp:teamCP(),area,stage:P.prog[area]||0,
     ended:!!P.ended,friends:(P.friends||[]).slice(0,100),
     team:{atk:P.atk,def:P.def,maxHp:P.maxHp,maxMp:P.maxMp,lv:P.lv,party:partyIds().map(id=>({id,lv:aData(id).lv,aw:P.awaken[id]||0,my:isMyth(id)?1:0,tr:trustLv(id)}))},
-    pvpW:(P.pvp&&P.pvp.w)||0,pvpL:(P.pvp&&P.pvp.l)||0,updatedAt:Date.now()};
+    pvpW:(P.pvp&&P.pvp.w)||0,pvpL:(P.pvp&&P.pvp.l)||0,updatedAt:Date.now(),seenAt:Date.now(),off:false};
 }
 function publishProfile(){
   if(!DBX||!myId||!P||canShare===false)return;
   if(FB&&P.uid!==myId)return;          // 다른 캐릭터로 바뀌는 중
-  const pub=myPublic(),sig=JSON.stringify({...pub,updatedAt:0});
+  const pub=myPublic(),sig=JSON.stringify({...pub,updatedAt:0,seenAt:0,off:0});
   if(sig===lastPub)return;
   lastPub=sig;pubDirty=true;
   if(pubBusy)return;
@@ -2122,6 +2123,29 @@ function publishProfile(){
     pubBusy=false;
   },FB?5000:1500);
 }
+/* 접속 상태: 게임을 열어 둔 동안 2분마다 seenAt만 살짝 올림 → 4분 안이면 「접속 중」, 앱을 떠나면 off 표시 */
+const BEAT_MS=2*60000,ONLINE_MS=4*60000;
+const lastSeenOf=x=>(x&&(x.seenAt||x.updatedAt))||0;
+const isOnline=(t,off)=>!off&&!!t&&Date.now()-t<ONLINE_MS;
+const presenceText=(t,off)=>!t?'접속 기록 없음':isOnline(t,off)?'🟢 접속 중':`마지막 접속 ${agoText(t)}`;
+const presenceHTML=x=>{const t=lastSeenOf(x),off=x.off?1:0;
+  return `<span class="pres ${isOnline(t,off)?'on':''}" data-sid="${esc(x.id||'')}" data-seen="${t}" data-off="${off}">${presenceText(t,off)}</span>`;};
+function refreshPresence(map){
+  document.querySelectorAll('.pres[data-seen]').forEach(el=>{
+    const x=map&&map[el.dataset.sid];
+    if(x&&lastSeenOf(x)>=(+el.dataset.seen||0)){el.dataset.seen=lastSeenOf(x);el.dataset.off=x.off?1:0;}
+    const t=+el.dataset.seen||0,off=el.dataset.off==='1';
+    el.textContent=presenceText(t,off);el.classList.toggle('on',isOnline(t,off));
+  });
+}
+setInterval(()=>refreshPresence(),30000);
+function heartbeat(){
+  if(!FB||DBX!==FB||!myId||!P||P.uid!==myId||canShare!==true)return;   // 프로필을 한 번 올린 뒤부터만
+  const off=document.visibilityState==='hidden';
+  try{FB.doc('players/'+myId).set({seenAt:Date.now(),off},{merge:true}).catch(()=>{});}catch(e){}
+}
+setInterval(()=>{if(document.visibilityState!=='hidden')heartbeat();},BEAT_MS);
+document.addEventListener('visibilitychange',heartbeat);   // 앱으로 돌아올 때(접속 중)·떠날 때(마지막 접속) 바로 기록
 const withTimeout=(p,ms=10000)=>Promise.race([p,new Promise((_,rej)=>setTimeout(()=>rej({code:'timeout'}),ms))]);
 
 let friendsUnsub=null;
@@ -2193,7 +2217,7 @@ async function renderFriends(msg,preList){
   const requests=list.filter(x=>x.id!==myId&&!mine.has(x.id)&&Array.isArray(x.friends)&&x.friends.includes(myId));
   const others=list.filter(x=>x.id!==myId&&!mine.has(x.id)&&!requests.includes(x));
   const medal=r=>r===1?'🥇':r===2?'🥈':r===3?'🥉':'#'+r;
-  const seen=x=>x.updatedAt?` · ${agoText(x.updatedAt)} 갱신`:'';
+  const seen=x=>lastSeenOf(x)?` · ${presenceHTML(x)}`:'';
   const rankRow=(x,i)=>{
     if(x.me)return `<div class="frow rk me"><div class="frank">${medal(i+1)}</div>
       <div style="flex:1;min-width:0"><b>${esc(P.name)}</b> <span class="tag t-ally">나</span>
@@ -2255,7 +2279,7 @@ async function renderFriends(msg,preList){
   };
   document.querySelectorAll('[data-finfo]').forEach(b=>b.onclick=()=>{
     const id=b.dataset.finfo,x=byId[id]||(P.fbook&&P.fbook[id]?{...P.fbook[id],id}:{id,hero:'모험가'});
-    showFriendDetail(x,{rec:vsRec(id),duel:x.team&&!x.missing?()=>duelF(id):null,del:()=>{
+    showFriendDetail(x,{live:true,rec:vsRec(id),duel:x.team&&!x.missing?()=>duelF(id):null,del:()=>{
       P.friends=P.friends.filter(v=>v!==id);if(P.fbook)delete P.fbook[id];
       save();renderFriends(`${esc(x.hero||'모험가')}님을 친구 목록에서 삭제했어요.`,list);}});
   });
@@ -2266,8 +2290,9 @@ async function renderFriends(msg,preList){
     const sig=friendsSig(list);
     try{
       friendsUnsub=FB.collection('players').orderBy('cp','desc').limit(200).onSnapshot(q=>{
-        if(!$('#fcodein')||$('#fcodein').value){return;}       // 입력 중이면 다시 그리지 않음
         const l=q.docs.filter(d=>d.exists).map(d=>({id:d.id,...d.data()}));
+        const m={};l.forEach(x=>m[x.id]=x);refreshPresence(m);   // 접속 상태는 화면을 다시 그리지 않고 글자만 바꿈
+        if(!$('#fcodein')||$('#fcodein').value){return;}       // 입력 중이면 다시 그리지 않음
         if(friendsSig(l)!==sig)renderFriends(msg,l);
       },()=>{});
     }catch(e){}
@@ -2391,7 +2416,7 @@ function showFriendDetail(x,o){
     ${t.atk?`<div class="small">주인공 · 공격 ${pvpCl(t.atk,1,9999)} · 방어 ${pvpCl(t.def,0,9999)} · HP ${fmt(pvpCl(t.maxHp,1,99999))}</div>`:''}
     <div class="rp-h">🤝 출전 동료</div>
     ${party.length?`<div class="pvpteam">${teamIconsHTML(party)}</div>`:'<div class="desc">팀 정보가 아직 없어요.</div>'}
-    <div class="small" style="margin-top:8px">나와의 배틀 ${o.rec.w||0}승 ${o.rec.l||0}패${x.updatedAt?` · ${agoText(x.updatedAt)} 갱신`:''}</div>
+    <div class="small" style="margin-top:8px">나와의 배틀 ${o.rec.w||0}승 ${o.rec.l||0}패${o.live?` · ${presenceHTML(x)}`:x.updatedAt?` · ${agoText(x.updatedAt)} 갱신`:''}</div>
     <div class="grid" style="margin-top:12px">${o.duel?'<button class="btn danger" id="fdduel">⚔ 배틀</button>':'<button class="btn" disabled>⚔ 배틀<small>팀 정보 없음</small></button>'}
       <button class="btn" id="fddel">친구 삭제</button></div></div>`,null,true);
   $('#mbtn').textContent='← 뒤로';
