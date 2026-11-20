@@ -522,7 +522,7 @@ body.battle .cmds .btn{min-height:44px;padding:6px 10px}
 .tab:active{transform:scale(.95)}
 #app:has(.tabbar) .sheet{bottom:76px}
 /* 탭별 화면 테마: 배경 빛·패널·제목이 탭 색을 은은하게 띰 (탭바가 있는 화면에서만) */
-body[data-tab=shop]{--tc:#e0b56a}body[data-tab=ally]{--tc:#e59ab4}body[data-tab=adv]{--tc:#7fb0f0}body[data-tab=friend]{--tc:#6fd0c0}
+body[data-theme=shop]{--tc:#e0b56a}body[data-theme=ally]{--tc:#e59ab4}body[data-theme=adv]{--tc:#7fb0f0}body[data-theme=friend]{--tc:#6fd0c0}
 body:has(.tabbar){--panel:color-mix(in srgb,var(--tc) 14%,#0f162c);
   background:radial-gradient(ellipse at 50% -10%,color-mix(in srgb,var(--tc) 42%,#0b1020) 0%,var(--bg) 65%) fixed;background-color:var(--bg)}
 body:has(.tabbar) .ptitle{color:color-mix(in srgb,var(--tc) 60%,#ffffff)}
@@ -2291,8 +2291,8 @@ function renderHub(msg){
 /* 하단 탭: 상점 · 동료 · 모험 · 친구 */
 let hubTab='adv';
 const TABS=[['shop','🕯','상점'],['ally','🤝','동료'],['adv','🗺','모험'],['friend','👥','친구']];
-const tabBar=()=>{document.body.dataset.tab=hubTab;return `<nav class="tabbar">${TABS.map(([k,ic,l])=>`<button class="tab t-${k} ${hubTab===k?'on':''}" data-tab="${k}"><span class="ti">${ic}</span>${l}</button>`).join('')}</nav>`;};
-document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('[data-tab]');if(b){e.preventDefault();hubTab=b.dataset.tab;renderHub();window.scrollTo(0,0);}});
+const tabBar=()=>{document.body.dataset.theme=hubTab;return `<nav class="tabbar">${TABS.map(([k,ic,l])=>`<button class="tab t-${k} ${hubTab===k?'on':''}" data-tab="${k}"><span class="ti">${ic}</span>${l}</button>`).join('')}</nav>`;};
+document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('.tabbar [data-tab]');if(b){e.preventDefault();hubTab=b.dataset.tab;renderHub();window.scrollTo(0,0);}});
 const footHTML=()=>`<div class="foot"><button class="link" id="savecode">💾 저장 코드 복사</button> · <button class="link" id="totitle">타이틀로</button>
   <div class="small" style="margin-top:2px">${cloudState==='on'?'☁ 클라우드 자동 저장 중':'이 브라우저에 자동 저장 중 · 저장 코드로 백업하세요'}</div></div>`;
 function bindFoot(){
