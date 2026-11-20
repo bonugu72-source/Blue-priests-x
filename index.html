@@ -237,6 +237,9 @@ body.title-mode{overflow:hidden}
 .pf-naberius.p2{box-shadow:0 0 34px rgba(255,30,50,.85),0 0 100px rgba(255,0,30,.45)}
 .pf-naberius.p2 .pglow{background:radial-gradient(ellipse at 50% 100%,rgba(255,50,30,.7),transparent 70%);animation-duration:1.2s}
 .pf-naberius.p2 img{filter:saturate(1.3) contrast(1.1)}
+.pf-mumyeong{box-shadow:0 0 30px rgba(160,90,255,.7),0 0 90px rgba(110,40,220,.4)}
+.pf-mumyeong .pglow{background:radial-gradient(ellipse at 50% 100%,rgba(150,80,255,.5),transparent 65%);box-shadow:inset 0 0 50px rgba(40,0,80,.7);animation:breathe 2.4s ease-in-out infinite}
+.pf-mumyeong .pembers i{background:#b07cff;box-shadow:0 0 6px #8a4dff,0 0 12px #6a2dff}
 .pembers{position:absolute;inset:0;pointer-events:none;overflow:hidden}
 .pembers i{position:absolute;bottom:-6px;width:4px;height:4px;border-radius:50%;background:#ff5a3a;box-shadow:0 0 6px #ff3a1a,0 0 12px #ff2a0a;animation:ember 3s linear infinite}
 .pf-naberius.p2 .pembers i{width:5px;height:5px}
@@ -907,6 +910,7 @@ const RELICS={
   seal_bune:   {name:'부네의 인장',             icon:'🟣', desc:'공격력 +8',                     apply:p=>{p.atk+=8;}},
   seal_andras: {name:'안드라스의 인장',         icon:'⚪', desc:'방어력 +6 · 최대 HP +20',        apply:p=>{p.def+=6;p.maxHp+=20;p.hp+=20;}},
   seal_furfur: {name:'푸르푸르의 인장',         icon:'🔵', desc:'최대 HP +40 · 공격력 +4',        apply:p=>{p.maxHp+=40;p.hp+=40;p.atk+=4;}},
+  seal_mumyeong:{name:'무명의 검은 수정',  icon:'🔮', desc:'공격 +28 · 방어 +24 · 최대 HP +220',apply:p=>{p.atk+=28;p.def+=24;p.maxHp+=220;p.hp+=220;}},
   seal_naberius3:{name:'각성한 나베리우스의 십자가',  icon:'✝️', desc:'공격 +26 · 방어 +22 · 최대 HP +200',apply:p=>{p.atk+=26;p.def+=22;p.maxHp+=200;p.hp+=200;}},
   seal_twins:{name:'쌍둥이의 반지',  icon:'💍', desc:'공격 +24 · 방어 +20 · 최대 HP +180',apply:p=>{p.atk+=24;p.def+=20;p.maxHp+=180;p.hp+=180;}},
   seal_agares:{name:'아가레스의 인장',  icon:'⚔️', desc:'공격 +22 · 방어 +18 · 최대 HP +160',apply:p=>{p.atk+=22;p.def+=18;p.maxHp+=160;p.hp+=160;}},
@@ -1231,6 +1235,27 @@ const AREAS=[
           line:'"충분히 쉬었다. 이제… 너희의 생명을 받아 가마."\n\n쓰러진 흑기사들의 핏빛 불길이 나베리우스에게 빨려 들어간다. 찢긴 상처가 순식간에 아물었다.\n\n— 나베리우스 귀환: 체력 30,000 · 흡혈 · 생명력 흡수 —'}},
       pre:'무너진 저택 앞, 핏빛 불길이 치솟는다.\n찢기고 피로 물든 정장 차림의 백발 남자가 낡은 나무 십자가를 끌며 걸어 나온다.\n그 뒤로 붉은 눈의 흑기사들이 대열을 이룬다.\n\n"이번에는 봐주지 않는다. 19군단의 주인이 직접 상대해 주마."',
       moves:[{t:'multi',n:'참격 난무',hits:12,m:0.32},{t:'curse',n:'쉰 목소리의 저주'},{t:'silence',n:'현혹의 언변'},{t:'sweep',n:'19군단의 참격',m:0.3},{t:'strong',n:'붉은 화염 참격'},{t:'multi',n:'흑기사 군단의 돌격',hits:6,m:0.65},{t:'charge',n:'후작의 위광'}]}
+  },
+  { name:'고대 원단수', country:'이름 없는 악마가 잠든 태고의 숲', flag:'🌳', rec:54, recEnd:58, glow:'#9b6bff',
+    desc:'세상이 생기기 전부터 서 있던 거대한 나무들의 숲. 그 가장 깊은 곳에 이름조차 잊힌 고대 악마가 잠들어 있다.',
+    intro:'이차원의 핏빛 불길이 꺼지자, 발밑에서 오래된 뿌리들이 솟아올랐다.\n\n하늘을 가릴 만큼 거대한 나무들, 이끼에 뒤덮인 채 숨 쉬는 듯한 숲. 고대 원단수였다.\n\n숲 가장 깊은 곳, 한쪽은 천사의 날개를 달고 한쪽 얼굴은 악마로 뒤틀린 사제복의 남자가 검은 수정 지팡이를 짚고 서 있었다.\n\n"…이름을 묻지 마라. 그런 것은 오래전에 버렸다."',
+    outro:'검은 수정이 산산이 부서지고, 숲을 휘감던 보랏빛 안개가 걷혔다.\n\n이름 없는 악마는 마지막으로 하늘을 올려다보며 희미하게 웃었다.\n\n"…언젠가 누군가 내 이름을 불러 주기를 바랐는지도 모르지."\n\n— 고대 원단수 해방 —',
+    enemies:[
+      {name:'이끼 덮인 수호목',   icon:'🌲', hp:780, atk:118, def:58, xp:310, gold:155, demon:true, moves:[{t:'strong',n:'뿌리 내려치기'},{t:'atk',n:'가지 휘두르기'},{t:'atk',n:'가지 휘두르기'}]},
+      {name:'뒤틀린 덩굴',        icon:'🌿', hp:720, atk:122, def:52, xp:312, gold:156, demon:true, moves:[{t:'multi',n:'덩굴 채찍',hits:3,m:0.45},{t:'curse',n:'옭아매는 덩굴'},{t:'atk',n:'가시 찌르기'}]},
+      {name:'원단수의 늑대',      icon:'🐺', hp:700, atk:126, def:50, xp:311, gold:156, demon:true, moves:[{t:'atk',n:'송곳니'},{t:'multi',n:'연속 물어뜯기',hits:2,m:0.65},{t:'dot',n:'찢긴 상처',dn:'출혈'}]},
+      {name:'보랏빛 안개 정령',   icon:'🌫️', hp:680, atk:124, def:48, xp:309, gold:155, demon:true, moves:[{t:'atk',n:'안개 손길'},{t:'drain',n:'생기 흡수'},{t:'sweep',n:'보랏빛 안개',m:0.15}]},
+      {name:'잊힌 숲의 수도승',   icon:'📿', hp:760, atk:120, def:56, xp:313, gold:157, demon:true, moves:[{t:'atk',n:'지팡이 일격'},{t:'curse',n:'잊힌 기도'},{t:'strong',n:'고대 주문'}]}
+    ],
+    elite:{name:'천년 묵은 수호목', icon:'🌳', hp:12000, atk:160, def:52, xp:1750, gold:1260, demon:true,
+      moves:[{t:'strong',n:'거목의 일격'},{t:'multi',n:'뿌리 폭풍',hits:3,m:0.55},{t:'curse',n:'숲의 저주'},{t:'charge',n:'대지의 분노'}]},
+    mid:{name:'스톨라스', art:'stolas', title:'솔로몬 72악마 · 제36영 · 왕자 · 26군단', hp:27000, atk:166, def:50, xp:6800, gold:5200, demon:true,
+      pre:'왕관을 쓴 거대한 올빼미가 고목 위에서 내려다본다. 노란 눈이 어둠 속에서 빛난다.\n\n"약초와 돌의 비밀을 아는 것은 나다. 너희는 이 숲의 거름이 될 뿐."',
+      moves:[{t:'atk',n:'발톱 할퀴기'},{t:'multi',n:'깃털 칼날',hits:4,m:0.35},{t:'curse',n:'독초의 저주'},{t:'sweep',n:'날개 돌풍',m:0.17},{t:'charge',n:'26군단의 밤'}]},
+    boss:{name:'무명', art:'mumyeong', title:'이름 없는 고대 악마', hp:80000, exactHp:true, atk:200, def:62, xp:36000, gold:50000, goldFirst:0, goldRepeat:50000, stoneFirst:3, demon:true, drop:'seal_mumyeong',
+      reflectHero:0.5, noBleed:true, critSlash:0.5,
+      pre:'검은 수정 지팡이 끝에서 보랏빛 안개가 피어오른다.\n찢긴 천사의 날개와 뒤틀린 악마의 얼굴을 한 사제가 천천히 고개를 든다.\n\n"너의 칼끝은 그대로 너에게 돌아간다. 피는… 나를 적시지 못한다."',
+      moves:[{t:'atk',n:'수정 지팡이 일격'},{t:'strong',n:'고대의 저주탄'},{t:'multi',n:'검은 덩굴 채찍',hits:3,m:0.45},{t:'curse',n:'이름 없는 저주'},{t:'sweep',n:'보랏빛 장막',m:0.18},{t:'atk',n:'수정 지팡이 일격'},{t:'charge',n:'원단수의 심판'}]}
   }
 
 ];
@@ -1243,7 +1268,7 @@ const stageRec=(a,s)=>Math.round(AREAS[a].rec+(s-1)*(AREAS[a].recEnd-AREAS[a].re
 const RT={atkCd:1500,defCd:400,itemCd:1500,fleeCd:1000,allyMs:1500,bossMs:1500,midMs:1600,normalMs:1800};
 const DEF_FLOOR=0.3; // 방어력이 아무리 높아도 적 공격의 30%는 들어감
 const ENEMY_MULT=1.3, LATE_BOSS_MULT=1.1; // 적 공격력·체력 1.3배 (나베리우스·보티스는 1.1배)
-const NORMAL_HP=[2.4,4,4.5,5,5.5,6,6.5,7,7.5,8,8.5,9,9.5,10], NORMAL_REWARD=1.5; // 일반 적이 몇 턴은 버티며 공격하도록
+const NORMAL_HP=[2.4,4,4.5,5,5.5,6,6.5,7,7.5,8,8.5,9,9.5,10,10.5], NORMAL_REWARD=1.5; // 일반 적이 몇 턴은 버티며 공격하도록
 function scaleBase(base,a,s){
   const f=1+0.06*(s-1);
   return {...base,hp:Math.round(base.hp*f*NORMAL_HP[a]),atk:Math.round(base.atk*f),def:Math.round(base.def*(1+0.04*(s-1))),
@@ -1411,6 +1436,12 @@ const ART={
     body:`${wing('M96,108 C76,86 46,72 16,76 L34,88 L14,98 L38,102 L22,116 L48,114 L40,130 L66,118 C78,114 88,112 96,118 Z',96,108)}
       <path d="M82,176 C76,150 80,124 92,110 C88,96 92,82 104,78 C116,76 124,84 124,94 L140,98 L124,104 C122,112 116,118 110,122 C120,136 122,158 116,176 L108,190 L104,176 L96,176 L92,190 Z"/>`,
     eyes:`<circle cx="112" cy="90" r="2.6"/>`},
+  stolas:{c:'#8fd09a',eye:'#ffcc33',latin:'STOLAS · SPIRITVS XXXVI · PRINCEPS · XXVI LEGIONES · ',
+    body:`${wing('M92,112 C70,84 40,74 14,84 L32,94 L12,104 L38,106 L22,120 L50,116 L44,132 L68,120 C78,116 86,114 92,120 Z',92,112)}
+      <path d="M70,182 C62,150 66,118 82,102 C76,90 82,76 100,74 C118,76 124,90 118,102 C134,118 138,150 130,182 L118,192 L112,182 L88,182 L82,192 Z"/>
+      <path d="M84,76 L80,58 L90,68 L95,54 L100,66 L105,54 L110,68 L120,58 L116,76 Z"/>
+      <path d="M84,82 L74,70 L90,78 Z M116,82 L126,70 L110,78 Z"/>`,
+    eyes:`<circle cx="92" cy="90" r="4.2"/><circle cx="108" cy="90" r="4.2"/>`},
   gamigin:{c:'#ff5a5a',eye:'#ffe0a0',latin:'GAMIGIN · SPIRITVS IV · MARCHIO · XXX LEGIONES · ',
     body:`<path d="M46,128 C46,112 56,102 72,100 L118,100 C126,86 132,72 140,62 C146,54 156,52 162,58 L170,70 C172,76 168,80 162,80 L156,80 C152,92 148,108 146,124 C146,140 138,148 128,150 L124,190 L114,190 L114,152 L80,152 L80,190 L70,190 L68,150 C56,146 46,140 46,128 Z"/>
       <path d="M140,62 L134,44 L146,56 Z M150,56 L150,38 L158,54 Z"/>
@@ -1460,6 +1491,7 @@ const PORTRAIT={
   naberius:{img:'naberius.jpg',cls:'pf-naberius',pos:'50% 24%'},
   naberius2:{img:'naberius.jpg',cls:'pf-naberius p2',pos:'50% 24%'},
   naberius3:{img:'naberius3.jpg',cls:'pf-naberius p2',pos:'50% 30%'},
+  mumyeong:{img:'mumyeong.jpg',cls:'pf-mumyeong',pos:'55% 16%'},
   darklord:{img:'naberius3.jpg',cls:'pf-naberius',pos:'100% 50%',zoom:2.6},
   botis:{img:'botis.jpg',cls:'pf-botis',pos:'50% 20%'},
   laia:{img:'twins.jpg',cls:'pf-laia',pos:'74% 46%',zoom:2.2},
@@ -1478,7 +1510,7 @@ const PORTRAIT={
 function portraitHTML(key,size){
   const p=PORTRAIT[key];
   const bolts=key==='furfur'?`<svg class="pbolts" viewBox="0 0 100 140" preserveAspectRatio="none"><path class="bolt" d="M7,0 L3,18 L9,17 L2,42"/><path class="bolt b2" d="M95,58 L99,76 L93,77 L99,100"/><path class="bolt b3" d="M90,0 L86,12 L92,12 L87,26"/></svg><div class="prain"></div>`:'';
-  const embers=(key.startsWith('naberius')||key==='darklord'||key.startsWith('amon')||key.startsWith('valefor')||key==='gamigin'||key==='barbatos'||key==='terazio'||key.startsWith('agares')||key==='laia')?`<div class="pembers">${Array.from({length:14},(_,i)=>`<i style="left:${(i*37)%100}%;animation-delay:${-(i*0.43).toFixed(2)}s;animation-duration:${(2.6+(i%5)*0.5).toFixed(1)}s"></i>`).join('')}</div>`:'';
+  const embers=(key.startsWith('naberius')||key==='darklord'||key==='mumyeong'||key.startsWith('amon')||key.startsWith('valefor')||key==='gamigin'||key==='barbatos'||key==='terazio'||key.startsWith('agares')||key==='laia')?`<div class="pembers">${Array.from({length:14},(_,i)=>`<i style="left:${(i*37)%100}%;animation-delay:${-(i*0.43).toFixed(2)}s;animation-duration:${(2.6+(i%5)*0.5).toFixed(1)}s"></i>`).join('')}</div>`:'';
   return `<div class="portrait ${p.cls} ${size||''}"><img src="${p.img}" alt="" style="object-position:${p.pos}${p.zoom?`;transform:scale(${p.zoom});transform-origin:${p.pos}`:''}">${bolts}${embers}<div class="pflash"></div><div class="pglow"></div></div>`;
 }
 let svgSeq=0;
@@ -3120,6 +3152,9 @@ function renderBattle(){
   if(B.reflect)passive.push('↩ 뒤집힌 시간: 준 피해의 50% 반사');
   if(e.bleedOnHit)passive.push('🩸 공격 시 출혈');
   if(e.burnHit)passive.push('🔥 공격 시 화상');
+  if(e.reflectHero)passive.push(`🔮 주인공 공격 ${Math.round(e.reflectHero*100)}% 반사`);
+  if(e.noBleed)passive.push('🩸 출혈 면역');
+  if(e.critSlash)passive.push('💥 공격마다 치명타 참격');
   if(e.relay)passive.push((B.relayStage||0)===0?`🩸 HP ${fmt(e.relay.at)} 이하 어둠의 군주 교대`:B.relayStage===1?'🩸 어둠의 군주를 쓰러뜨리면 나베리우스 귀환':'🩸 흡혈 50% · 5초마다 생명력 흡수');
   if(e.twin)passive.push(B.twinned?'🧊 7초마다 빙결 · 얼어붙은 숨결 · ❄ 절대 영도(방어 필수)':`☯ HP ${fmt(e.twin.at)} 이하 쌍둥이 교대`);
   if(e.critAll)passive.push(`💥 모든 공격 치명타 ×${e.critAll*(B.awoke&&e.awaken?e.awaken.critMult:1)}`);
@@ -3207,6 +3242,7 @@ function hitEnemy(mult,label){
   addLog(`${label}! ${e.name}에게 ${d} 피해${crit?' (치명타!)':''}`);
   queueFx('enemy',(crit?'💥':'')+d,crit?'crit':'dmg');
   if(B.reflect){const r=Math.round(d*0.5);P.hp=Math.max(0,P.hp-r);addLog(`↩ 뒤집힌 시간 — 주인공에게 ${r} 반사`);queueFx('player','↩-'+r,'pdmg');}
+  else if(e.reflectHero&&d>0){const r=Math.max(1,Math.round(d*e.reflectHero));P.hp=Math.max(0,P.hp-r);addLog(`🔮 ${e.name}의 반사 — 주인공에게 ${r} 되돌아왔다`);queueFx('player','🔮-'+r,'pdmg');}
 }
 function allyHit(base,label,defFactor,fixed){
   const e=B.e;
@@ -3368,7 +3404,8 @@ function alliesAct(){
         const left=Math.ceil((10000-(Date.now()-(B.startAt||Date.now())))/1000);
         if(left>0){addLog(`${nm} — 등불에 힘을 모으는 중… (${left}초 남음)`);break;}
         const d=allyHit(20+lv*6,`${nm}의 등불 — 고정 피해`,0,true);
-        if(d&&isMyth(id)&&e.hp>0){B.ebleed={dmg:Math.max(1,Math.round(d*0.3)),turns:3};addLog(`🩸 피의 등불 — ${e.name} 출혈 (3턴)`);}
+        if(d&&isMyth(id)&&e.hp>0&&e.noBleed)addLog(`🩸 ${e.name}에게는 출혈이 통하지 않는다`);
+        else if(d&&isMyth(id)&&e.hp>0){B.ebleed={dmg:Math.max(1,Math.round(d*0.3)),turns:3};addLog(`🩸 피의 등불 — ${e.name} 출혈 (3턴)`);}
         break;}
       case 'weakspot':{ // 가이아 수도사: 약점 → 공격력 3배 고정 피해
         const base=12+lv*4;
@@ -3700,6 +3737,7 @@ function enemyTurn(){
   if(e.slashes&&mv.t!=='sealed'&&P.hp>0){
     for(let i=0;i<e.slashes;i++)hitPlayer(0.35,`🗡 추격 참격 ${i+1}`);
   }
+  if(e.critSlash&&mv.t!=='sealed'&&mv.t!=='charge'&&P.hp>0){const f=e.fixedDmg;e.fixedDmg=true;hitPlayer(e.critSlash,`💥 ${e.name}의 참격 — 치명타`);e.fixedDmg=f;} // 공격력 절반의 치명타 (방어력 무시)
   B.ward=false;
   if(e.burnBleed&&P.hp>0&&e.hp>0){ // 테라지오: 처음부터 끝까지 화상 + 출혈
     const bd=Math.max(3,Math.round(e.atk*0.075)),bl=Math.max(3,Math.round(e.atk*0.075));
