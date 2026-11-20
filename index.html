@@ -312,6 +312,12 @@ body.pfrozen #cmds .btn{filter:saturate(.2) brightness(1.2);background:linear-gr
 
 .codebox{width:100%;height:96px;border-radius:10px;border:1px solid var(--line);background:#070b18;color:#cfe0ff;font-size:11px;padding:8px;font-family:monospace;word-break:break-all;resize:none;user-select:text;-webkit-user-select:text}
 
+.presets{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:8px 0 4px}
+.preset{border:1px solid rgba(140,170,255,.25);border-radius:12px;padding:8px;background:rgba(20,30,60,.45);display:flex;flex-direction:column;gap:6px}
+.preset.on{border-color:var(--gold);box-shadow:0 0 0 1px rgba(255,210,110,.35) inset}
+.preset .ptop{font-size:13px}.preset .pmem{display:flex;flex-direction:column;gap:3px;min-height:54px;font-size:12px}
+.preset .pm{display:flex;align-items:center;gap:5px}.preset .pm .aface,.preset .pm .aemo{width:20px;height:20px;min-width:20px;font-size:13px;display:inline-flex;align-items:center;justify-content:center;border-radius:50%}
+.preset .pbtns{display:flex;flex-direction:column;gap:4px}.preset .pbtns .btn{padding:6px 4px;font-size:12px;min-height:0}
 .teamcp{font-size:14px;color:#e8d7a0;text-align:center;padding:4px 0}.teamcp b{font-size:20px;color:var(--gold);margin:0 4px}
 .cpbreak{text-align:center;line-height:1.6}
 .frow{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:10px;background:#0c1329;border:1px solid transparent}
@@ -2389,6 +2395,28 @@ function bindFoot(){
   if($('#savecode'))$('#savecode').onclick=showSaveCode;
 }
 /* 출전 동료 3칸: 아이콘 + 이름, 빈 칸은 '비어있음' */
+/* 출전 파티 저장 (파티 1 · 파티 2) */
+const PRESET_N=2;
+function presetHTML(){
+  P.presets=Array.isArray(P.presets)?P.presets:[];
+  return `<div class="presets">${Array.from({length:PRESET_N},(_,i)=>{
+    const pr=(P.presets[i]||[]).filter(owned),cur=pr.length&&pr.length===P.active.length&&pr.every((x,k)=>x===P.active[k]);
+    return `<div class="preset ${cur?'on':''}"><div class="ptop"><b>파티 ${i+1}</b>${cur?' <span class="small">· 편성 중</span>':''}</div>
+      <div class="pmem">${pr.length?pr.map(id=>`<span class="pm">${allyFace(id,'sm')}${ALLIES[id].name}</span>`).join(''):'<span class="small">저장된 파티 없음</span>'}</div>
+      <div class="pbtns"><button class="btn" data-pload="${i}" ${pr.length&&!cur?'':'disabled'}>불러오기</button><button class="btn" data-psave="${i}" ${P.active.length?'':'disabled'}>현재 파티 저장</button></div></div>`;}).join('')}</div>`;
+}
+function presetLoad(i){
+  const pr=((P.presets||[])[i]||[]).filter(owned).slice(0,MAX_ACTIVE);
+  if(!pr.length)return;
+  P.active=pr;save();renderAllies(`📋 파티 ${i+1}을(를) 불러왔다 — ${pr.map(id=>ALLIES[id].name).join(' · ')}`);
+}
+function presetSave(i){
+  if(!P.active.length)return;
+  P.presets=Array.isArray(P.presets)?P.presets:[];P.presets[i]=P.active.slice();save();
+  renderAllies(`💾 현재 출전 동료를 파티 ${i+1}에 저장했다`);
+}
+document.addEventListener('click',e=>{const t=e.target.closest&&e.target.closest('[data-pload],[data-psave]');if(!t||t.disabled)return;
+  if(t.dataset.pload!=null)presetLoad(+t.dataset.pload);else presetSave(+t.dataset.psave);});
 function sortieSlotsHTML(inMgmt){
   const slot=i=>{
     const id=P.active[i];
@@ -2568,6 +2596,7 @@ function renderAllies(msg){
     ${msg?`<div class="notice">${msg}</div>`:''}
     <div class="panel"><div class="ptitle">⚔ 출전 동료 <span class="small">${P.active.length}/${MAX_ACTIVE}</span></div>
       ${sortieSlotsHTML(true)}
+      ${presetHTML()}
       <div class="teamcp">⚔ 팀 전투력 <b>${fmt(teamCP())}</b></div>
       <div class="small cpbreak">주인공 ${fmt(heroCP())}${partyIds().map(id=>` · ${ALLIES[id].name} ${fmt(allyCP(id))}`).join('')}</div></div>
     <div class="panel"><div class="ptitle">🕊️ 고정 조력자</div>${allyCard(FIXED)}</div>
