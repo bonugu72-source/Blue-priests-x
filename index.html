@@ -2915,7 +2915,7 @@ function allyCard(id){
   if(!isFixed)btns.push(`<button class="btn ${on?'primary':''}" data-sortie="${id}">${on?'출전 중':'대기'}</button>`);
   btns.push(d.lv>=cap?`<button class="btn" disabled>최대 레벨</button>`
     :`<button class="btn ${P.gold>=aCost(id)?'primary':''}" data-alv="${id}" ${P.gold<aCost(id)?'disabled':''}>레벨업 ${aCost(id)} G</button>`);
-  if(needSyn)btns.push(`<button class="btn ${cnt>=needSyn?'danger':''}" data-syn="${id}" ${cnt<needSyn?'disabled':''}>합성 ${cnt}/${needSyn}</button>`);
+  if(needSyn){const sp=synSpare(id);btns.push(`<button class="btn ${sp>=needSyn?'danger':''}" data-syn="${id}" ${sp<needSyn?'disabled':''}>합성 ${sp}/${needSyn}<small>1장은 보존</small></button>`);}
   const my=isMyth(id),mc=MYTH_COST[al.star];
   if(mc&&d.lv>=cap&&!my){
     const st=al.star>=5?MYTH_STONE5:0,ok=P.gold>=mc&&P.items.stone>=st;
@@ -3106,7 +3106,7 @@ function renderShop(msg){
     </div>
     <div class="panel"><div class="ptitle">✝ 동료 소환</div>
       <div class="desc">${STAR_RATE.map(([st,r])=>'★'+st+' '+(Math.round(r*10000)/100)+'%').join(' · ')}<br>
-      합성: 같은 캐릭터 ★1×${SYN_NEED[1]} → ★2 · ★2×${SYN_NEED[2]} → ★3 · ★3×${SYN_NEED[3]} → ★4 · ★4×${SYN_NEED[4]} → ★5 (무작위)</div>
+      합성: 같은 캐릭터 ★1×${SYN_NEED[1]} → ★2 · ★2×${SYN_NEED[2]} → ★3 · ★3×${SYN_NEED[3]} → ★4 · ★4×${SYN_NEED[4]} → ★5 (무작위 · 원본 1장은 보존)</div>
       <div class="grid">
         <button class="btn primary" id="sumT1" ${P.tickets<1?'disabled':''}>🎫 소환권 1회<small>보유 ${P.tickets}장</small></button>
         <button class="btn primary" id="sumT10" ${P.tickets<10?'disabled':''}>🎫 소환권 10회<small>10장 사용</small></button>
@@ -3179,9 +3179,11 @@ function summon(n,useTicket){
   const top=res.reduce((a,b)=>ALLIES[b.id].star>ALLIES[a.id].star?b:a);
   summonFx(ALLIES[top.id].star,()=>showStory(revealHTML(res,n===1?'소환 결과':n+'회 소환 결과'+(res.some(r=>r.gift)?' + 🎁 ★4 확정':'')),()=>renderShop(`${n}회 소환 완료 · 최고 등급 ${'★'.repeat(ALLIES[top.id].star)} ${ALLIES[top.id].name}`),true));
 }
+/* 합성 재료로 쓸 수 있는 장수: 보유 카드 중 1장은 항상 남김 */
+function synSpare(id){return Math.max(0,(P.roster[id]||0)-1);}
 function synthesize(id){
   const al=ALLIES[id],need=SYN_NEED[al.star];
-  if(!need||(P.roster[id]||0)<need)return;
+  if(!need||synSpare(id)<need)return;
   P.roster[id]-=need;
   if(P.roster[id]<=0){delete P.roster[id];P.active=P.active.filter(x=>x!==id);}
   const nid=pick(allyIds(al.star+1)),isNew=!owned(nid);
@@ -3191,8 +3193,8 @@ function synthesize(id){
 
 /* 일괄 합성: 지금 재료가 모인 모든 캐릭터를 한 번에 합성 */
 function synthPlan(){
-  return Object.keys(P.roster).filter(id=>SYN_NEED[ALLIES[id].star]&&(P.roster[id]||0)>=SYN_NEED[ALLIES[id].star])
-    .map(id=>({id,n:Math.floor(P.roster[id]/SYN_NEED[ALLIES[id].star])})).sort((a,b)=>ALLIES[a.id].star-ALLIES[b.id].star);
+  return Object.keys(P.roster).filter(id=>SYN_NEED[ALLIES[id].star]&&synSpare(id)>=SYN_NEED[ALLIES[id].star])
+    .map(id=>({id,n:Math.floor(synSpare(id)/SYN_NEED[ALLIES[id].star])})).sort((a,b)=>ALLIES[a.id].star-ALLIES[b.id].star);
 }
 function synthAllAsk(){
   const plan=synthPlan();if(!plan.length)return;
@@ -3200,7 +3202,7 @@ function synthAllAsk(){
   $('#mtext').innerHTML=`<div class="sum"><div class="sum-title">🔮 일괄 합성</div>
     <div class="synlist">${plan.map(x=>{const al=ALLIES[x.id],need=SYN_NEED[al.star];
       return `<div class="synrow">${allyFace(x.id,'xs')} <span class="synnm">${'★'.repeat(al.star)} ${al.name}</span><b>${need*x.n}장 → ★${al.star+1} ×${x.n}</b></div>`;}).join('')}</div>
-    <p class="sum-desc">총 ${total}회 합성합니다. 재료로 쓴 캐릭터는 사라지고, 한 단계 위 등급의 무작위 캐릭터를 얻습니다.</p>
+    <p class="sum-desc">총 ${total}회 합성합니다. 캐릭터마다 1장은 남기고, 나머지 재료로 한 단계 위 등급의 무작위 캐릭터를 얻습니다.</p>
     <button class="btn" id="syncancel" style="width:100%;margin-bottom:8px">취소</button></div>`;
   $('#mbtn').textContent=`🔮 ${total}회 합성하기`;
   $('#modal').classList.remove('hidden');
