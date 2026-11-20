@@ -1546,7 +1546,7 @@ function fbBind(p){
       }else{
         try{await cloudRef.set({json:JSON.stringify(mine),savedAt:mine.savedAt||Date.now(),key:SAVE_KEY});}catch(e){}
       }
-      if(P&&P.uid===pid){fbMergeFriends();publishProfile();}
+      if(P&&P.uid===pid){fbMergeFriends();publishProfile();if(pendingFriend)takePendingFriend();}
     }catch(e){if(!fbPid)cloudState='denied';}
     fbBinding=null;updateCloudNote();
   })();
@@ -1806,81 +1806,134 @@ const withTimeout=(p,ms=10000)=>Promise.race([p,new Promise((_,rej)=>setTimeout(
 
 let friendsUnsub=null;
 const friendsSig=l=>JSON.stringify(l.map(x=>[x.id,x.hero,x.lv,x.cp,x.area,x.stage,x.ended,x.pvpW,x.pvpL,(x.friends||[]).join(',')]));
+/* 짧은 친구 코드 = 캐릭터 ID(P.uid). 보여 줄 땐 대문자, 입력은 대소문자·공백 무시 */
+const myShortCode=()=>String(P.uid||'').toUpperCase();
+function myShortLink(){return location.href.split('#')[0]+'#f='+encodeURIComponent(P.uid);}
+function parseFriendId(str){
+  let t=String(str||'').trim();
+  const i=t.indexOf('#f=');if(i>=0)t=decodeURIComponent(t.slice(i+3)).trim();
+  if(t.includes(FCODE_PREFIX)){const f=parseFriendCode(t);return f?f.id:null;}   // 예전 긴 친구 코드도 받기
+  t=t.replace(/[\s\-]/g,'').toLowerCase();
+  return /^[a-z0-9]{6,24}$/.test(t)?t:null;
+}
+const vsRec=id=>{const v=(P.fvs&&P.fvs[id])||{},o=(P.fbook&&P.fbook[id])||{};return {w:(v.w||0)+(o.w||0),l:(v.l||0)+(o.l||0)};};
+async function fbAddFriend(raw){
+  const id=parseFriendId(raw);
+  if(!id)return '친구 코드를 읽지 못했어요. 친구가 보내 준 코드나 링크를 그대로 붙여 넣어 주세요.';
+  if(id===myId)return '내 친구 코드예요. 친구의 코드를 넣어 주세요.';
+  P.friends=P.friends||[];
+  if(P.friends.includes(id))return '이미 친구예요.';
+  if(P.friends.length>=100)return '친구는 100명까지 추가할 수 있어요.';
+  let d=null;
+  try{const snap=await withTimeout(FB.doc('players/'+id).get());if(snap.exists)d=snap.data();}catch(e){}
+  if(!d)return '그 코드의 모험가를 찾지 못했어요. 친구가 새 버전 게임을 한 번 열었는지 확인해 주세요.';
+  P.friends.push(id);save();
+  return `🤝 ${esc(d.hero||'모험가')}님을 친구로 추가했어요! 상대도 나를 추가하면 「맞친구」가 돼요.`;
+}
 async function renderFriends(msg,preList){
   if(friendsUnsub){try{friendsUnsub();}catch(e){}friendsUnsub=null;}
   clearBattle();
-  const head=`${statusHTML()}${topBack()}${msg?`<div class="notice">${msg}</div>`:''}
-    <div class="panel"><div class="ptitle">👥 친구</div>
-      <div class="frow me"><div class="fcp">⚔ ${fmt(teamCP())}</div><div><b>${esc(P.name)}</b> <span class="small">Lv ${P.lv} · ${progressText(myPublic())}</span>
-      <div class="small">내 팀 전투력</div></div></div></div>`;
-  const back=`<button class="btn" id="back">← 돌아가기</button>`;
   if(!DBX||!myId){
     if(FB&&cloudState==='denied'&&!msg)msg='⚠ 이 기기는 아직 실시간 친구에 연결되지 않았어요. 다른 기기에서 쓰던 <b>최신 저장 코드</b>를 타이틀의 「저장 코드로 불러오기」로 한 번 불러오면 연결돼요.';
     renderFriendsCode(msg);return;}
+  const back=`<button class="btn" id="back">← 돌아가기</button>`;
   let list=[];
   if(preList)list=preList;
   else{
-  $('#app').innerHTML=head+`<div class="panel"><div class="desc">모험가 목록을 불러오는 중…</div></div>`+back;
-  $('#back').onclick=()=>renderHub();
-  publishProfile();
-  try{
-    const q=await withTimeout(DBX.collection('players').orderBy('cp','desc').limit(200).get());
-    list=q.docs.filter(d=>d.exists).map(d=>({id:d.id,...d.data()}));
-  }catch(e){
+    $('#app').innerHTML=`${statusHTML()}${topBack()}<div class="panel"><div class="desc">친구 정보를 불러오는 중…</div></div>`+back;
+    $('#back').onclick=()=>renderHub();
+    publishProfile();
+    try{
+      const q=await withTimeout(DBX.collection('players').orderBy('cp','desc').limit(200).get());
+      list=q.docs.filter(d=>d.exists).map(d=>({id:d.id,...d.data()}));
+    }catch(e){
+      if(!$('#back'))return;
+      renderFriendsCode('친구 정보를 불러오지 못했어요. 잠시 뒤 다시 열어 주세요.');return;
+    }
     if(!$('#back'))return;
-    $('#app').innerHTML=head+`<div class="panel"><div class="desc">모험가 목록을 불러오지 못했어요. 잠시 뒤 다시 열어 주세요.</div></div>`+back;
-    $('#back').onclick=()=>renderHub();return;
   }
-  if(!$('#back'))return;
-  }
-  const ps=USERX?await USERX.profiles(list.map(x=>x.id)):{};
-  const mine=new Set(P.friends||[]);
-  const others=list.filter(x=>x.id!==myId);
-  const friends=others.filter(x=>mine.has(x.id));
-  const addedMe=others.filter(x=>!mine.has(x.id)&&Array.isArray(x.friends)&&x.friends.includes(myId));
-  const rest=others.filter(x=>!mine.has(x.id)&&!addedMe.includes(x));
-  const rankOf=id=>list.findIndex(x=>x.id===id)+1;
-  const row=(x,btn)=>{
-    const acct=ps[x.id]&&ps[x.id].name?ps[x.id].name:'';
-    const mutual=mine.has(x.id)&&Array.isArray(x.friends)&&x.friends.includes(myId);
-    return `<div class="frow"><div class="fcp">⚔ ${fmt(x.cp||0)}<span class="small">#${rankOf(x.id)}</span></div>
-      <div style="flex:1"><b>${esc(x.hero||'모험가')}</b> ${mutual?'<span class="tag t-ally">맞친구</span>':''}
-      <div class="small">${acct?esc(acct)+' · ':''}Lv ${x.lv||1} · ${progressText(x)}${x.ended?' · ✝ 엔딩':''}${(x.pvpW||x.pvpL)?` · 대결 ${pvpCl(x.pvpW,0,1e6)}승 ${pvpCl(x.pvpL,0,1e6)}패`:''}</div></div>${btn}</div>`;
+  P.friends=P.friends||[];
+  const byId={};list.forEach(x=>byId[x.id]=x);
+  const mine=new Set(P.friends);
+  const me={...myPublic(),id:myId,me:true,hero:P.name};          // 내 정보는 항상 지금 값으로
+  const friends=P.friends.filter(id=>id!==myId).map(id=>byId[id]||(P.fbook&&P.fbook[id]?{...P.fbook[id],id,old:true}:{id,hero:'모험가',missing:true}));
+  const ranking=[me,...friends].sort((a,b)=>(b.cp||0)-(a.cp||0));
+  const requests=list.filter(x=>x.id!==myId&&!mine.has(x.id)&&Array.isArray(x.friends)&&x.friends.includes(myId));
+  const others=list.filter(x=>x.id!==myId&&!mine.has(x.id)&&!requests.includes(x));
+  const medal=r=>r===1?'🥇':r===2?'🥈':r===3?'🥉':'#'+r;
+  const seen=x=>x.updatedAt?` · ${agoText(x.updatedAt)} 갱신`:'';
+  const rankRow=(x,i)=>{
+    if(x.me)return `<div class="frow rk me"><div class="frank">${medal(i+1)}</div>
+      <div style="flex:1;min-width:0"><b>${esc(P.name)}</b> <span class="tag t-ally">나</span>
+      <div class="small">Lv ${P.lv} · ${progressText(me)}${P.ended?' · ✝':''}</div>
+      <div class="small">대결 전적 ${(P.pvp&&P.pvp.w)||0}승 ${(P.pvp&&P.pvp.l)||0}패</div></div>
+      <div class="fcp">⚔ ${fmt(me.cp)}</div></div>`;
+    const mutual=Array.isArray(x.friends)&&x.friends.includes(myId);
+    const r=vsRec(x.id);
+    const sub=x.missing?'아직 새 버전 게임에 접속하지 않았어요':x.old?'예전 친구 코드 정보 · 친구가 새 버전에 접속하면 실시간으로 바뀌어요'
+      :`나와의 대결 ${r.w}승 ${r.l}패${seen(x)}`;
+    return `<div class="frow rk"><div class="frank">${medal(i+1)}</div>
+      <div style="flex:1;min-width:0"><b>${esc(x.hero||'모험가')}</b> ${mutual?'<span class="tag t-ally">맞친구</span>':x.missing||x.old?'':'<span class="tag">요청 보냄</span>'}
+      <div class="small">${x.missing?'':`Lv ${x.lv||1} · ${progressText(x)}${x.ended?' · ✝':''}`}</div>
+      <div class="small">${sub}</div></div>
+      <div class="fcp">⚔ ${fmt(x.cp||0)}</div>
+      <div class="fbtns">${x.team&&!x.missing?`<button class="btn danger fbtn" data-duel="${esc(x.id)}">⚔ 대결</button>`:''}<button class="btn fbtn" data-fdel="${esc(x.id)}">삭제</button></div></div>`;
   };
-  const addBtn=id=>`<button class="btn primary fbtn" data-fadd="${esc(id)}">친구 추가</button>`;
-  const delBtn=id=>`<div class="fbtns"><button class="btn danger fbtn" data-duel="${esc(id)}">⚔ 대결</button><button class="btn fbtn" data-fdel="${esc(id)}">삭제</button></div>`;
-  const myRank=rankOf(myId);
-  $('#app').innerHTML=head+
-    `${canShare===false?'<div class="notice">이 계정은 이 게임에 기록을 남길 권한이 없어 모험가 목록에 오를 수 없어요. 목록 보기만 가능해요.</div>':''}
-    <div class="panel"><div class="ptitle">🤝 내 친구 <span class="small">${friends.length}명${myRank?` · 내 순위 #${myRank}/${list.length}`:''}</span></div>
-      ${FB?'<div class="desc">🔴 실시간 — 친구가 레벨업·강화하면 코드 없이 자동으로 바뀌어요.</div>':''}
-      <div class="desc">⚔ 대결: 친구가 마지막으로 저장한 팀과 싸워요. 승리 보상은 하루 ${PVP_DAILY}번 · 내 전적 ${(P.pvp&&P.pvp.w)||0}승 ${(P.pvp&&P.pvp.l)||0}패</div>
-      ${friends.length?friends.map(x=>row(x,delBtn(x.id))).join(''):'<div class="desc">아직 친구가 없어요. 아래 모험가 목록에서 추가해 보세요.</div>'}</div>
-    ${addedMe.length?`<div class="panel"><div class="ptitle">📨 나를 친구로 추가한 모험가</div>${addedMe.map(x=>row(x,addBtn(x.id))).join('')}</div>`:''}
-    <div class="panel"><div class="ptitle">🏆 모험가 목록 <span class="small">전투력 순</span></div>
-      ${rest.length?rest.map(x=>row(x,addBtn(x.id))).join(''):'<div class="desc">아직 다른 모험가가 없어요.</div>'}</div>
-    <div class="grid"><button class="btn" id="frefresh">↻ 새로고침</button>${back}</div>`;
+  const simpleRow=(x,label)=>`<div class="frow"><div class="fcp">⚔ ${fmt(x.cp||0)}</div>
+      <div style="flex:1;min-width:0"><b>${esc(x.hero||'모험가')}</b><div class="small">Lv ${x.lv||1} · ${progressText(x)}${seen(x)}</div></div>
+      <button class="btn primary fbtn" data-fadd="${esc(x.id)}">${label}</button></div>`;
+  const nf=friends.length,myRank=ranking.findIndex(x=>x.me)+1;
+  $('#app').innerHTML=`${statusHTML()}${topBack()}${msg?`<div class="notice">${msg}</div>`:''}
+    ${canShare===false?'<div class="notice">⚠ 내 정보를 친구들에게 올리지 못하고 있어요. 최신 저장 코드를 한 번 불러와 주세요.</div>':''}
+    ${requests.length?`<div class="panel"><div class="ptitle">📨 친구 요청 <span class="small">${requests.length}명</span></div>
+      <div class="desc">나를 친구로 추가한 모험가예요. 수락하면 서로 친구가 돼요.</div>
+      ${requests.map(x=>simpleRow(x,'수락')).join('')}</div>`:''}
+    <div class="panel"><div class="ptitle">🏆 친구 랭킹 <span class="small">전투력 순 · 친구 ${nf}명 · 내 순위 ${myRank}/${ranking.length}</span></div>
+      <div class="desc">🔴 실시간 — 친구가 레벨업·강화하면 코드 없이 자동으로 바뀌어요.</div>
+      ${ranking.map(rankRow).join('')}
+      ${nf?'':'<div class="desc">아직 친구가 없어요. 아래 <b>내 친구 코드</b>를 친구에게 보내 보세요.</div>'}
+      <div class="desc" style="margin-top:6px">⚔ 대결: 친구의 현재 팀과 싸워요. 승리 보상은 하루 ${PVP_DAILY}번.</div></div>
+    <div class="panel"><div class="ptitle">📤 내 친구 코드</div>
+      <div class="desc">이 코드나 링크를 친구에게 보내면 돼요. <b>한 번만</b> 주고받으면 그 뒤로는 계속 자동으로 갱신돼요.</div>
+      <div style="font:900 22px/1.3 monospace;letter-spacing:2px;text-align:center;color:#cfe0ff;background:#080d1e;border:1px solid var(--line);border-radius:10px;padding:10px;margin:6px 0 8px;word-break:break-all">${myShortCode()}</div>
+      <div class="grid"><button class="btn primary" id="fshare">🔗 친구 링크 보내기</button><button class="btn" id="fcopy">📋 코드 복사</button></div></div>
+    <div class="panel"><div class="ptitle">➕ 친구 추가</div>
+      <div class="desc">친구에게 받은 <b>친구 코드</b>나 <b>친구 링크</b>를 붙여 넣으세요.</div>
+      <input id="fcodein" class="fcode" style="font-size:16px;text-transform:uppercase" placeholder="예: ${myShortCode().slice(0,6)}…" autocomplete="off">
+      <button class="btn primary" id="faddbtn" style="width:100%">🤝 친구 추가</button></div>
+    ${others.length?`<div class="panel"><div class="ptitle">🌐 다른 모험가 <span class="small">${others.length}명</span></div>
+      ${others.slice(0,30).map(x=>simpleRow(x,'친구 추가')).join('')}</div>`:''}
+    ${back}`;
+  $('#faddbtn').onclick=async()=>{const b=$('#faddbtn');b.disabled=true;b.textContent='확인 중…';const m=await fbAddFriend($('#fcodein').value);if($('#faddbtn'))renderFriends(m);};
+  $('#fcopy').onclick=e=>copyText(myShortCode(),e.currentTarget);
+  $('#fshare').onclick=async e=>{
+    const link=myShortLink(),txt=`『푸른사제들』 ${P.name}의 친구 코드: ${myShortCode()}\n링크를 열면 바로 친구로 추가돼요!`;
+    if(navigator.share){try{await navigator.share({title:'푸른사제들 친구 추가',text:txt,url:link});return;}catch(err){if(err&&err.name==='AbortError')return;}}
+    copyText(txt+'\n'+link,e.currentTarget);
+  };
   document.querySelectorAll('[data-fadd]').forEach(b=>b.onclick=()=>{
-    P.friends=P.friends||[];
     if(!P.friends.includes(b.dataset.fadd)&&P.friends.length<100)P.friends.push(b.dataset.fadd);
-    save();renderFriends('🤝 친구로 추가했어요.');
+    const x=byId[b.dataset.fadd];save();renderFriends(`🤝 ${esc((x&&x.hero)||'모험가')}님을 친구로 추가했어요!`,list);
   });
   document.querySelectorAll('[data-fdel]').forEach(b=>b.onclick=()=>{
-    P.friends=(P.friends||[]).filter(x=>x!==b.dataset.fdel);save();renderFriends('친구 목록에서 삭제했어요.');
+    const id=b.dataset.fdel,x=byId[id]||(P.fbook&&P.fbook[id]);
+    if(b.dataset.armed!=='1'){b.dataset.armed='1';b.textContent='한 번 더 누르면 삭제';return;}
+    P.friends=P.friends.filter(v=>v!==id);if(P.fbook)delete P.fbook[id];
+    save();renderFriends(`${esc((x&&x.hero)||'모험가')}님을 친구 목록에서 삭제했어요.`,list);
   });
   document.querySelectorAll('[data-duel]').forEach(b=>b.onclick=()=>{
-    const f=list.find(x=>x.id===b.dataset.duel);
+    const f=byId[b.dataset.duel]||(P.fbook&&P.fbook[b.dataset.duel]);
     if(!f||!f.team){renderFriends('이 친구는 아직 팀 정보가 없어요. 친구가 게임을 한 번 더 플레이하면 대결할 수 있어요.');return;}
-    startPvp(f);
+    startPvp({...f,id:b.dataset.duel});
   });
-  $('#frefresh').onclick=()=>renderFriends();
   $('#back').onclick=()=>renderHub();
-  // Firebase: 친구 화면이 열려 있는 동안 다른 모험가의 레벨·전투력이 바뀌면 바로 다시 그림
+  if(!preList)window.scrollTo(0,0);
+  // 친구 화면이 열려 있는 동안 다른 모험가의 레벨·전투력이 바뀌면 바로 다시 그림
   if(FB&&DBX===FB){
     const sig=friendsSig(list);
     try{
       friendsUnsub=FB.collection('players').orderBy('cp','desc').limit(200).onSnapshot(q=>{
-        if(!$('#frefresh')){if(friendsUnsub){friendsUnsub();friendsUnsub=null;}return;}
+        if(!$('#fcodein')||$('#fcodein').value){return;}       // 입력 중이면 다시 그리지 않음
         const l=q.docs.filter(d=>d.exists).map(d=>({id:d.id,...d.data()}));
         if(friendsSig(l)!==sig)renderFriends(msg,l);
       },()=>{});
@@ -1903,7 +1956,7 @@ function parseFriendCode(str){
     t=t.slice(j+FCODE_PREFIX.length).replace(/[^A-Za-z0-9+/=]/g,'');
     const o=JSON.parse(decodeURIComponent(escape(atob(t))));
     if(!o||typeof o.id!=='string'||!o.team||!Array.isArray(o.team.party))return null;
-    return {id:o.id.slice(0,24),hero:String(o.hero||'모험가').replace(/[<>&"'`]/g,'').slice(0,8),lv:pvpCl(o.lv,1,99),cp:pvpCl(o.cp,0,9999999),
+    return {id:o.id.slice(0,24),hero:String(o.hero||'모험가').replace(/[<>&"'`]/g,'').slice(0,8),lv:pvpCl(o.lv,1,9999),cp:pvpCl(o.cp,0,9999999),
       area:pvpCl(o.area,0,AREAS.length-1),stage:pvpCl(o.stage,0,STAGES),ended:!!o.ended,team:o.team,pvpW:pvpCl(o.pvpW,0,1e6),pvpL:pvpCl(o.pvpL,0,1e6),updatedAt:pvpCl(o.updatedAt,0,9e15)};
   }catch(e){return null;}
 }
@@ -1976,14 +2029,16 @@ function renderFriendsCode(msg){
 let pendingFriend=(()=>{try{return location.hash.startsWith('#f=')?location.hash:null}catch(e){return null}})();
 function takePendingFriend(){
   if(!pendingFriend||!P)return false;
-  const code=pendingFriend;pendingFriend=null;
+  const code=pendingFriend;
+  // 짧은 친구 링크인데 아직 클라우드 연결 중이면 연결이 끝난 뒤 처리
+  if(!code.includes(FCODE_PREFIX)&&!(DBX&&myId)&&cloudState!=='denied'&&cloudState!=='off')return false;
+  pendingFriend=null;
   try{history.replaceState(null,'',location.href.split('#')[0]);}catch(e){}
   if(DBX&&myId){
-    const f=parseFriendCode(code);
-    if(!f||f.id===myId)return false;
-    P.friends=P.friends||[];
-    if(!P.friends.includes(f.id)&&P.friends.length<100)P.friends.push(f.id);
-    save();renderFriends(`🤝 ${esc(f.hero||'모험가')}님을 친구로 추가했어요!`);return true;
+    fbAddFriend(code).then(m=>renderFriends(m));return true;
+  }
+  if(FB&&!code.includes(FCODE_PREFIX)){
+    renderFriendsCode('⚠ 아직 클라우드에 연결되지 않아 친구 링크를 처리하지 못했어요. 연결된 뒤 친구 화면에서 코드를 넣어 주세요.');return true;
   }
   const r=addFriendByCode(code);renderFriendsCode(r.msg);return true;
 }
@@ -1994,7 +2049,7 @@ const pvpCl=(v,lo,hi)=>Math.max(lo,Math.min(hi,Number(v)||lo));
 function teamIconsHTML(party){return party.map(x=>`<span class="pvpa" title="${ALLIES[x.id].name}">${allyFace(x.id,'pv')}<i>Lv${x.lv}</i></span>`).join('');}
 function startPvp(f){
   const t=f&&f.team;if(!t)return;
-  const hero={atk:pvpCl(t.atk,1,9999),def:pvpCl(t.def,0,9999),maxHp:pvpCl(t.maxHp,1,99999),lv:pvpCl(t.lv,1,99)};
+  const hero={atk:pvpCl(t.atk,1,9999),def:pvpCl(t.def,0,9999),maxHp:pvpCl(t.maxHp,1,99999),lv:pvpCl(t.lv,1,9999)};
   const party=(Array.isArray(t.party)?t.party:[]).filter(x=>x&&ALLIES[x.id]).slice(0,4)
     .map(x=>({id:x.id,lv:pvpCl(x.lv,1,60),aw:pvpCl(x.aw,0,AWAKEN_MAX),my:x.my?1:0}));
   const allyHp=party.reduce((s,x)=>s+Math.round((50+x.lv*10)*(0.7+0.15*ALLIES[x.id].star)*(x.my?2:1)),0);
@@ -2063,6 +2118,7 @@ function pvpEnd(win){
   let msg;
   const fb=P.fbook&&e.friendId&&P.fbook[e.friendId];
   if(fb){if(win)fb.w=(fb.w||0)+1;else fb.l=(fb.l||0)+1;}
+  else if(e.friendId){P.fvs=P.fvs||{};const v=P.fvs[e.friendId]||(P.fvs[e.friendId]={w:0,l:0});if(win)v.w++;else v.l++;}
   if(win){
     P.pvp.w++;
     if(P.pvp.n<PVP_DAILY){P.pvp.n++;const g=30+e.hero.lv*5;P.gold+=g;msg=`⚔ ${esc(e.heroName)}의 팀에 승리! +${g} G (오늘 대결 보상 ${P.pvp.n}/${PVP_DAILY})`;}
