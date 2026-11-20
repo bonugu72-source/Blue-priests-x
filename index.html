@@ -1109,11 +1109,11 @@ const AREAS=[
     mid:{name:'포칼로르', art:'focalor', title:'솔로몬 72악마 · 제41영 · 공작 · 30군단', hp:23000, atk:150, def:46, xp:6000, gold:4600, demon:true,
       pre:'그리핀의 날개를 단 자가 얼어붙은 바다 위에 내려선다.\n\n"바람과 파도를 다스리는 것은 나다. 너희를 깊은 물속에 가라앉혀 주마."',
       moves:[{t:'atk',n:'날개 베기'},{t:'sweep',n:'폭풍 해일',m:0.17},{t:'multi',n:'바람 칼날',hits:4,m:0.35},{t:'curse',n:'익사의 저주'},{t:'charge',n:'30군단의 폭풍'}]},
-    boss:{name:'라이아', art:'laia', title:'엇갈린 세계의 쌍둥이 · 불꽃의 동생', hp:40000, exactHp:true, atk:150, def:46, xp:28000, gold:35000, goldFirst:0, goldRepeat:35000, stoneFirst:2, demon:true, drop:'seal_twins',
+    boss:{name:'라이아', art:'laia', title:'엇갈린 세계의 쌍둥이 · 불꽃의 동생', hp:40000, exactHp:true, atk:170, def:46, xp:28000, gold:35000, goldFirst:0, goldRepeat:35000, stoneFirst:2, demon:true, drop:'seal_twins',
       tick:6000, burnHit:true,
-      twin:{at:10000,name:'테리아',title:'엇갈린 세계의 쌍둥이 · 얼음의 언니',art:'teria',hp:70000,atk:110,def:50,freezeEvery:7000,freezeMs:3000,
-        line:'"라이아, 물러나. 이제 언니가 할게."\n\n쓰러지려던 라이아를 감싸며 하얀 머리의 쌍둥이가 내려선다. 순식간에 불길이 얼어붙고, 도시 전체가 하얗게 질린다.\n\n— 테리아 등장: 체력 70,000 · 얼어붙은 숨결 · 7초마다 빙결 —',
-        moves:[{t:'atk',n:'얼음 송곳'},{t:'freezebreath',n:'얼어붙은 숨결'},{t:'multi',n:'빙정 난무',hits:4,m:0.35},{t:'sweep',n:'눈보라의 날개',m:0.15},{t:'atk',n:'얼음 송곳'},{t:'charge',n:'절대 영도'}]},
+      twin:{at:10000,name:'테리아',title:'엇갈린 세계의 쌍둥이 · 얼음의 언니',art:'teria',hp:70000,atk:150,def:50,freezeEvery:7000,freezeMs:3000,
+        line:'"라이아, 물러나. 이제 언니가 할게."\n\n쓰러지려던 라이아를 감싸며 하얀 머리의 쌍둥이가 내려선다. 순식간에 불길이 얼어붙고, 도시 전체가 하얗게 질린다.\n\n— 테리아 등장: 체력 70,000 · 얼어붙은 숨결 · 7초마다 빙결 · 절대 영도 —',
+        moves:[{t:'atk',n:'얼음 송곳'},{t:'freezebreath',n:'얼어붙은 숨결'},{t:'multi',n:'빙정 난무',hits:4,m:0.35},{t:'sweep',n:'눈보라의 날개',m:0.15},{t:'charge',n:'절대 영도',kind:'zero'},{t:'atk',n:'얼음 송곳'},{t:'charge',n:'절대 영도',kind:'zero'}]},
       pre:'불타는 도시 쪽의 쌍둥이가 날개를 펼치며 일어선다. 손끝에서 불길이 치솟는다.\n\n"언니는 쉬고 있어. 이 정도는 나 혼자서도 충분하니까."',
       moves:[{t:'atk',n:'불꽃 손톱'},{t:'dot',n:'타오르는 낙인',dn:'화상'},{t:'curse',n:'약점의 각인'},{t:'strong',n:'지옥불 폭발'},{t:'multi',n:'불꽃 날개 연타',hits:3,m:0.45},{t:'charge',n:'업화의 날개'}]}
   }
@@ -2768,7 +2768,14 @@ const paraOn=()=>!!(B&&B.paraUntil&&Date.now()<B.paraUntil);
 /* 테리아: 7초마다 주인공 빙결 (얼음을 깰 때까지 행동 불가) */
 const pFrozen=()=>!!(B&&B.pFrozenUntil&&Date.now()<B.pFrozenUntil);
 const aFrozen=()=>!!(B&&B.aFrozenUntil&&Date.now()<B.aFrozenUntil);
+const ZERO_FREEZE_MS=3000;
+function freezePlayer(ms){
+  B.pFrozenUntil=Math.max(B.pFrozenUntil||0,Date.now()+ms);
+  document.body.classList.add('pfrozen');renderBattle();
+  setTimeout(()=>{if(B&&!pFrozen()){document.body.classList.remove('pfrozen');addLog('🧊 얼음을 깨고 빠져나왔다!');renderBattle();}},ms+50);
+}
 function freezeTick(){
+  if(B&&B.chargeKind==='zero'){B.freezeAt=Date.now()+B.e.twin.freezeEvery;return;} // 절대 영도 준비 중에는 빙결로 방어를 막지 않음
   if(!B||B.over||B.won||P.hp<=0||!$('#modal').classList.contains('hidden')){if(B&&B.e.twin)B.freezeAt=Date.now()+B.e.twin.freezeEvery;return;}
   const w=B.e.twin;B.freezeAt=Date.now()+w.freezeEvery;
   B.pFrozenUntil=Date.now()+w.freezeMs;
@@ -2886,7 +2893,7 @@ function renderBattle(){
   if(B.reflect)passive.push('↩ 뒤집힌 시간: 준 피해의 50% 반사');
   if(e.bleedOnHit)passive.push('🩸 공격 시 출혈');
   if(e.burnHit)passive.push('🔥 공격 시 화상');
-  if(e.twin)passive.push(B.twinned?'🧊 7초마다 빙결 · 얼어붙은 숨결':`☯ HP ${fmt(e.twin.at)} 이하 쌍둥이 교대`);
+  if(e.twin)passive.push(B.twinned?'🧊 7초마다 빙결 · 얼어붙은 숨결 · ❄ 절대 영도(방어 필수)':`☯ HP ${fmt(e.twin.at)} 이하 쌍둥이 교대`);
   if(e.critAll)passive.push(`💥 모든 공격 치명타 ×${e.critAll*(B.awoke&&e.awaken?e.awaken.critMult:1)}`);
   if(e.awaken)passive.push(B.awoke?'💢 각성: 3초마다 영혼을 가르는 일격':`💢 HP ${fmt(e.awaken.at)} 이하 각성`);
   if(e.burnBleed)passive.push('🔥🩸 끝없는 화상·출혈');
@@ -2905,6 +2912,7 @@ function renderBattle(){
     warn=B.chargeKind==='jeongyeok'?`⚠ 「전격」 — 방어하지 않으면 HP 절반 소멸`
       :B.chargeKind==='tornado'?`⚠ 「스파크 토네이도」 — 방어해도 HP 1/3 소멸`
       :B.chargeKind==='deathblow'?`☠ 「죽음의 일격」 — 방어하지 않으면 동료 1명 사망`
+      :B.chargeKind==='zero'?`❄ 「절대 영도」 — 방어하지 않으면 HP 절반 + 3초 빙결`
       :`⚠ 「${B.chargeName}」 준비 중 — 방어 추천`;
   }
   $('#app').innerHTML=`${statusHTML()}
@@ -3330,7 +3338,7 @@ function enemyTurn(){
   else if(B.charging){mv={t:'release',n:B.chargeName,kind:B.chargeKind};B.charging=false;B.chargeKind=null;}
   else if(e.pvp)mv={t:'pvp',n:''};
   else if(e.tornado&&e.hp<e.maxHp*0.35&&B.tornadoCD<=0){mv={t:'charge',n:'스파크 토네이도',kind:'tornado'};B.tornadoCD=4;}
-  else if(e.moves)mv=pick(e.moves);
+  else if(e.moves){mv=pick(e.moves);if(mv.kind==='zero'&&pFrozen())mv={t:'atk',n:'얼음 송곳'};} // 빙결 중엔 방어 불가 → 절대 영도 보류
   else mv=Math.random()<0.2?{t:'strong',n:'강타'}:{t:'atk',n:'공격'};
   const label=`${e.name} — ${mv.n}`;
 
@@ -3354,6 +3362,11 @@ function enemyTurn(){
             document.body.classList.add('flash');setTimeout(()=>document.body.classList.remove('flash'),300);allyDown(id);}
           else hitPlayer(2.5,`${e.name}의 「죽음의 일격」`);
         }
+      }else if(mv.kind==='zero'){
+        if(B.defending)hitPlayer(1,`${e.name}의 「절대 영도」 — 막아냈다`);
+        else{const d=Math.round(P.hp*0.5);P.hp=Math.max(0,P.hp-d);addLog(`❄ ${e.name}의 「절대 영도」! 방어하지 못했다 — HP ${d} 소멸 · 3초간 빙결`);queueFx('player','❄-'+d,'pdmg');
+          document.body.classList.add('flash');setTimeout(()=>document.body.classList.remove('flash'),300);
+          if(P.hp>0)freezePlayer(ZERO_FREEZE_MS);}
       }else if(mv.kind==='tornado'){
         const d=Math.ceil(P.maxHp/3);P.hp=Math.max(0,P.hp-d);
         addLog(`${e.name}의 「스파크 토네이도」! 방어도 소용없다 — HP ${d} 소멸`);queueFx('player','🌪-'+d,'pdmg');
@@ -3413,6 +3426,7 @@ function enemyTurn(){
       addLog(mv.kind==='jeongyeok'?`⚠ ${e.name} — 「전격」 충전! 방어하지 않으면 HP 절반을 잃는다`
         :mv.kind==='tornado'?`⚠ ${e.name} — 「스파크 토네이도」의 전조! 방어해도 HP 1/3을 잃는다`
         :mv.kind==='deathblow'?`⚠ ${e.name} — 「죽음의 일격」 준비! 방어하지 않으면 동료 한 명이 죽는다`
+        :mv.kind==='zero'?`⚠ ${e.name} — 「절대 영도」 준비! 방어하지 않으면 HP 절반을 잃고 얼어붙는다`
         :`⚠ ${e.name} — 「${mv.n}」 준비! 곧 날아온다 — 방어하자!`);
       break;
   }
