@@ -793,6 +793,9 @@ const COST_F={0:1.5,1:0.5,2:0.75,3:1,4:1.5,5:2,6:3};
 const AWAKEN_MAX=5, AWAKEN_BASE=3, AWAKEN_ITEM={name:'천상의 성유물',icon:'💠'}; // ★5는 5각성까지 (4·5각성은 확률) · ★6은 3각성까지
 const awakenMax=id=>ALLIES[id].star===5?5:3;
 const AWAKEN_STAGE={4:{stone:4,rate:0.5},5:{stone:5,rate:0.25}};
+/* 4각성부터: 지역 이동(마계 제외)의 모든 지역을 클리어해야 가능 */
+const worldCleared=()=>{const rs=realmStart();for(let i=0;i<rs;i++)if(!((P.prog[i]||0)>=STAGES||(P.cleared&&P.cleared[i])))return false;return true;};
+const worldClearCount=()=>{const rs=realmStart();let n=0;for(let i=0;i<rs;i++)if((P.prog[i]||0)>=STAGES||(P.cleared&&P.cleared[i]))n++;return n;};
 /* 성유물 획득 알림 (화면 위에 잠시 떠오름) */
 function stoneToast(n,why){
   const d=document.createElement('div');d.className='stoast';
@@ -2938,6 +2941,7 @@ function allyCard(id){
     btns.push(`<button class="btn myth ${ok?'':'off'}" data-myth="${id}" ${ok?'':'disabled'}>🔱 신화 승급 ${fmt(mc)} G${st?` · ${AWAKEN_ITEM.icon}${st}`:''}</button>`);
   }
   if(al.star>=5)btns.push(aw>=awakenMax(id)?`<button class="btn" disabled>각성 완료</button>`
+    :aw>=AWAKEN_BASE&&!worldCleared()?`<button class="btn" disabled>🔒 ${aw+1}각성<small>지역 이동의 모든 지역 클리어 필요 (${worldClearCount()}/${realmStart()})</small></button>`
     :(()=>{const c=awakenCost(id),ok=P.items.stone>=c.stone&&cnt>=1+c.card;if(c.rate<1)return `<button class="btn ${ok?'danger':''}" data-awk="${id}" ${ok?'':'disabled'}>각성 ${aw}/${awakenMax(id)} · 성공 ${Math.round(c.rate*100)}%<small>${AWAKEN_ITEM.icon}${c.stone}${c.card?` · 같은 카드 1장 (${Math.max(0,cnt-1)}/1)`:''} · 실패 시 성유물만 소모</small></button>`;return `<button class="btn ${ok?'danger':''}" data-awk="${id}" ${ok?'':'disabled'}>각성 ${aw}/${awakenMax(id)}<small>${c.card?`${AWAKEN_ITEM.icon}1 · 같은 카드 1장 (${Math.max(0,cnt-1)}/1)`:`${AWAKEN_ITEM.icon}${c.stone} (전용 캐릭터 · 카드 불필요)`}</small></button>`;})());
   return `<div class="acard ${isFixed?'fixed':''} ${my?'mythc':''} ${aw>=5?'aw5':aw>=4?'aw4':''}"><div class="ally"><div class="ic">${allyFace(id,'md')}</div><div style="flex:1">
     ${isFixed?'<span class="tag t-ally">고정 조력자</span>':`<span class="gold">${'★'.repeat(al.star)}</span>`} ${al.name}${my?' <span class="mytag">신화</span>':''}${aw?` <span class="gold">각성 ${aw}</span>`:''}${TIER5[id]?` <span class="small">${TIER5[id]}티어</span>`:''}
@@ -3096,6 +3100,7 @@ const awakenCost=id=>{const nx=(P.awaken[id]||0)+1,st=AWAKEN_STAGE[nx],ex=!!ALLI
 function awaken(id){
   const c=awakenCost(id);
   if(ALLIES[id].star<5||P.items.stone<c.stone||(P.roster[id]||0)<1+c.card||(P.awaken[id]||0)>=awakenMax(id))return;
+  if((P.awaken[id]||0)+1>AWAKEN_BASE&&!worldCleared())return;
   const al=ALLIES[id];
   if(c.rate<1&&Math.random()>=c.rate){ // 4·5각성 실패: 성유물만 사라지고 카드는 남음
     P.items.stone-=c.stone;save();
