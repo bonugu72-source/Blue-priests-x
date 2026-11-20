@@ -827,7 +827,7 @@ const ALLIES={
   elia:    {star:5,name:'엘리아',        icon:'🌹', role:'꽃의 수호', kit:'flower',
             desc:'색이 다른 꽃의 보호막(주인공 피해 흡수 · 동료 피해 절반, 2턴) · 꽃의 속박(적 1턴 행동 불가, 4턴마다) · 꽃잎 공격'},
   pasri:   {star:5,name:'파스리',        icon:'🏮', role:'고정 피해', kit:'fixed',
-            desc:'전투 시작 후 10초 동안 공격하지 못함 · 10초가 지나면 모든 공격이 적의 방어력을 무시하는 고정 피해'},
+            desc:'전투 시작 후 9초 동안 공격하지 못함 · 9초가 지나면 모든 공격이 적의 방어력을 무시하는 고정 피해'},
   gaia:    {star:5,name:'가이아 수도사',  icon:'🔷', role:'약점 간파', kit:'weakspot',
             desc:'약점: 15% 확률로 적의 약점을 찾아 공격력 3배의 고정 피해(방어력 무시) · 평소엔 창 찌르기 · 눈썰미: 출전 중 나라 보스 처치 시 💠 천상의 성유물 획득 확률 +10%'},
   sakura:  {star:5,name:'사쿠라',        icon:'🌸', role:'벚꽃바람', kit:'sakura',
@@ -2328,7 +2328,7 @@ function pvpEnemyActs(e){
       case 'twin':     dmg(6+lv*1.8,0.5,`${nm}의 쌍검 ①`);dmg(6+lv*1.8,0.5,`${nm}의 쌍검 ②`);break;
       case 'guard':    if(e.hp<e.maxHp*0.5&&Math.random()<0.3)heal(0.06);else dmg(9+lv*2.8,0.4,`${nm}의 방패 강타`);break;
       case 'chant':    if(e.hp<e.maxHp*0.7&&Math.random()<0.4)heal(0.12);else dmg(7+lv*2.4,0.5,`${nm}의 빛의 음표`);break;
-      case 'train':    if(Math.random()<0.4)dmg((14+lv*4.4)*(a.my?3:2),0,`${nm}의 열차 관통`);else dmg(14+lv*4.4,0.5,`${nm}의 군도 베기`);break;
+      case 'train':    if(Math.random()<0.4)dmg(vistaBase(lv)*(a.my?3:2),0,`${nm}의 열차 관통`);else dmg(vistaBase(lv),0.5,`${nm}의 군도 베기`);break;
       case 'breeze':   if(e.hp<e.maxHp*0.7&&Math.random()<0.45)heal(0.1);else dmg(6+lv*2.4,0.5,`${nm}의 낙엽 바람`);break;
       case 'purify':   if(e.hp<e.maxHp*0.5&&Math.random()<0.4)heal(0.12);else dmg(10+lv*3.6,0.4,`${nm}의 날개 베기`);break;
       case 'monk_holy':dmg(8+lv*2.8,0,`${nm}의 성수 투척`);break;
@@ -2885,7 +2885,8 @@ function sakuraTick(){
 /* 카르마: 5초마다 무작위 부적 (주인공 치유 / 적 저주 / 적 불태움) */
 /* 비스타: 3초마다 열차 소환 — 관통(기본 공격 2배, 방어 무시) + 폭파로 시야 차단 */
 const TRAIN_MS=3000;
-const vistaBase=lv=>14+lv*4.4;
+const PASRI_WAIT=9000; // 파스리 충전 시간 (10초 → 9초)
+const vistaBase=lv=>12.6+lv*4.0; // 기존 14+lv*4.4에서 약 9% 하향
 function trainTick(){
   if(!B||B.over||B.won||!$('#modal').classList.contains('hidden'))return;
   const id='vista5',h=B.ahp[id],e=B.e;
@@ -3144,7 +3145,7 @@ function renderBattle(){
   if(B.sealed>0)st.push(`⛓ 적 속박 ${B.sealed}`);
   if(B.eburn)st.push(`🔥 적 불태움 ${B.eburn.turns}`);
   if(B.ebleed)st.push(`🩸 적 출혈 ${B.ebleed.turns}`);
-  if(inParty('pasri')&&B.startAt&&Date.now()-B.startAt<10000)st.push(`🏮 파스리 충전 ${Math.ceil((10000-(Date.now()-B.startAt))/1000)}초`);
+  if(inParty('pasri')&&B.startAt&&Date.now()-B.startAt<PASRI_WAIT)st.push(`🏮 파스리 충전 ${Math.ceil((PASRI_WAIT-(Date.now()-B.startAt))/1000)}초`);
   if(B.healCut)st.push(`✂ 회복 -10% ${B.healCut}`);
   if(paraOn())st.push('⚡ 동료 마비 (방어 -50%)');
   if(B.noHeal)st.push('🚫 회복 불가');
@@ -3421,8 +3422,8 @@ function alliesAct(){
         }else if(B.eliaCD<=0&&!B.sealed){B.sealed=isMyth(id)?2:1;B.eliaCD=4;addLog(`${nm}의 꽃의 속박 — 덩굴과 꽃이 적을 휘감았다 (${B.sealed}턴간 행동 불가)`);}
         else allyHit(8+lv*3.4,`${nm}의 꽃잎 폭풍`,0.5);
         break;
-      case 'fixed':{ // 파스리: 10초 대기 후 방어 무시 고정 피해
-        const left=Math.ceil((10000-(Date.now()-(B.startAt||Date.now())))/1000);
+      case 'fixed':{ // 파스리: 9초 대기 후 방어 무시 고정 피해
+        const left=Math.ceil((PASRI_WAIT-(Date.now()-(B.startAt||Date.now())))/1000);
         if(left>0){addLog(`${nm} — 등불에 힘을 모으는 중… (${left}초 남음)`);break;}
         const d=allyHit(20+lv*6,`${nm}의 등불 — 고정 피해`,0,true);
         if(d&&isMyth(id)&&e.hp>0&&e.noBleed)addLog(`🩸 ${e.name}에게는 출혈이 통하지 않는다`);
