@@ -325,6 +325,9 @@ body.pfrozen #cmds .btn{filter:saturate(.2) brightness(1.2);background:linear-gr
 .realmp{border-color:rgba(199,139,255,.45);background:linear-gradient(160deg,rgba(60,20,80,.55),rgba(20,10,35,.6))}
 .realmp.lockp{opacity:.75}
 .area.realm{border-color:rgba(199,139,255,.5)}.area.realm.on{box-shadow:0 0 0 2px #c78bff inset}
+.memrow{width:100%;text-align:left;background:linear-gradient(135deg,rgba(255,230,240,.08),rgba(200,220,255,.06));border:1px solid rgba(255,210,230,.35);border-radius:12px;color:inherit;font:inherit;cursor:pointer;padding:6px}
+.memthumb{width:40px;height:40px;border-radius:8px;background-size:cover;background-position:center;box-shadow:0 0 10px rgba(255,200,220,.4)}
+.memimg{display:block;width:100%;max-height:58vh;object-fit:contain;border-radius:12px;margin:8px 0;box-shadow:0 0 24px rgba(255,210,230,.35)}
 .presets{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:8px 0 4px}
 .preset{border:1px solid rgba(140,170,255,.25);border-radius:12px;padding:8px;background:rgba(20,30,60,.45);display:flex;flex-direction:column;gap:6px}
 .preset.on{border-color:var(--gold);box-shadow:0 0 0 1px rgba(255,210,110,.35) inset}
@@ -926,6 +929,7 @@ const RELICS={
   seal_andras: {name:'안드라스의 인장',         icon:'⚪', desc:'방어력 +6 · 최대 HP +20',        apply:p=>{p.def+=6;p.maxHp+=20;p.hp+=20;}},
   seal_furfur: {name:'푸르푸르의 인장',         icon:'🔵', desc:'최대 HP +40 · 공격력 +4',        apply:p=>{p.maxHp+=40;p.hp+=40;p.atk+=4;}},
   time_belt:{name:'시간에 갇힌 벨트', icon:'⏳', desc:'희귀 아이템 · 전투마다 주인공 HP가 처음으로 절반 이하가 되면 남은 HP만큼 보호막',apply:p=>{}},
+  our_memory:{name:'우리들의 추억', icon:'📸', img:'memory.jpg', desc:'희귀한 유물 · 효과 없음 — 시간 속에 잠긴 추억 (눌러서 보기)',apply:p=>{}},
   blood_orb:{name:'피로 얼룩진 구슬', icon:'🩸', desc:'희귀 아이템 · 주인공 흡혈 10% (주인공이 준 피해의 10%만큼 HP 회복)',apply:p=>{}},
   seal_mumyeong:{name:'무명의 검은 수정',  icon:'🔮', desc:'공격 +28 · 방어 +24 · 최대 HP +220',apply:p=>{p.atk+=28;p.def+=24;p.maxHp+=220;p.hp+=220;}},
   seal_naberius3:{name:'각성한 나베리우스의 십자가',  icon:'✝️', desc:'공격 +26 · 방어 +22 · 최대 HP +200',apply:p=>{p.atk+=26;p.def+=22;p.maxHp+=200;p.hp+=200;}},
@@ -2740,7 +2744,7 @@ let relicOpen=false;
 function renderAllyTab(msg){
   hubTab='ally';
   const relicHTML=P.relics.length
-    ?P.relics.map(r=>`<div class="ally"><div class="ic">${RELICS[r].icon}</div><div>${RELICS[r].name}<small>${RELICS[r].desc}</small></div></div>`).join('')
+    ?P.relics.map(r=>RELICS[r].img?`<button class="ally memrow" data-mem="1"><div class="ic memthumb" style="background-image:url(${RELICS[r].img})"></div><div>${RELICS[r].name}<small>${RELICS[r].desc}</small></div></button>`:`<div class="ally"><div class="ic">${RELICS[r].icon}</div><div>${RELICS[r].name}<small>${RELICS[r].desc}</small></div></div>`).join('')
     :'<div class="desc">보스를 쓰러뜨리거나 미션을 완료해 유물을 얻자.</div>';
   $('#app').innerHTML=`${statusHTML()}
     ${msg?`<div class="notice">${msg}</div>`:''}
@@ -2756,6 +2760,7 @@ function renderAllyTab(msg){
       <div class="rlist">${relicHTML}</div></details>
     ${tabBar()}`;
   $('#relicbox').ontoggle=e=>{relicOpen=e.target.open;};
+  document.querySelectorAll('[data-mem]').forEach(b=>b.onclick=showMemory);
   $('#allies').onclick=()=>{renderAllies();window.scrollTo(0,0);};
   $('#dex').onclick=()=>renderDex();
 }
@@ -2953,7 +2958,8 @@ function awaken(id){
 }
 
 /* ===================== 상점 ===================== */
-const BLOOD_ORB_COST=200000, BLOOD_ORB_PCT=0.10;
+const BLOOD_ORB_COST=200000, BLOOD_ORB_PCT=0.10, MEMORY_KILLS=11;
+function showMemory(){const r=RELICS.our_memory;showStory(`<div class="sum s5"><div class="sum-title">희귀한 유물</div><img class="memimg" src="${r.img}" alt="우리들의 추억"><div class="sum-name">📸 ${r.name}</div><p class="sum-desc">아무런 힘도 없다.<br>하지만 시간 속에 잠긴, 다시 오지 않을 그날의 추억.</p></div>`,()=>renderAllyTab(),true);}
 const realmStart=()=>{const i=AREAS.findIndex(a=>a.realm);return i<0?AREAS.length:i;};
 function renderShop(msg){
   hubTab='shop';
@@ -4104,8 +4110,11 @@ function victory(){
   const gold=e.goldRepeat!=null?(firstClear?e.goldFirst:e.goldRepeat):B.isBoss?Math.round(e.gold*BOSS_GOLD_MULT):e.gold;
   P.gold+=gold;
   P.kills[tName]=(P.kills[tName]||0)+1;
+  const memEgg=tName==='푸르푸르'&&P.kills[tName]>=MEMORY_KILLS&&!P.relics.includes('our_memory'); // 이스터에그
+  if(memEgg)gainRelic('our_memory');
   P.wins[area]=(P.wins[area]||0)+1;
   let extra=[];
+  if(memEgg)extra.push(`📸 이스터에그! 희귀한 유물 「우리들의 추억」을 손에 넣었다 — 시간 속에 잠긴 추억`);
   {P.trust=P.trust||{};const g=TRUST_GAIN[stype]||1;
    partyIds().filter(trustOn).forEach(id=>{const l0=trustLv(id);P.trust[id]=Math.min(TRUST_REQ[TRUST_MAX],trustPts(id)+g);const l1=trustLv(id);
      if(l1>l0)extra.push(`💗 ${ALLIES[id].name} 신뢰도 ${l1}/${TRUST_MAX} — 전투력 +${Math.round((trustMult(id)-1)*100)}%`);});}
