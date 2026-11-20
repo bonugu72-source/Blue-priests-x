@@ -806,11 +806,13 @@ const ALLIES={
             desc:'날갯짓으로 폭풍을 일으켜 5초 동안 주인공 치명타 확률 2배 · 전투에서 처음 쓰러진 동료를 HP 50%로 부활(1회) · 폭풍 중엔 깃털 칼날 공격'},
   mikael:  {star:5,name:'미카엘',        icon:'🛡️', role:'정화의 날개', kit:'purify',
             desc:'정화(걸려 있는 모든 디버프 제거 + 주인공 현재 HP의 절반만큼 방어막, 3턴마다) · 평소엔 날개 베기'},
+  elise:   {star:5,name:'엘리스',        icon:'🍂', role:'정화의 바람', kit:'breeze', hpMul:2.5,
+            desc:'정화의 바람(주인공·동료의 디버프 제거: 방어력 감소·지속 피해·봉인·회복 감소·불화·둔화·침묵) · 디버프가 없으면 3턴마다 가을바람의 응원(주인공·동료 HP 10% 회복 + 3턴간 주인공 공격력 1.2배) · 공격은 약하지만 체력이 다른 동료의 2.5배'},
   siren:   {star:5,name:'세이렌 사제',   icon:'💎', role:'보석의 빛', kit:'prism',
             desc:'보석처럼 반짝이는 광선 공격 · 적이 힘을 모으거나 3턴마다 프리즘 굴절(다음 적 공격 피해 절반, 절반은 적에게 반사)'}
 };
 /* ★5 티어 — 신화 제외 최대 전투력: 1티어 4000 · 2티어 3300 · 3티어 2700 */
-const TIER5={guseju:1,asiris:1,karma:1,pasri:1,danian:2,elia:2,kirie:2,gaia:2,siren:3,mikael:3,sakura:3};
+const TIER5={guseju:1,asiris:1,karma:1,pasri:1,danian:2,elia:2,kirie:2,gaia:2,elise:2,siren:3,mikael:3,sakura:3};
 const TIER5_CP={1:4000,2:3300,3:2700};
 /* 신화: 최대 레벨에서 열림 · 능력치 2배 */
 const MYTH_COST={1:3000,2:5000,3:5000,4:10000,5:30000}, MYTH_STONE5=2;
@@ -825,6 +827,7 @@ const MYTH_SKILL={
   sakura:{name:'만개',desc:'부활 대기 7초 → 4초 · 벚꽃바람이 적의 치명타 확률을 75% 낮춤'},
   kirie: {name:'폭풍의 수호천사',desc:'부활을 두 번까지 · 폭풍 중 치명타 피해 2배'},
   mikael:{name:'대천사의 가호',desc:'방어막이 현재 HP 전부만큼 · 정화 주기 2턴'},
+  elise: {name:'만추의 축복',desc:'정화할 때도 주인공·동료 HP 10% 회복 · 응원 주기 3턴 → 2턴'},
   siren: {name:'천광의 프리즘',desc:'반사 피해 2배 · 광선이 방어 무시'}
 };
 /* 동료 일러스트 */
@@ -843,6 +846,7 @@ const ALLY_IMG={
   sakura:{src:'ally_sakura.jpg',pos:'50% 10%',face:'49% 11%',size:'450%'},
   kirie:{src:'ally_kirie.jpg',pos:'50% 18%',face:'50% 19%'},
   mikael:{src:'ally_mikael.jpg',pos:'45% 28%',face:'38% 33%',size:'240%'},
+  elise:{src:'ally_elise.jpg',pos:'52% 62%',face:'52% 64%',size:'420%'},
   karma:{src:'ally_karma.jpg',pos:'42% 22%',face:'35% 24%'},
   gubeomju:{src:'ally_gubeomju.jpg',pos:'50% 26%',face:'48% 38%',size:'220%'}
 };
@@ -2210,7 +2214,7 @@ function startPvp(f){
   const hero={atk:pvpCl(t.atk,1,9999),def:pvpCl(t.def,0,9999),maxHp:pvpCl(t.maxHp,1,99999),lv:pvpCl(t.lv,1,9999)};
   const party=(Array.isArray(t.party)?t.party:[]).filter(x=>x&&ALLIES[x.id]).slice(0,4)
     .map(x=>({id:x.id,lv:pvpCl(x.lv,1,60),aw:pvpCl(x.aw,0,AWAKEN_MAX),my:x.my?1:0,tr:pvpCl(x.tr||0,0,TRUST_MAX)}));
-  const allyHp=party.reduce((s,x)=>s+Math.round((50+x.lv*10)*(0.7+0.15*ALLIES[x.id].star)*(x.my?2:1)),0);
+  const allyHp=party.reduce((s,x)=>s+Math.round((50+x.lv*10)*(0.7+0.15*ALLIES[x.id].star)*(x.my?2:1)*(ALLIES[x.id].hpMul||1)),0);
   const heroName=(String(f.hero||'').replace(/[<>&"'`]/g,'').slice(0,8))||'모험가';
   const e={name:`${heroName}의 팀`,heroName,hp:Math.round(hero.maxHp*PVP_HP+allyHp*0.35),atk:hero.atk,def:hero.def,xp:0,gold:0,
     pvp:true,hero,party,friendId:f.id,cp:pvpCl(f.cp,0,9999999)};
@@ -2259,6 +2263,7 @@ function pvpEnemyActs(e){
       case 'twin':     dmg(6+lv*1.8,0.5,`${nm}의 쌍검 ①`);dmg(6+lv*1.8,0.5,`${nm}의 쌍검 ②`);break;
       case 'guard':    if(e.hp<e.maxHp*0.5&&Math.random()<0.3)heal(0.06);else dmg(9+lv*2.8,0.4,`${nm}의 방패 강타`);break;
       case 'chant':    if(e.hp<e.maxHp*0.7&&Math.random()<0.4)heal(0.12);else dmg(7+lv*2.4,0.5,`${nm}의 빛의 음표`);break;
+      case 'breeze':   if(e.hp<e.maxHp*0.7&&Math.random()<0.45)heal(0.1);else dmg(6+lv*2.4,0.5,`${nm}의 낙엽 바람`);break;
       case 'purify':   if(e.hp<e.maxHp*0.5&&Math.random()<0.4)heal(0.12);else dmg(10+lv*3.6,0.4,`${nm}의 날개 베기`);break;
       case 'monk_holy':dmg(8+lv*2.8,0,`${nm}의 성수 투척`);break;
       case 'civ_atk': case 'civ_burn': case 'civ_blind': case 'civ_cart': case 'civ_scan': case 'civ_guard': case 'civ_food':
@@ -2825,7 +2830,7 @@ function startBattle(spec){
   const okList=P.active.filter(id=>spec.pvp||sortieOk(a,id)).slice(0,smax||9);
   const party=[...(noFixed?[]:[FIXED]),...okList];
   const benched=spec.pvp?[]:P.active.filter(id=>!okList.includes(id));
-  party.forEach(id=>{const al=ALLIES[id],mx=Math.round((50+aData(id).lv*10)*(0.7+0.15*al.star)*(isMyth(id)?2:1));ahp[id]={hp:mx,max:mx};});
+  party.forEach(id=>{const al=ALLIES[id],mx=Math.round((50+aData(id).lv*10)*(0.7+0.15*al.star)*(isMyth(id)?2:1)*(al.hpMul||1));ahp[id]={hp:mx,max:mx};});
   B={e:{...t,maxHp:t.hp},spec,area:a,stage:spec.hunt?0:s,stype:type,baseName:t.name,isBoss,isFinal:!!t.final,
      charging:false,chargeName:'',chargeKind:null,phase:1,tornadoCD:0,
      buff:0,aura:0,hex:0,immune:0,reflect:0,curAlly:null,stun:{},stunWhy:{},ahp,agatoUsed:false,curse:0,silence:0,weak:0,ward:false,rage:0,turn:0,
@@ -3334,6 +3339,21 @@ function alliesAct(){
             addLog(`${nm}의 정화 — ${debuffs.length?debuffs.join(', ')+' 제거 · ':''}방어막 ${B.mshield}`);queueFx('player','🛡'+B.mshield,'mpf');
           }else addLog(`${nm}의 정화 — ${debuffs.join(', ')} 제거`);
         }else allyHit(10+lv*3.6,`${nm}의 날개 베기`,0.4);
+        break;}
+      case 'breeze':{ // 엘리스: 디버프 제거 · 응원 서포트 (공격은 약함)
+        if(B.eliseCD>0)B.eliseCD--;
+        const db=[];
+        if(B.curse){db.push('방어력 감소');B.curse=0;}
+        if(B.dot){db.push(B.dot.name);B.dot=null;}
+        if(B.silence){db.push('봉인');B.silence=0;}
+        if(B.healCut){db.push('회복 감소');B.healCut=0;}
+        partyIds().forEach(x=>{if(B.stun[x]>0&&B.stunWhy[x]==='불화'){B.stun[x]=0;db.push(`${ALLIES[x].name} 불화`);}});
+        if((B.vslow&&Object.keys(B.vslow).length)||(B.vsil&&Object.keys(B.vsil).length)){B.vslow={};B.vsil={};db.push('동료 둔화·침묵');}
+        if(db.length){addLog(`🍂 ${nm}의 정화의 바람 — ${db.join(', ')} 제거`);queueFx('player','🍂 정화','mpf');if(isMyth(id))heal(0.1,`🔱 만추의 축복`);}
+        else if(B.eliseCD<=0){
+          B.eliseCD=isMyth(id)?2:3;heal(0.1,`🍂 ${nm}의 가을바람 응원`);
+          if(!B.aura){B.aura=4;addLog(`${nm}의 응원 — 3턴간 주인공 공격력 1.2배`);}
+        }else allyHit(6+lv*2.4,`${nm}의 낙엽 바람`,0.5);
         break;}
       case 'prism':{ // 세이렌: 보석 광선 · 프리즘 굴절 반사
         B.sirenT++;
