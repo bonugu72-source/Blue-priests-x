@@ -251,6 +251,10 @@ body.title-mode{overflow:hidden}
 .pf-naberius.p2{box-shadow:0 0 34px rgba(255,30,50,.85),0 0 100px rgba(255,0,30,.45)}
 .pf-naberius.p2 .pglow{background:radial-gradient(ellipse at 50% 100%,rgba(255,50,30,.7),transparent 70%);animation-duration:1.2s}
 .pf-naberius.p2 img{filter:saturate(1.3) contrast(1.1)}
+.pf-chahuia{box-shadow:0 0 30px rgba(140,180,255,.75),0 0 90px rgba(200,170,255,.35)}
+.pf-chahuia .pglow{background:radial-gradient(ellipse at 50% 100%,rgba(140,170,255,.5),transparent 65%);animation:breathe 2.4s ease-in-out infinite}
+.pf-chahuia2{box-shadow:0 0 30px rgba(255,50,40,.8),0 0 90px rgba(255,90,30,.45)}
+.pf-chahuia2 .pglow{background:radial-gradient(ellipse at 50% 100%,rgba(255,60,40,.55),transparent 65%);box-shadow:inset 0 0 50px rgba(80,0,0,.7);animation:breathe 2s ease-in-out infinite}
 .pf-merem{box-shadow:0 0 30px rgba(170,90,255,.75),0 0 90px rgba(255,200,90,.3)}
 .pf-merem .pglow{background:radial-gradient(ellipse at 50% 100%,rgba(160,80,255,.5),transparent 65%);box-shadow:inset 0 0 50px rgba(40,0,80,.7);animation:breathe 2.2s ease-in-out infinite}
 .pf-perta{box-shadow:0 0 30px rgba(220,225,255,.6),0 0 90px rgba(255,215,120,.3)}
@@ -345,6 +349,7 @@ body.pfrozen #cmds .btn{filter:saturate(.2) brightness(1.2);background:linear-gr
 .memthumb{width:40px;height:40px;border-radius:8px;background-size:cover;background-position:center;box-shadow:0 0 10px rgba(255,200,220,.4)}
 .memimg{display:block;width:100%;max-height:58vh;object-fit:contain;border-radius:12px;margin:8px 0;box-shadow:0 0 24px rgba(255,210,230,.35)}
 .rchip{display:inline-block;padding:1px 7px;border-radius:9px;font-size:11px;font-weight:700;color:var(--rc,#ccc);background:rgba(255,255,255,.06);box-shadow:0 0 0 1px color-mix(in srgb,var(--rc,#888) 45%,transparent) inset;margin:2px 4px 2px 0}.rchip.off{color:#8a93ad;font-weight:400}
+.txpbtn{display:block;width:100%;margin:4px 0;padding:5px 8px;font-size:12px;min-height:0;background:linear-gradient(135deg,#5a1f3e,#2a1a4e);border-color:rgba(255,150,200,.5)}
 .presets{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:8px 0 4px}
 .preset{border:1px solid rgba(140,170,255,.25);border-radius:12px;padding:8px;background:rgba(20,30,60,.45);display:flex;flex-direction:column;gap:6px}
 .preset.on{border-color:var(--gold);box-shadow:0 0 0 1px rgba(255,210,110,.35) inset}
@@ -1413,6 +1418,29 @@ const AREAS=[
       magic:true, magicGrow:1, halfTick:3000, itemAt:{n:10,id:'merem_feather'},
       pre:'우물 위로 금빛 마법진이 떠오르고, 보랏빛 깃털이 소용돌이친다.\n두건을 쓴 소녀가 손끝으로 마법진을 돌리며 웃는다.\n\n"검으로는 마법을 막을 수 없어. 3초마다 네 목숨을 절반씩 가져갈 테니까… 잘 막아 봐."',
       moves:[{t:'atk',n:'마력 탄환'},{t:'strong',n:'금빛 마법진 폭발'},{t:'multi',n:'보랏빛 깃털 비',hits:4,m:0.35},{t:'curse',n:'악의의 저주'},{t:'sweep',n:'갈라지는 대지',m:0.18},{t:'atk',n:'마력 탄환'},{t:'charge',n:'저승 우물의 대마법'}]}
+  },
+  { name:'저승의 경계선', realm:'demon', country:'마계 · 하늘과 저승이 맞닿은 선', flag:'⚖️', rec:66, recEnd:70, glow:'#8fb8ff',
+    desc:'천계에서 쫓겨난 자들이 마지막으로 지나는 경계선. 별빛 마법진이 떠 있는 하늘 아래, 추방당한 대천사가 기다린다.',
+    intro:'저승 우물을 지나자, 하늘과 땅의 경계가 흐릿해졌다.\n\n별빛이 쏟아지는 허공에 수정 조각들이 떠다니고, 거대한 마법진이 천천히 돌고 있다.\n\n그 한가운데, 푸른 머리칼의 대천사가 미소 짓고 있었다.\n\n"어서 오렴. 여기는 하늘에서 버려진 자들이 마지막으로 머무는 곳이야."',
+    outro:'붉은 마법진이 깨지고, 검은 날개가 재가 되어 흩날렸다.\n\n차후이아의 붉은 눈이 천천히 푸른빛을 되찾는다.\n\n"…고마워. 이제야 그분께 돌아갈 수 있을 것 같아."\n\n— 저승의 경계선 해방 —',
+    enemies:[
+      {name:'추방된 천사의 그림자', icon:'👤', hp:940, atk:146, def:66, xp:380, gold:190, demon:true, moves:[{t:'atk',n:'그림자 날개'},{t:'curse',n:'추방의 낙인'},{t:'atk',n:'그림자 날개'}]},
+      {name:'경계의 수정 골렘',     icon:'💎', hp:1000, atk:140, def:74, xp:382, gold:191, demon:true, moves:[{t:'strong',n:'수정 주먹'},{t:'atk',n:'짓밟기'},{t:'sweep',n:'수정 파편',m:0.15}]},
+      {name:'별빛 마법진의 파수꾼', icon:'✴️', hp:900, atk:150, def:62, xp:381, gold:191, demon:true, moves:[{t:'atk',n:'별빛 탄환'},{t:'silence',n:'봉인 문양'},{t:'strong',n:'마법진 폭발'}]},
+      {name:'타락한 성가대원',      icon:'🎶', hp:920, atk:148, def:64, xp:383, gold:192, demon:true, moves:[{t:'atk',n:'불협화음'},{t:'drain',n:'영혼의 노래'},{t:'curse',n:'저주받은 찬송'}]},
+      {name:'경계를 떠도는 망령',   icon:'👻', hp:960, atk:152, def:60, xp:384, gold:192, demon:true, moves:[{t:'atk',n:'차가운 손길'},{t:'dot',n:'경계의 상처',dn:'출혈'},{t:'multi',n:'원한의 손톱',hits:2,m:0.6}]}
+    ],
+    elite:{name:'경계선의 문지기 천사', icon:'🛡️', hp:15000, atk:186, def:62, xp:2100, gold:1520, demon:true,
+      moves:[{t:'strong',n:'심판의 창'},{t:'multi',n:'천사의 연격',hits:3,m:0.55},{t:'curse',n:'추방의 선고'},{t:'charge',n:'경계 봉쇄'}]},
+    mid:{name:'오로바스', art:'orobas', title:'솔로몬 72악마 · 제55영 · 왕자 · 20군단', hp:33000, atk:192, def:60, xp:8200, gold:6200, demon:true,
+      pre:'말의 머리를 한 왕자가 경계선 위에서 발굽을 구른다.\n\n"나는 거짓을 말하지 않는다. 너희는 이 선을 넘지 못한다."',
+      moves:[{t:'atk',n:'발굽 짓밟기'},{t:'strong',n:'왕자의 돌진'},{t:'multi',n:'갈기 채찍',hits:3,m:0.5},{t:'curse',n:'진실의 눈'},{t:'charge',n:'20군단의 질주'}]},
+    boss:{name:'차후이아', art:'chahuia', title:'추방당한 대천사', hp:30000, exactHp:true, atk:200, def:62, xp:48000, gold:60000, goldFirst:0, goldRepeat:60000, demon:true, trustXpFirst:1,
+      voidAlly:0.5, reflectAlly:0.5,
+      madness:{at:10000,to:40000,atkMult:1,art:'chahuia2',title:'타락',logName:'타락',fallen:{rageEvery:4000,maxMul:32},
+        line:'"하늘이 나를 버렸다면… 나도 하늘을 버리겠어."\n\n푸른 머리칼이 붉게 물들고, 하얀 날개가 검게 타들어 간다. 머리 위로 뒤틀린 뿔이 솟아오르고, 붉은 마법진이 하늘을 뒤덮는다.\n\n— 타락천사 차후이아: 체력 40,000 · 주인공과 동료 모두 출혈 · 4초마다 방어하지 않으면 공격력 2배 —'},
+      pre:'수정 조각이 떠다니는 별빛 마법진 한가운데, 하얀 예복을 입은 푸른 머리칼의 대천사가 미소 짓는다.\n\n"너희 동료들의 칼끝은 다른 차원으로 흘려보낼게. 그리고 너의 칼끝은… 네 동료들에게 돌려줄게."',
+      moves:[{t:'atk',n:'수정 지팡이'},{t:'strong',n:'별빛 마법진 폭발'},{t:'multi',n:'수정 비',hits:4,m:0.35},{t:'curse',n:'추방의 선고'},{t:'sweep',n:'차원의 균열',m:0.18},{t:'charge',n:'대천사의 심판'}]}
   }
 
 ];
@@ -1425,7 +1453,7 @@ const stageRec=(a,s)=>Math.round(AREAS[a].rec+(s-1)*(AREAS[a].recEnd-AREAS[a].re
 const RT={atkCd:1500,defCd:400,itemCd:1500,fleeCd:1000,allyMs:1500,bossMs:1500,midMs:1600,normalMs:1800};
 const DEF_FLOOR=0.3; // 방어력이 아무리 높아도 적 공격의 30%는 들어감
 const ENEMY_MULT=1.3, LATE_BOSS_MULT=1.1; // 적 공격력·체력 1.3배 (나베리우스·보티스는 1.1배)
-const NORMAL_HP=[2.4,4,4.5,5,5.5,6,6.5,7,7.5,8,8.5,9,9.5,10,10.5,11,11.5], NORMAL_REWARD=1.5; // 일반 적이 몇 턴은 버티며 공격하도록
+const NORMAL_HP=[2.4,4,4.5,5,5.5,6,6.5,7,7.5,8,8.5,9,9.5,10,10.5,11,11.5,12], NORMAL_REWARD=1.5; // 일반 적이 몇 턴은 버티며 공격하도록
 function scaleBase(base,a,s){
   const f=1+0.06*(s-1);
   return {...base,hp:Math.round(base.hp*f*NORMAL_HP[a]),atk:Math.round(base.atk*f),def:Math.round(base.def*(1+0.04*(s-1))),
@@ -1610,6 +1638,11 @@ const ART={
       <path d="M92,90 C88,80 92,70 100,68 C108,70 112,80 108,90 Z"/>
       <path d="M90,74 C84,82 82,96 86,106 L90,92 Z M110,74 C116,82 118,96 114,106 L110,92 Z"/>`,
     eyes:`<circle cx="96" cy="80" r="2"/><circle cx="104" cy="80" r="2"/>`},
+  orobas:{c:'#b9c4d8',eye:'#ff5050',latin:'OROBAS · SPIRITVS LV · PRINCEPS · XX LEGIONES · ',
+    body:`<path d="M66,190 C60,160 64,132 78,116 L86,96 C84,80 88,62 98,50 L104,36 L110,50 C120,56 128,66 130,78 L142,92 C146,98 144,106 138,108 L126,106 C124,118 126,132 130,146 C136,160 136,176 132,190 Z"/>
+      <path d="M100,48 C96,40 92,34 86,30 C94,30 100,36 104,42 Z M110,48 C112,40 116,34 122,30 C116,32 112,38 110,44 Z"/>
+      <path d="M86,96 C78,90 72,82 70,72 C80,78 86,84 90,92 Z"/>`,
+    eyes:`<circle cx="118" cy="74" r="2.6"/>`},
   vine:{c:'#d0a060',eye:'#ff4040',latin:'VINE · SPIRITVS XLV · REX ET COMES · XXXVI LEGIONES · ',
     body:`<path d="M30,186 C30,160 44,142 66,136 L120,132 C134,120 140,104 150,96 C160,90 172,94 174,104 L178,118 C178,126 172,130 164,130 L158,132 C156,146 150,160 140,166 L140,190 L128,190 L126,168 L74,168 L72,190 L60,190 L58,164 C42,160 30,174 30,186 Z"/>
       <path d="M88,138 C80,118 84,96 100,86 C96,74 102,60 116,58 C130,60 136,72 132,84 C142,92 144,108 138,122 Z"/>
@@ -1671,6 +1704,8 @@ const PORTRAIT={
   naberius:{img:'naberius.jpg',cls:'pf-naberius',pos:'50% 24%'},
   naberius2:{img:'naberius.jpg',cls:'pf-naberius p2',pos:'50% 24%'},
   naberius3:{img:'naberius3.jpg',cls:'pf-naberius p2',pos:'50% 30%'},
+  chahuia:{img:'chahuia.jpg',cls:'pf-chahuia',pos:'50% 22%'},
+  chahuia2:{img:'chahuia2.jpg',cls:'pf-chahuia2',pos:'50% 18%'},
   merem:{img:'merem.jpg',cls:'pf-merem',pos:'40% 18%'},
   perta:{img:'perta.jpg',cls:'pf-perta',pos:'50% 24%'},
   mumyeong:{img:'mumyeong.jpg',cls:'pf-mumyeong',pos:'55% 16%'},
@@ -2189,11 +2224,18 @@ const trustLv=id=>{const p=trustPts(id);let l=0;while(l<TRUST_MAX&&p>=TRUST_REQ[
 const trustOn=id=>ALLIES[id]&&((ALLIES[id].star===5&&!!TIER5[id])||ALLIES[id].star===6);
 const trustMultT=(id,lv)=>trustOn(id)?1+(trustTop(id)-1)*Math.max(0,Math.min(TRUST_MAX,lv||0))/TRUST_MAX:1;
 const trustMult=id=>trustMultT(id,trustLv(id));
+function useTrustXp(id){
+  if(!trustOn(id)||(P.items.trustxp||0)<1)return;
+  const l0=trustLv(id);if(l0>=TRUST_MAX)return;
+  const l1=Math.min(TRUST_MAX,l0+2);P.trust=P.trust||{};P.trust[id]=Math.max(trustPts(id),TRUST_REQ[l1]);P.items.trustxp--;save();
+  renderAllies(`💗 신뢰도 XP 사용 — ${ALLIES[id].name} 신뢰도 ${l0} → ${l1} (전투력 +${Math.round((trustMult(id)-1)*100)}%)`);
+}
+document.addEventListener('click',e=>{const t=e.target.closest&&e.target.closest('[data-txp]');if(t&&!t.disabled)useTrustXp(t.dataset.txp);});
 function trustHTML(id){
   if(!trustOn(id))return '';
-  const l=trustLv(id),p=trustPts(id);
+  const l=trustLv(id),p=trustPts(id),txp=P.items.trustxp||0;
   const nxt=l<TRUST_MAX?` · 다음 ${p-TRUST_REQ[l]}/${TRUST_REQ[l+1]-TRUST_REQ[l]}`:' · 최대';
-  return `<div class="trust"><span class="hearts">${'❤️'.repeat(l)}${'🤍'.repeat(TRUST_MAX-l)}</span><span class="small">신뢰도 ${l}/${TRUST_MAX}${nxt}${l?` · 전투력 +${Math.round((trustMult(id)-1)*100)}%`:''}</span></div>`;
+  return `${txp&&l<TRUST_MAX?`<button class="btn txpbtn" data-txp="${id}">💗 신뢰도 XP 사용 (+2) · 보유 ${txp}</button>`:''}<div class="trust"><span class="hearts">${'❤️'.repeat(l)}${'🤍'.repeat(TRUST_MAX-l)}</span><span class="small">신뢰도 ${l}/${TRUST_MAX}${nxt}${l?` · 전투력 +${Math.round((trustMult(id)-1)*100)}%`:''}</span></div>`;
 }
 const allyMult=id=>multOf(id,P.awaken[id],isMyth(id))*trustMult(id);
 function allyGainXp(id,n){
@@ -3413,13 +3455,13 @@ function synthAll(){
 }
 
 /* ===================== 전투 ===================== */
-function clearBattle(){forcedMv=null;if(B&&B.enemyT)clearInterval(B.enemyT);if(B&&B.allyT)clearInterval(B.allyT);document.body.classList.remove('pfrozen');if(B&&B.freezeT)clearInterval(B.freezeT);if(B&&B.sakuraT)clearInterval(B.sakuraT);document.body.classList.remove('battle');if(B&&B.waveT)clearInterval(B.waveT);if(B&&B.soulT)clearInterval(B.soulT);if(B&&B.drainT)clearInterval(B.drainT);if(B&&B.tsT)clearInterval(B.tsT);if(B&&B.paraT)clearInterval(B.paraT);if(B&&B.zapT)clearInterval(B.zapT);if(B&&B.karmaT)clearInterval(B.karmaT);if(B&&B.trainT)clearInterval(B.trainT);if(B&&B.aoraT)clearInterval(B.aoraT);if(B&&B.heartT)clearInterval(B.heartT);if(B&&B.halfT)clearInterval(B.halfT);if(B&&B.isaT)clearInterval(B.isaT);B=null;}
+function clearBattle(){forcedMv=null;if(B&&B.enemyT)clearInterval(B.enemyT);if(B&&B.allyT)clearInterval(B.allyT);document.body.classList.remove('pfrozen');if(B&&B.freezeT)clearInterval(B.freezeT);if(B&&B.sakuraT)clearInterval(B.sakuraT);document.body.classList.remove('battle');if(B&&B.waveT)clearInterval(B.waveT);if(B&&B.soulT)clearInterval(B.soulT);if(B&&B.drainT)clearInterval(B.drainT);if(B&&B.tsT)clearInterval(B.tsT);if(B&&B.paraT)clearInterval(B.paraT);if(B&&B.zapT)clearInterval(B.zapT);if(B&&B.karmaT)clearInterval(B.karmaT);if(B&&B.trainT)clearInterval(B.trainT);if(B&&B.aoraT)clearInterval(B.aoraT);if(B&&B.heartT)clearInterval(B.heartT);if(B&&B.halfT)clearInterval(B.halfT);if(B&&B.fallT)clearInterval(B.fallT);if(B&&B.isaT)clearInterval(B.isaT);B=null;}
 /* 반사·부적 등으로 적이 턴 밖에서 쓰러졌을 때 */
 function winNow(){
   if(!B||B.won)return;
   if((B.e.berserk&&!B.berserked)||(B.e.madness&&!B.maddened)||(B.e.awaken&&!B.awoke)||(B.e.twin&&!B.twinned)||(B.e.relay&&(B.relayStage||0)<2)){B.e.hp=Math.max(1,B.e.hp);renderBattle();return;}
   B.won=true;B.busy=true;if(B.enemyT)clearInterval(B.enemyT);if(B.allyT)clearInterval(B.allyT);if(B.freezeT)clearInterval(B.freezeT);document.body.classList.remove('pfrozen');if(B.sakuraT)clearInterval(B.sakuraT);if(B.paraT)clearInterval(B.paraT);if(B.waveT)clearInterval(B.waveT);if(B.soulT)clearInterval(B.soulT);if(B.drainT)clearInterval(B.drainT);if(B.tsT)clearInterval(B.tsT);
-  if(B.zapT)clearInterval(B.zapT);if(B.karmaT)clearInterval(B.karmaT);if(B.trainT)clearInterval(B.trainT);if(B.aoraT)clearInterval(B.aoraT);if(B.heartT)clearInterval(B.heartT);if(B.halfT)clearInterval(B.halfT);if(B.isaT)clearInterval(B.isaT);
+  if(B.zapT)clearInterval(B.zapT);if(B.karmaT)clearInterval(B.karmaT);if(B.trainT)clearInterval(B.trainT);if(B.aoraT)clearInterval(B.aoraT);if(B.heartT)clearInterval(B.heartT);if(B.halfT)clearInterval(B.halfT);if(B.fallT)clearInterval(B.fallT);if(B.isaT)clearInterval(B.isaT);
   renderBattle();setTimeout(victory,750);
 }
 /* 이사벨 부제: 5초마다 주인공 HP 40% 회복 */
@@ -3689,6 +3731,16 @@ function freezeTick(){
 /* 메르엠: 체력이 떨어질수록 마법력 증가 (HP 0에 가까울수록 최대 1+magicGrow배) */
 const magicMul=()=>(B&&B.e&&B.e.magicGrow)?1+B.e.magicGrow*(1-Math.max(0,B.e.hp)/B.e.maxHp):1;
 /* 메르엠: 3초마다 저승의 대마법 — 방어하지 않으면 주인공·동료 현재 HP 절반, 방어하면 무력화 */
+/* 타락천사 차후이아: 4초마다 방어 확인 — 방어하지 않으면 공격력 2배 (누적) · 동료 출혈 */
+function fallTick(){
+  if(!B||B.over||B.won||P.hp<=0||!$('#modal').classList.contains('hidden')){if(B)B.fallAt=Date.now()+4000;return;}
+  const e=B.e,f=e.madness&&e.madness.fallen;if(!f)return;B.fallAt=Date.now()+f.rageEvery;
+  if(B.guard)addLog(`🛡 방어 태세 — ${e.name}의 타락한 분노를 억눌렀다 (공격력 ×${B.fallMul})`);
+  else if(B.fallMul<f.maxMul){B.fallMul*=2;addLog(`💢 ${e.name}의 타락한 분노! 방어하지 않아 공격력이 두 배로 — ×${B.fallMul}`);document.body.classList.add('flash');setTimeout(()=>document.body.classList.remove('flash'),250);}
+  partyIds().forEach(id=>{const h=B.ahp[id];if(h&&h.hp>1){const d=Math.max(1,Math.round(h.max*0.04));h.hp=Math.max(1,h.hp-d);}});
+  addLog('🩸 출혈 — 동료 모두 최대 HP 4% 피해');
+  renderBattle();
+}
 function halfTick(){
   if(!B||B.over||B.won||P.hp<=0||!$('#modal').classList.contains('hidden')){if(B&&B.e.halfTick)B.halfAt=Date.now()+B.e.halfTick;return;}
   const e=B.e;B.halfAt=Date.now()+e.halfTick;
@@ -3803,6 +3855,7 @@ function renderBattle(){
   if(B.drainAt)st.push(`🩸 흡수 ${Math.max(0,Math.ceil((B.drainAt-Date.now())/1000))}초`);
   if(B.freezeAt)st.push(pFrozen()?'🧊 주인공 빙결':`🧊 빙결 ${Math.max(0,Math.ceil((B.freezeAt-Date.now())/1000))}초`);
   if(aFrozen())st.push('❄ 동료 빙결');
+  if(B.fallAt)st.push(`💢 분노 ${Math.max(0,Math.ceil((B.fallAt-Date.now())/1000))}초 · 공격 ×${B.fallMul||1}${B.guard?' · 🛡':''}`);
   if(B.halfAt)st.push(`🔮 악의의 마법 ${Math.max(0,Math.ceil((B.halfAt-Date.now())/1000))}초${B.guard?' · 🛡 방어 태세':''}`);
   if(B.soulAt)st.push(`🗡 영혼 일격 ${Math.max(0,Math.ceil((B.soulAt-Date.now())/1000))}초${B.guard?' · 🛡 방어 태세':''}`);
   if(B.e.wave&&B.waveAt)st.push(`🌀 파동 ${Math.max(0,Math.ceil((B.waveAt-Date.now())/1000))}초${B.guard?' · 🛡 방어 태세':''}`);
@@ -3825,6 +3878,7 @@ function renderBattle(){
   if(e.bleedOnHit)passive.push('🩸 공격 시 출혈');
   if(e.burnHit)passive.push('🔥 공격 시 화상');
   if(e.timeStop)passive.push(`⏳ ${e.timeStop.every/1000}초마다 시간정지 ${e.timeStop.ms/1000}초 (방어 시 ${e.timeStop.guardMs/1000}초)`);
+  if(e.voidAlly)passive.push(`🌀 동료 공격 ${Math.round(e.voidAlly*100)}% 무효 · 🔁 주인공 공격 ${Math.round(e.reflectAlly*100)}% 동료에게 반사`);
   if(e.magic)passive.push(`🔮 마법 피해 (주인공 방어력 절반) · 마법력 ×${magicMul().toFixed(2)}`);
   if(e.halfTick)passive.push(`🔮 ${e.halfTick/1000}초마다 악의의 마법 (방어 시 무력화)`);
   if(e.reflectHero)passive.push(`🔮 주인공 공격 ${Math.round(e.reflectHero*100)}% 반사`);
@@ -3835,7 +3889,7 @@ function renderBattle(){
   if(e.critAll)passive.push(`💥 모든 공격 치명타 ×${e.critAll*(B.awoke&&e.awaken?e.awaken.critMult:1)}`);
   if(e.awaken)passive.push(B.awoke?'💢 각성: 3초마다 영혼을 가르는 일격':`💢 HP ${fmt(e.awaken.at)} 이하 각성`);
   if(e.burnBleed)passive.push('🔥🩸 끝없는 화상·출혈');
-  if(e.madness)passive.push(B.maddened?`💢 ${e.madness.logName||'광기'}: 공격력 ${e.madness.atkMult}배`:`💢 HP ${fmt(e.madness.at)} 이하 ${e.madness.logName||'광기'}`);
+  if(e.madness)passive.push(B.maddened?(e.madness.fallen?`💢 타락: 출혈 · 4초마다 방어 필요 (공격력 ×${B.fallMul||1})`:`💢 ${e.madness.logName||'광기'}: 공격력 ${e.madness.atkMult}배`):`💢 HP ${fmt(e.madness.at)} 이하 ${e.madness.logName||'광기'}`);
   if(e.wave)passive.push('🌀 5초마다 거스르는 파동');
   if(e.fixedDmg)passive.push('🎯 방어력 무시 고정 피해');
   if(e.paralyze)passive.push('⚡ 3초마다 동료 마비');
@@ -3918,10 +3972,12 @@ function hitEnemy(mult,label){
   queueFx('enemy',(crit?'💥':'')+d,crit?'crit':'dmg');
   if(P.relics.includes('blood_orb')&&d>0&&P.hp>0){const vh=Math.min(P.maxHp-P.hp,Math.round(d*BLOOD_ORB_PCT*pHealMul()));if(vh>0){P.hp+=vh;stat('heal','hero',vh);queueFx('player','🩸+'+vh,'heal');}}
   if(B.reflect){const r=Math.round(d*0.5);P.hp=Math.max(0,P.hp-r);addLog(`↩ 뒤집힌 시간 — 주인공에게 ${r} 반사`);queueFx('player','↩-'+r,'pdmg');}
+  else if(e.reflectAlly&&d>0){const alive=partyIds().filter(id=>B.ahp[id]&&B.ahp[id].hp>0);if(alive.length){const id=pick(alive),h=B.ahp[id],r=Math.max(1,Math.round(d*e.reflectAlly));h.hp=Math.max(0,h.hp-r);addLog(`🔁 ${e.name}의 반사 — 주인공의 공격 절반이 ${ALLIES[id].name}에게! (${r})`);if(h.hp<=0&&!allyDown(id))addLog(`${ALLIES[id].name}이(가) 쓰러졌다!`);}}
   else if(e.reflectHero&&d>0){const r=Math.max(1,Math.round(d*e.reflectHero));P.hp=Math.max(0,P.hp-r);addLog(`🔮 ${e.name}의 반사 — 주인공에게 ${r} 되돌아왔다`);queueFx('player','🔮-'+r,'pdmg');}
 }
 function allyHit(base,label,defFactor,fixed){
   const e=B.e;
+  if(e.voidAlly&&Math.random()<e.voidAlly){addLog(`🌀 ${label} — ${e.name}이(가) 다른 차원으로 흘려보냈다 (무효)`);queueFx('enemy','차원 무효','mpf');return 0;}
   if(B.immune){addLog(`${label}! — ⏸ 피해 무효`);queueFx('enemy','무효','mpf');return 0;}
   if(B.vsil&&B.vsil[B.curAlly]&&Math.random()<0.3){addLog(`${label}! — 🔇 침묵에 막혀 무효`);queueFx('enemy','침묵','mpf');return 0;}
   let d=fixed?Math.max(1,Math.round(base*(B.am||1))):Math.max(1,Math.round((base*(B.am||1)-enemyDef()*defFactor)*rnd(0.9,1.1)));
@@ -4195,7 +4251,7 @@ function hitPlayer(mult,label){
   const critOn=e.critAll&&!(sakuraWind()&&Math.random()<(isMyth('sakura')?0.75:0.5));
   if(e.critAll&&!critOn)label+=' (🌸 벚꽃바람에 치명타가 빗나감)';
   const crit=critOn?e.critAll*(B.awoke&&e.awaken?e.awaken.critMult:1):1;
-  const raw=e.atk*(1+0.2*B.rage)*(B.hex?0.8:1)*(salvOn()?1/1.5:1)*magicMul()*mult*crit;
+  const raw=e.atk*(1+0.2*B.rage)*(B.hex?0.8:1)*(salvOn()?1/1.5:1)*magicMul()*(B.fallMul||1)*mult*crit;
   // fixedDmg: 방어력 무시 고정 피해 · 그 외에는 방어력으로 최대 70%까지만 줄어듦 (최소 30%는 들어감)
   let d=e.fixedDmg?raw:Math.max(raw*DEF_FLOOR,raw-def/2)*rnd(0.9,1.1);
   d=Math.max(1,Math.round(d));
@@ -4316,6 +4372,8 @@ function checkPhase(){
   if(e.madness&&!B.maddened&&e.hp>0&&e.hp<=e.madness.at){
     const m=e.madness;
     B.maddened=true;e.maxHp=Math.max(e.maxHp,m.to);e.hp=m.to;e.atk=Math.round(e.atk*m.atkMult);e.art=m.art;B.charging=false;B.chargeKind=null;
+    if(m.fallen){e.voidAlly=0;e.reflectAlly=0;e.title='타락천사';B.fallMul=1;B.dot={name:'출혈',dmg:Math.max(5,Math.round(e.atk*0.08)),turns:999};
+      B.fallAt=Date.now()+m.fallen.rageEvery+2500;B.fallT=setInterval(fallTick,m.fallen.rageEvery);}
     addLog(`💢 ${e.name}의 ${m.logName||'광기'} — 체력 ${fmt(m.to)}까지 회복 · 공격력 ${m.atkMult}배!`);
     document.body.classList.add('flash');setTimeout(()=>document.body.classList.remove('flash'),400);
     showStory(`<div class="sum s5"><div class="sum-title">${m.title||'광기'}</div><div class="intro-art">${PORTRAIT[m.art]?portraitHTML(m.art,'big'):bossSVG(m.art)}</div><div class="sum-name">${e.name}</div><p class="sum-desc" style="color:#ffb0b0">${esc(m.line).replace(/\n/g,'<br>')}</p></div>`,
@@ -4533,6 +4591,7 @@ function victory(){
   {P.trust=P.trust||{};const g=TRUST_GAIN[stype]||1;
    partyIds().filter(trustOn).forEach(id=>{const l0=trustLv(id);P.trust[id]=Math.min(TRUST_REQ[TRUST_MAX],trustPts(id)+g);const l1=trustLv(id);
      if(l1>l0)extra.push(`💗 ${ALLIES[id].name} 신뢰도 ${l1}/${TRUST_MAX} — 전투력 +${Math.round((trustMult(id)-1)*100)}%`);});}
+  if(firstClear&&e.trustXpFirst){P.items.trustxp=(P.items.trustxp||0)+e.trustXpFirst;extra.push(`🏁 첫 클리어 보상: 💗 신뢰도 XP ×${e.trustXpFirst} — 동료 관리에서 ★5 동료 한 명에게 사용하면 신뢰도 +2`);}
   if(firstClear&&e.itemFirst&&RELICS[e.itemFirst]&&!P.relics.includes(e.itemFirst)){gainRelic(e.itemFirst);const it=RELICS[e.itemFirst];extra.push(`🏁 첫 클리어 보상: ${it.icon} 희귀 아이템 「${it.name}」 — ${it.desc.replace('희귀 아이템 · ','')}`);}
   if(firstClear&&e.stoneFirst){P.items.stone+=e.stoneFirst;stoneToast(e.stoneFirst,'첫 클리어 보상');extra.push(`🏁 첫 클리어 보상: ${AWAKEN_ITEM.icon} 「${AWAKEN_ITEM.name}」 ×${e.stoneFirst}`);}
   if(stype==='normal'&&Math.random()<0.15){P.items.water++;extra.push('성수 획득');}
