@@ -1254,6 +1254,7 @@ const ALLY_IMG={
   roa:{src:'ally_roa.jpg',pos:'50% 24%',face:'50% 31%',size:'400%'},
   muhee:{src:'ally_muhee.jpg',pos:'50% 20%',face:'50% 24%',size:'420%'},
   aora:{src:'ally_aora.jpg',pos:'50% 18%',face:'50% 24%',size:'420%'},
+  elizabeth:{src:'ally_elizabeth.jpg',pos:'50% 16%',face:'50% 17%',size:'560%'},
   akira:{src:'ally_akira.jpg',pos:'50% 18%',face:'50% 21%',size:'560%'},
   babelord:{src:'ally_babelord.jpg',pos:'50% 22%',face:'48% 28%',size:'420%'},
   miner:{src:'ally_miner.jpg',pos:'50% 15%',face:'50% 21%',size:'450%'},
@@ -2786,7 +2787,7 @@ function trustHTML(id){
 }
 /* 초월: 5각성 + 신화 승급을 마친 ★5만 · 구원의 조각 1개 · 성공 20% · 초월하면 전투력 2배 */
 const TRANS_RATE=0.2, TRANS_DROP=0.05, TRANS_DROP_DANIAN=0.05, TRANS_MULT=2, SALV_ITEM={name:'구원의 조각',icon:'✴️'};
-const transOn=id=>!!(P.trans&&P.trans[id]);
+const transOn=id=>!!(P&&P.trans&&P.trans[id]);
 const transReady=id=>ALLIES[id]&&ALLIES[id].star===5&&isMyth(id)&&(P.awaken[id]||0)>=5&&!transOn(id);
 const allyMult=id=>multOf(id,P.awaken[id],isMyth(id))*trustMult(id)*(transOn(id)?TRANS_MULT:1);
 function allyGainXp(id,n){
