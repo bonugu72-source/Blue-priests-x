@@ -776,6 +776,10 @@ body:has(.tabbar) .tabbar{background:color-mix(in srgb,var(--tc) 6%,rgba(8,12,26
 .bar.dgtbar span{font-size:14px;font-weight:900;font-variant-numeric:tabular-nums}
 .bar.dgtbar.low i{background:linear-gradient(90deg,#b8323a,#ff7a7a)}
 .bar.dgtbar.low span{animation:dglow .6s infinite alternate}
+.dgcount{position:fixed;inset:0;z-index:45;display:flex;align-items:center;justify-content:center;background:rgba(4,5,12,.42)}
+.dgcount b{font-size:130px;font-weight:900;color:#fff;font-variant-numeric:tabular-nums;text-shadow:0 0 30px var(--ba,#c9a0ff),0 0 60px var(--ba,#c9a0ff);animation:dgpop .9s ease-out both}
+.dgcount b.go{font-size:72px;color:var(--gold);animation:dgpop .5s ease-out both}
+@keyframes dgpop{0%{transform:scale(1.8);opacity:0}25%{transform:scale(1);opacity:1}80%{opacity:1}100%{transform:scale(.85);opacity:.15}}
 .dgstop{border:1px solid rgba(255,140,140,.55);background:#5a1c2a;color:#ffe0e0;font:inherit;font-size:13px;font-weight:800;border-radius:10px;padding:3px 10px;margin-right:4px;cursor:pointer}
 .dgstop:active{transform:scale(.95)}
 .dghud b{color:var(--gold);font-variant-numeric:tabular-nums}
@@ -3361,20 +3365,57 @@ const dgSec=ms=>(Math.max(0,ms)/1000).toFixed(1);
 function dgHudHTML(){
   return `<div class="dghud"><span id="dgdmg">총 딜 <b>${fmt(Math.round(dgTotal()))}</b></span><span>💀 ${B.dgKills}</span></div>`;
 }
+/* 시작 전 3 · 2 · 1 카운트다운 (보스 화면을 먼저 보여 주고, 끝나면 60초와 전투가 시작됨) */
+const DG_COUNT_MS=900;
+function dgCountdown(go){
+  if(!B||!B.dungeon)return;
+  renderBattle();
+  const ov=document.createElement('div');ov.className='dgcount';document.body.appendChild(ov);
+  let n=3;
+  const step=()=>{
+    if(!B||!B.dungeon||B.dgEnded){ov.remove();return;}
+    if(n>0){ov.innerHTML=`<b>${n}</b>`;n--;setTimeout(step,DG_COUNT_MS);}
+    else{ov.innerHTML='<b class="go">시작!</b>';B.dgGo=true;go();setTimeout(()=>ov.remove(),500);}
+  };
+  step();
+}
 function dungeonStart(){
   if(B)return;
   P._dgRestore={hp:P.hp,mp:P.mp};P.hp=P.maxHp;P.mp=P.maxMp;
   startBattle({area:dgAreaAt(0),dungeon:true});
 }
 /* 보스를 쓰러뜨리면 승리 대신 다음 보스가 바로 나온다 */
-function dungeonNextBoss(){
-  if(!B||!B.dungeon||B.over||B.e.hp>0)return;
-  const old=B.e.name;
+/* 1회 타격의 남는 딜: 보스 남은 HP보다 크게 때리면 넘친 만큼 다음 보스에게 이어짐 (출혈·불태움 같은 지속 피해는 제외) */
+function dgOver(who,d,e){
+  if(!B||!B.dungeon||e!==B.e||!(d>e.hp))return;
+  const k=who||'hero';B.dgOver=B.dgOver||{};B.dgOver[k]=(B.dgOver[k]||0)+(d-Math.max(0,e.hp));
+}
+function dgAdvance(){   // 다음 보스 등장 — 이전 보스에게 걸린 출혈·불태움은 남은 턴이 있어도 끊김
   B.dgDone+=B.e.maxHp;B.dgKills++;B.dgN++;
   const a=dgAreaAt(B.dgN),t=dgEnemy(a);
   B.e=t;B.area=a;B.baseName=t.name;B.charging=false;B.chargeKind=null;
-  const q=dgSeq();
-  addLog(`💀 ${old} 처치! — ${B.dgN===q.main.length?'😈 마계 보스 반복 시작 · ':''}다음 보스 「${t.name}」 (HP ${fmt(t.hp)})`);
+  B.ebleed=null;B.eburn=null;
+}
+/* 보스를 쓰러뜨리면 승리 대신 다음 보스가 바로 나온다 (남는 딜은 무제한으로 이어서 들어감) */
+function dungeonNextBoss(){
+  if(!B||!B.dungeon||B.over||B.e.hp>0)return;
+  const q=dgSeq(),n0=B.dgN,killed=[B.e.name],hadDot=!!(B.ebleed||B.eburn);
+  dgAdvance();
+  const over=B.dgOver||{};B.dgOver=null;
+  let carried=0;
+  Object.keys(over).forEach(w=>{
+    let amt=Math.round(over[w]);
+    while(amt>0&&B&&B.dungeon){
+      const e=B.e,take=Math.min(amt,e.hp);
+      e.hp-=take;amt-=take;carried+=take;stat('dmg',w,take);
+      if(e.hp<=0){killed.push(e.name);dgAdvance();}
+    }
+  });
+  const t=B.e;
+  addLog(`💀 ${killed.join(' · ')} 처치!${carried>0?` 💥 남은 피해 ${fmt(carried)} → 다음 보스로`:''}`);
+  if(hadDot)addLog('🩸 출혈·불태움은 쓰러진 보스와 함께 끝났다');
+  addLog(`${n0<q.main.length&&B.dgN>=q.main.length?'😈 마계 보스 반복 시작 · ':''}다음 보스 「${t.name}」 (HP ${fmt(t.hp)} / ${fmt(t.maxHp)})`);
+  if(carried>0)queueFx('enemy','💥'+fmt(carried),'crit');
   renderBattle();
 }
 function dungeonTick(){
@@ -4200,7 +4241,7 @@ function aoraTick(){
   if((B.blind||0)<2){B.blind=2;addLog(`🌫️ 대천사 아오라의 안개 — 적의 시야를 가렸다 (2턴간 적 공격 35% 빗나감)`);}
   if(!B.immune){
     const lv=aData(id).lv,d=Math.max(1,Math.round((8+lv*2.5)*allyMult(id)*(isMyth(id)?2:1)));
-    stat('dmg',id,Math.min(d,e.hp));e.hp=Math.max(0,e.hp-d);
+    dgOver(id,d,e);stat('dmg',id,Math.min(d,e.hp));e.hp=Math.max(0,e.hp-d);
     const vh=h?Math.min(h.max-h.hp,d):0;if(vh>0){h.hp+=vh;stat('heal',id,vh);}
     addLog(`👼 천사의 심판 — 생명력 흡수 ${d}${vh?` (아오라 HP +${vh})`:''}`);queueFx('enemy','👼'+d,'dmg');
   }
@@ -4276,7 +4317,7 @@ function karmaTick(){
     else{
       if(B.immune){addLog('📜 카르마의 화염 부적 — ⏸ 피해 무효');continue;}
       if(B.vsil&&B.vsil.karma&&Math.random()<0.3){addLog('📜 카르마의 화염 부적 — 🔇 침묵에 막혀 무효');continue;}
-      const d=Math.max(1,Math.round((6+lv*2.2)*KARMA_TAL*m*rnd(0.9,1.1)*(B.vslow&&B.vslow.karma?0.6:1)));stat('dmg','karma',Math.min(d,e.hp));e.hp=Math.max(0,e.hp-d);
+      const d=Math.max(1,Math.round((6+lv*2.2)*KARMA_TAL*m*rnd(0.9,1.1)*(B.vslow&&B.vslow.karma?0.6:1)));dgOver('karma',d,e);stat('dmg','karma',Math.min(d,e.hp));e.hp=Math.max(0,e.hp-d);
       B.eburn={dmg:Math.max(1,Math.round(d*0.4)),turns:2};
       addLog(`📜 카르마의 화염 부적 — ${d} 피해 · 불태움`);queueFx('enemy','🔥'+d,'dmg');
     }
@@ -4357,7 +4398,7 @@ function startBattle(spec){
       <p class="sum-desc">친구가 마지막으로 저장한 팀을 AI가 조종해요.<br>대결은 연습 경기라 HP는 가득 찬 상태로 시작하고, 끝나면 원래대로 돌아와요.</p></div>`,begin,true);
   }else if(spec.dungeon){
     showStory(`<div class="sum s5"><div class="sum-title">🏰 던전 — 공격력 측정</div><div class="intro-art">${PORTRAIT[t.art]?portraitHTML(t.art,'big'):bossSVG(t.art)}</div><div class="sum-name">첫 상대 · ${t.name}</div>
-      <p class="sum-desc" style="color:#cdd6f0">${DG_HP_MULT>1?`보스 HP ×${DG_HP_MULT} · `:''}보스는 공격하지 않아요 · 제한 시간 ${DG_MS/1000}초<br>보스를 쓰러뜨리면 다음 보스가 바로 나와요. 시작을 누르면 시간이 흘러요!</p></div>`,begin,true);
+      <p class="sum-desc" style="color:#cdd6f0">${DG_HP_MULT>1?`보스 HP ×${DG_HP_MULT} · `:''}보스는 공격하지 않아요 · 제한 시간 ${DG_MS/1000}초<br>보스를 쓰러뜨리면 다음 보스가 바로 나와요. 시작을 누르면 3·2·1 뒤에 시간이 흘러요!</p></div>`,()=>dgCountdown(begin),true);
     $('#mbtn').textContent='⚔ 시작';
   }else if(isBoss){
     addLog(`${type==='boss'?(t.final?'최종 보스':'나라 보스'):'솔로몬 72악마'} 「${t.name}」 강림!`);
@@ -4705,6 +4746,7 @@ function hitEnemy(mult,label){
   d=Math.max(1,Math.round(d));
   const crit=charmOn()||Math.random()<0.1*(stormOn()?2:1);
   if(crit)d=Math.round(d*(charmOn()?Math.max(charmCrit(),stormOn()&&isMyth('kirie')?2:1.5):(stormOn()&&isMyth('kirie')?2:1.5)));
+  dgOver('hero',d,e);
   stat('dmg','hero',Math.min(d,e.hp));
   e.hp=Math.max(0,e.hp-d);
   addLog(`${label}! ${e.name}에게 ${d} 피해${crit?' (치명타!)':''}`);
@@ -4722,6 +4764,7 @@ function allyHit(base,label,defFactor,fixed){
   let d=fixed?Math.max(1,Math.round(base*(B.am||1))):Math.max(1,Math.round((base*(B.am||1)-enemyDef()*defFactor)*rnd(0.9,1.1)));
   if(B.vslow&&B.vslow[B.curAlly])d=Math.max(1,Math.round(d*0.6));
   const ch=charmOn();if(ch)d=Math.round(d*charmCrit()); // 로아의 유혹: 동료 공격도 치명타
+  dgOver(B.curAlly,d,e);
   stat('dmg',B.curAlly,Math.min(d,e.hp));
   e.hp=Math.max(0,e.hp-d);
   addLog(`${label}! ${d} 피해${ch?' 💗(치명타!)':''}`);
@@ -5043,6 +5086,7 @@ function autoHuntStop(why){
 function act(kind,arg){
   if(!B||B.busy||B.over||B.won)return;
   if(kind==='dgquit'){if(B.dungeon)dungeonEnd('quit');return;}
+  if(B.dungeon&&!B.dgGo)return;   // 3·2·1 카운트다운이 끝나기 전에는 행동 불가
   if(kind==='itemmenu'||kind==='skillmenu'||kind==='back'){B.menu=kind==='itemmenu'?'item':'main';renderBattle();return;}
   if(Date.now()<(B.cdUntil||0))return;
   if(pFrozen()){addLog(`🧊 얼어붙어 움직일 수 없다… (${Math.ceil((B.pFrozenUntil-Date.now())/1000)}초)`);renderBattle();return;}
