@@ -1066,6 +1066,17 @@ const RELICS={
   yujun_suit:{name:'유준이의 맞춤형 정장', icon:'🤵', desc:'희귀 아이템 · 주인공 공격력 +50 (챌린저 800 LP 이스터에그)',apply:p=>{p.atk+=50;}},
   gonggu_paper:{name:'공구방 롤링페이퍼', icon:'📜', desc:'희귀 아이템 · 주인공 공격력 +50 (챌린저 1000 LP 이스터에그)',apply:p=>{p.atk+=50;}},
   bonu_staff:{name:'보누 지팡이', icon:'🪄', desc:'희귀 아이템 · 주인공 공격력 +50 (챌린저 500 LP 이스터에그)',apply:p=>{p.atk+=50;}},
+  bonu_grip:{name:'본우의 악력기', icon:'💪', desc:'희귀 아이템 · 주인공 방어력 +20 (기억 보관소)',apply:p=>{p.def+=20;}},
+  yujun_glasses:{name:'유준이의 안경', icon:'👓', desc:'희귀 아이템 · 주인공 방어력 +20 (기억 보관소)',apply:p=>{p.def+=20;}},
+  jihu_glove:{name:'지후의 글러브', icon:'🧤', desc:'희귀 아이템 · 주인공 방어력 +20 (기억 보관소)',apply:p=>{p.def+=20;}},
+  junhee_bat:{name:'준희의 야구베트', icon:'⚾', desc:'희귀 아이템 · 주인공 방어력 +20 (기억 보관소)',apply:p=>{p.def+=20;}},
+  jueun_ipad:{name:'주은이의 아이패드', icon:'📱', desc:'희귀 아이템 · 주인공 방어력 +20 (기억 보관소)',apply:p=>{p.def+=20;}},
+  seolwoo_jacket:{name:'설우의 과잠', icon:'🧥', desc:'희귀 아이템 · 주인공 방어력 +20 (기억 보관소)',apply:p=>{p.def+=20;}},
+  suyeon_mask:{name:'수연이의 마스크', icon:'😷', desc:'희귀 아이템 · 주인공 방어력 +20 (기억 보관소)',apply:p=>{p.def+=20;}},
+  juwon_ticket:{name:'주원이의 뮤지컬 티켓', icon:'🎟️', desc:'희귀 아이템 · 주인공 방어력 +20 (기억 보관소)',apply:p=>{p.def+=20;}},
+  eunbit_scarf:{name:'은빛의 목도리', icon:'🧣', desc:'희귀 아이템 · 주인공 방어력 +20 (기억 보관소)',apply:p=>{p.def+=20;}},
+  chaeyun_letter:{name:'채윤이의 생일편지', icon:'💌', desc:'희귀 아이템 · 주인공 방어력 +20 (기억 보관소)',apply:p=>{p.def+=20;}},
+  hyoseo_laptop:{name:'효서의 노트북', icon:'💻', desc:'희귀 아이템 · 주인공 방어력 +20 (기억 보관소)',apply:p=>{p.def+=20;}},
   merem_feather:{name:'메르엠의 보랏빛 깃털', icon:'🪶', desc:'희귀 아이템 · 주인공 최대 HP +300',apply:p=>{p.maxHp+=300;p.hp+=300;}},
   our_memory:{name:'우리들의 추억', icon:'📸', img:'memory.jpg', desc:'희귀한 유물 · 효과 없음 — 시간 속에 잠긴 추억 (눌러서 보기)',apply:p=>{}},
   blood_orb:{name:'피로 얼룩진 구슬', icon:'🩸', desc:'희귀 아이템 · 주인공 흡혈 10% (주인공이 준 피해의 10%만큼 HP 회복)',apply:p=>{}},
@@ -1795,6 +1806,30 @@ function bossSVG(key){
 </svg>`;
 }
 
+/* 공구방 특별 미션: 보스를 5번 잡으면 기억의 퍼즐 조각 1개 */
+const GG_MISSIONS=[{id:'gg_furfur',area:3,boss:'푸르푸르'},{id:'gg_naberius',area:4,boss:'나베리우스'},{id:'gg_botis',area:5,boss:'보티스'},{id:'gg_barbatos',area:6,boss:'바르바토스'},{id:'gg_amon',area:7,boss:'아몬'}];
+const GG_COUNT=5;
+const MEMORY_ITEMS=['bonu_grip','yujun_glasses','jihu_glove','junhee_bat','jueun_ipad','seolwoo_jacket','suyeon_mask','juwon_ticket','eunbit_scarf','chaeyun_letter','hyoseo_laptop'];
+/* 아몬은 중간 보스(악마)와 이름이 같아, 최종 보스 처치만 따로 센 값을 쓴다 */
+const ggProg=m=>Math.min(GG_COUNT,m.boss==='아몬'?((P.fbk||{})[m.area]||0):(P.kills[m.boss]||0));
+const ggDone=m=>!!(P.done&&P.done[m.id]);
+function ggClaim(id){const m=GG_MISSIONS.find(x=>x.id===id);if(!m||ggDone(m)||ggProg(m)<GG_COUNT)return;
+  P.done[m.id]=true;P.items.puzzle=(P.items.puzzle||0)+1;save();
+  renderHub(`👥 공구방 특별 미션 완료: ${m.boss} ${GG_COUNT}회 처치 — 🧩 기억의 퍼즐 조각 ×1 (동료 탭 › 기억 보관소에서 사용)`);}
+function renderMemVault(msg){
+  hubTab='ally';const n=P.items.puzzle||0,left=MEMORY_ITEMS.filter(k=>!P.relics.includes(k));
+  $('#app').innerHTML=`${statusHTML()}${topBack()}
+    ${msg?`<div class="notice">${msg}</div>`:''}
+    <div class="panel"><div class="ptitle">🧩 기억 보관소 <span class="small">기억의 퍼즐 조각 ${n}개 · 수집 ${MEMORY_ITEMS.length-left.length}/${MEMORY_ITEMS.length}</span></div>
+      <div class="desc">기억의 퍼즐 조각 하나를 맞추면, 잠겨 있던 기억 하나가 희귀 아이템이 되어 돌아온다. (아직 얻지 못한 것 중 무작위 · 각각 주인공 방어력 +20)</div>
+      <div class="grid"><button class="btn primary full" id="mvuse" ${n>0&&left.length?'':'disabled'}>${left.length?`🧩 퍼즐 조각 사용 (${n}개)`:'모든 기억을 되찾았다 ✔'}</button></div>
+      <div style="display:grid;gap:6px;margin:8px 0">${MEMORY_ITEMS.map(k=>{const r=RELICS[k],has=P.relics.includes(k);return `<div class="mission"><div class="info">${has?r.icon:'❔'} ${has?r.name:'잠긴 기억'}<small>${has?'방어력 +20':'기억의 퍼즐 조각으로 열 수 있다'}</small></div>${has?'<span class="tag done">보유</span>':''}</div>`;}).join('')}</div>
+      <div class="grid"><button class="btn full" id="back">← 돌아가기</button></div></div>${tabBar()}`;
+  $('#mvuse').onclick=()=>{const L=MEMORY_ITEMS.filter(k=>!P.relics.includes(k));if(!(P.items.puzzle>0)||!L.length)return;
+    const k=L[Math.floor(Math.random()*L.length)];P.items.puzzle--;gainRelic(k);save();
+    renderMemVault(`🧩 기억의 퍼즐이 맞춰졌다! ${RELICS[k].icon} 희귀 아이템 「${RELICS[k].name}」 획득 — 주인공 방어력 +20`);};
+  $('#back').onclick=()=>renderAllyTab();window.scrollTo(0,0);
+}
 /* 미션 */
 const MISSIONS=[
   {id:'seoul_ghost', area:0, type:'kill', target:'처녀귀신', count:4, title:'처녀귀신 정화',
@@ -3044,9 +3079,12 @@ function renderHub(msg){
     <div class="panel realmp ${realmOpen?'':'lockp'}"><div class="ptitle">😈 마계 이동 <span class="small">${realmOpen?`개방 ${Math.min(P.unlocked+1,AREAS.length)-RS}/${AREAS.length-RS}`:'🔒 잠김'}</span></div>
       ${realmOpen?`<div class="areas">${realms}</div>`:`<div class="desc">🔒 ${AREAS[RS-1].name}까지 클리어하면 마계로 가는 문이 열린다.</div>`}</div>
     <div class="panel"><div class="ptitle">📜 미션</div>${missionHTML}</div>
+    <div class="panel"><div class="ptitle">👥 공구방 특별 미션 <span class="small">보상: 🧩 기억의 퍼즐 조각</span></div>${GG_MISSIONS.map(m=>{const pr=ggProg(m),dn=ggDone(m);
+      return `<div class="mission"><div class="info"><span class="tag item">퍼즐</span>${m.boss} 처치<small>${AREAS[m.area].flag} ${AREAS[m.area].name}의 최종 보스 ${m.boss}를 ${GG_COUNT}번 쓰러뜨려라.<br>보상: 🧩 기억의 퍼즐 조각 ×1</small></div>${dn?'<span class="tag done">완료</span>':pr>=GG_COUNT?`<button class="btn primary" data-gg="${m.id}">보상 받기</button>`:`<span class="small">${pr} / ${GG_COUNT}</span>`}</div>`;}).join('')}</div>
     ${tabBar()}`;
   document.querySelectorAll('.area').forEach(b=>b.onclick=()=>{P.cur=+b.dataset.i;save();renderHub();});
   document.querySelectorAll('[data-claim]').forEach(b=>b.onclick=()=>claim(b.dataset.claim));
+  document.querySelectorAll('[data-gg]').forEach(b=>b.onclick=()=>ggClaim(b.dataset.gg));
   $('#hunt').onclick=()=>startBattle({area:P.cur,hunt:true});
   $('#map').onclick=()=>renderMap(P.cur);
   if($('#rank'))$('#rank').onclick=()=>renderRank();
@@ -3149,12 +3187,14 @@ function renderAllyTab(msg){
       <div class="grid">
         <button class="btn m-ally" id="allies">🤝 동료 관리<small>출전·레벨업·합성·각성</small></button>
         <button class="btn m-coll" id="dex">📖 동료 도감<small>모든 동료의 이름·능력</small></button>
+        <button class="btn m-coll full" id="memvault">🧩 기억 보관소<small>기억의 퍼즐 조각 ${P.items.puzzle||0}개 · 희귀 아이템 ${MEMORY_ITEMS.filter(k=>P.relics.includes(k)).length}/${MEMORY_ITEMS.length}</small></button>
       </div>
     </div>
     ${tabBar()}`;
   $('#relics').onclick=()=>renderRelics();
   $('#allies').onclick=()=>{renderAllies();window.scrollTo(0,0);};
   $('#dex').onclick=()=>renderDex();
+  $('#memvault').onclick=()=>renderMemVault();
 }
 
 function claim(id){
@@ -4671,6 +4711,7 @@ function victory(){
   const memEgg=tName==='푸르푸르'&&P.kills[tName]>=MEMORY_KILLS&&!P.relics.includes('our_memory'); // 이스터에그
   if(memEgg)gainRelic('our_memory');
   P.wins[area]=(P.wins[area]||0)+1;
+  if(stype==='boss'&&!fromHunt){P.fbk=P.fbk||{};P.fbk[area]=(P.fbk[area]||0)+1;} // 최종 보스 처치 수 (공구방 특별 미션)
   let extra=[];
   if(e.itemAt&&!fromHunt&&(P.kills[tName]||0)>=e.itemAt.n&&RELICS[e.itemAt.id]&&!P.relics.includes(e.itemAt.id)){gainRelic(e.itemAt.id);const it=RELICS[e.itemAt.id];extra.push(`🎁 ${e.itemAt.n}회 클리어 보상: ${it.icon} 희귀 아이템 「${it.name}」 — ${it.desc.replace('희귀 아이템 · ','')}`);}
   if(memEgg)extra.push(`📸 이스터에그! 희귀한 유물 「우리들의 추억」을 손에 넣었다 — 시간 속에 잠긴 추억`);
