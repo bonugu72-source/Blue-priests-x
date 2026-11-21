@@ -3768,6 +3768,13 @@ function restLabel(){
   const sec=Math.ceil(l/1000);
   return `⛪ 성당 휴식<small>다시 가능까지 ${Math.floor(sec/60)}:${String(sec%60).padStart(2,'0')}</small>`;
 }
+const GLASYA_BONUS=50000;
+function goldToast(n,why){
+  const d=document.createElement('div');d.className='stoast';d.style.background='linear-gradient(135deg,rgba(120,80,10,.96),rgba(200,150,40,.96))';d.style.borderColor='#ffe8a0';
+  d.innerHTML=`<div class="st-ic">💰</div><div><b>${fmt(n)} 코인 획득!</b><small>${why||''}</small></div>`;
+  const prev=document.querySelectorAll('.stoast').length;d.style.top=`${14+prev*70}px`;
+  document.body.appendChild(d);d.onclick=()=>d.remove();setTimeout(()=>d.classList.add('out'),4200);setTimeout(()=>d.remove(),4800);
+}
 function migrateSave(){
   if(P._dgRestore&&!B){P.hp=P._dgRestore.hp;P.mp=P._dgRestore.mp;delete P._dgRestore;} // 던전 도중 나간 경우 HP 원래대로
   if(!P.uid)P.uid='u'+Date.now().toString(36)+Math.random().toString(36).slice(2,8);
@@ -3776,6 +3783,8 @@ function migrateSave(){
   ['prog','wins'].forEach(k=>{if(!Array.isArray(P[k]))P[k]=[];while(P[k].length<AREAS.length)P[k].push(0);});
   if(!Array.isArray(P.cleared))P.cleared=[];while(P.cleared.length<AREAS.length)P.cleared.push(false);
   if(P.ended&&P.unlocked<5)P.unlocked=5;
+  // 서울 글라시아라볼라스 첫 클리어 50,000 코인: 업데이트 전에 이미 깬 계정도 한 번 지급
+  if(!P.glasyaBonus&&((P.prog[0]||0)>=STAGES||P.cleared[0])){P.glasyaBonus=1;P.gold+=GLASYA_BONUS;setTimeout(()=>goldToast(GLASYA_BONUS,'서울 글라시아라볼라스 첫 클리어 보상 (소급 지급)'),800);}
   // 이전 버전에서 마지막 지역 보스를 이미 깬 경우: 새로 추가된 다음 지역을 연다
   let opened=null;
   for(let i=0;i<AREAS.length-1;i++)if((P.prog[i]>=STAGES||P.cleared[i])&&P.unlocked<i+1){P.unlocked=i+1;opened=i+1;}
@@ -5580,6 +5589,7 @@ function victory(){
   const tName=B.baseName;
   B.over=true;
   const firstClear=!fromHunt&&stage>P.prog[area];
+  if(firstClear&&area===0&&stype==='boss')P.glasyaBonus=1; // 첫 클리어 50,000 코인을 받았으니 소급 지급 대상 아님
   const gold0=e.goldRepeat!=null?(firstClear?e.goldFirst:e.goldRepeat):B.isBoss?Math.round(e.gold*BOSS_GOLD_MULT):e.gold;
   const ringOn=!fromHunt&&P.relics.includes('heaven_ring'); // 천상의 반지: 스테이지 클리어 골드 +20%
   const gold=fromHunt?gold0*HUNT_MULT:ringOn?Math.round(gold0*1.2):gold0;
