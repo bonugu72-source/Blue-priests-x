@@ -3187,7 +3187,7 @@ function renderHub(msg){
         <button class="btn m-adv main full" id="map">🗺 스테이지 지도<small>진행 ${prog}/${STAGES}</small></button>
         <div class="rankrow">        <button class="btn m-rank" id="rank" ${P.lv<RANK_MIN_LV?'disabled':''}>${P.lv<RANK_MIN_LV?`🔒 랭크전<small>Lv ${RANK_MIN_LV}부터 열림 (현재 Lv ${P.lv})</small></button>`:`${rankOf().icon} 랭크전<small>${rankOf().n}${rankNeed(rankState().tier)?` · ${rankState().lp}/${rankNeed(rankState().tier)} LP`:` · ${rankState().lp} LP`} · ${rankState().w}승 ${rankState().l}패</small></button>`}
         <button class="btn m-tower" id="tower" ${towerOpen()?'':'disabled'}>${towerOpen()?`🗼 구원의 탑<small>${towerState().best>=TOWER_MAX?`${TOWER_MAX}층 정복 ✔`:`${towerState().best}/${TOWER_MAX}층 · 동료 1명`}</small>`:`🔒 구원의 탑<small>Lv ${TOWER_MIN_LV} · 지역 ${realmStart()}곳 클리어 (${worldClearCount()}/${realmStart()})</small>`}</button></div>
-        <button class="btn m-adv" id="hunt">⚔ 자유 사냥<small>경험치·골드 모으기</small></button>
+        <button class="btn m-adv" id="hunt">⚔ 자유 사냥 (자동)<small>경험치·골드 ×${HUNT_MULT} · 멈출 때까지 반복</small></button>
         <button class="btn m-rest" id="rest" ${restLeft()>0?'disabled':''}>${restLabel()}</button>
       </div>
     </div>
@@ -3201,7 +3201,7 @@ function renderHub(msg){
   document.querySelectorAll('.area').forEach(b=>b.onclick=()=>{P.cur=+b.dataset.i;save();renderHub();});
   document.querySelectorAll('[data-claim]').forEach(b=>b.onclick=()=>claim(b.dataset.claim));
   document.querySelectorAll('[data-gg]').forEach(b=>b.onclick=()=>ggClaim(b.dataset.gg));
-  $('#hunt').onclick=()=>startBattle({area:P.cur,hunt:true});
+  $('#hunt').onclick=()=>{autoHunt={on:true,area:P.cur,n:0,xp:0,gold:0};startBattle({area:P.cur,hunt:true});};
   $('#map').onclick=()=>renderMap(P.cur);
   if($('#rank'))$('#rank').onclick=()=>renderRank();
   if($('#tower'))$('#tower').onclick=()=>renderTower();
@@ -3668,7 +3668,7 @@ function winNow(){
   if(!B||B.won)return;
   if((B.e.berserk&&!B.berserked)||(B.e.madness&&!B.maddened)||(B.e.awaken&&!B.awoke)||(B.e.twin&&!B.twinned)||(B.e.relay&&(B.relayStage||0)<2)){B.e.hp=Math.max(1,B.e.hp);renderBattle();return;}
   B.won=true;B.busy=true;if(B.enemyT)clearInterval(B.enemyT);if(B.allyT)clearInterval(B.allyT);if(B.freezeT)clearInterval(B.freezeT);document.body.classList.remove('pfrozen');if(B.sakuraT)clearInterval(B.sakuraT);if(B.paraT)clearInterval(B.paraT);if(B.waveT)clearInterval(B.waveT);if(B.soulT)clearInterval(B.soulT);if(B.drainT)clearInterval(B.drainT);if(B.tsT)clearInterval(B.tsT);
-  if(B.zapT)clearInterval(B.zapT);if(B.karmaT)clearInterval(B.karmaT);if(B.trainT)clearInterval(B.trainT);if(B.aoraT)clearInterval(B.aoraT);if(B.diceT)clearInterval(B.diceT);if(B.heartT)clearInterval(B.heartT);if(B.halfT)clearInterval(B.halfT);if(B.fallT)clearInterval(B.fallT);if(B.isaT)clearInterval(B.isaT);
+  if(B.zapT)clearInterval(B.zapT);if(B.karmaT)clearInterval(B.karmaT);if(B.trainT)clearInterval(B.trainT);if(B.aoraT)clearInterval(B.aoraT);if(B.autoT)clearInterval(B.autoT);if(B.diceT)clearInterval(B.diceT);if(B.heartT)clearInterval(B.heartT);if(B.halfT)clearInterval(B.halfT);if(B.fallT)clearInterval(B.fallT);if(B.isaT)clearInterval(B.isaT);
   renderBattle();setTimeout(victory,750);
 }
 /* 이사벨 부제: 5초마다 주인공 HP 40% 회복 */
@@ -3844,6 +3844,7 @@ function startBattle(spec){
         addLog(`🏹 ${t.name}의 사냥 표식 — ${ALLIES[id].name}이(가) 전투가 끝날 때까지 행동 불능!`);}
     }
     if(B)B.startAt=Date.now();
+    if(B&&spec.hunt&&autoHunt.on){B.auto=true;B.autoT=setInterval(autoTick,AUTO_MS);}
     if(B&&inParty('karma'))B.karmaT=setInterval(karmaTick,5000);
     if(B&&inParty('vista5'))B.trainT=setInterval(trainTick,TRAIN_MS);
     if(B&&inParty('aora'))B.aoraT=setInterval(aoraTick,AORA_MS);
@@ -4053,6 +4054,7 @@ function cmdHTML(){
     <button class="btn primary full" data-act="attack" ${dis}>${pFrozen()?`🧊 얼음을 깨는 중… ${Math.ceil((B.pFrozenUntil-Date.now())/1000)}초`:`⚔ 공격<span class="awkc ${(B.atkN||0)===AWAKEN_SKILL.every-1?'ready':''}">✨ 각성 ${'●'.repeat(B.atkN||0)}${'○'.repeat(AWAKEN_SKILL.every-(B.atkN||0))} ${(B.atkN||0)===AWAKEN_SKILL.every-1?'다음 공격 발동!':''}</span>`}</button>
     <button class="btn ${B.defending?'guardon':''}" data-act="defend" ${B.defending||B.busy||pFrozen()?'disabled':''}>${B.defending?'🛡 방어 중':'🛡 방어'}<small>${B.defending?'공격하면 해제':'피해 40% 감소 · 동료도 공격 멈춤'}</small></button>
     <button class="btn" data-act="itemmenu" ${dis}>🧪 아이템</button>
+    ${B.auto?`<button class="btn danger full" data-act="autostop">⏹ 자동 사냥 멈추기 <small>${autoSum()}</small></button>`:''}
     <button class="btn full" data-act="flee" ${(B.busy||B.isBoss||B.tower)?'disabled':''}>${B.pvp?'대결 중에는 도망칠 수 없다':B.tower?'탑에서는 도망칠 수 없다':B.isBoss?'보스전에서는 도망칠 수 없다':'🏃 도망 (60%)'}</button>
   </div>`;
 }
@@ -4518,12 +4520,30 @@ function hitPlayer(mult,label){
   return d;
 }
 
+/* 자유 사냥: 경험치·골드 3배 · 자동 전투로 멈출 때까지 계속 */
+const HUNT_MULT=3, AUTO_MS=550;
+let autoHunt={on:false,area:0,n:0,xp:0,gold:0};
+const autoSum=()=>`${autoHunt.n}회 처치 · ✨ +${fmt(autoHunt.xp)} · 💰 +${fmt(autoHunt.gold)} G`;
+function autoTick(){
+  if(!B||!B.auto||B.over||B.won||B.busy||!$('#modal').classList.contains('hidden'))return;
+  if(Date.now()<(B.cdUntil||0)||pFrozen())return;
+  if(P.hp<P.maxHp*0.45&&P.items.water>0&&!B.noHeal){act('item','water');return;}
+  if(P.hp<P.maxHp*0.25){autoHuntStop('⚠ HP가 위험해 자동 사냥을 멈췄다 (성수 없음) — 성당에서 휴식하자');return;}
+  if(B.charging&&!B.guard){act('defend');return;}
+  act('attack');
+}
+function autoHuntStop(why){
+  const had=autoHunt.on;autoHunt.on=false;
+  if(B&&B.auto&&!B.over&&!B.won){B.over=true;clearBattle();}
+  save();renderHub(had?`${why||'⏹ 자동 사냥을 멈췄다'}<br>🔁 이번 사냥: ${autoSum()}`:why);
+}
 function act(kind,arg){
   if(!B||B.busy||B.over||B.won)return;
   if(kind==='itemmenu'||kind==='skillmenu'||kind==='back'){B.menu=kind==='itemmenu'?'item':'main';renderBattle();return;}
   if(Date.now()<(B.cdUntil||0))return;
   if(pFrozen()){addLog(`🧊 얼어붙어 움직일 수 없다… (${Math.ceil((B.pFrozenUntil-Date.now())/1000)}초)`);renderBattle();return;}
   const e=B.e;
+  if(kind==='autostop'){autoHuntStop();return;}
   if(kind==='attack'||kind==='item'){B.guard=false;B.defending=false;}
   if(kind==='attack'){
     hitEnemy(1,'공격');
@@ -4557,6 +4577,7 @@ function act(kind,arg){
     if(B.isBoss||B.tower)return;
     if(Math.random()<0.6){
       B.busy=true;addLog('무사히 도망쳤다!');renderBattle();
+      if(autoHunt.on){const w=autoSum();autoHunt.on=false;setTimeout(()=>{save();renderHub(`무사히 도망쳤다. 🔁 자동 사냥 종료 — ${w}`);},600);return;}
       setTimeout(()=>{save();renderHub('무사히 도망쳤다.');},600);return;
     }
     addLog('도망에 실패했다!');
@@ -4823,7 +4844,8 @@ function victory(){
   const firstClear=!fromHunt&&stage>P.prog[area];
   const gold0=e.goldRepeat!=null?(firstClear?e.goldFirst:e.goldRepeat):B.isBoss?Math.round(e.gold*BOSS_GOLD_MULT):e.gold;
   const ringOn=!fromHunt&&P.relics.includes('heaven_ring'); // 천상의 반지: 스테이지 클리어 골드 +20%
-  const gold=ringOn?Math.round(gold0*1.2):gold0;
+  const gold=fromHunt?gold0*HUNT_MULT:ringOn?Math.round(gold0*1.2):gold0;
+  const xp=fromHunt?e.xp*HUNT_MULT:e.xp; // 자유 사냥: 경험치·골드 3배
   P.gold+=gold;
   P.kills[tName]=(P.kills[tName]||0)+1;
   const memEgg=tName==='푸르푸르'&&P.kills[tName]>=MEMORY_KILLS&&!P.relics.includes('our_memory'); // 이스터에그
@@ -4861,11 +4883,12 @@ function victory(){
     }
   }
   const allyUps=[];
-  partyIds().forEach(id=>{if(allyGainXp(id,e.xp))allyUps.push(`${ALLIES[id].name} Lv ${aData(id).lv}`);});
-  const ups=gainXp(e.xp);
+  partyIds().forEach(id=>{if(allyGainXp(id,xp))allyUps.push(`${ALLIES[id].name} Lv ${aData(id).lv}`);});
+  const ups=gainXp(xp);
+  if(fromHunt&&autoHunt.on){autoHunt.n++;autoHunt.xp+=xp;autoHunt.gold+=gold;}
   if(allyUps.length)ups.push('🤝 동료 레벨업: '+allyUps.join(', '));
-  const lines=[`✨ 경험치 +${fmt(e.xp)}`];
-  if(gold)lines.push(`💰 ${fmt(gold)} G${e.goldRepeat!=null?(firstClear?' (첫 클리어 보상)':' (재도전 보상)'):gold0!==e.gold?' (보스 보너스 ×1.25)':''}${ringOn&&gold>gold0?` · 💍 천상의 반지 +${fmt(gold-gold0)}`:''}`);
+  const lines=[`✨ 경험치 +${fmt(xp)}${fromHunt?` (자유 사냥 ×${HUNT_MULT})`:''}`];
+  if(gold)lines.push(`💰 ${fmt(gold)} G${e.goldRepeat!=null?(firstClear?' (첫 클리어 보상)':' (재도전 보상)'):fromHunt?` (자유 사냥 ×${HUNT_MULT})`:gold0!==e.gold?' (보스 보너스 ×1.25)':''}${ringOn&&gold>gold0?` · 💍 천상의 반지 +${fmt(gold-gold0)}`:''}`);
   const rep={title:`${AREAS[area].flag} ${esc(e.twin?`${tName} · ${e.twin.name}`:tName)} 처치`,won:true,lines:[...lines,...extra,...ups],st:B.st,party:partyIds().slice()};
   clearBattle();
   victoryFlow(area,stype,first,wasFinal,fromHunt,'',stage,rep);
@@ -4888,6 +4911,10 @@ function victoryFlow(area,stype,first,wasFinal,fromHunt,msg,stage,rep){
   }
   save();
   if(!fromHunt&&first&&stage<STAGES){mapSel={a:area,s:stage+1};autoNext(area,stage+1,rep);return;}
+  if(fromHunt&&autoHunt.on){const a=autoHunt.area;
+    $('#app').innerHTML=`${statusHTML()}<div class="panel"><div class="ptitle">🔁 자동 사냥 중</div><div class="notice">${rep?rep.lines.map(esc).join('<br>'):''}</div><div class="desc">${autoSum()}<br>다음 적을 찾는 중…</div><div class="grid"><button class="btn danger full" id="autostop2">⏹ 자동 사냥 멈추기</button></div></div>`;
+    $('#autostop2').onclick=()=>autoHuntStop();
+    setTimeout(()=>{if(autoHunt.on&&!B)startBattle({area:a,hunt:true});},900);return;}
   if(fromHunt)renderHub();else renderMap(area);
   if(rep)showResult(rep,null,null,(!fromHunt&&stype==='boss'&&stage)?()=>startBattle({area,stage}):null);
 }
@@ -4967,13 +4994,14 @@ function autoNext(a,s,rep){
 function defeat(){
   if(B&&B.pvp){pvpEnd(false);return;}
   if(B&&B.tower){towerEnd(false);return;}
+  const autoWas=autoHunt.on&&B&&B.auto;autoHunt.on=false;
   const rep=B?{title:`${esc(B.baseName||B.e.name)}에게 패배`,won:false,st:B.st,party:partyIds().slice()}:null;
   clearBattle();
   const lost=Math.floor(P.gold/2);
   P.gold-=lost;P.hp=Math.round(P.maxHp*0.5);P.mp=Math.round(P.maxMp*0.5);save();
   const note=`눈앞이 어두워진다… 교구의 사제들이 쓰러진 ${esc(P.name)}을(를) 성당으로 옮겼다.`;
   const after=()=>renderHub('정신을 차렸다. 성당에서 휴식하고 다시 도전하자.');
-  if(rep){rep.note=note;rep.lines=[`💸 소지금 ${fmt(lost)} G를 잃었다`,'🩹 HP 절반으로 깨어남'];showResult(rep,after,'계속');}
+  if(rep){rep.note=note;rep.lines=[`💸 소지금 ${fmt(lost)} G를 잃었다`,'🩹 HP 절반으로 깨어남',...(autoWas?[`🔁 자동 사냥 종료 — ${autoSum()}`]:[])];showResult(rep,after,'계속');}
   else showStory(note+`\n\n(소지금 ${lost} G를 잃었다)`,after);
 }
 
