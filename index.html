@@ -5440,8 +5440,8 @@ function hitPlayer(mult,label){
 const HUNT_MULT=3, AUTO_MS=550;
 let autoHunt={on:false,area:0,n:0,xp:0,gold:0};
 const autoSum=()=>`${autoHunt.farm?`${autoHunt.n}/${autoHunt.farm.target}회`:`${autoHunt.n}회`} 처치 · ✨ +${fmt(autoHunt.xp)} · 💰 +${fmt(autoHunt.gold)} G`;
-/* 글라시아라볼라스 작: 서울 최종 보스를 자동 전투로 반복 · 300번 잡으면 멈춤 (북마크 주소 …/#glasya 로 바로 시작) */
-const FARM_AREA=0, FARM_TARGET=300;
+/* 글라시아라볼라스 작: 서울 최종 보스를 자동 전투로 반복 · 100번 잡으면 멈춤 (북마크 주소 …/#glasya 로 바로 시작) */
+const FARM_AREA=0, FARM_TARGET=100;
 const farmReady=()=>(P.prog[FARM_AREA]||0)>=STAGES-1;
 function startGlasyaFarm(){
   if(!farmReady()){renderHub('🔒 글라시아라볼라스 작은 서울 15스테이지(최종 보스)까지 열려 있어야 할 수 있다');return;}
