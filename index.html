@@ -753,6 +753,8 @@ body:has(.tabbar) .tabbar{background:color-mix(in srgb,var(--tc) 6%,rgba(8,12,26
 .dghrow .dgn{display:flex;flex-direction:column;gap:2px;min-width:0}.dghrow .dgn b{color:var(--gold);font-size:16px}
 .dghrow .dgn small{display:flex;align-items:center;gap:3px;color:#9aa3c2;font-size:11px;flex-wrap:wrap}
 .dghbar{height:8px;border-radius:5px;background:rgba(255,255,255,.07);overflow:hidden}.dghbar i{display:block;height:100%;background:linear-gradient(90deg,#8a5ad8,#e8c76a)}
+.dgrow[data-dgrec],.dghrow[data-dghist]{cursor:pointer}.dgrow[data-dgrec]:active,.dghrow[data-dghist]:active{transform:scale(.98)}
+.dgrecp{display:flex;gap:4px;justify-content:center;margin-top:4px}
 .dghrow.life{box-shadow:0 0 0 2px rgba(232,199,106,.55) inset}
 .btn.m-dg{background:linear-gradient(135deg,#5a2a8a,#2a1a5e);border-color:rgba(201,160,255,.55);font-size:18px;padding:14px 10px;box-shadow:0 0 18px rgba(170,110,255,.22)}.btn.m-dg small{color:#e2ccff}
 .dgrhead{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:6px;white-space:nowrap}
@@ -2756,7 +2758,7 @@ function myPublic(){
     ended:!!P.ended,friends:(P.friends||[]).slice(0,100),
     team:{atk:P.atk,def:P.def,maxHp:P.maxHp,maxMp:P.maxMp,lv:P.lv,party:partyIds().map(id=>({id,lv:aData(id).lv,aw:P.awaken[id]||0,my:isMyth(id)?1:0,tr:trustLv(id)}))},
     pvpW:(P.pvp&&P.pvp.w)||0,pvpL:(P.pvp&&P.pvp.l)||0,rankT:(P.rank&&P.rank.tier)||0,rankLP:(P.rank&&P.rank.lp)||0,rankOn:P.lv>=RANK_MIN_LV?1:0,
-    ...(P.dg&&P.dg.best>0&&Array.isArray(P.dg.top)?{dgDay:P.dg.day,dgBest:P.dg.best,dgTop:P.dg.top.slice(0,20).map(r=>({v:r.v,p:(r.p||[]).slice(0,MAX_ACTIVE),at:r.at||0}))}:{dgDay:'',dgBest:0,dgTop:[]}),   // 던전 오늘의 기록 (상위 20개)
+    ...(P.dg&&P.dg.best>0&&Array.isArray(P.dg.top)?{dgDay:P.dg.day,dgBest:P.dg.best,dgTop:P.dg.top.slice(0,20).map(r=>({v:r.v,p:(r.p||[]).slice(0,MAX_ACTIVE),at:r.at||0,...(r.d?{d:r.d}:{}),...(r.k!=null?{k:r.k}:{})}))}:{dgDay:'',dgBest:0,dgTop:[]}),   // 던전 오늘의 기록 (상위 20개)
     updatedAt:Date.now(),seenAt:Date.now(),off:false};
 }
 function publishProfile(){
@@ -3396,10 +3398,11 @@ function dungeonEnd(why){
   const D=dgState(),prev=D.best||0,party=pparty.filter(id=>id!==FIXED),at=Date.now();
   const nb=total>prev,life=total>(P.dgLife.v||0);
   D.runs=(D.runs||0)+1;D.last=total;
-  if(total>0){D.top.push({v:total,p:party,at});D.top.sort((a,b)=>b.v-a.v||a.at-b.at);D.top=D.top.slice(0,DG_KEEP);}
+  const dmg={};['hero',...pparty].forEach(w=>{const v=Math.round((pst&&pst.dmg&&pst.dmg[w])||0);if(v>0)dmg[w]=v;});   // 딜 그래프용: 멤버별 준 피해
+  if(total>0){D.top.push({v:total,p:party,at,d:dmg,k:kills});D.top.sort((a,b)=>b.v-a.v||a.at-b.at);D.top=D.top.slice(0,DG_KEEP);}
   D.best=D.top.length?D.top[0].v:0;
   if(life)P.dgLife={v:total,at,p:party,k:kills};
-  P.dgHist.unshift({v:total,at,p:party,k:kills,w:why,u:used});P.dgHist=P.dgHist.slice(0,DG_KEEP);
+  P.dgHist.unshift({v:total,at,p:party,k:kills,w:why,u:used,d:dmg});P.dgHist=P.dgHist.slice(0,DG_KEEP);
   save();publishProfile();
   renderDungeon();
   const lines=[`⚔ 총 피해 <b class="gold">${fmt(total)}</b>`,
@@ -3430,15 +3433,17 @@ function dgRankList(){
   (dgRank&&dgRankDay===day?dgRank:[]).forEach(x=>{
     if(x.id===me)return;   // 내 기록은 이 기기의 최신 기록으로 넣음
     const runs=Array.isArray(x.dgTop)&&x.dgTop.length?x.dgTop:(x.dgBest>0?[{v:x.dgBest,p:x.dgParty||[],at:x.dgAt||0}]:[]);   // 예전 버전은 최고 기록 1개
-    runs.slice(0,DG_KEEP).forEach(r=>{if(r&&r.v>0)rows.push({id:x.id,hero:x.hero,lv:x.lv,v:r.v,p:r.p||[],at:r.at||0});});
+    runs.slice(0,DG_KEEP).forEach(r=>{if(r&&r.v>0)rows.push({id:x.id,hero:x.hero,lv:x.lv,v:r.v,p:r.p||[],at:r.at||0,d:r.d||null,k:r.k});});
   });
-  D.top.forEach(r=>rows.push({id:me,hero:P.name,lv:P.lv,v:r.v,p:r.p||[],at:r.at||0,me:true}));
+  D.top.forEach(r=>rows.push({id:me,hero:P.name,lv:P.lv,v:r.v,p:r.p||[],at:r.at||0,d:r.d||null,k:r.k,me:true}));
   return rows.sort((a,b)=>b.v-a.v||a.at-b.at).slice(0,DG_KEEP);
 }
+let dgRankShown=[];   // 지금 화면에 그린 랭킹 (누르면 이 기록의 딜 그래프)
 function dgRankHTML(full){   // full: 랭킹 상세 화면(20위까지) · 아니면 상위 3명만
-  const list=dgRankList(),n=full?DG_KEEP:3,shown=list.slice(0,n),myR=list.findIndex(x=>x.me)+1;
+  const list=dgRankList();dgRankShown=list;
+  const n=full?DG_KEEP:3,shown=list.slice(0,n),myR=list.findIndex(x=>x.me)+1;
   const medal=r=>r===1?'🥇':r===2?'🥈':r===3?'🥉':r;
-  const row=(x,r)=>`<div class="dgrow ${x.me?'me':''} ${r<=3?'r'+r:''}"><span class="dgr">${medal(r)}</span>
+  const row=(x,r)=>`<div class="dgrow ${x.me?'me':''} ${r<=3?'r'+r:''}" data-dgrec="${r-1}"><span class="dgr">${medal(r)}</span>
     <span class="dgn"><b>${esc(x.hero||'모험가')}${x.me?' <span class="tag t-ally dgme">나</span>':''}</b><small>Lv ${x.lv||'?'} · ${(x.p||[]).filter(id=>ALLIES[id]).map(id=>allyFace(id,'xs')).join('')||'동료 없음'}</small></span>
     <span class="dgv">${fmt(x.v||0)}</span></div>`;
   const st=dgRankState==='live'?'<span class="pres on">🟢 실시간</span>':dgRankState==='wait'?'<span class="small">⏳ 연결 중…</span>':dgRankState==='err'?'<span class="small">⚠ 불러오기 실패</span>':'<span class="small">☁ 연결 전 · 내 기록만</span>';
@@ -3494,6 +3499,29 @@ function renderDungeon(msg){
   $('#dghist').onclick=()=>renderDungeonHistory();
   document.querySelectorAll('[data-dgslot]').forEach(b=>b.onclick=()=>renderDungeonParty());
 }
+/* 기록 하나의 딜 그래프 (주인공·이사벨·동료별 준 피해) */
+function showDgRecord(r,heroName,sub){
+  if(!r)return;
+  const d=r.d||{},who=Object.keys(d).filter(w=>w==='hero'||ALLIES[w]).sort((a,b)=>d[b]-d[a]);
+  const tot=who.reduce((s,w)=>s+d[w],0),mx=Math.max(1,...who.map(w=>d[w]));
+  const ic=w=>w==='hero'?'<span class="aemo xs">✝</span>':allyFace(w,'xs');
+  const nm=w=>w==='hero'?esc(heroName||'주인공'):ALLIES[w].name;
+  const chart=who.map(w=>`<div class="rp-row"><div class="rp-nm">${ic(w)}<span>${nm(w)}</span></div>
+      <div class="rp-bar"><i class="d" style="width:${(d[w]/mx*100).toFixed(1)}%"></i></div>
+      <div class="rp-v">${fmt(d[w])}<small>${tot?Math.round(d[w]/tot*100):0}%</small></div></div>`).join('');
+  showStory(`<div class="report result"><div class="rs-head win">🏰 ${fmt(r.v)}</div>
+    <div class="sum-title">${sub}</div>
+    <div class="rs-rew"><div>${r.at>1e12?`🕒 ${dgWhen(r.at)}`:''}${r.k!=null?` · 💀 보스 ${r.k}명`:''}</div>
+      <div class="dgrecp">${(r.p||[]).filter(id=>ALLIES[id]).map(id=>allyFace(id,'xs')).join('')||'<span class="small">동료 없음</span>'}</div></div>
+    ${who.length?`<div class="rp-h">⚔ 준 피해 <span>합계 ${fmt(tot)}</span></div>${chart}`:'<div class="desc" style="text-align:center;margin-top:12px">이 기록은 딜 그래프가 저장되기 전에 세운 기록이라 그래프가 없어요.</div>'}</div>`,null,true);
+  $('#mbtn').textContent='닫기';
+}
+document.addEventListener('click',e=>{
+  const a=e.target.closest&&e.target.closest('[data-dgrec]');
+  if(a){const r=dgRankShown[+a.dataset.dgrec];if(r)showDgRecord(r,r.hero,`${a.querySelector('.dgr')?a.querySelector('.dgr').textContent.trim():''} · ${esc(r.hero||'모험가')} · Lv ${r.lv||'?'}`);return;}
+  const h=e.target.closest&&e.target.closest('[data-dghist]');
+  if(h&&P&&Array.isArray(P.dgHist)){const i=+h.dataset.dghist,r=P.dgHist[i];if(r)showDgRecord(r,P.name,`📜 나의 기록 · 최근 ${i+1}번째`);}
+});
 /* 오늘의 랭킹 상세: 1위 ~ 20위 (실시간) */
 function renderDungeonRank(){
   hubTab='dungeon';
@@ -3516,8 +3544,8 @@ function renderDungeonHistory(){
   $('#app').innerHTML=`${statusHTML()}${topBack()}
     <div class="panel"><div class="ptitle">🏅 개인 최고 기록 <span class="small">매일 초기화되지 않아요</span></div>
       ${L.v>0?`<div class="dglife"><b>${fmt(L.v)}</b><span class="small">${L.at?dgWhen(L.at):''}${L.k!=null?` · 💀 ${L.k}명`:''}</span><span class="dgparty">${face(L.p)}</span></div>`:'<div class="desc">아직 기록이 없어요.</div>'}</div>
-    <div class="panel"><div class="ptitle">📜 최근 기록 <span class="small">최근 ${DG_KEEP}회 · 최신순</span></div>
-      ${H.length?H.map((r,i)=>`<div class="dghrow ${L.v>0&&r.v===L.v&&r.at===L.at?'life':''}">
+    <div class="panel"><div class="ptitle">📜 최근 기록 <span class="small">최근 ${DG_KEEP}회 · 최신순 · 눌러서 딜 그래프</span></div>
+      ${H.length?H.map((r,i)=>`<div class="dghrow ${L.v>0&&r.v===L.v&&r.at===L.at?'life':''}" data-dghist="${i}">
         <span class="dgr">${i+1}</span>
         <span class="dgn"><b>${fmt(r.v)}${L.v>0&&r.v===L.v&&r.at===L.at?' <span class="tag item">최고</span>':''}</b><small>${dgWhen(r.at)} · 💀 ${r.k||0}명 · ${why(r)}</small><small>${face(r.p)}</small></span>
         <span class="dghbar"><i style="width:${(r.v/mx*100).toFixed(1)}%"></i></span></div>`).join(''):'<div class="desc">아직 기록이 없어요. 던전에 입장해 보세요!</div>'}</div>
