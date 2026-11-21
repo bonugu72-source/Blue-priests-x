@@ -413,6 +413,11 @@ body.pfrozen #cmds .btn{filter:saturate(.2) brightness(1.2);background:linear-gr
 .room .fr .nm{font-size:10px;font-weight:700;color:#3b2614;background:rgba(255,255,255,.8);border-radius:6px;padding:0 4px;text-align:center;white-space:nowrap;margin-top:-2px}
 .room .fr .say{position:absolute;bottom:100%;left:50%;transform:translateX(-50%);background:#fff;color:#222;font-size:11px;border-radius:8px;padding:2px 6px;white-space:nowrap;box-shadow:0 2px 6px rgba(0,0,0,.25);animation:pop .3s ease-out}
 @keyframes bob{from{transform:translateY(0)}to{transform:translateY(-3px)}}
+/* 동료 검색 */
+.asearch{display:flex;gap:6px;margin:8px 0 2px}
+.asearch input{flex:1;min-width:0;font-size:16px;padding:10px 12px;border-radius:12px;border:1px solid #3a4a7a;background:#0c1329;color:#fff;outline:none}
+.asearch input:focus{border-color:#7fb0ff;box-shadow:0 0 0 2px rgba(127,176,255,.25)}
+.asearch .btn{min-height:auto;padding:0 14px;flex:0 0 auto}
 /* 초월 */
 .aface.trans{position:relative;box-shadow:0 0 0 2px #ffe08a,0 0 8px 2px rgba(255,200,60,.85),0 0 18px rgba(255,170,40,.55);animation:transglow 1.6s ease-in-out infinite;overflow:hidden}
 .aface.trans::after{content:'';position:absolute;inset:-20%;background:linear-gradient(115deg,transparent 40%,rgba(255,250,220,.85) 50%,transparent 60%);animation:transsweep 2.2s ease-in-out infinite;pointer-events:none}
@@ -4099,11 +4104,15 @@ function renderDex(){
 }
 let allySort=(()=>{try{return localStorage.getItem('bp_ally_sort')||'cp'}catch(e){return 'cp'}})();
 let allyStar='all';
+let allyQuery='';
 function renderAllies(msg){
   const tierRank=id=>TIER5[id]?(10-TIER5[id]):0;   // 1티어가 가장 위
   const key={tier:id=>tierRank(id)*1e7+allyCP(id),lv:id=>aData(id).lv,cp:id=>allyCP(id),cnt:id=>P.roster[id]||0}[allySort]||(id=>allyCP(id));
   const own=Object.keys(ALLIES).filter(id=>owned(id)&&id!==FIXED).sort((x,y)=>ALLIES[y].star-ALLIES[x].star||key(y)-key(x)||allyCP(y)-allyCP(x));
-  const shown=own.filter(id=>allyStar==='all'||ALLIES[id].star===+allyStar);
+  const qn=t=>String(t||'').replace(/\s+/g,'').toLowerCase();
+  let shown=[];
+  const calcShown=()=>{const q=qn(allyQuery);shown=q?own.filter(id=>qn(ALLIES[id].name).includes(q)):own.filter(id=>allyStar==='all'||ALLIES[id].star===+allyStar);};
+  calcShown();
   const cntStar=st=>own.filter(id=>ALLIES[id].star===st).length;
   const starTabs=[['all','전체'],[6,'★6'],[5,'★5'],[4,'★4'],[3,'★3'],[2,'★2'],[1,'★1']];
   // 티어순일 때 ★5는 1·2·3티어로 나눠 보여 줌
@@ -4113,7 +4122,8 @@ function renderAllies(msg){
       return h.length?`<div class="tiergrp">${t?t+'티어':'티어 없음'} <span>${h.length}명</span></div>${h.map(allyCard).join('')}`:'';}).join('');
   };
   const listHTML=()=>{
-    if(!shown.length)return '<div class="desc">이 등급의 동료가 아직 없다.</div>';
+    if(!shown.length)return allyQuery?`<div class="desc">「${esc(allyQuery)}」 이름의 보유 동료가 없다.</div>`:'<div class="desc">이 등급의 동료가 아직 없다.</div>';
+    if(allyQuery)return `<div class="stargrp">🔍 검색 결과 <span>${shown.length}명</span></div>${shown.map(allyCard).join('')}`;
     // 출전 중인 동료는 맨 위에 따로 모아 보여 줌
     const act=P.active.filter(id=>shown.includes(id)),rest=shown.filter(id=>!P.active.includes(id));
     const top=act.length?`<div class="stargrp actgrp">⚔ 출전 중 <span>${act.length}명</span></div>${act.map(allyCard).join('')}`:'';
@@ -4132,16 +4142,24 @@ function renderAllies(msg){
     <div class="panel"><div class="ptitle">🤝 보유 동료 <span class="small">도감 ${own.length}/${Object.keys(ALLIES).length-1} · 출전 ${P.active.length}/${MAX_ACTIVE} · ${AWAKEN_ITEM.icon} ${AWAKEN_ITEM.name} ${P.items.stone}개 · ${SALV_ITEM.icon} ${SALV_ITEM.name} ${P.items.salv||0}개</span></div>
       <div class="desc">출전 동료와 이사벨은 전투 경험치를 함께 얻는다. 골드로 바로 레벨업할 수도 있다.</div>
       ${(()=>{const pl=synthPlan(),t=pl.reduce((s,x)=>s+x.n,0);return `<button class="btn ${t?'danger':''} synall" id="synall" ${t?'':'disabled'}>🔮 일괄 합성${t?` (${t}회 가능)`:''}<small>${t?'재료가 모인 모든 캐릭터를 한 번에 합성':'합성할 수 있는 캐릭터가 없음'}</small></button>`;})()}
+      <div class="asearch"><input id="aq" type="text" enterkeyhint="search" autocomplete="off" placeholder="🔍 동료 이름 검색" value="${esc(allyQuery)}"><button class="btn" id="aqx" ${allyQuery?'':'hidden'}>✕</button></div>
       <div class="sortbar sticky">${starTabs.map(([k,l])=>`<button class="sortbtn ${String(allyStar)===String(k)?'on':''}" data-astar="${k}">${l}${k==='all'?'':` <span class="small">${cntStar(k)}</span>`}</button>`).join('')}</div>
       <div class="sortbar" style="margin-top:0"><span class="small">같은 등급 안 정렬</span>${[['tier','🏅 티어'],['cp','⚔ 전투력'],['lv','레벨'],['cnt','카드 개수']].map(([k,l])=>`<button class="sortbtn ${allySort===k?'on':''}" data-sort="${k}">${l}</button>`).join('')}</div>
-      ${own.length?listHTML():'<div class="desc">아직 동료가 없다. 상점에서 소환하자.</div>'}</div>
+      <div id="alist">${own.length?listHTML():'<div class="desc">아직 동료가 없다. 상점에서 소환하자.</div>'}</div></div>
     <button class="btn" id="back">← 돌아가기</button>${tabBar()}`;
+  const bindCards=()=>{
   document.querySelectorAll('[data-sortie]').forEach(b=>b.onclick=()=>toggleSortie(b.dataset.sortie));
   document.querySelectorAll('[data-syn]').forEach(b=>b.onclick=()=>synthesize(b.dataset.syn));
   document.querySelectorAll('[data-alv]').forEach(b=>b.onclick=()=>allyLevelUp(b.dataset.alv));
   document.querySelectorAll('[data-awk]').forEach(b=>b.onclick=()=>awaken(b.dataset.awk));
   document.querySelectorAll('[data-myth]').forEach(b=>b.onclick=()=>mythUp(b.dataset.myth));
   document.querySelectorAll('[data-trans]').forEach(b=>b.onclick=()=>transUp(b.dataset.trans));
+  };bindCards();
+  // 이름 검색: 입력할 때마다 목록만 다시 그린다 (입력창 포커스 유지) · 검색 중엔 등급 탭과 상관없이 전체에서 찾는다
+  const refreshList=()=>{calcShown();$('#alist').innerHTML=own.length?listHTML():'';bindCards();$('#aqx').hidden=!allyQuery;};
+  $('#aq').oninput=e=>{allyQuery=e.target.value;refreshList();};
+  $('#aq').onkeydown=e=>{if(e.key==='Enter')e.target.blur();};
+  $('#aqx').onclick=()=>{allyQuery='';$('#aq').value='';refreshList();};
   if($('#synall'))$('#synall').onclick=synthAllAsk;
   document.querySelectorAll('[data-astar]').forEach(b=>b.onclick=()=>{allyStar=b.dataset.astar;
     const pn=b.closest('.panel'),y=pn?pn.offsetTop:window.scrollY;renderAllies();window.scrollTo(0,Math.min(window.scrollY,y));});
