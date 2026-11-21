@@ -413,6 +413,22 @@ body.pfrozen #cmds .btn{filter:saturate(.2) brightness(1.2);background:linear-gr
 .room .fr .nm{font-size:10px;font-weight:700;color:#3b2614;background:rgba(255,255,255,.8);border-radius:6px;padding:0 4px;text-align:center;white-space:nowrap;margin-top:-2px}
 .room .fr .say{position:absolute;bottom:100%;left:50%;transform:translateX(-50%);background:#fff;color:#222;font-size:11px;border-radius:8px;padding:2px 6px;white-space:nowrap;box-shadow:0 2px 6px rgba(0,0,0,.25);animation:pop .3s ease-out}
 @keyframes bob{from{transform:translateY(0)}to{transform:translateY(-3px)}}
+/* 탑 선택 슬라이드 */
+.tsel{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;padding:6px 2px 10px;scrollbar-width:none}
+.tsel::-webkit-scrollbar{display:none}
+.tsel-card{flex:0 0 86%;scroll-snap-align:center;border-radius:18px;padding:18px 14px 14px;text-align:center;position:relative;overflow:hidden;
+  background:linear-gradient(160deg,#1c2a55,#0d1430);border:1px solid #3a5aa0;box-shadow:0 6px 20px rgba(0,0,0,.45)}
+.tsel-card.heaven{background:linear-gradient(160deg,#fff6dc22,#3a2c68 40%,#121030);border-color:#ffe08a;box-shadow:0 0 22px rgba(255,214,110,.35),0 6px 20px rgba(0,0,0,.45)}
+.tsel-card.locked{filter:grayscale(.7) brightness(.75)}
+.tsel-art{font-size:64px;filter:drop-shadow(0 0 16px rgba(160,200,255,.6));animation:halo 2.6s ease-in-out infinite}
+.tsel-card.heaven .tsel-art{filter:drop-shadow(0 0 18px rgba(255,220,130,.9))}
+.tsel-title{font-family:'Noto Serif KR',serif;font-size:24px;font-weight:900;margin:6px 0 2px;color:#fff}
+.tsel-card.heaven .tsel-title{color:#fff1c0;text-shadow:0 0 10px rgba(255,200,80,.7)}
+.tsel-body{font-size:12.5px;color:var(--dim);line-height:1.55;margin:10px 0;min-height:76px}
+.tsel-prog{font-size:13px;font-weight:700;color:#cfe0ff;margin-bottom:10px}
+.tsel-dots{display:flex;justify-content:center;gap:8px;margin:2px 0 10px}
+.tsel-dots i{width:8px;height:8px;border-radius:50%;background:#3a4a7a;cursor:pointer}.tsel-dots i.on{background:#ffe08a;box-shadow:0 0 6px #ffcc33}
+.heavenp{border-color:#ffe08a}
 /* 동료 검색 */
 .asearch{display:flex;gap:6px;margin:8px 0 2px}
 .asearch input{flex:1;min-width:0;font-size:16px;padding:10px 12px;border-radius:12px;border:1px solid #3a4a7a;background:#0c1329;color:#fff;outline:none}
@@ -1180,6 +1196,8 @@ const ALLIES={
             desc:'운명의 점(4초마다 운명의 주사위를 굴린다 — 1: 주인공 현재 HP의 절반만큼 회복 · 2: 동료 전원 보호막 500 · 3: 바벨로드 공격력 2배 · 4: 모든 디버프 제거 · 5: 공격 속도 증가(한 번에 두 번 공격) · 6: 4초간 자신이 받는 모든 피해 반사 / 3·5는 다음 주사위까지 유지) · 상점 소환으로만 획득 (합성 불가)'},
   akira:   {star:5,name:'아키라',        icon:'🏹', role:'얼어붙은 활', kit:'frost',
             desc:'얼어붙은 화살(적을 2초간 얼려 행동 불능 · 끝나면 4초 쉬었다가 다시 사용) · 40% 확률로 급소를 찾아 쏘면 치명타(피해 2배) + 들어간 피해의 절반만큼 주인공 HP 회복 · 🔱 신화: 혹한의 화살(4초마다 아키라의 공격력 2배씩 증가 · 최대 4배)'},
+  elizabeth:{star:6,name:'엘리자베스',   icon:'👑', role:'최후의 여왕', kit:'judge', exclusive:true,
+            desc:'심판(3초마다 적에게 무작위로 출혈 · 속박 · 시야 차단 · 공격 반사 중 하나를 3초간 + 공격력의 절반만큼 주인공에게 보호막 · 보호막 중첩 가능) · 천상의 탑 30층 돌파 보상으로만 획득 (상점·합성 불가)'},
   miner:   {star:5,name:'미네르',        icon:'🌊', role:'물의 여신', kit:'tide', hpMul:0.6,
             desc:'침몰(적을 물속으로 끌어내려 3턴간 적 공격력 감소) · 물보라(2턴간 동료가 받는 피해 절반) · 체력이 적어 쉽게 쓰러지지만, 쓰러지면 물의 여신 「미네르바」로 각성해 HP 60%로 부활(1회) — 이후 공격이 고정 피해 + 치명타'},
   vista5:  {star:5,name:'비스타',        icon:'🚂', role:'열차 소환', kit:'train',
@@ -3287,6 +3305,7 @@ function pvpEnemyActs(e){
       case 'charm':    dmg((12+lv*3.6)*1.5,0.4,`${nm}의 하트 화살 (치명타)`);break;
       case 'justice':  if(!B.pvpMuhee&&Date.now()-(B.startAt||0)>=(a.my?3000:5000)){B.pvpMuhee=true;const d=Math.floor(P.hp/2);P.hp-=d;estat('dmg',a.id,d);addLog(`⚖️ ${nm}의 정의! 주인공 체력 절반(${d})을 앗아갔다`);queueFx('player','⚖️-'+d,'pdmg');}break;
       case 'aora':     if(Math.random()<0.3){B.curse=Math.max(B.curse,2);addLog(`${nm}의 천사의 구원 — 주인공이 속박되어 방어력 감소`);}else dmg(16+lv*5,0.3,`${nm}의 천사의 심판`);break;
+      case 'judge':    dmg(16+lv*5,0.4,`${nm}의 여왕의 검`);break;
       case 'frost':    if(Math.random()<0.4){const d=dmg((13+lv*4.2)*2,0.4,`${nm}의 급소 사격 (치명타)`);if(e.hp<e.maxHp)heal(0.05);}else dmg(13+lv*4.2,0.4,`${nm}의 서리 화살`);break;
       case 'dice':     {const n=1+Math.floor(Math.random()*6);if(n===1&&e.hp<e.maxHp)heal(0.15);else dmg((14+lv*4.5)*(n===3?2:1),0.4,`${nm}의 운명의 점 ${n} — 예언의 광선`);if(n===5)dmg(14+lv*4.5,0.4,`${nm}의 예언의 광선 — 연속`);}break;
       case 'tide':     dmg(12+lv*4,0.5,`${nm}의 물살`);break;
@@ -3440,12 +3459,12 @@ function renderTower(msg){
         <button class="btn danger full" id="tgo">⚔ ${f}층 ${done?'다시 도전':'도전'}</button>
         ${done&&f>1?`<button class="btn full" id="trst">🔁 1층부터 다시 오르기</button>`:''}
         <button class="btn full" id="tally">🤝 출전 동료 바꾸기</button>
-        <button class="btn full" id="back">← 거점으로</button>
+        <button class="btn full" id="back">← 탑 선택으로</button>
       </div></div>${tabBar()}`;
   if($('#tgo'))$('#tgo').onclick=()=>{if(!towerOpen())return renderTower();const T=towerState();T.tries=(T.tries||0)+1;P._towerRestore={hp:P.hp,mp:P.mp};P.hp=P.maxHp;P.mp=P.maxMp;startBattle({area:towerArea(f),tower:f,replay:done});};
   if($('#trst'))$('#trst').onclick=()=>{towerState().run=1;save();renderTower('🔁 1층부터 다시 오른다');};
   $('#tally').onclick=()=>renderAllies();
-  $('#back').onclick=()=>renderHub();
+  $('#back').onclick=()=>renderTowerSelect();
   window.scrollTo(0,0);
 }
 function towerEnd(win){
@@ -3872,7 +3891,7 @@ function renderHub(msg){
   $('#hunt').onclick=()=>{autoHunt={on:true,area:P.cur,n:0,xp:0,gold:0};startBattle({area:P.cur,hunt:true});};
   $('#map').onclick=()=>renderMap(P.cur);
   if($('#rank'))$('#rank').onclick=()=>renderRank();
-  if($('#tower'))$('#tower').onclick=()=>renderTower();
+  if($('#tower'))$('#tower').onclick=()=>renderTowerSelect();
   $('#rest').onclick=()=>{
     if(restLeft()>0)return;
     P.hp=P.maxHp;P.mp=P.maxMp;P.restAt=Date.now();save();
@@ -4392,7 +4411,7 @@ function winNow(){
   if(B.dungeon){dungeonNextBoss();return;}   // 던전: 승리 대신 다음 보스
   if((B.e.berserk&&!B.berserked)||(B.e.madness&&!B.maddened)||(B.e.awaken&&!B.awoke)||(B.e.twin&&!B.twinned)||(B.e.relay&&(B.relayStage||0)<2)||(B.e.lastStand&&!B.lastStood)){B.e.hp=Math.max(1,B.e.hp);renderBattle();return;}
   B.won=true;B.busy=true;if(B.enemyT)clearInterval(B.enemyT);if(B.allyT)clearInterval(B.allyT);if(B.freezeT)clearInterval(B.freezeT);document.body.classList.remove('pfrozen');if(B.sakuraT)clearInterval(B.sakuraT);if(B.paraT)clearInterval(B.paraT);if(B.waveT)clearInterval(B.waveT);if(B.soulT)clearInterval(B.soulT);if(B.drainT)clearInterval(B.drainT);if(B.tsT)clearInterval(B.tsT);
-  if(B.zapT)clearInterval(B.zapT);if(B.karmaT)clearInterval(B.karmaT);if(B.trainT)clearInterval(B.trainT);if(B.aoraT)clearInterval(B.aoraT);if(B.autoT)clearInterval(B.autoT);if(B.diceT)clearInterval(B.diceT);if(B.coldT)clearInterval(B.coldT);if(B.heartT)clearInterval(B.heartT);if(B.halfT)clearInterval(B.halfT);if(B.fallT)clearInterval(B.fallT);if(B.isaT)clearInterval(B.isaT);
+  if(B.zapT)clearInterval(B.zapT);if(B.karmaT)clearInterval(B.karmaT);if(B.trainT)clearInterval(B.trainT);if(B.aoraT)clearInterval(B.aoraT);if(B.autoT)clearInterval(B.autoT);if(B.diceT)clearInterval(B.diceT);if(B.judgeT)clearInterval(B.judgeT);if(B.coldT)clearInterval(B.coldT);if(B.heartT)clearInterval(B.heartT);if(B.halfT)clearInterval(B.halfT);if(B.fallT)clearInterval(B.fallT);if(B.isaT)clearInterval(B.isaT);
   renderBattle();setTimeout(victory,750);
 }
 /* 이사벨 부제: 5초마다 주인공 HP 40% 회복 */
@@ -4455,6 +4474,111 @@ function aoraTick(){
   }
   if(e.hp<=0){winNow();return;}
   renderBattle();
+}
+/* 엘리자베스: 심판 — 3초마다 적에게 출혈/속박/시야 차단/공격 반사 중 하나(3초) + 공격력 절반 보호막(중첩) */
+const JUDGE_MS=3000, JUDGE_DUR=3000;
+const ezBindOn=()=>!!(B&&B.ezBindUntil&&Date.now()<B.ezBindUntil);
+const ezReflOn=()=>!!(B&&B.ezReflUntil&&Date.now()<B.ezReflUntil);
+const ezBase=()=>(16+aData('elizabeth').lv*5)*allyMult('elizabeth');
+function judgeTick(){
+  if(!B||B.over||B.won||!$('#modal').classList.contains('hidden'))return;
+  const id='elizabeth',h=B.ahp[id],e=B.e,now=Date.now();
+  if(!inParty(id)||(h&&h.hp<=0)||(B.stun[id]>0)||aFrozen()||e.hp<=0||P.hp<=0)return;
+  const k=Math.floor(Math.random()*4),base=ezBase(),sh=Math.max(1,Math.round(base*0.5)),bb=B;let txt='';
+  if(k===0){txt='출혈';const dd=Math.max(1,Math.round(base*0.5));B.ezBleedUntil=now+JUDGE_DUR;
+    [1000,2000,3000].forEach(t=>setTimeout(()=>{if(B!==bb||!B||B.over||B.won||B.e.hp<=0||B.immune)return;stat('dmg',id,Math.min(dd,B.e.hp));B.e.hp=Math.max(0,B.e.hp-dd);addLog(`🩸 심판의 출혈 — ${B.e.name} ${dd} 피해`);queueFx('enemy','🩸'+dd,'dmg');if(B.e.hp<=0){winNow();return;}renderBattle();},t));}
+  else if(k===1){txt='속박';B.ezBindUntil=now+JUDGE_DUR;}
+  else if(k===2){txt='시야 차단';B.blind=Math.max(B.blind||0,2);}
+  else {txt='공격 반사';B.ezReflUntil=now+JUDGE_DUR;}
+  B.ezShield=(B.ezShield||0)+sh;stat('heal',id,0);
+  addLog(`👑 엘리자베스의 심판 — ${e.name}에게 ${txt} (3초) · 주인공 보호막 +${sh} (총 ${B.ezShield})`);queueFx('enemy','👑 '+txt,'mpf');renderBattle();
+}
+/* ===================== 탑 선택 (구원의 탑 · 천상의 탑) ===================== */
+const HEAVEN_MAX=30;
+const HEAVEN_REWARD={5:{salv:1},10:{salv:1},15:{salv:1},20:{salv:1},25:{salv:1},30:{ally:'elizabeth'}}; // 첫 돌파 보상
+const heavenRewardText=f=>{const w=HEAVEN_REWARD[f];if(!w)return '';return w.salv?`${SALV_ITEM.icon} ${SALV_ITEM.name} ×${w.salv}`:`★6 ${ALLIES[w.ally].name} (천상의 탑 전용)`;};
+const heavenOpen=()=>towerOpen()&&towerState().best>=TOWER_MAX; // 구원의 탑 30층 정복 시 개방
+const heavenState=()=>{P.heaven=P.heaven||{best:0,tries:0};return P.heaven;};
+const heavenBosses=()=>AREAS.map((a,i)=>i).filter(i=>AREAS[i].realm&&AREAS[i].boss); // 마계 이동의 최종 보스들
+const heavenArea=f=>{const L=heavenBosses();return L[(f-1)%L.length];};
+const heavenMul=f=>({hp:0.85+0.02*(f-1),atk:0.8+0.01*(f-1)}); // 구원의 탑 보스층과 같은 배율
+function heavenEnemy(f){
+  const a=heavenArea(f);let t=stageEnemy(a,15);
+  const em=LATE_BOSS_MULT,tm=heavenMul(f),sc=v=>v?Math.round(v*tm.hp):v;
+  if(t.madness)t={...t,madness:{...t.madness,at:sc(t.madness.at),to:Math.round(sc(t.madness.to)*0.6)}};
+  if(t.awaken)t={...t,awaken:{...t.awaken,at:sc(t.awaken.at),to:Math.round(sc(t.awaken.to)*0.6),...(t.awaken.critMult?{critMult:Math.min(1.5,t.awaken.critMult)}:{}),...(t.awaken.soulTick?{soulTick:5000}:{})}};
+  if(t.lastStand)t={...t,lastStand:{...t.lastStand,at:sc(t.lastStand.at)}};
+  if(t.slashes>2)t={...t,slashes:2};
+  if(t.reflectHero)t={...t,reflectHero:Math.min(0.3,t.reflectHero)};
+  t={...t,hp:Math.round((t.exactHp?t.hp:t.hp*em)*tm.hp),atk:Math.round(t.atk*em*tm.atk),goldFirst:undefined,goldRepeat:undefined,stoneFirst:undefined,trustXpFirst:undefined,drop:undefined,itemAt:undefined};
+  return t;
+}
+function renderTowerSelect(){
+  hubTab='adv';
+  if(!towerOpen()){renderTower();return;}
+  const T=towerState(),H=heavenState(),hop=heavenOpen();
+  const card=(k,title,sub,body,prog,ok,lockTxt)=>`<div class="tsel-card ${k} ${ok?'':'locked'}"><div class="tsel-art">${k==='heaven'?'☁️':'🗼'}</div>
+    <div class="tsel-title">${title}</div><div class="small">${sub}</div><div class="tsel-body">${body}</div>
+    <div class="tsel-prog">${prog}</div>
+    <button class="btn ${ok?'danger':''} full" data-tsel="${k}" ${ok?'':'disabled'}>${ok?'입장하기':lockTxt}</button></div>`;
+  $('#app').innerHTML=`${statusHTML()}${topBack()}
+    <div class="panel"><div class="ptitle">🗼 탑 선택 <span class="small">옆으로 밀어서 고르기</span></div>
+      <div class="tsel" id="tsel">
+        ${card('salv','구원의 탑','활옥사원 ~ 고대 원단수의 적 · 30층',`동료 1명과 함께 오른다 · 10층마다 보스<br>돌파 보상: 성유물 · 코인 · ★5 루메온 · 명찰`,`최고 ${T.best}/${TOWER_MAX}층${T.best>=TOWER_MAX?' · 정복 ✔':''}`,true,'')}
+        ${card('heaven','천상의 탑','마계 이동의 최종 보스들 · 30층',`페르타 · 메르엠 · 차후이아 · 나키로아가 번갈아 등장<br>모든 층이 보스 (구원의 탑 보스층과 같은 배율)<br>돌파 보상: 5·10·15·20·25층 ${SALV_ITEM.icon} ${SALV_ITEM.name} · 30층 ★6 엘리자베스`,hop?`최고 ${H.best}/${HEAVEN_MAX}층${H.best>=HEAVEN_MAX?' · 정복 ✔':''}`:`🔒 구원의 탑 ${TOWER_MAX}층 정복 시 개방 (현재 ${T.best}/${TOWER_MAX}층)`,hop,'🔒 잠김')}
+      </div>
+      <div class="tsel-dots"><i class="on"></i><i></i></div>
+      <button class="btn full" id="back">← 거점으로</button></div>${tabBar()}`;
+  const sl=$('#tsel'),dots=[...document.querySelectorAll('.tsel-dots i')];
+  sl.onscroll=()=>{const i=Math.round(sl.scrollLeft/Math.max(1,sl.clientWidth*0.86));dots.forEach((d,j)=>d.classList.toggle('on',j===i));};
+  dots.forEach((d,j)=>d.onclick=()=>sl.scrollTo({left:j*sl.scrollWidth/2,behavior:'smooth'}));
+  document.querySelectorAll('[data-tsel]').forEach(b=>b.onclick=()=>b.dataset.tsel==='heaven'?renderHeaven():renderTower());
+  $('#back').onclick=()=>renderHub();window.scrollTo(0,0);
+}
+function renderHeaven(msg){
+  hubTab='adv';
+  if(!heavenOpen()){renderTowerSelect();return;}
+  const H=heavenState(),done=H.best>=HEAVEN_MAX,f=done?Math.min(HEAVEN_MAX,H.run||1):Math.min(HEAVEN_MAX,H.best+1);
+  const ally=P.active[0],a=heavenArea(f),en=heavenEnemy(f),m=heavenMul(f);
+  $('#app').innerHTML=`${statusHTML()}${topBack()}
+    ${msg?`<div class="notice">${msg}</div>`:''}
+    <div class="panel heavenp"><div class="ptitle">☁️ 천상의 탑 <span class="small">최고 ${H.best}층 / ${HEAVEN_MAX}층${H.clears?` · 재정복 ${H.clears}회`:''}</span></div>
+      <div class="desc"><b>돌파 보상</b> ${Object.keys(HEAVEN_REWARD).map(k=>`${k}층: ${heavenRewardText(+k)}${(H.got||{})[k]?' ✔':''}`).join(' · ')}</div>
+      <div class="tlad">${Array.from({length:HEAVEN_MAX},(_,i)=>{const n=i+1;return `<span class="${n<=H.best?'done':''} ${n===f?'on':''} ${HEAVEN_REWARD[n]?'bos':''}">${n<=H.best?'✔':n}</span>`;}).join('')}</div>
+      ${done?`<div class="notice">👑 천상의 탑 ${HEAVEN_MAX}층을 모두 정복했다! 🔁 다시 오르기 — 1층부터 다시 도전할 수 있다 (보상 없음)</div>`:''}
+      <div class="desc"><b>${f}층</b> ☠ 보스 — <b>${esc(en.name)}</b> <span class="small">(${AREAS[a].flag} ${AREAS[a].name}의 최종 보스 · HP ${fmt(en.hp)} · 공격 ${fmt(en.atk)} · 탑 강화 체력 ×${m.hp.toFixed(2)} 공격 ×${m.atk.toFixed(2)})</span></div>
+      <div class="desc">⚠ 출전 조건 — 동료 <b>1명</b>만 함께 오를 수 있다 (출전 동료 중 첫 번째 · 이사벨 부제 불가)<br>
+        이번 동료: ${ally?`${allyFace(ally,'sm')} <b>${nameHTML(ally)}</b> Lv ${aData(ally).lv}`:'<span class="small">없음 — 주인공 혼자 오른다</span>'}<br>
+        탑에서는 HP가 가득 찬 상태로 싸우고, 끝나면 원래 HP로 돌아온다. 도망칠 수 없다.</div>
+      <div class="grid">
+        <button class="btn danger full" id="hgo">⚔ ${f}층 ${done?'다시 도전':'도전'}</button>
+        ${done&&f>1?`<button class="btn full" id="hrst">🔁 1층부터 다시 오르기</button>`:''}
+        <button class="btn full" id="hally">🤝 출전 동료 바꾸기</button>
+        <button class="btn full" id="hsel">← 탑 선택으로</button>
+      </div></div>${tabBar()}`;
+  $('#hgo').onclick=()=>{if(!heavenOpen())return renderHeaven();const H=heavenState();H.tries=(H.tries||0)+1;P._towerRestore={hp:P.hp,mp:P.mp};P.hp=P.maxHp;P.mp=P.maxMp;startBattle({area:heavenArea(f),tower:f,heaven:true,replay:done});};
+  if($('#hrst'))$('#hrst').onclick=()=>{heavenState().run=1;save();renderHeaven('🔁 1층부터 다시 오른다');};
+  $('#hally').onclick=()=>renderAllies();
+  $('#hsel').onclick=()=>renderTowerSelect();
+  window.scrollTo(0,0);
+}
+function heavenEnd(win){
+  const f=B.tower,rp=B.towerReplay,e=B.e,pst=B.st,pparty=partyIds().slice();clearBattle();
+  if(P._towerRestore){P.hp=P._towerRestore.hp;P.mp=P._towerRestore.mp;delete P._towerRestore;}
+  const H=heavenState(),lines=[];let gotAlly=null;
+  if(win&&rp){H.run=f+1;lines.push(`🔁 ${f}층 다시 오르기 승리 (보상 없음)${f>=HEAVEN_MAX?'':` — 다음은 ${f+1}층`}`);
+    if(f>=HEAVEN_MAX){H.run=1;H.clears=(H.clears||0)+1;lines.push(`👑 천상의 탑 재정복! (${H.clears}회) — 다시 1층부터`);}}
+  else if(win){const first=f>H.best;if(first)H.best=f;lines.push(first?`☁️ ${f}층 돌파!${f>=HEAVEN_MAX?' — 천상의 탑 정복!':` 다음은 ${f+1}층`}`:`☁️ ${f}층 재도전 승리`);
+    H.got=H.got||{};const w=HEAVEN_REWARD[f];
+    if(w&&!H.got[f]){H.got[f]=true;
+      if(w.salv){P.items.salv=(P.items.salv||0)+w.salv;salvToast(`천상의 탑 ${f}층 돌파`);}
+      if(w.ally){const isNew=!owned(w.ally);addAlly(w.ally);aData(w.ally);if(isNew)gotAlly=w.ally;}
+      lines.push(`🎁 ${f}층 돌파 보상: ${heavenRewardText(f)}`);}}
+  else lines.push(`${f}층에서 쓰러졌다… 다시 도전하자`);
+  lines.push(`최고 기록 ${H.best}/${HEAVEN_MAX}층`);
+  save();renderHeaven();
+  const res=()=>showResult({title:`☁️ 천상의 탑 ${f}층 — ${esc(e.name)}`,won:win,lines,st:pst,party:pparty});
+  if(gotAlly)summonFx(6,()=>showStory(revealHTML([{id:gotAlly,isNew:true}],'천상의 탑 정복 보상'),res,true));else res();
 }
 /* 아키라: 얼어붙은 화살(2초 빙결) · 급소 40% · 신화 혹한의 화살(4초마다 공격력 2배, 최대 4배) */
 const AKIRA_FREEZE=2000, AKIRA_REST=4000, AKIRA_VITAL=0.4, AKIRA_COLD_MS=4000, AKIRA_COLD_MAX=4;
@@ -4541,11 +4665,11 @@ function startBattle(spec){
   let s=spec.stage,t;
   if(spec.pvp){t=spec.pvp;s=0;}
   else if(spec.dungeon){t=dgEnemy(a);s=15;}   // 던전: 샌드백 보스 (효과 없음)
-  else if(spec.tower){t=towerEnemy(spec.tower);s=0;}
+  else if(spec.tower){t=spec.heaven?heavenEnemy(spec.tower):towerEnemy(spec.tower);s=0;}
   else if(spec.hunt){s=Math.min(14,Math.max(1,P.prog[a]));if(stageType(s)!=='normal')s=Math.max(1,s-1);t=scaledEnemy(a,s,huntPick(AREAS[a].enemies));}
   else t=stageEnemy(a,s);
   if(!spec.pvp&&!spec.tower&&!spec.dungeon){const em=(!spec.hunt&&stageType(s)==='boss'&&a>=4)?LATE_BOSS_MULT:ENEMY_MULT;t={...t,hp:t.exactHp?t.hp:Math.round(t.hp*em),atk:Math.round(t.atk*em)};} // 적 체력·공격력 배율 (exactHp: 체력 고정)
-  const type=spec.pvp?'pvp':spec.dungeon?'boss':spec.tower?towerType(spec.tower):spec.hunt?'normal':stageType(s);
+  const type=spec.pvp?'pvp':spec.dungeon?'boss':spec.tower?(spec.heaven?'boss':towerType(spec.tower)):spec.hunt?'normal':stageType(s);
   const isBoss=type==='boss'||type==='mid'||type==='pvp';
   clearBattle();
   const ahp={};
@@ -4561,7 +4685,7 @@ function startBattle(spec){
      party,healCut:0,mikaCD:0,mshield:0,st:{dmg:{},heal:{}},dot:null,evade:false,sealed:0,over:false,won:false,shield:0,ashield:0,prism:0,negate:0,blind:0,eburn:null,eliaCD:0,sirenT:0,danT:0,
      defending:false,busy:false,menu:'main',log:[],fxq:[]};
   if(spec.dungeon){B.dungeon=true;B.dgN=0;B.dgDone=0;B.dgKills=0;B.dgLeft=DG_MS;addLog(`🏰 던전 — ${DG_MS/1000}초 동안 최대한 많은 피해를 넣자!`);}
-  if(spec.tower){B.tower=spec.tower;B.towerReplay=!!spec.replay;addLog(`🗼 구원의 탑 ${spec.tower}층 — 동료 1명만 함께 오른다`);}
+  if(spec.tower){B.tower=spec.tower;B.heaven=!!spec.heaven;B.towerReplay=!!spec.replay;addLog(`${B.heaven?'☁️ 천상의 탑':'🗼 구원의 탑'} ${spec.tower}층 — 동료 1명만 함께 오른다`);}
   else if(noFixed)addLog('⚠ 출전 조건 — 이사벨 부제는 이 지역에 함께할 수 없다');
   if(benched.length)addLog(`⚠ 출전 조건 — ${benched.map(id=>ALLIES[id].name).join(', ')} 출전 불가 (${sortieRule(a).text})`);
   const begin=()=>{
@@ -4586,6 +4710,7 @@ function startBattle(spec){
     if(B&&inParty('vista5'))B.trainT=setInterval(trainTick,TRAIN_MS);
     if(B&&inParty('aora'))B.aoraT=setInterval(aoraTick,AORA_MS);
     if(B&&inParty('babelord'))B.diceT=setInterval(diceTick,diceMs());
+    if(B&&inParty('elizabeth'))B.judgeT=setInterval(judgeTick,JUDGE_MS);
     if(B&&inParty('akira')&&isMyth('akira'))B.coldT=setInterval(akiraColdTick,AKIRA_COLD_MS);
     if(B&&inParty('roa'))B.heartT=setInterval(heartTick,HEART_MS);
     if(B&&t.halfTick&&!t.pvp){B.halfAt=Date.now()+t.halfTick;B.halfT=setInterval(halfTick,t.halfTick);}
@@ -4834,6 +4959,9 @@ function renderBattle(){
   if(B.evadeNext)st.push('🔦 눈부심');
   if(B.blind)st.push(`📜 시야 차단 ${B.blind}`);
   if(B.sealed>0)st.push(`⛓ 적 속박 ${B.sealed}`);
+  if(ezBindOn())st.push(`⛓ 심판의 속박 ${Math.ceil((B.ezBindUntil-Date.now())/1000)}초`);
+  if(ezReflOn())st.push(`🪞 심판의 반사 ${Math.ceil((B.ezReflUntil-Date.now())/1000)}초`);
+  if(B.ezShield>0)st.push(`👑 여왕의 보호막 ${B.ezShield}`);
   if(eFrozenOn())st.push(`🧊 적 빙결 ${Math.ceil((B.eFrozenUntil-Date.now())/1000)}초`);
   if((B.akiraMul||1)>1)st.push(`❄️ 아키라 공격 ×${B.akiraMul}`);
   if(B.eburn)st.push(`🔥 적 불태움 ${B.eburn.turns}`);
@@ -4910,7 +5038,7 @@ function renderBattle(){
   }
   $('#app').innerHTML=`${statusHTML()}
     <div class="enemy ${B.isBoss?'boss':''} ${B.isFinal?'final':''}">
-      <div class="eflag">${B.dungeon?`🏰 던전 · ${B.dgN+1}번째 보스 · ${AREAS[B.area].flag} ${AREAS[B.area].name}${B.dgN>=dgSeq().main.length?' · 마계 반복':''}`:B.tower?`🗼 구원의 탑 ${B.tower}층 · ${AREAS[B.area].name}의 적`:`${AREAS[B.area].flag} ${AREAS[B.area].name}`}${B.tower||B.dungeon?'':B.pvp?' · 친구 대결':B.stage?` · 스테이지 ${B.stage}`:' · 자유 사냥'}</div>
+      <div class="eflag">${B.dungeon?`🏰 던전 · ${B.dgN+1}번째 보스 · ${AREAS[B.area].flag} ${AREAS[B.area].name}${B.dgN>=dgSeq().main.length?' · 마계 반복':''}`:B.tower?(B.heaven?`☁️ 천상의 탑 ${B.tower}층 · ${AREAS[B.area].name}의 최종 보스`:`🗼 구원의 탑 ${B.tower}층 · ${AREAS[B.area].name}의 적`):`${AREAS[B.area].flag} ${AREAS[B.area].name}`}${B.tower||B.dungeon?'':B.pvp?' · 친구 대결':B.stage?` · 스테이지 ${B.stage}`:' · 자유 사냥'}</div>
       ${B.dungeon?dgHudHTML():''}
       <div class="ename">${e.name}${tag}</div>
       ${e.title?`<div class="etitle">${e.title}</div>`:''}
@@ -5204,6 +5332,8 @@ function alliesAct(){
           const h=B.ahp[id];if(d&&h&&h.hp>0){const vh=Math.min(h.max-h.hp,Math.round(d*0.5));if(vh>0){h.hp+=vh;stat('heal',id,vh);}}
         }
         break;}
+      case 'judge':{ // 엘리자베스: 여왕의 검 (심판은 judgeTick)
+        allyHit(16+lv*5,`${nm}의 여왕의 검`,0.4);break;}
       case 'frost':{ // 아키라: 얼어붙은 화살 · 급소 사격(치명타 + 피해 절반 회복) · 신화 혹한의 화살
         const base=(13+lv*4.2)*(B.akiraMul||1);
         if(Date.now()>=(B.akiraCD||0)&&!B.immune){B.eFrozenUntil=Date.now()+AKIRA_FREEZE;B.akiraCD=B.eFrozenUntil+AKIRA_REST;addLog(`🧊 ${nm}의 얼어붙은 화살! ${e.name}이(가) ${AKIRA_FREEZE/1000}초간 얼어붙었다 (행동 불능)`);queueFx('enemy','🧊 빙결','mpf');allyHit(base,`${nm}의 얼어붙은 화살`,0.4);}
@@ -5276,8 +5406,12 @@ function hitPlayer(mult,label){
     const r=Math.round(d*0.5*(B.prismM>=2?2:1));d=Math.max(1,d-Math.round(d*0.5));
     if(!B.immune){stat('dmg','siren',Math.min(r,e.hp));e.hp=Math.max(0,e.hp-r);addLog(`💎 프리즘 굴절 — ${e.name}에게 ${r} 반사`);queueFx('enemy','💎'+r,'dmg');}
   }
+  if(ezReflOn()){ // 엘리자베스의 심판: 공격 반사 — 주인공은 피해를 받지 않고 적에게 되돌린다
+    if(!B.immune){stat('dmg','elizabeth',Math.min(d,e.hp));e.hp=Math.max(0,e.hp-d);}
+    addLog(`🪞 ${label} — 심판의 반사! ${e.name}에게 ${d} 되돌렸다`);queueFx('enemy','🪞'+d,'dmg');return 0;}
   let absorbed=0;
-  if(B.shield>0){absorbed=Math.min(B.shield,d);B.shield-=absorbed;d-=absorbed;stat('heal','elia',absorbed);}
+  if(B.ezShield>0){const a0=Math.min(B.ezShield,d);B.ezShield-=a0;d-=a0;absorbed+=a0;stat('heal','elizabeth',a0);}
+  if(B.shield>0&&d>0){const a1=Math.min(B.shield,d);B.shield-=a1;d-=a1;absorbed+=a1;stat('heal','elia',a1);}
   if(B.mshield>0&&d>0){const a2=Math.min(B.mshield,d);B.mshield-=a2;d-=a2;absorbed+=a2;stat('heal','mikael',a2);}
   if(B.bshield>0&&d>0){const a3=Math.min(B.bshield,d);B.bshield-=a3;d-=a3;absorbed+=a3;}
   P.hp=Math.max(0,P.hp-d);
@@ -5462,6 +5596,7 @@ function enemyTurn(){
   else if(forcedMv){mv=forcedMv;forcedMv=null;}
   else if(B.invisNext){B.invisNext=false;mv={t:'invisslash',n:'보이지 않는 참격'};forcedMv={t:'bleedstorm',n:'무수한 출혈 참격',hits:8,m:0.25};}
   else if(eFrozenOn())mv={t:'frozen'};
+  else if(ezBindOn())mv={t:'bound'};
   else if(B.sealed>0){mv={t:'sealed'};B.sealed--;}
   else if(B.charging){mv={t:'release',n:B.chargeName,kind:B.chargeKind};B.charging=false;B.chargeKind=null;}
   else if(e.pvp)mv={t:'pvp',n:''};
@@ -5474,6 +5609,7 @@ function enemyTurn(){
     case 'idle':    break;
     case 'sealed':  addLog(`${e.name} — 봉인되어 움직일 수 없다!`);break;
     case 'frozen':  addLog(`🧊 ${e.name} — 얼어붙어 움직일 수 없다!`);break;
+    case 'bound':   addLog(`⛓ ${e.name} — 심판의 속박에 묶여 움직일 수 없다!`);break;
     case 'pvp':     pvpEnemyActs(e);break;
     case 'nullify': B.immune=2;addLog(`${label} — ⏸ 잠시 동안 모든 피해가 무효화된다!`);break;
     case 'reflect': B.reflect=2;addLog(`${label} — ↩ 잠시 동안 준 피해의 절반이 되돌아온다!`);break;
@@ -5561,11 +5697,12 @@ function enemyTurn(){
       break;
   }
   // 나베리우스: 숨 쉴 틈 없는 추격 참격
-  if(e.burnHit&&mv.t!=='sealed'&&P.hp>0&&Math.random()<0.4&&!(B.dot&&B.dot.name==='화상')){B.dot={name:'화상',dmg:Math.max(5,Math.round(e.atk*0.12)),turns:3};addLog('🔥 라이아의 불길 — 화상');}
-  if(e.slashes&&mv.t!=='sealed'&&P.hp>0){
+  const _held=mv.t==='sealed'||mv.t==='frozen'||mv.t==='bound'; // 봉인·빙결·속박 중엔 추가 공격도 없음
+  if(e.burnHit&&!_held&&P.hp>0&&Math.random()<0.4&&!(B.dot&&B.dot.name==='화상')){B.dot={name:'화상',dmg:Math.max(5,Math.round(e.atk*0.12)),turns:3};addLog('🔥 라이아의 불길 — 화상');}
+  if(e.slashes&&!_held&&P.hp>0){
     for(let i=0;i<e.slashes;i++)hitPlayer(0.35,`🗡 추격 참격 ${i+1}`);
   }
-  if(e.critSlash&&mv.t!=='sealed'&&mv.t!=='charge'&&P.hp>0){const f=e.fixedDmg;e.fixedDmg=true;hitPlayer(e.critSlash,`💥 ${e.name}의 참격 — 치명타`);e.fixedDmg=f;} // 공격력 절반의 치명타 (방어력 무시)
+  if(e.critSlash&&!_held&&mv.t!=='charge'&&P.hp>0){const f=e.fixedDmg;e.fixedDmg=true;hitPlayer(e.critSlash,`💥 ${e.name}의 참격 — 치명타`);e.fixedDmg=f;} // 공격력 절반의 치명타 (방어력 무시)
   B.ward=false;
   if(e.burnBleed&&P.hp>0&&e.hp>0){ // 테라지오: 처음부터 끝까지 화상 + 출혈
     const bd=Math.max(3,Math.round(e.atk*0.075)),bl=Math.max(3,Math.round(e.atk*0.075));
@@ -5621,7 +5758,7 @@ function gainXp(n){
 function victory(){
   if(!B)return;
   if(B.pvp){pvpEnd(true);return;}
-  if(B.tower){towerEnd(true);return;}
+  if(B.tower){if(B.heaven)heavenEnd(true);else towerEnd(true);return;}
   const e=B.e,area=B.area,stype=B.stype,stage=B.stage,wasFinal=B.isFinal,fromHunt=!!B.spec.hunt;
   const tName=B.baseName;
   B.over=true;
@@ -5781,7 +5918,7 @@ function autoNext(a,s,rep){
 function defeat(){
   if(B&&B.dungeon){dungeonEnd('down');return;}
   if(B&&B.pvp){pvpEnd(false);return;}
-  if(B&&B.tower){towerEnd(false);return;}
+  if(B&&B.tower){if(B.heaven)heavenEnd(false);else towerEnd(false);return;}
   const autoWas=autoHunt.on&&B&&B.auto;autoHunt.on=false;
   const rep=B?{title:`${esc(B.baseName||B.e.name)}에게 패배`,won:false,st:B.st,party:partyIds().slice()}:null;
   clearBattle();
