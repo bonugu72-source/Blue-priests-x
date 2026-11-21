@@ -1807,11 +1807,12 @@ function bossSVG(key){
 }
 
 /* 공구방 특별 미션: 보스를 5번 잡으면 기억의 퍼즐 조각 1개 */
-const GG_MISSIONS=[{id:'gg_furfur',area:3,boss:'푸르푸르'},{id:'gg_naberius',area:4,boss:'나베리우스'},{id:'gg_botis',area:5,boss:'보티스'},{id:'gg_barbatos',area:6,boss:'바르바토스'},{id:'gg_amon',area:7,boss:'아몬'}];
+const GG_MISSIONS=[{id:'gg_furfur',area:3,boss:'푸르푸르'},{id:'gg_naberius',area:4,boss:'나베리우스'},{id:'gg_botis',area:5,boss:'보티스'},{id:'gg_barbatos',area:6,boss:'바르바토스'},{id:'gg_amon',area:7,boss:'아몬'},
+  {id:'gg_valefor',area:8,boss:'발레포르',fresh:true},{id:'gg_gamigin',area:9,boss:'가미긴',fresh:true},{id:'gg_terazio',area:10,boss:'테라지오',fresh:true},{id:'gg_agares',area:11,boss:'아가레스',fresh:true},{id:'gg_twins',area:12,boss:'라이아와 테리아',fresh:true}]; // fresh: 이 미션이 생긴 뒤 처치한 횟수만 센다
 const GG_COUNT=5;
 const MEMORY_ITEMS=['bonu_grip','yujun_glasses','jihu_glove','junhee_bat','jueun_ipad','seolwoo_jacket','suyeon_mask','juwon_ticket','eunbit_scarf','chaeyun_letter','hyoseo_laptop'];
 /* 아몬은 중간 보스(악마)와 이름이 같아, 최종 보스 처치만 따로 센 값을 쓴다 */
-const ggProg=m=>Math.min(GG_COUNT,m.boss==='아몬'?((P.fbk||{})[m.area]||0):(P.kills[m.boss]||0));
+const ggProg=m=>Math.min(GG_COUNT,m.fresh?((P.ggk||{})[m.area]||0):m.boss==='아몬'?((P.fbk||{})[m.area]||0):(P.kills[m.boss]||0));
 const ggDone=m=>!!(P.done&&P.done[m.id]);
 function ggClaim(id){const m=GG_MISSIONS.find(x=>x.id===id);if(!m||ggDone(m)||ggProg(m)<GG_COUNT)return;
   P.done[m.id]=true;P.items.puzzle=(P.items.puzzle||0)+1;save();
@@ -3080,7 +3081,7 @@ function renderHub(msg){
       ${realmOpen?`<div class="areas">${realms}</div>`:`<div class="desc">🔒 ${AREAS[RS-1].name}까지 클리어하면 마계로 가는 문이 열린다.</div>`}</div>
     <div class="panel"><div class="ptitle">📜 미션</div>${missionHTML}</div>
     <div class="panel"><div class="ptitle">👥 공구방 특별 미션 <span class="small">보상: 🧩 기억의 퍼즐 조각</span></div>${GG_MISSIONS.map(m=>{const pr=ggProg(m),dn=ggDone(m);
-      return `<div class="mission"><div class="info"><span class="tag item">퍼즐</span>${m.boss} 처치<small>${AREAS[m.area].flag} ${AREAS[m.area].name}의 최종 보스 ${m.boss}를 ${GG_COUNT}번 쓰러뜨려라.<br>보상: 🧩 기억의 퍼즐 조각 ×1</small></div>${dn?'<span class="tag done">완료</span>':pr>=GG_COUNT?`<button class="btn primary" data-gg="${m.id}">보상 받기</button>`:`<span class="small">${pr} / ${GG_COUNT}</span>`}</div>`;}).join('')}</div>
+      return `<div class="mission"><div class="info"><span class="tag item">퍼즐</span>${m.boss} 처치<small>${AREAS[m.area].flag} ${AREAS[m.area].name}의 최종 보스 ${m.boss}${/[가-힣]/.test(m.boss.slice(-1))&&(m.boss.slice(-1).charCodeAt(0)-44032)%28?'을':'를'} ${GG_COUNT}번 쓰러뜨려라.${m.fresh?' (미션이 생긴 뒤부터 센다)':''}<br>보상: 🧩 기억의 퍼즐 조각 ×1</small></div>${dn?'<span class="tag done">완료</span>':pr>=GG_COUNT?`<button class="btn primary" data-gg="${m.id}">보상 받기</button>`:`<span class="small">${pr} / ${GG_COUNT}</span>`}</div>`;}).join('')}</div>
     ${tabBar()}`;
   document.querySelectorAll('.area').forEach(b=>b.onclick=()=>{P.cur=+b.dataset.i;save();renderHub();});
   document.querySelectorAll('[data-claim]').forEach(b=>b.onclick=()=>claim(b.dataset.claim));
@@ -4711,7 +4712,7 @@ function victory(){
   const memEgg=tName==='푸르푸르'&&P.kills[tName]>=MEMORY_KILLS&&!P.relics.includes('our_memory'); // 이스터에그
   if(memEgg)gainRelic('our_memory');
   P.wins[area]=(P.wins[area]||0)+1;
-  if(stype==='boss'&&!fromHunt){P.fbk=P.fbk||{};P.fbk[area]=(P.fbk[area]||0)+1;} // 최종 보스 처치 수 (공구방 특별 미션)
+  if(stype==='boss'&&!fromHunt){P.fbk=P.fbk||{};P.fbk[area]=(P.fbk[area]||0)+1;if(GG_MISSIONS.some(m=>m.fresh&&m.area===area)){P.ggk=P.ggk||{};P.ggk[area]=(P.ggk[area]||0)+1;}} // 최종 보스 처치 수 (공구방 특별 미션)
   let extra=[];
   if(e.itemAt&&!fromHunt&&(P.kills[tName]||0)>=e.itemAt.n&&RELICS[e.itemAt.id]&&!P.relics.includes(e.itemAt.id)){gainRelic(e.itemAt.id);const it=RELICS[e.itemAt.id];extra.push(`🎁 ${e.itemAt.n}회 클리어 보상: ${it.icon} 희귀 아이템 「${it.name}」 — ${it.desc.replace('희귀 아이템 · ','')}`);}
   if(memEgg)extra.push(`📸 이스터에그! 희귀한 유물 「우리들의 추억」을 손에 넣었다 — 시간 속에 잠긴 추억`);
