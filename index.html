@@ -377,6 +377,35 @@ body.pfrozen #cmds .btn{filter:saturate(.2) brightness(1.2);background:linear-gr
 .sfx.s6{animation:sfxshake .5s .6s 3}.sfx.s6 .sfx-circle div{border-color:#ffffff}
 .sumcell.s6{border-color:#bfe6ff;box-shadow:0 0 18px rgba(190,230,255,.9),0 0 30px rgba(255,220,120,.5);background:linear-gradient(160deg,#20304a,#3a2a08)}
 .sum.s6 .sum-stars{color:#e6f6ff;text-shadow:0 0 12px #9fd8ff,0 0 24px #ffd24a}
+.sum.s6 .aportrait{box-shadow:0 0 30px #bfe6ff,0 0 70px rgba(255,220,120,.55);border:2px solid #fff6d8;position:relative;z-index:2}
+/* ★6 소환: 천사의 날개 */
+.wingcard{position:relative;width:170px;margin:8px auto;isolation:isolate}
+.wingcard .aportrait{margin:0;position:relative;z-index:2}
+.wingcard .wing{position:absolute;top:-6%;width:150px;height:200px;z-index:1;pointer-events:none;filter:drop-shadow(0 0 8px #e9f7ff) drop-shadow(0 0 22px rgba(255,214,110,.8));animation:wingin .7s ease-out both}
+.wingcard .wing svg,.sumcell .mwing svg,.sfx-wings .wing svg{width:100%;height:100%;display:block;transform-origin:0% 58%}
+.wf{width:100%;height:100%}.l>.wf{transform:scaleX(-1)}
+.wingcard .wing.r{left:56%;transform-origin:0% 60%}.wingcard .wing.l{right:56%;transform-origin:100% 60%}
+.wingcard .wing svg{animation:flap 1.15s ease-in-out .7s infinite}
+@keyframes flap{0%,100%{transform:rotate(8deg) scaleX(1)}50%{transform:rotate(-14deg) scaleX(.8)}}
+@keyframes wingin{0%{opacity:0;transform:scale(.3)}100%{opacity:1;transform:scale(1)}}
+.wingcard .halo{position:absolute;left:50%;top:-18px;width:90px;height:22px;margin-left:-45px;border-radius:50%;border:3px solid #fff3c4;box-shadow:0 0 14px #ffd24a,inset 0 0 10px #ffd24a;z-index:3;animation:halo 2.4s ease-in-out infinite}
+@keyframes halo{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+.wingcard .holo{position:absolute;inset:0;border-radius:14px;overflow:hidden;z-index:3;pointer-events:none}
+.wingcard .holo::before{content:'';position:absolute;inset:-40%;background:linear-gradient(115deg,transparent 38%,rgba(255,255,255,.75) 48%,rgba(190,230,255,.5) 52%,transparent 62%);animation:shine 1.6s .8s ease-in-out infinite}
+.wingcard .holo::after{content:'';position:absolute;inset:0;background:radial-gradient(circle at 50% 30%,rgba(255,240,190,.35),transparent 60%);animation:glowp 1.8s ease-in-out infinite}
+@keyframes glowp{0%,100%{opacity:.3}50%{opacity:1}}
+.wingcard .fth{position:absolute;bottom:10%;width:7px;height:16px;border-radius:50% 50% 50% 50%/70% 70% 30% 30%;background:linear-gradient(#fff,#cfeaff);box-shadow:0 0 8px #fff;z-index:4;opacity:0;animation:fth 3.2s linear infinite}
+@keyframes fth{0%{opacity:0;transform:translate(0,0) rotate(0)}15%{opacity:1}100%{opacity:0;transform:translate(var(--x),-240px) rotate(var(--rt))}}
+.sumcell.s6{overflow:visible}
+.sumcell .mwing{position:absolute;top:2px;width:26px;height:34px;z-index:0;filter:drop-shadow(0 0 4px #e9f7ff)}
+.sumcell .mwing.r{right:-14px}.sumcell .mwing.l{left:-14px}.sumcell .mwing svg{animation:flap 1.15s ease-in-out infinite}
+.sumcell.s6 .ic,.sumcell.s6 .st,.sumcell.s6 .nm{position:relative;z-index:1}
+.sumcell.s6::after{content:'';position:absolute;inset:0;border-radius:10px;background:linear-gradient(115deg,transparent 40%,rgba(255,255,255,.6) 50%,transparent 60%);background-size:250% 100%;animation:shine6 1.6s .8s ease-in-out infinite;pointer-events:none}
+@keyframes shine6{0%{background-position:120% 0}60%,100%{background-position:-20% 0}}
+.sfx-wings{position:absolute;left:50%;top:50%;width:0;height:0;z-index:1}
+.sfx-wings .wing{position:absolute;top:-170px;width:230px;height:300px;opacity:0;filter:drop-shadow(0 0 6px #fff) drop-shadow(0 0 22px rgba(255,214,110,.7));animation:sfxwing 2.6s .45s ease-out forwards}
+.sfx-wings .wing.r{left:4px;transform-origin:0% 60%}.sfx-wings .wing.l{right:4px;transform-origin:100% 60%}.sfx-wings .wing svg{animation:flap .6s ease-in-out .6s infinite}
+@keyframes sfxwing{0%{opacity:0;transform:scale(.2)}25%{opacity:1;transform:scale(1.05)}80%{opacity:1}100%{opacity:.85;transform:scale(1.15)}}
 .sfx-bg{position:absolute;inset:0;background:radial-gradient(circle at 50% 50%,color-mix(in srgb,var(--c) 28%,#03050c),#03050c 70%);animation:sfxfade .3s ease-out}
 .sfx-circle{position:absolute;width:240px;height:240px;top:50%;left:50%;transform:translate(-50%,-50%)}
 .sfx-circle div{position:absolute;inset:0;border-radius:50%;border:2px solid var(--c);box-shadow:0 0 16px var(--c),inset 0 0 16px var(--c);opacity:.85}
@@ -916,6 +945,8 @@ const ALLIES={
             desc:'정의: 전투 시작 5초 후 적의 현재 체력 절반을 앗아가고, 그 대가로 무희는 쓰러진다 (전투당 1회) · 그 외의 능력은 없음'},
   aora:    {star:6,name:'대천사 아오라',  icon:'👼', role:'대천사', kit:'aora', hpMul:1.5,
             desc:'천사의 구원(적을 3초간 속박 · 그동안 적 공격력 1.5배 감소 · 주인공 피해 1.5배 증가) · 5초마다 시야를 가리는 안개(2턴간 적 공격 35% 빗나감) · 패시브 「천사의 심판」: 흡혈(준 피해의 50% 회복) + 5초마다 생명력 흡수 · 상점 소환으로만 획득 (합성 불가)'},
+  babelord:{star:6,name:'천계의 예언자 바벨로드',icon:'🎲',role:'천계의 예언자',kit:'dice',
+            desc:'운명의 점(4초마다 운명의 주사위를 굴린다 — 1: 주인공 현재 HP의 절반만큼 회복 · 2: 동료 전원 보호막 500 · 3: 바벨로드 공격력 2배 · 4: 모든 디버프 제거 · 5: 공격 속도 증가(한 번에 두 번 공격) · 6: 4초간 자신이 받는 모든 피해 반사 / 3·5는 다음 주사위까지 유지) · 상점 소환으로만 획득 (합성 불가)'},
   miner:   {star:5,name:'미네르',        icon:'🌊', role:'물의 여신', kit:'tide', hpMul:0.6,
             desc:'침몰(적을 물속으로 끌어내려 3턴간 적 공격력 감소) · 물보라(2턴간 동료가 받는 피해 절반) · 체력이 적어 쉽게 쓰러지지만, 쓰러지면 물의 여신 「미네르바」로 각성해 HP 60%로 부활(1회) — 이후 공격이 고정 피해 + 치명타'},
   vista5:  {star:5,name:'비스타',        icon:'🚂', role:'열차 소환', kit:'train',
@@ -945,6 +976,7 @@ const MYTH_SKILL={
   roa:   {name:'매혹의 여왕',desc:'하트 회복량 2배 · 유혹 중 치명타 피해 1.5배 → 2배'},
   muhee: {name:'심판의 춤',desc:'정의 발동까지 5초 → 3초'},
   aora:  {name:'대천사의 강림',desc:'천사의 구원 지속 3초 → 5초 · 생명력 흡수량 2배'},
+  babelord:{name:'운명의 지배자',desc:'주사위를 굴리는 주기 4초 → 3초'},
   miner: {name:'바다의 여왕',desc:'물보라 보호막 2턴 → 3턴 · 미네르바의 치명타 피해 1.5배 → 2배'},
   vista5:{name:'특급 열차',desc:'열차 관통 피해가 기본 공격의 2배 → 3배 · 시야 차단 3턴'},
   elise: {name:'만추의 축복',desc:'정화할 때도 주인공·동료 HP 10% 회복 · 응원 주기 3턴 → 2턴'},
@@ -970,6 +1002,7 @@ const ALLY_IMG={
   roa:{src:'ally_roa.jpg',pos:'50% 24%',face:'50% 31%',size:'400%'},
   muhee:{src:'ally_muhee.jpg',pos:'50% 20%',face:'50% 24%',size:'420%'},
   aora:{src:'ally_aora.jpg',pos:'50% 18%',face:'50% 24%',size:'420%'},
+  babelord:{src:'ally_babelord.jpg',pos:'50% 22%',face:'48% 28%',size:'420%'},
   miner:{src:'ally_miner.jpg',pos:'50% 15%',face:'50% 21%',size:'450%'},
   vista5:{src:'ally_vista5.jpg',pos:'55% 18%',face:'57% 27%',size:'400%'},
   elise:{src:'ally_elise.jpg',pos:'52% 62%',face:'52% 64%',size:'420%'},
@@ -1005,6 +1038,14 @@ function allyFace(id,cls){
   const im=allyImg(id);
   return im?`<span class="aface ${cls||''}" style="background-image:url(${im.src});background-position:${im.face}${im.size?';background-size:'+im.size+' auto':''}"></span>`:`<span class="aemo ${cls||''}">${ALLIES[id].icon}</span>`;
 }
+/* 천사의 날개 (★6 소환 연출) — 깃털을 부채꼴로 겹쳐 그린 오른쪽 날개, 왼쪽은 좌우 반전 */
+const WING_SVG=(()=>{let f='';
+  const row=(n,len,wid,a0,a1,op)=>{for(let i=0;i<n;i++){const a=a0+(a1-a0)*i/(n-1),r=a*Math.PI/180,cx=6+Math.cos(r)*len*0.5,cy=70-Math.sin(r)*len*0.5;
+    f+=`<ellipse cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" rx="${(len/2).toFixed(1)}" ry="${wid}" transform="rotate(${(-a).toFixed(1)} ${cx.toFixed(1)} ${cy.toFixed(1)})" fill="url(#wgf)" stroke="#9fc8ef" stroke-width=".7" opacity="${op}"/>`;}};
+  row(11,112,5,-50,70,.9);row(9,80,6,-36,64,.95);row(7,50,7,-20,56,1);f+=`<path d="M4 58 Q30 30 62 22 Q40 44 22 74 Z" fill="#fffdf2" stroke="#9fc8ef" stroke-width=".7"/>`;
+  return `<svg viewBox="0 0 120 120" preserveAspectRatio="xMinYMid meet"><defs><linearGradient id="wgf" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#fffbe8"/><stop offset=".6" stop-color="#ffffff"/><stop offset="1" stop-color="#cfe9ff" stop-opacity=".75"/></linearGradient></defs>${f}</svg>`;})();
+const wingPair=cls=>`<div class="${cls} l"><div class="wf">${WING_SVG}</div></div><div class="${cls} r"><div class="wf">${WING_SVG}</div></div>`;
+const wingCard=inner=>`<div class="wingcard">${wingPair('wing')}<div class="halo"></div>${inner.replace(/<\/div>$/,'<div class="holo"></div></div>')}${Array.from({length:10},(_,i)=>`<i class="fth" style="left:${8+Math.round(Math.random()*84)}%;--x:${Math.round(Math.random()*80-40)}px;--rt:${Math.round(Math.random()*540-270)}deg;animation-delay:${(0.8+i*0.32).toFixed(2)}s"></i>`).join('')}</div>`;
 function allyPortrait(id){
   const im=allyImg(id);
   return im?`<div class="aportrait"><img src="${im.src}" style="object-position:${im.pos}" alt=""></div>`:`<div class="sum-icon">${ALLIES[id].icon}</div>`;
@@ -1840,7 +1881,7 @@ const MISSIONS=[
 const SUMMON_COST=100, SUMMON11_COST=1000; // 11회 연속: 1회 가격×11보다 100 G 할인
 const BOSS_GOLD_MULT=1.25;
 const DROP={seal:0.30,stoneBoss:0.25,stoneMid:0.15,stoneNormal:0.01}; // 희귀 유물 확률 // 보스(솔로몬 72악마) 처치 골드 배율
-const STAR_RATE=[[6,0.0007],[5,0.003],[4,0.03],[3,0.14],[2,0.30],[1,0.5263]]; // ★6은 상점 소환에서만 (합성 불가)
+const STAR_RATE=[[6,0.0005],[5,0.003],[4,0.03],[3,0.14],[2,0.30],[1,0.5265]]; // ★6은 상점 소환에서만 (합성 불가)
 const SYN_NEED={1:6,2:5,3:4,4:3};   // 같은 캐릭터 N개 → 한 단계 위 무작위 캐릭터
 const RARE_DROPS={};
 
@@ -2752,6 +2793,7 @@ function pvpEnemyActs(e){
       case 'charm':    dmg((12+lv*3.6)*1.5,0.4,`${nm}의 하트 화살 (치명타)`);break;
       case 'justice':  if(!B.pvpMuhee&&Date.now()-(B.startAt||0)>=(a.my?3000:5000)){B.pvpMuhee=true;const d=Math.floor(P.hp/2);P.hp-=d;estat('dmg',a.id,d);addLog(`⚖️ ${nm}의 정의! 주인공 체력 절반(${d})을 앗아갔다`);queueFx('player','⚖️-'+d,'pdmg');}break;
       case 'aora':     if(Math.random()<0.3){B.curse=Math.max(B.curse,2);addLog(`${nm}의 천사의 구원 — 주인공이 속박되어 방어력 감소`);}else dmg(16+lv*5,0.3,`${nm}의 천사의 심판`);break;
+      case 'dice':     {const n=1+Math.floor(Math.random()*6);if(n===1&&e.hp<e.maxHp)heal(0.15);else dmg((14+lv*4.5)*(n===3?2:1),0.4,`${nm}의 운명의 점 ${n} — 예언의 광선`);if(n===5)dmg(14+lv*4.5,0.4,`${nm}의 예언의 광선 — 연속`);}break;
       case 'tide':     dmg(12+lv*4,0.5,`${nm}의 물살`);break;
       case 'train':    if(Math.random()<0.4)dmg(vistaBase(lv)*(a.my?3:2),0,`${nm}의 열차 관통`);else dmg(vistaBase(lv),0.5,`${nm}의 군도 베기`);break;
       case 'breeze':   if(e.hp<e.maxHp*0.7&&Math.random()<0.45)heal(0.1);else dmg(6+lv*2.4,0.5,`${nm}의 낙엽 바람`);break;
@@ -3377,12 +3419,12 @@ function revealHTML(list,title){
   const best=Math.max(...list.map(x=>ALLIES[x.id].star));
   if(list.length===1){
     const {id,isNew}=list[0],al=ALLIES[id];
-    return `<div class="sum s${al.star}"><div class="sum-title">${title}</div><div class="sum-stars">${'★'.repeat(al.star)}</div>${allyPortrait(id)}
+    return `<div class="sum s${al.star}"><div class="sum-title">${title}</div><div class="sum-stars">${'★'.repeat(al.star)}</div>${al.star>=6?wingCard(allyPortrait(id)):allyPortrait(id)}
       <div class="sum-name">${al.name}</div><div class="small">${al.role}</div><p class="sum-desc">${al.desc}</p>
       <div class="notice">${isNew?'새로운 동료가 합류했다!':'보유 수 +1 (합성 재료) · 현재 '+P.roster[id]+'개'}</div></div>`;
   }
   return `<div class="sum s${best}"><div class="sum-title">${title}</div><div class="sumgrid">${list.map((x,i)=>{const {id,isNew}=x,al=ALLIES[id];
-    return `<div class="sumcell s${al.star}" style="animation-delay:${(i*0.09).toFixed(2)}s"><div class="ic">${allyFace(id,'sm')}</div><div class="st">${'★'.repeat(al.star)}</div><div class="nm">${al.name}</div>${isNew?'<div class="new">NEW</div>':''}${x.gift?'<div class="gift">🎁 확정</div>':''}</div>`;}).join('')}</div></div>`;
+    return `<div class="sumcell s${al.star}" style="animation-delay:${(i*0.09).toFixed(2)}s">${al.star>=6?wingPair('mwing'):''}<div class="ic">${allyFace(id,'sm')}</div><div class="st">${'★'.repeat(al.star)}</div><div class="nm">${al.name}</div>${isNew?'<div class="new">NEW</div>':''}${x.gift?'<div class="gift">🎁 확정</div>':''}</div>`;}).join('')}</div></div>`;
 }
 /* 소환 연출: 최고 등급에 따라 화려해짐 */
 function summonFx(top,cb){
@@ -3392,7 +3434,7 @@ function summonFx(top,cb){
   ov.className='sfx s'+top;
   ov.innerHTML=`<div class="sfx-bg"></div>
     <div class="sfx-circle"><div class="r1"></div><div class="r2"></div><div class="r3"></div></div>
-    <div class="sfx-pillar"></div>${top>=4?'<div class="sfx-rays"></div>':''}${top>=5?'<div class="sfx-rays r2"></div>':''}
+    ${top>=6?`<div class="sfx-wings">${wingPair('wing')}</div>`:''}<div class="sfx-pillar"></div>${top>=4?'<div class="sfx-rays"></div>':''}${top>=5?'<div class="sfx-rays r2"></div>':''}
     <div class="sfx-parts">${parts}</div>
     ${top>=4?`<div class="sfx-label">${'★'.repeat(top)}</div>`:''}
     <div class="sfx-flash"></div><div class="sfx-skip">탭하여 건너뛰기</div>`;
@@ -3468,7 +3510,7 @@ function winNow(){
   if(!B||B.won)return;
   if((B.e.berserk&&!B.berserked)||(B.e.madness&&!B.maddened)||(B.e.awaken&&!B.awoke)||(B.e.twin&&!B.twinned)||(B.e.relay&&(B.relayStage||0)<2)){B.e.hp=Math.max(1,B.e.hp);renderBattle();return;}
   B.won=true;B.busy=true;if(B.enemyT)clearInterval(B.enemyT);if(B.allyT)clearInterval(B.allyT);if(B.freezeT)clearInterval(B.freezeT);document.body.classList.remove('pfrozen');if(B.sakuraT)clearInterval(B.sakuraT);if(B.paraT)clearInterval(B.paraT);if(B.waveT)clearInterval(B.waveT);if(B.soulT)clearInterval(B.soulT);if(B.drainT)clearInterval(B.drainT);if(B.tsT)clearInterval(B.tsT);
-  if(B.zapT)clearInterval(B.zapT);if(B.karmaT)clearInterval(B.karmaT);if(B.trainT)clearInterval(B.trainT);if(B.aoraT)clearInterval(B.aoraT);if(B.heartT)clearInterval(B.heartT);if(B.halfT)clearInterval(B.halfT);if(B.fallT)clearInterval(B.fallT);if(B.isaT)clearInterval(B.isaT);
+  if(B.zapT)clearInterval(B.zapT);if(B.karmaT)clearInterval(B.karmaT);if(B.trainT)clearInterval(B.trainT);if(B.aoraT)clearInterval(B.aoraT);if(B.diceT)clearInterval(B.diceT);if(B.heartT)clearInterval(B.heartT);if(B.halfT)clearInterval(B.halfT);if(B.fallT)clearInterval(B.fallT);if(B.isaT)clearInterval(B.isaT);
   renderBattle();setTimeout(victory,750);
 }
 /* 이사벨 부제: 5초마다 주인공 HP 40% 회복 */
@@ -3529,6 +3571,38 @@ function aoraTick(){
     const vh=h?Math.min(h.max-h.hp,d):0;if(vh>0){h.hp+=vh;stat('heal',id,vh);}
     addLog(`👼 천사의 심판 — 생명력 흡수 ${d}${vh?` (아오라 HP +${vh})`:''}`);queueFx('enemy','👼'+d,'dmg');
   }
+  if(e.hp<=0){winNow();return;}
+  renderBattle();
+}
+/* 바벨로드: 운명의 점 — 주사위 1~6 무작위 */
+const diceMs=()=>isMyth('babelord')?3000:4000, DICE_REFL=4000, DICE_SHIELD=500;
+const diceAtkOn=()=>!!(B&&B.diceAtkUntil&&Date.now()<B.diceAtkUntil);
+const diceSpdOn=()=>!!(B&&B.diceSpdUntil&&Date.now()<B.diceSpdUntil);
+const diceReflOn=()=>!!(B&&B.diceReflUntil&&Date.now()<B.diceReflUntil);
+function cleanseAll(){const db=[];
+  if(B.curse){db.push('방어력 감소');B.curse=0;}
+  if(B.dot){db.push(B.dot.name);B.dot=null;}
+  if(B.silence){db.push('봉인');B.silence=0;}
+  if(B.healCut){db.push('회복 감소');B.healCut=0;}
+  partyIds().forEach(x=>{if(B.stun[x]>0&&B.stunWhy[x]==='불화'){B.stun[x]=0;db.push(`${ALLIES[x].name} 불화`);}});
+  if((B.vslow&&Object.keys(B.vslow).length)||(B.vsil&&Object.keys(B.vsil).length)){B.vslow={};B.vsil={};db.push('동료 둔화·침묵');}
+  return db;}
+/* 동료가 받는 피해: 주사위 보호막이 먼저 흡수 · 바벨로드 반사 중이면 적에게 되돌린다. 실제로 받은 피해를 돌려준다 */
+function allyTake(id,d){
+  if(id==='babelord'&&diceReflOn()&&B.e&&B.e.hp>0){const e=B.e;if(!B.immune){stat('dmg',id,Math.min(d,e.hp));e.hp=Math.max(0,e.hp-d);}addLog(`🎲 운명의 반사 — 바벨로드가 받은 피해 ${d}를 ${e.name}에게 되돌렸다`);queueFx('enemy','🎲'+d,'dmg');return 0;}
+  const sh=B.dshield&&B.dshield[id];if(sh>0){const a=Math.min(sh,d);B.dshield[id]-=a;d-=a;}
+  return d;}
+function diceTick(){
+  if(!B||B.over||B.won||!$('#modal').classList.contains('hidden'))return;
+  const id='babelord',h=B.ahp[id],e=B.e,now=Date.now();
+  if(!inParty(id)||(h&&h.hp<=0)||(B.stun[id]>0)||aFrozen()||e.hp<=0||P.hp<=0)return;
+  const n=1+Math.floor(Math.random()*6),nm='바벨로드';B.diceN=n;
+  if(n===1){const hh=Math.min(P.maxHp-P.hp,Math.floor(P.hp/2*pHealMul()));if(hh>0){P.hp+=hh;stat('heal',id,hh);queueFx('player','🎲+'+hh,'heal');}addLog(`🎲 ${nm}의 주사위 1 — 주인공 HP ${hh} 회복 (현재 HP의 절반)`);}
+  else if(n===2){B.dshield=B.dshield||{};partyIds().forEach(x=>{const a=B.ahp[x];if(a&&a.hp>0)B.dshield[x]=Math.max(B.dshield[x]||0,DICE_SHIELD);});addLog(`🎲 ${nm}의 주사위 2 — 동료 전원에게 보호막 ${DICE_SHIELD}`);}
+  else if(n===3){B.diceAtkUntil=now+diceMs();addLog(`🎲 ${nm}의 주사위 3 — 바벨로드의 공격력 2배!`);}
+  else if(n===4){const db=cleanseAll();addLog(`🎲 ${nm}의 주사위 4 — 모든 디버프 제거${db.length?` (${db.join(', ')})`:' (걸린 디버프 없음)'}`);if(db.length)queueFx('player','🎲 정화','mpf');}
+  else if(n===5){B.diceSpdUntil=now+diceMs();addLog(`🎲 ${nm}의 주사위 5 — 공격 속도 증가 (한 번에 두 번 공격)`);}
+  else {B.diceReflUntil=now+DICE_REFL;addLog(`🎲 ${nm}의 주사위 6 — 4초간 자신이 받는 모든 피해를 반사한다`);}
   if(e.hp<=0){winNow();return;}
   renderBattle();
 }
@@ -3615,6 +3689,7 @@ function startBattle(spec){
     if(B&&inParty('karma'))B.karmaT=setInterval(karmaTick,5000);
     if(B&&inParty('vista5'))B.trainT=setInterval(trainTick,TRAIN_MS);
     if(B&&inParty('aora'))B.aoraT=setInterval(aoraTick,AORA_MS);
+    if(B&&inParty('babelord'))B.diceT=setInterval(diceTick,diceMs());
     if(B&&inParty('roa'))B.heartT=setInterval(heartTick,HEART_MS);
     if(B&&t.halfTick&&!t.pvp){B.halfAt=Date.now()+t.halfTick;B.halfT=setInterval(halfTick,t.halfTick);}
     if(B&&inParty('sakura')){B.sakuraT=setInterval(sakuraTick,1000);sakuraTick();}
@@ -3682,7 +3757,7 @@ function hitAllies(pct,label,quiet){
   const down=[];
   partyIds().forEach(id=>{const h=B.ahp[id];if(!h||h.hp<=0)return;
     if(id==='danian'&&Math.random()<0.5)return; // 다니안 회피
-    const d=Math.max(1,Math.round(h.max*pct*(B.ashield?0.5:1)*(B.splash?0.5:1)*(paraOn()?1.5:1)*rnd(0.9,1.1)));h.hp=Math.max(0,h.hp-d);
+    const d=allyTake(id,Math.max(1,Math.round(h.max*pct*(B.ashield?0.5:1)*(B.splash?0.5:1)*(paraOn()?1.5:1)*rnd(0.9,1.1))));h.hp=Math.max(0,h.hp-d);
     if(h.hp<=0&&!allyDown(id))down.push(ALLIES[id].name);});
   if(!quiet)addLog(`${label} — 동료 전원 피해`);
   if(down.length)addLog(`💀 ${down.join(', ')} 쓰러짐 (이번 전투 행동 불가)`);
@@ -3979,7 +4054,7 @@ function hitEnemy(mult,label){
   queueFx('enemy',(crit?'💥':'')+d,crit?'crit':'dmg');
   if(P.relics.includes('blood_orb')&&d>0&&P.hp>0){const vh=Math.min(P.maxHp-P.hp,Math.round(d*BLOOD_ORB_PCT*pHealMul()));if(vh>0){P.hp+=vh;stat('heal','hero',vh);queueFx('player','🩸+'+vh,'heal');}}
   if(B.reflect){const r=Math.round(d*0.5);P.hp=Math.max(0,P.hp-r);addLog(`↩ 뒤집힌 시간 — 주인공에게 ${r} 반사`);queueFx('player','↩-'+r,'pdmg');}
-  else if(e.reflectAlly&&d>0){const alive=partyIds().filter(id=>B.ahp[id]&&B.ahp[id].hp>0);if(alive.length){const id=pick(alive),h=B.ahp[id],r=Math.max(1,Math.round(d*e.reflectAlly));h.hp=Math.max(0,h.hp-r);addLog(`🔁 ${e.name}의 반사 — 주인공의 공격 절반이 ${ALLIES[id].name}에게! (${r})`);if(h.hp<=0&&!allyDown(id))addLog(`${ALLIES[id].name}이(가) 쓰러졌다!`);}}
+  else if(e.reflectAlly&&d>0){const alive=partyIds().filter(id=>B.ahp[id]&&B.ahp[id].hp>0);if(alive.length){const id=pick(alive),h=B.ahp[id],r=allyTake(id,Math.max(1,Math.round(d*e.reflectAlly)));h.hp=Math.max(0,h.hp-r);addLog(`🔁 ${e.name}의 반사 — 주인공의 공격 절반이 ${ALLIES[id].name}에게! (${r})`);if(h.hp<=0&&!allyDown(id))addLog(`${ALLIES[id].name}이(가) 쓰러졌다!`);}}
   else if(e.reflectHero&&d>0){const r=Math.max(1,Math.round(d*e.reflectHero));P.hp=Math.max(0,P.hp-r);addLog(`🔮 ${e.name}의 반사 — 주인공에게 ${r} 되돌아왔다`);queueFx('player','🔮-'+r,'pdmg');}
 }
 function allyHit(base,label,defFactor,fixed){
@@ -4205,6 +4280,10 @@ function alliesAct(){
           const d=allyHit(base,`${nm}의 천사의 심판`,0.3);
           const h=B.ahp[id];if(d&&h&&h.hp>0){const vh=Math.min(h.max-h.hp,Math.round(d*0.5));if(vh>0){h.hp+=vh;stat('heal',id,vh);}}
         }
+        break;}
+      case 'dice':{ // 바벨로드: 운명의 점 (주사위는 diceTick) · 평소엔 예언의 지팡이
+        const base=(14+lv*4.5)*(diceAtkOn()?2:1),lb=`${nm}의 예언의 광선${diceAtkOn()?' (공격력 2배)':''}`;
+        allyHit(base,lb,0.4);if(diceSpdOn()&&B.e.hp>0)allyHit(base,lb+' — 연속',0.4);
         break;}
       case 'tide':{ // 미네르: 침몰(적 공격력 감소) · 물보라(동료 보호) · 미네르바 각성 후 고정 피해 + 치명타
         B.minerT=(B.minerT||0)+1;const base=12+lv*4;
