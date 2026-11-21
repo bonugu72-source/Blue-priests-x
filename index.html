@@ -291,6 +291,18 @@ body:has(.status) #bgmbtn{display:none}
 .stoast .st-ic{font-size:30px;filter:drop-shadow(0 0 8px #9fd8ff);animation:stspin 1.6s ease-in-out infinite}
 @keyframes stin{from{opacity:0;transform:translate(-50%,-30px) scale(.8)}to{opacity:1;transform:translate(-50%,0) scale(1)}}
 @keyframes stspin{50%{transform:scale(1.18) rotate(12deg)}}
+/* 구원의 조각 알림: 금빛으로 더 반짝인다 */
+.stoast.salv{background:linear-gradient(135deg,rgba(120,70,8,.97),rgba(210,150,30,.97) 55%,rgba(150,80,10,.97));border:1px solid #fff0b0;overflow:hidden;
+  box-shadow:0 0 0 2px rgba(255,230,140,.5),0 0 30px rgba(255,200,60,.9),0 0 60px rgba(255,160,30,.5),0 6px 20px rgba(0,0,0,.5);animation:stin .45s cubic-bezier(.2,1.4,.4,1) both,salvpulse 1.2s .45s ease-in-out infinite}
+.stoast.salv small{color:#fff3c8}
+.stoast.salv b{color:#fffbe8;text-shadow:0 0 8px #ffcc33}
+.stoast.salv .st-ic{filter:drop-shadow(0 0 10px #ffe08a) drop-shadow(0 0 20px #ffb52e);animation:salvspin 1.4s ease-in-out infinite}
+.stoast.salv::before{content:'';position:absolute;inset:0;background:linear-gradient(110deg,transparent 35%,rgba(255,255,255,.8) 48%,rgba(255,240,180,.5) 52%,transparent 65%);background-size:250% 100%;animation:salvsweep 1.3s ease-in-out infinite;pointer-events:none}
+.stoast.salv .sp{position:absolute;width:5px;height:5px;border-radius:50%;background:#fff;box-shadow:0 0 6px #fff,0 0 12px #ffd76a;opacity:0;animation:salvsp 1.4s var(--d) ease-out infinite;pointer-events:none}
+@keyframes salvpulse{50%{box-shadow:0 0 0 3px rgba(255,240,170,.8),0 0 44px rgba(255,214,90,1),0 0 90px rgba(255,170,40,.7),0 6px 20px rgba(0,0,0,.5)}}
+@keyframes salvspin{0%,100%{transform:scale(1) rotate(0)}50%{transform:scale(1.3) rotate(180deg)}}
+@keyframes salvsweep{0%{background-position:130% 0}70%,100%{background-position:-30% 0}}
+@keyframes salvsp{0%{opacity:0;transform:scale(.2)}30%{opacity:1;transform:scale(1.4)}100%{opacity:0;transform:scale(.2) translateY(-10px)}}
 .pf-laia{box-shadow:0 0 28px rgba(255,110,40,.7),0 0 90px rgba(255,60,0,.35)}
 .pf-laia .pglow{background:radial-gradient(ellipse at 50% 100%,rgba(255,110,30,.5),transparent 62%);animation:breathe 2.2s ease-in-out infinite}
 .pf-teria{box-shadow:0 0 28px rgba(140,210,255,.75),0 0 90px rgba(80,170,255,.35)}
@@ -1066,6 +1078,13 @@ function stoneToast(n,why){
   const prev=document.querySelectorAll('.stoast').length;d.style.top=`${14+prev*70}px`;
   document.body.appendChild(d);d.onclick=()=>d.remove();
   setTimeout(()=>d.classList.add('out'),3200);setTimeout(()=>d.remove(),3800);
+}
+function salvToast(why){
+  const d=document.createElement('div');d.className='stoast salv';
+  d.innerHTML=`<div class="st-ic">✴️</div><div><b>구원의 조각 ×1 획득!</b><small>${why||''} · 보유 ${P.items.salv||0}개</small></div>${Array.from({length:9},(_,i)=>`<i class="sp" style="left:${8+Math.round(Math.random()*84)}%;top:${10+Math.round(Math.random()*75)}%;--d:${(i*0.16).toFixed(2)}s"></i>`).join('')}`;
+  const prev=document.querySelectorAll('.stoast').length;d.style.top=`${14+prev*70}px`;
+  document.body.appendChild(d);d.onclick=()=>d.remove();
+  setTimeout(()=>d.classList.add('out'),4200);setTimeout(()=>d.remove(),4800);
 }
 const ALLIES={
   /* 고정 조력자 */
@@ -5573,7 +5592,7 @@ function victory(){
   if(firstClear&&e.trustXpFirst){P.items.trustxp=(P.items.trustxp||0)+e.trustXpFirst;extra.push(`🏁 첫 클리어 보상: 💗 신뢰도 XP ×${e.trustXpFirst} — 동료 관리에서 ★5 동료 한 명에게 사용하면 신뢰도 +2`);}
   if(firstClear&&e.itemFirst&&RELICS[e.itemFirst]&&!P.relics.includes(e.itemFirst)){gainRelic(e.itemFirst);const it=RELICS[e.itemFirst];extra.push(`🏁 첫 클리어 보상: ${it.icon} 희귀 아이템 「${it.name}」 — ${it.desc.replace('희귀 아이템 · ','')}`);}
   if(firstClear&&e.stoneFirst){P.items.stone+=e.stoneFirst;stoneToast(e.stoneFirst,'첫 클리어 보상');extra.push(`🏁 첫 클리어 보상: ${AWAKEN_ITEM.icon} 「${AWAKEN_ITEM.name}」 ×${e.stoneFirst}`);}
-  if(stype==='boss'&&!fromHunt&&AREAS[area].realm&&Math.random()<TRANS_DROP+(inParty('danian')?TRANS_DROP_DANIAN:0)){P.items.salv=(P.items.salv||0)+1;extra.push(`${SALV_ITEM.icon} 희귀 드랍! 「${SALV_ITEM.name}」 획득${inParty('danian')?' (다니안 +3%p)':''} — 5각성·신화 ★5를 초월시킬 수 있다 (보유 ${P.items.salv}개)`);}
+  if(stype==='boss'&&!fromHunt&&AREAS[area].realm&&Math.random()<TRANS_DROP+(inParty('danian')?TRANS_DROP_DANIAN:0)){P.items.salv=(P.items.salv||0)+1;salvToast(`희귀 드랍${inParty('danian')?' (다니안 +3%p)':''}`);extra.push(`${SALV_ITEM.icon} 희귀 드랍! 「${SALV_ITEM.name}」 획득${inParty('danian')?' (다니안 +3%p)':''} — 5각성·신화 ★5를 초월시킬 수 있다 (보유 ${P.items.salv}개)`);}
   if(stype==='normal'&&Math.random()<0.15){P.items.water++;extra.push('성수 획득');}
   if(stype==='normal'&&Math.random()<DROP.stoneNormal){P.items.stone++;stoneToast(1,'희귀 드랍');extra.push(`${AWAKEN_ITEM.icon} 희귀 아이템 「${AWAKEN_ITEM.name}」 획득!`);}
   const first=!fromHunt&&stage>P.prog[area];
