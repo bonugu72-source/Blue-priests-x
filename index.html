@@ -1924,8 +1924,8 @@ function renderGarden(msg){
   $('#back').onclick=()=>{clearInterval(gardenTimer);renderAllyTab();};window.scrollTo(0,0);
 }
 /* ===================== 행운의 룰렛 ===================== */
-/* 첫 1회 무료 · 이후 무료는 15분마다 · 유료 1회 10,000 코인 · 6칸 중 무작위(각 1/6) */
-const RL_COST=10000, RL_FREE_MS=15*60*1000;
+/* 무료 뽑기 전용: 첫 1회 무료 · 이후 15분마다 무료 1회 · 6칸 중 무작위(각 1/6) */
+const RL_FREE_MS=15*60*1000;
 const RL_SEG=[
   {k:'gold',ic:'💰',t:'10,000 코인',c:'#d89a2b'},
   {k:'none',ic:'💨',t:'꽝',c:'#59627a'},
@@ -1942,24 +1942,21 @@ function renderRoulette(msg,win){
   const bg=`conic-gradient(${RL_SEG.map((g,i)=>`${g.c} ${i*deg}deg ${(i+1)*deg}deg`).join(',')})`;
   $('#app').innerHTML=`${statusHTML()}${topBack()}
     <div class="panel"><div class="ptitle">🎡 행운의 룰렛</div>
-      <div class="desc">💰 10,000 코인 · 💨 꽝 · 💗 신뢰도 XP 1개 · ✨ 경험치 10,000 · ★4 무작위 동료 · ★5 무작위 동료 중 하나가 무작위로 나온다.<br>처음 한 번은 무료 · 이후 무료 뽑기는 15분마다 · 유료 1회 ${fmt(RL_COST)} 코인</div>
+      <div class="desc">💰 10,000 코인 · 💨 꽝 · 💗 신뢰도 XP 1개 · ✨ 경험치 10,000 · ★4 무작위 동료 · ★5 무작위 동료 중 하나가 무작위로 나온다.<br>무료 뽑기 전용 — 처음 한 번 무료 · 이후 15분마다 다시 무료로 돌릴 수 있다</div>
       <div class="rlwrap"><div class="rlpin"></div><div class="rlwheel" id="rlw" style="transform:rotate(${rlRot}deg)"><div class="rlbg" style="background:${bg}"></div>
         ${RL_SEG.map((g,i)=>`<div class="rllb" style="transform:rotate(${i*deg+deg/2}deg)"><span><i>${g.ic}</i>${g.t}</span></div>`).join('')}</div><div class="rlhub">🍀</div></div>
       <div class="rlres ${win?'win':''}" id="rlres">${msg||'&nbsp;'}</div>
       <div class="grid">
         <button class="btn primary full" id="rlfree" ${rlFreeLeft()>0?'disabled':''}>${rlFreeLeft()>0?`🎁 무료 뽑기 · <span id="rlcd">${rlTime(rlFreeLeft())}</span> 후`:'🎁 무료 뽑기'}</button>
-        <button class="btn danger full" id="rlpay" ${P.gold<RL_COST?'disabled':''}>🎡 룰렛 돌리기 · ${fmt(RL_COST)} 코인</button>
         <button class="btn full" id="back">← 상점으로</button></div></div>${tabBar()}`;
-  $('#rlfree').onclick=()=>rlSpin(true);
-  $('#rlpay').onclick=()=>rlSpin(false);
+  $('#rlfree').onclick=()=>rlSpin();
   $('#back').onclick=()=>{clearInterval(rlTimer);renderShop();};
   if(rlFreeLeft()>0)rlTimer=setInterval(()=>{const el=document.getElementById('rlcd');if(!document.getElementById('rlw')){clearInterval(rlTimer);return;}
     if(rlFreeLeft()<=0){clearInterval(rlTimer);if(!rlSpinning){const b=$('#rlfree');b.disabled=false;b.innerHTML='🎁 무료 뽑기';}}else if(el)el.textContent=rlTime(rlFreeLeft());},1000);
 }
-function rlSpin(free){
+function rlSpin(){
   if(rlSpinning)return;
-  if(free){if(rlFreeLeft()>0)return;P.rlFreeAt=Date.now()+RL_FREE_MS;}
-  else{if(P.gold<RL_COST)return;P.gold-=RL_COST;}
+  if(rlFreeLeft()>0)return;P.rlFreeAt=Date.now()+RL_FREE_MS;
   const n=RL_SEG.length,deg=360/n,i=Math.floor(Math.random()*n),g=RL_SEG[i];
   // 보상은 돌리는 순간 확정·저장 (연출 중 화면을 벗어나도 지급)
   let txt='',win=true;
@@ -1969,7 +1966,7 @@ function rlSpin(free){
   else if(g.k==='xp'){const ups=gainXp(10000);txt='✨ 경험치 10,000 획득!'+(ups.length?' '+ups[ups.length-1]:'');}
   else{const st=g.k==='s5'?5:4,pool=allyIds(st),id=pool[Math.floor(Math.random()*pool.length)],isNew=!P.roster[id];addAlly(id);aData(id);txt=`${'★'.repeat(st)} ${ALLIES[id].name} 획득!${isNew?' (새 동료)':' (보유 수 +1 · 합성 재료)'}`;}
   save();rlSpinning=true;
-  ['rlfree','rlpay','back'].forEach(x=>{const b=document.getElementById(x);if(b)b.disabled=true;});
+  ['rlfree','back'].forEach(x=>{const b=document.getElementById(x);if(b)b.disabled=true;});
   $('#rlres').className='rlres';$('#rlres').innerHTML='두근두근…';
   const target=360-(i*deg+deg/2)+(Math.random()*deg*0.6-deg*0.3);
   rlRot=rlRot+360*6+((target-rlRot)%360+360)%360;
@@ -3613,7 +3610,7 @@ function renderShop(msg){
         <button class="btn danger full" id="sumG11" ${P.gold<SUMMON11_COST?'disabled':''}>💰 골드 11회 연속<small>${fmt(SUMMON11_COST)} G (${SUMMON_COST*11-SUMMON11_COST} G 할인)</small></button>
       </div>
     </div>
-    <button class="btn m-coll" id="roul">🎡 행운의 룰렛<small>${rlFreeLeft()<=0?'🎁 무료 뽑기 가능!':`${fmt(RL_COST)} 코인 · 무료까지 ${rlTime(rlFreeLeft())}`}</small></button>
+    <button class="btn m-coll" id="roul">🎡 행운의 룰렛<small>${rlFreeLeft()<=0?'🎁 무료 뽑기 가능!':`다음 무료 뽑기까지 ${rlTime(rlFreeLeft())}`}</small></button>
     <button class="btn m-coll" id="cos">👗 동료 코스튬<small>새 의상 해금 · 갈아입히기</small></button>
     ${tabBar()}`;
   $('#cos').onclick=()=>{renderCostume();};
