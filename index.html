@@ -1232,7 +1232,8 @@ const ALLY_IMG={
 /* 동료 코스튬 (그림은 받는 대로 img에 넣기) */
 const COSTUMES={
   muhee:[
-    {id:'muhee_suit',name:'심판자의 정장',desc:'검은 정장 · 선글라스 · 휘날리는 흰 머리칼',cost:200000,img:{src:'cos_muhee_suit.jpg',pos:'50% 22%',face:'46% 25%',size:'450%'}}
+    {id:'muhee_suit',name:'심판자의 정장',desc:'검은 정장 · 선글라스 · 휘날리는 흰 머리칼',cost:200000,img:{src:'cos_muhee_suit.jpg',pos:'50% 22%',face:'46% 25%',size:'450%'}},
+    {id:'muhee_summer',name:'물결의 여름',desc:'흰 레이스 상의 · 반바지 · 물결과 꽃잎',stone:30,img:{src:'cos_muhee_summer.jpg',pos:'50% 20%',face:'46% 21%',size:'450%'}}
   ],
   sakura:[
     {id:'sakura_dress',name:'검은 원피스',desc:'검은 후드 원피스 · 갈색 부츠',cost:30000,img:{src:'cos_sakura_dress.jpg',pos:'50% 14%',face:'50% 13%',size:'450%'}},
@@ -4024,7 +4025,7 @@ function renderCostume(msg){
       if(on)btn=`<button class="btn" disabled>착용 중</button>`;
       else if(own)btn=`<button class="btn primary" data-coseq="${id}|${isBase?'':c.id}" ${has?'':'disabled'}>착용</button>`;
       else if(!c.img)btn=`<button class="btn" disabled>🔒 ${fmt(c.cost)} G · 곧 공개</button>`;
-      else{const ok=has&&P.gold>=c.cost;btn=`<button class="btn ${ok?'danger':''}" data-cosbuy="${id}|${c.id}" ${ok?'':'disabled'}>🔓 ${fmt(c.cost)} G</button>`;}
+      else{const ok=has&&(c.stone?P.items.stone>=c.stone:P.gold>=c.cost);btn=`<button class="btn ${ok?'danger':''}" data-cosbuy="${id}|${c.id}" ${ok?'':'disabled'}>🔓 ${c.stone?`${AWAKEN_ITEM.icon} ${c.stone}개`:`${fmt(c.cost)} G`}</button>`;}
       return `<div class="coscard ${on?'on':''}">${pic}<div class="cosname">${isBase?'기본 의상':c.name}</div><div class="small cosdesc">${isBase?'처음 입고 있던 옷':c.desc}</div>${btn}</div>`;
     };
     return `<div class="panel"><div class="ptitle">${allyFace(id,'xs')} ${'★'.repeat(al.star)} ${al.name} ${has?'':'<span class="small">(미보유 — 동료를 얻어야 해금·착용 가능)</span>'}</div>
@@ -4036,8 +4037,9 @@ function renderCostume(msg){
     <button class="btn" id="back">← 돌아가기</button>${tabBar()}`;
   document.querySelectorAll('[data-cosbuy]').forEach(b=>b.onclick=()=>{
     const [id,cid]=b.dataset.cosbuy.split('|'),c=COSTUMES[id].find(x=>x.id===cid);
-    if(!c||!(id===FIXED||owned(id))||P.gold<c.cost||P.cos.owned[cid])return;
-    P.gold-=c.cost;P.cos.owned[cid]=true;P.cos.eq[id]=cid;save();
+    if(!c||!(id===FIXED||owned(id))||P.cos.owned[cid]||(c.stone?P.items.stone<c.stone:P.gold<c.cost))return;
+    if(c.stone)P.items.stone-=c.stone;else P.gold-=c.cost; // 성유물 가격 의상은 천상의 성유물로 구매
+    P.cos.owned[cid]=true;P.cos.eq[id]=cid;save();
     renderCostume(`🔓 ${ALLIES[id].name}의 「${c.name}」 해금! 바로 갈아입혔어요.${c.img?'':' (의상 그림은 곧 추가돼요)'}`);
   });
   document.querySelectorAll('[data-coseq]').forEach(b=>b.onclick=()=>{
