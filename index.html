@@ -3847,6 +3847,7 @@ function renderHub(msg){
   if(hubTab!=='dungeon')dgUnsubscribe();   // 던전 화면을 떠나면 랭킹 실시간 구독 해제
   const opened=migrateSave();
   if(opened!=null){save();showStory(AREAS[opened].intro,()=>renderHub(`🔓 새 지역 개방: ${AREAS[opened].flag} ${AREAS[opened].name}`));return;}
+  if(!farmHashDone&&/glasya/i.test(location.hash)){farmHashDone=true;try{history.replaceState(null,'',location.pathname+location.search);}catch(e){}setTimeout(startGlasyaFarm,300);} // 북마크 …/#glasya 로 열면 바로 시작
   if(hubTab==='shop'){renderShop(msg);return;}
   if(hubTab==='ally'){renderAllyTab(msg);return;}
   if(hubTab==='dungeon'){renderDungeon(msg);return;}
@@ -3882,7 +3883,7 @@ function renderHub(msg){
         <button class="btn m-adv main full" id="map">🗺 스테이지 지도<small>진행 ${prog}/${STAGES}</small></button>
         <div class="rankrow">        <button class="btn m-rank" id="rank" ${P.lv<RANK_MIN_LV?'disabled':''}>${P.lv<RANK_MIN_LV?`🔒 랭크전<small>Lv ${RANK_MIN_LV}부터 열림 (현재 Lv ${P.lv})</small></button>`:`${rankOf().icon} 랭크전<small>${rankOf().n}${rankNeed(rankState().tier)?` · ${rankState().lp}/${rankNeed(rankState().tier)} LP`:` · ${rankState().lp} LP`} · ${rankState().w}승 ${rankState().l}패</small></button>`}
         <button class="btn m-tower" id="tower" ${towerOpen()?'':'disabled'}>${towerOpen()?`🗼 구원의 탑<small>${towerState().best>=TOWER_MAX?`${TOWER_MAX}층 정복 ✔`:`${towerState().best}/${TOWER_MAX}층 · 동료 1명`}</small>`:`🔒 구원의 탑<small>Lv ${TOWER_MIN_LV} · 지역 ${realmStart()}곳 클리어 (${worldClearCount()}/${realmStart()})</small>`}</button></div>
-        <button class="btn m-adv" id="hunt">⚔ 자유 사냥 (자동)<small>경험치·골드 ×${HUNT_MULT} · 멈출 때까지 반복</small></button>
+        <button class="btn m-adv" id="hunt">⚔ 자유 사냥 (자동)<small>경험치·골드 ×${HUNT_MULT} · 멈출 때까지 반복</small></button>${farmReady()?`<button class="btn m-adv" id="gfarm">🔁 글라시아라볼라스 작<small>서울 최종 보스 자동 반복 · ${FARM_TARGET}번 잡으면 멈춤</small></button>`:''}
         <button class="btn m-rest" id="rest" ${restLeft()>0?'disabled':''}>${restLabel()}</button>
       </div>
     </div>
@@ -3896,6 +3897,7 @@ function renderHub(msg){
   document.querySelectorAll('.area').forEach(b=>b.onclick=()=>{P.cur=+b.dataset.i;save();renderHub();});
   document.querySelectorAll('[data-claim]').forEach(b=>b.onclick=()=>claim(b.dataset.claim));
   $('#ggbtn').onclick=()=>renderGG();
+  if($('#gfarm'))$('#gfarm').onclick=()=>startGlasyaFarm();
   $('#hunt').onclick=()=>{autoHunt={on:true,area:P.cur,n:0,xp:0,gold:0};startBattle({area:P.cur,hunt:true});};
   $('#map').onclick=()=>renderMap(P.cur);
   if($('#rank'))$('#rank').onclick=()=>renderRank();
@@ -4713,7 +4715,7 @@ function startBattle(spec){
     }
     if(B)B.startAt=Date.now();
     if(B&&spec.dungeon){B.dgLast=performance.now();B.dgT=setInterval(dungeonTick,200);}
-    if(B&&spec.hunt&&autoHunt.on){B.auto=true;B.autoT=setInterval(autoTick,AUTO_MS);}
+    if(B&&(spec.hunt||spec.farm)&&autoHunt.on){B.auto=true;B.autoT=setInterval(autoTick,AUTO_MS);}
     if(B&&inParty('karma'))B.karmaT=setInterval(karmaTick,5000);
     if(B&&inParty('vista5'))B.trainT=setInterval(trainTick,TRAIN_MS);
     if(B&&inParty('aora'))B.aoraT=setInterval(aoraTick,AORA_MS);
@@ -4742,6 +4744,9 @@ function startBattle(spec){
     showStory(`<div class="sum s5"><div class="sum-title">🏰 던전 — 공격력 측정</div><div class="intro-art">${PORTRAIT[t.art]?portraitHTML(t.art,'big'):bossSVG(t.art)}</div><div class="sum-name">첫 상대 · ${t.name}</div>
       <p class="sum-desc" style="color:#cdd6f0">${DG_HP_MULT>1?`보스 HP ×${DG_HP_MULT} · `:''}보스는 공격하지 않아요 · 제한 시간 ${DG_MS/1000}초<br>보스를 쓰러뜨리면 다음 보스가 바로 나와요. 시작을 누르면 3·2·1 뒤에 시간이 흘러요!</p></div>`,()=>dgCountdown(begin),true);
     $('#mbtn').textContent='⚔ 시작';
+  }else if(isBoss&&spec.farm){
+    addLog(`🔁 글라시아라볼라스 작 ${autoHunt.n+1}/${autoHunt.farm?autoHunt.farm.target:FARM_TARGET}회 — 「${t.name}」`);
+    begin();
   }else if(isBoss){
     addLog(`${type==='boss'?(t.final?'최종 보스':'나라 보스'):'솔로몬 72악마'} 「${t.name}」 강림!`);
     if(t.dimension)addLog('🌀 차원 전이 — 주인공의 공격 절반이 다른 차원으로 흘러간다');
@@ -5434,7 +5439,16 @@ function hitPlayer(mult,label){
 /* 자유 사냥: 경험치·골드 3배 · 자동 전투로 멈출 때까지 계속 */
 const HUNT_MULT=3, AUTO_MS=550;
 let autoHunt={on:false,area:0,n:0,xp:0,gold:0};
-const autoSum=()=>`${autoHunt.n}회 처치 · ✨ +${fmt(autoHunt.xp)} · 💰 +${fmt(autoHunt.gold)} G`;
+const autoSum=()=>`${autoHunt.farm?`${autoHunt.n}/${autoHunt.farm.target}회`:`${autoHunt.n}회`} 처치 · ✨ +${fmt(autoHunt.xp)} · 💰 +${fmt(autoHunt.gold)} G`;
+/* 글라시아라볼라스 작: 서울 최종 보스를 자동 전투로 반복 · 300번 잡으면 멈춤 (북마크 주소 …/#glasya 로 바로 시작) */
+const FARM_AREA=0, FARM_TARGET=300;
+const farmReady=()=>(P.prog[FARM_AREA]||0)>=STAGES-1;
+function startGlasyaFarm(){
+  if(!farmReady()){renderHub('🔒 글라시아라볼라스 작은 서울 15스테이지(최종 보스)까지 열려 있어야 할 수 있다');return;}
+  autoHunt={on:true,area:FARM_AREA,n:0,xp:0,gold:0,farm:{stage:STAGES,target:FARM_TARGET}};
+  startBattle({area:FARM_AREA,stage:STAGES,farm:true});
+}
+let farmHashDone=false;
 function autoTick(){
   if(!B||!B.auto||B.over||B.won||B.busy||!$('#modal').classList.contains('hidden'))return;
   if(Date.now()<(B.cdUntil||0)||pFrozen())return;
@@ -5767,7 +5781,7 @@ function victory(){
   if(!B)return;
   if(B.pvp){pvpEnd(true);return;}
   if(B.tower){if(B.heaven)heavenEnd(true);else towerEnd(true);return;}
-  const e=B.e,area=B.area,stype=B.stype,stage=B.stage,wasFinal=B.isFinal,fromHunt=!!B.spec.hunt;
+  const e=B.e,area=B.area,stype=B.stype,stage=B.stage,wasFinal=B.isFinal,fromHunt=!!B.spec.hunt,fromFarm=!!B.spec.farm;
   const tName=B.baseName;
   B.over=true;
   const firstClear=!fromHunt&&stage>P.prog[area];
@@ -5817,7 +5831,7 @@ function victory(){
   const allyUps=[];
   partyIds().forEach(id=>{if(allyGainXp(id,xp))allyUps.push(`${ALLIES[id].name} Lv ${aData(id).lv}`);});
   const ups=gainXp(xp);
-  if(fromHunt&&autoHunt.on){autoHunt.n++;autoHunt.xp+=xp;autoHunt.gold+=gold;}
+  if((fromHunt||fromFarm)&&autoHunt.on){autoHunt.n++;autoHunt.xp+=xp;autoHunt.gold+=gold;}
   if(allyUps.length)ups.push('🤝 동료 레벨업: '+allyUps.join(', '));
   const lines=[`✨ 경험치 +${fmt(xp)}${fromHunt?` (자유 사냥 ×${HUNT_MULT})`:''}`];
   if(gold)lines.push(`💰 ${fmt(gold)} G${e.goldRepeat!=null?(firstClear?' (첫 클리어 보상)':' (재도전 보상)'):fromHunt?` (자유 사냥 ×${HUNT_MULT})`:gold0!==e.gold?' (보스 보너스 ×1.25)':''}${ringOn&&gold>gold0?` · 💍 천상의 반지 +${fmt(gold-gold0)}`:''}`);
@@ -5842,6 +5856,11 @@ function victoryFlow(area,stype,first,wasFinal,fromHunt,msg,stage,rep){
     return;
   }
   save();
+  if(autoHunt.on&&autoHunt.farm&&!fromHunt){
+    if(autoHunt.n>=autoHunt.farm.target){autoHunt.on=false;save();renderHub(`🏁 글라시아라볼라스 작 완료 — ${autoSum()}<br>${autoHunt.farm.target}번을 모두 잡아 자동으로 멈췄다`);return;}
+    $('#app').innerHTML=`${statusHTML()}<div class="panel"><div class="ptitle">🔁 글라시아라볼라스 작</div><div class="notice">${rep?rep.lines.map(esc).join('<br>'):''}</div><div class="desc">${autoSum()}<br>다음 전투 준비 중…</div><div class="grid"><button class="btn danger full" id="autostop2">⏹ 멈추기</button></div></div>`;
+    $('#autostop2').onclick=()=>autoHuntStop('⏹ 글라시아라볼라스 작을 멈췄다');
+    setTimeout(()=>{if(autoHunt.on&&autoHunt.farm&&!B)startBattle({area:FARM_AREA,stage:STAGES,farm:true});},900);return;}
   if(!fromHunt&&first&&stage<STAGES){mapSel={a:area,s:stage+1};autoNext(area,stage+1,rep);return;}
   if(fromHunt&&autoHunt.on){const a=autoHunt.area;
     $('#app').innerHTML=`${statusHTML()}<div class="panel"><div class="ptitle">🔁 자동 사냥 중</div><div class="notice">${rep?rep.lines.map(esc).join('<br>'):''}</div><div class="desc">${autoSum()}<br>다음 적을 찾는 중…</div><div class="grid"><button class="btn danger full" id="autostop2">⏹ 자동 사냥 멈추기</button></div></div>`;
