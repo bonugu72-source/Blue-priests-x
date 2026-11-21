@@ -461,6 +461,16 @@ body.pfrozen #cmds .btn{filter:saturate(.2) brightness(1.2);background:linear-gr
 @keyframes tup{0%{opacity:0;transform:translateY(0)}20%{opacity:1}100%{opacity:0;transform:translateY(-110vh)}}
 .tfx.ok .tmsg b{color:#fff1b8;text-shadow:0 0 12px #ffcc33,0 0 30px #ff9a1a}
 .tfx.ok .tmsg small{color:#ffe39a}
+/* 초월 성공 글씨 양옆: 반짝이는 빛 (렌즈 플레어) */
+.tfx .tmsg b.tflare{position:relative;display:inline-block;padding:0 26px}
+.tfx .tmsg b.tflare::before,.tfx .tmsg b.tflare::after{content:'';position:absolute;top:50%;width:46px;height:46px;margin-top:-23px;pointer-events:none;
+  background:radial-gradient(circle,#fff 0 3px,rgba(255,240,180,.95) 4px,rgba(255,200,70,.55) 9px,transparent 22px),
+    linear-gradient(90deg,transparent 0,rgba(255,236,170,.95) 50%,transparent 100%) center/100% 2px no-repeat,
+    linear-gradient(0deg,transparent 0,rgba(255,236,170,.9) 50%,transparent 100%) center/2px 70% no-repeat;
+  filter:drop-shadow(0 0 6px #ffcc33);animation:tflr 1.4s ease-in-out infinite}
+.tfx .tmsg b.tflare::before{left:-22px}
+.tfx .tmsg b.tflare::after{right:-22px;animation-delay:.7s}
+@keyframes tflr{0%,100%{transform:scale(.7) rotate(0);opacity:.75}50%{transform:scale(1.15) rotate(45deg);opacity:1}}
 /* 실패 */
 .tfx.ng .tcrack{position:absolute;inset:-8px;z-index:5;opacity:0;animation:tcrk .4s 1.65s forwards}
 @keyframes tcrk{0%,98%{opacity:1}100%{opacity:0}}
@@ -4149,7 +4159,7 @@ function allyLevelUp(id){
 function transFx(id,ok,cb){
   const im=allyImg(id),al=ALLIES[id];
   const spk=Array.from({length:24},()=>{const a=Math.random()*Math.PI*2,d=110+Math.random()*90;return `<b class="tspk" style="--x:${Math.round(Math.cos(a)*d)}px;--y:${Math.round(Math.sin(a)*d)}px;--d:${(0.4+Math.random()*0.9).toFixed(2)}s"></b>`;}).join('');
-  const ring=`<svg class="tring" viewBox="0 0 280 280"><circle cx="140" cy="140" r="132"/><circle cx="140" cy="140" r="118" stroke-dasharray="4 6"/><circle cx="140" cy="140" r="96"/><path id="tpath" d="M140,140 m-108,0 a108,108 0 1,1 216,0 a108,108 0 1,1 -216,0" fill="none"/><text><textPath href="#tpath">✴ TRANSCENDENTIA · SALVATIO · ✴ TRANSCENDENTIA · SALVATIO ·</textPath></text></svg>`;
+  const ring=`<svg class="tring" viewBox="0 0 280 280"><circle cx="140" cy="140" r="132"/><circle cx="140" cy="140" r="118" stroke-dasharray="4 6"/><circle cx="140" cy="140" r="96"/><path id="tpath" d="M140,140 m-108,0 a108,108 0 1,1 216,0 a108,108 0 1,1 -216,0" fill="none"/><text><textPath href="#tpath">TRANSCENDENTIA · SALVATIO · TRANSCENDENTIA · SALVATIO ·</textPath></text></svg>`;
   const bg=ok?'<div class="trays"></div>':'<div class="tdark"></div>';
   const fg=ok?`<div class="tflash"></div>${[0,0.15,0.3].map(d=>`<b class="tbr" style="--d:${(1.85+d).toFixed(2)}s"></b>`).join('')}`
     :`<svg class="tcrack" viewBox="0 0 50 50" style="position:absolute;left:50%;top:128px;width:50px;height:50px;margin:-25px;z-index:5"><path d="M25 4 L22 18 L28 24 L20 34 L25 46"/><path d="M22 18 L12 16"/><path d="M28 24 L40 28"/><path d="M20 34 L10 38"/></svg>${Array.from({length:10},(_,i)=>{const a=-Math.PI/2+(i/10)*Math.PI*2+(Math.random()-0.5)*0.5,d=60+Math.random()*60;return `<b class="tfrag" style="--x:${Math.round(Math.cos(a)*d)}px;--y:${Math.round(Math.sin(a)*d+220)}px;--r:${Math.round(Math.random()*720-360)}deg"></b>`;}).join('')}`;
@@ -4157,7 +4167,7 @@ function transFx(id,ok,cb){
   const ov=document.createElement('div');ov.className='tfx '+(ok?'ok':'ng');
   ov.innerHTML=`${bg}${ups}<div class="tstage">${ring}${im?`<div class="tpor" style="background-image:url(${im.src});background-position:${im.pos||'50% 20%'}"></div>`:`<div class="tpor emo">${al.icon}</div>`}
     ${spk}<div class="tshard"><i></i></div>${fg}
-    <div class="tmsg" style="--t:${ok?2.1:2.4}s">${ok?`<b>✴ 초월 성공 ✴</b><small>${esc(al.name)} — 초월자</small>`:`<b>초월 실패…</b><small>구원의 조각이 빛을 잃고 부서졌다</small>`}</div></div>
+    <div class="tmsg" style="--t:${ok?2.1:2.4}s">${ok?`<b class="tflare">초월 성공</b><small>${esc(al.name)} — 초월자</small>`:`<b>초월 실패…</b><small>구원의 조각이 빛을 잃고 부서졌다</small>`}</div></div>
     <div class="tsk">탭하여 계속</div>`;
   document.body.appendChild(ov);
   const t0=Date.now();let done=false;
