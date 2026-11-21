@@ -1003,6 +1003,7 @@ const RELICS={
   seal_andras: {name:'안드라스의 인장',         icon:'⚪', desc:'방어력 +6 · 최대 HP +20',        apply:p=>{p.def+=6;p.maxHp+=20;p.hp+=20;}},
   seal_furfur: {name:'푸르푸르의 인장',         icon:'🔵', desc:'최대 HP +40 · 공격력 +4',        apply:p=>{p.maxHp+=40;p.hp+=40;p.atk+=4;}},
   time_belt:{name:'시간에 갇힌 벨트', icon:'⏳', desc:'희귀 아이템 · 전투마다 주인공 HP가 처음으로 절반 이하가 되면 남은 HP만큼 보호막',apply:p=>{}},
+  jihu_suit:{name:'지후의 맞춤형 정장', icon:'👔', desc:'희귀 아이템 · 주인공 공격력 +50 (챌린저 900 LP 이스터에그)',apply:p=>{p.atk+=50;}},
   yujun_suit:{name:'유준이의 맞춤형 정장', icon:'🤵', desc:'희귀 아이템 · 주인공 공격력 +50 (챌린저 800 LP 이스터에그)',apply:p=>{p.atk+=50;}},
   gonggu_paper:{name:'공구방 롤링페이퍼', icon:'📜', desc:'희귀 아이템 · 주인공 공격력 +50 (챌린저 1000 LP 이스터에그)',apply:p=>{p.atk+=50;}},
   bonu_staff:{name:'보누 지팡이', icon:'🪄', desc:'희귀 아이템 · 주인공 공격력 +50 (챌린저 500 LP 이스터에그)',apply:p=>{p.atk+=50;}},
@@ -2744,7 +2745,7 @@ const RANKS=[
 const RANK_REWARD={1:{stone:1},2:{gold:20000},3:{stone:3},4:{gold:40000},5:{stone:5},6:{ally:'roa'}}; // 티어 승급 보상 (티어당 1회)
 const rankRewardText=t=>{const w=RANK_REWARD[t];if(!w)return '';return w.ally?`★5 ${ALLIES[w.ally].name} (챌린저 전용)`:w.stone?`💠 천상의 성유물 ×${w.stone}`:`${fmt(w.gold)} 코인`;};
 const RANK_LP=100, RANK_WIN=20, RANK_LOSS=15, RANK_MIN_LV=20, RANK_EGG_LP=500;
-const RANK_EGGS=[[500,'bonu_staff'],[800,'yujun_suit'],[1000,'gonggu_paper']]; // 챌린저 LP 이스터에그 // 플레이어 Lv 20부터 랭크전 개방
+const RANK_EGGS=[[500,'bonu_staff'],[800,'yujun_suit'],[900,'jihu_suit'],[1000,'gonggu_paper']]; // 챌린저 LP 이스터에그 // 플레이어 Lv 20부터 랭크전 개방
 const RANK_AI_NAMES=['푸른 기사','심연의 사제','은빛 순례자','붉은 수도사','밤의 성가대','새벽의 파수꾼','잿빛 집행자','별빛 부제'];
 const rankState=()=>{P.rank=P.rank||{tier:0,lp:0,w:0,l:0,best:0};return P.rank;};
 const rankOf=()=>RANKS[Math.min(RANKS.length-1,rankState().tier)];
