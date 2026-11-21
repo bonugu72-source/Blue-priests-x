@@ -639,6 +639,10 @@ body.battle .chip{font-size:11px;padding:3px 8px}
 body.battle .pstat{min-height:0;flex:none;font-size:11px}
 body.battle .log{flex:none;height:clamp(64px,13dvh,112px);min-height:0;overflow:hidden;padding:6px 10px;font-size:12px;line-height:1.5;-webkit-mask-image:linear-gradient(transparent,#000 20px);mask-image:linear-gradient(transparent,#000 20px)}
 body.battle .cmds{flex:none}
+body.battle:has(.dgstatus) .eicon .portrait{max-height:420px}
+body.battle:has(.dgstatus) .eicon .bsvg{max-width:330px;max-height:330px}
+body.battle:has(.dgstatus) .log{height:clamp(52px,9dvh,84px)}
+body.battle:has(.dgstatus) .cmds .btn.primary{min-height:64px;font-size:20px}
 body.battle .cmds .grid{gap:6px}
 body.battle .cmds .btn{min-height:44px;padding:6px 10px}
 /* 보스전 화면 테마: 보스 일러스트(없으면 보스 고유색)에 맞춰 화면 전체 색을 바꿈 — --ba 강조색 · --bm 중간 톤 · --bd 가장 어두운 바탕 */
@@ -765,8 +769,13 @@ body:has(.tabbar) .tabbar{background:color-mix(in srgb,var(--tc) 6%,rgba(8,12,26
 .dgsep{text-align:center;color:#6b7699;margin:2px 0}
 .dghud{display:flex;justify-content:center;gap:14px;align-items:center;margin:4px 0 2px;font-size:14px;color:#e8e2ff}
 .dghud span{background:rgba(0,0,0,.35);border-radius:10px;padding:3px 10px}
-.dghud #dgtime{font-weight:900;font-variant-numeric:tabular-nums;min-width:84px;text-align:center}
-.dghud #dgtime.low{color:#ff7a7a;animation:dglow .6s infinite alternate}
+.bar.dgtbar i{background:linear-gradient(90deg,#7a4ad0,#c9a0ff);transition:width .2s linear}
+.bar.dgtbar{height:24px;border-radius:12px}.bar.dgtbar i{border-radius:12px}
+.bar.dgtbar span{font-size:14px;font-weight:900;font-variant-numeric:tabular-nums}
+.bar.dgtbar.low i{background:linear-gradient(90deg,#b8323a,#ff7a7a)}
+.bar.dgtbar.low span{animation:dglow .6s infinite alternate}
+.dgstop{border:1px solid rgba(255,140,140,.55);background:#5a1c2a;color:#ffe0e0;font:inherit;font-size:13px;font-weight:800;border-radius:10px;padding:3px 10px;margin-right:4px;cursor:pointer}
+.dgstop:active{transform:scale(.95)}
 .dghud b{color:var(--gold);font-variant-numeric:tabular-nums}
 @keyframes dglow{from{opacity:1}to{opacity:.55}}
 /* 모험 탭 */
@@ -2563,6 +2572,12 @@ function statusHTML(){
   if(!B&&hubTab!=='adv')return `<div class="status mini" id="pstatus">
     <div class="row"><b>✝ ${esc(P.name)}</b><span>Lv ${P.lv}</span><span><span class="gold">${P.gold} G</span><button class="bgmmini" data-bgm>${BGM.isOn()?'🔊':'🔇'}</button></span></div>
   </div>`;
+  if(B&&B.dungeon){const pc=Math.max(0,Math.min(100,B.dgLeft/DG_MS*100));   // 던전: 보스가 공격하지 않아 HP 대신 남은 시간을 보여 줌
+    return `<div class="status dgstatus" id="pstatus">
+    <div class="row"><b>✝ ${esc(P.name)}</b><span>Lv ${P.lv}</span><span><button class="dgstop" data-act="dgquit">⏹ 중지</button><button class="bgmmini" data-bgm>${BGM.isOn()?'🔊':'🔇'}</button></span></div>
+    <div class="bar dgtbar ${B.dgLeft<10000?'low':''}" id="dgtbar"><i id="dgtfill" style="width:${pc}%"></i><span id="dgtime">⏱ ${dgSec(B.dgLeft)}초</span></div>
+    <div class="row small"><span>공격 ${P.atk}</span><span>방어 ${P.def}</span><span>성수 ${P.items.water}</span></div>
+  </div>`;}
   return `<div class="status" id="pstatus">
     <div class="row"><b>✝ ${esc(P.name)}</b><span>Lv ${P.lv}</span><span><span class="gold">${P.gold} G</span><button class="bgmmini" data-bgm>${BGM.isOn()?'🔊':'🔇'}</button></span></div>
     ${bar(P.hp,P.maxHp,'hp','HP')}
@@ -3310,7 +3325,7 @@ function towerEnd(win){
 /* 지역 보스가 순서대로 연속 등장 → 모두 쓰러뜨리면 마계 보스 3명이 계속 반복
    보스 HP ×10 · 보스는 공격·반격·빙결 등 어떤 효과도 쓰지 않는 샌드백 · 제한 시간 60초
    기록은 한국 시간 기준 하루 단위(매일 0시 초기화)로 players/{id} 공개 프로필에 함께 올려 모두와 실시간 공유 */
-const DG_MS=60000, DG_HP_MULT=10;
+const DG_MS=60000, DG_HP_MULT=1;   // 보스 HP 배율 (1 = 원래 HP)
 const dgDay=()=>new Date(Date.now()+9*3600e3).toISOString().slice(0,10);   // 한국 날짜
 const DG_KEEP=20;   // 오늘 기록 상위 20개 · 최근 기록 20회
 function dgState(){
@@ -3342,7 +3357,7 @@ const dgTeamCP=()=>heroCP()+[FIXED,...dgParty()].reduce((s,id)=>s+allyCP(id),0);
 const dgTotal=()=>B?B.dgDone+Math.max(0,B.e.maxHp-B.e.hp):0;
 const dgSec=ms=>(Math.max(0,ms)/1000).toFixed(1);
 function dgHudHTML(){
-  return `<div class="dghud"><span id="dgtime" class="${B.dgLeft<10000?'low':''}">⏱ ${dgSec(B.dgLeft)}초</span><span id="dgdmg">총 딜 <b>${fmt(Math.round(dgTotal()))}</b></span><span>💀 ${B.dgKills}</span></div>`;
+  return `<div class="dghud"><span id="dgdmg">총 딜 <b>${fmt(Math.round(dgTotal()))}</b></span><span>💀 ${B.dgKills}</span></div>`;
 }
 function dungeonStart(){
   if(B)return;
@@ -3366,8 +3381,10 @@ function dungeonTick(){
   if(!$('#modal').classList.contains('hidden'))return;   // 창이 떠 있는 동안은 전투와 함께 시간도 멈춤
   B.dgLeft-=dt;
   if(B.dgLeft<=0){B.dgLeft=0;dungeonEnd('time');return;}
-  const t=$('#dgtime'),d=$('#dgdmg');
-  if(t){t.textContent=`⏱ ${dgSec(B.dgLeft)}초`;t.classList.toggle('low',B.dgLeft<10000);}
+  const t=$('#dgtime'),f=$('#dgtfill'),tb=$('#dgtbar'),d=$('#dgdmg');
+  if(t)t.textContent=`⏱ ${dgSec(B.dgLeft)}초`;
+  if(f)f.style.width=Math.max(0,B.dgLeft/DG_MS*100)+'%';
+  if(tb)tb.classList.toggle('low',B.dgLeft<10000);
   if(d)d.innerHTML=`총 딜 <b>${fmt(Math.round(dgTotal()))}</b>`;
 }
 function dungeonEnd(why){
@@ -3451,7 +3468,7 @@ function renderDungeon(msg){
     ${msg?`<div class="notice">${msg}</div>`:''}
     <div class="panel"><div class="ptitle">🏰 던전 입장 <span class="small">공격력 측정</span></div>
       <div class="dginfo">
-        <div><b>🐉 ×${DG_HP_MULT}</b><span>보스 HP</span></div>
+        ${DG_HP_MULT>1?`<div><b>🐉 ×${DG_HP_MULT}</b><span>보스 HP</span></div>`:`<div><b>🐉 ${q.main.length+q.realm.length}명</b><span>보스 연속 등장</span></div>`}
         <div><b>🕊️</b><span>보스는 공격 안 함</span></div>
         <div><b>⏱ ${DG_MS/1000}초</b><span>제한 시간</span></div>
       </div>
@@ -4312,7 +4329,7 @@ function startBattle(spec){
       <p class="sum-desc">친구가 마지막으로 저장한 팀을 AI가 조종해요.<br>대결은 연습 경기라 HP는 가득 찬 상태로 시작하고, 끝나면 원래대로 돌아와요.</p></div>`,begin,true);
   }else if(spec.dungeon){
     showStory(`<div class="sum s5"><div class="sum-title">🏰 던전 — 공격력 측정</div><div class="intro-art">${PORTRAIT[t.art]?portraitHTML(t.art,'big'):bossSVG(t.art)}</div><div class="sum-name">첫 상대 · ${t.name}</div>
-      <p class="sum-desc" style="color:#cdd6f0">보스 HP ×${DG_HP_MULT} · 보스는 공격하지 않아요 · 제한 시간 ${DG_MS/1000}초<br>보스를 쓰러뜨리면 다음 보스가 바로 나와요. 시작을 누르면 시간이 흘러요!</p></div>`,begin,true);
+      <p class="sum-desc" style="color:#cdd6f0">${DG_HP_MULT>1?`보스 HP ×${DG_HP_MULT} · `:''}보스는 공격하지 않아요 · 제한 시간 ${DG_MS/1000}초<br>보스를 쓰러뜨리면 다음 보스가 바로 나와요. 시작을 누르면 시간이 흘러요!</p></div>`,begin,true);
     $('#mbtn').textContent='⚔ 시작';
   }else if(isBoss){
     addLog(`${type==='boss'?(t.final?'최종 보스':'나라 보스'):'솔로몬 72악마'} 「${t.name}」 강림!`);
@@ -4499,10 +4516,10 @@ function cmdHTML(){
   }
   return `${cdBar}<div class="grid">
     <button class="btn primary full" data-act="attack" ${dis}>${pFrozen()?`🧊 얼음을 깨는 중… ${Math.ceil((B.pFrozenUntil-Date.now())/1000)}초`:`⚔ 공격<span class="awkc ${(B.atkN||0)===AWAKEN_SKILL.every-1?'ready':''}">✨ 각성 ${'●'.repeat(B.atkN||0)}${'○'.repeat(AWAKEN_SKILL.every-(B.atkN||0))} ${(B.atkN||0)===AWAKEN_SKILL.every-1?'다음 공격 발동!':''}</span>`}</button>
-    <button class="btn ${B.defending?'guardon':''}" data-act="defend" ${B.defending||B.busy||pFrozen()?'disabled':''}>${B.defending?'🛡 방어 중':'🛡 방어'}<small>${B.defending?'공격하면 해제':'피해 40% 감소 · 동료도 공격 멈춤'}</small></button>
-    <button class="btn" data-act="itemmenu" ${dis}>🧪 아이템</button>
+    ${B.dungeon?'':`<button class="btn ${B.defending?'guardon':''}" data-act="defend" ${B.defending||B.busy||pFrozen()?'disabled':''}>${B.defending?'🛡 방어 중':'🛡 방어'}<small>${B.defending?'공격하면 해제':'피해 40% 감소 · 동료도 공격 멈춤'}</small></button>
+    <button class="btn" data-act="itemmenu" ${dis}>🧪 아이템</button>`}
     ${B.auto?`<button class="btn danger full" data-act="autostop">⏹ 자동 사냥 멈추기 <small>${autoSum()}</small></button>`:''}
-    ${B.dungeon?`<button class="btn full" data-act="dgquit">⏹ 측정 끝내기<small>지금까지 넣은 딜로 기록</small></button>`:`<button class="btn full" data-act="flee" ${(B.busy||B.isBoss||B.tower)?'disabled':''}>${B.pvp?'대결 중에는 도망칠 수 없다':B.tower?'탑에서는 도망칠 수 없다':B.isBoss?'보스전에서는 도망칠 수 없다':'🏃 도망 (60%)'}</button>`}
+    ${B.dungeon?'':`<button class="btn full" data-act="flee" ${(B.busy||B.isBoss||B.tower)?'disabled':''}>${B.pvp?'대결 중에는 도망칠 수 없다':B.tower?'탑에서는 도망칠 수 없다':B.isBoss?'보스전에서는 도망칠 수 없다':'🏃 도망 (60%)'}</button>`}
   </div>`;
 }
 
@@ -4560,7 +4577,7 @@ function renderBattle(){
   const vis=e.pvp?`<div class="eicon pvpvis" id="eicon"><div class="pvphero">✝</div><div class="pvpteam">${teamIconsHTML(e.party)}</div></div>`:e.art?`<div class="eicon art ${B.charging?'charge':''}" id="eicon" style="--t:${t}s">${bossSVG(e.art)}</div>`
     :`<div class="eicon sil ${e.elite?'elite':''} ${B.charging?'charge':''}" id="eicon" style="--gc:${e.elite?'#ff3040':AREAS[B.area].glow}">${e.icon}</div>`;
   const passive=[];
-  if(B.dungeon)passive.push(`🏰 샌드백 — 공격·반격·상태이상 없음 · HP ×${DG_HP_MULT}`);
+  if(B.dungeon)passive.push(`🏰 샌드백 — 공격·반격·상태이상 없음${DG_HP_MULT>1?` · HP ×${DG_HP_MULT}`:''}`);
   if(e.dimension)passive.push('🌀 차원 전이');
   if(e.zap)passive.push('⚡ 흐르는 전류 (3초마다)');
   // 실시간 전투: 별도 맹공 없음
