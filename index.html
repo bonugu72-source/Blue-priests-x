@@ -401,6 +401,20 @@ body.pfrozen #cmds .btn{filter:saturate(.2) brightness(1.2);background:linear-gr
 .room .fr .nm{font-size:10px;font-weight:700;color:#3b2614;background:rgba(255,255,255,.8);border-radius:6px;padding:0 4px;text-align:center;white-space:nowrap;margin-top:-2px}
 .room .fr .say{position:absolute;bottom:100%;left:50%;transform:translateX(-50%);background:#fff;color:#222;font-size:11px;border-radius:8px;padding:2px 6px;white-space:nowrap;box-shadow:0 2px 6px rgba(0,0,0,.25);animation:pop .3s ease-out}
 @keyframes bob{from{transform:translateY(0)}to{transform:translateY(-3px)}}
+/* 초월 */
+.aface.trans{position:relative;box-shadow:0 0 0 2px #ffe08a,0 0 8px 2px rgba(255,200,60,.85),0 0 18px rgba(255,170,40,.55);animation:transglow 1.6s ease-in-out infinite;overflow:hidden}
+.aface.trans::after{content:'';position:absolute;inset:-20%;background:linear-gradient(115deg,transparent 40%,rgba(255,250,220,.85) 50%,transparent 60%);animation:transsweep 2.2s ease-in-out infinite;pointer-events:none}
+@keyframes transglow{0%,100%{box-shadow:0 0 0 2px #ffe08a,0 0 8px 2px rgba(255,200,60,.8),0 0 16px rgba(255,170,40,.5)}50%{box-shadow:0 0 0 2px #fff4c8,0 0 14px 4px rgba(255,214,90,1),0 0 30px rgba(255,180,40,.8)}}
+@keyframes transsweep{0%{transform:translateX(-70%)}60%,100%{transform:translateX(70%)}}
+.transic{position:relative;display:flex;flex-direction:column;align-items:center}
+.transic .translb{display:block;margin-top:3px;font-size:10px;font-weight:900;letter-spacing:1px;color:#ffe38a;white-space:nowrap;text-shadow:0 0 6px #ffcc33,0 0 12px #ff9a1a;position:relative;isolation:isolate}
+.transic .translb::before{content:'';position:absolute;left:50%;top:50%;width:60px;height:22px;margin:-11px 0 0 -30px;border-radius:50%;background:radial-gradient(ellipse,rgba(255,210,90,.6),transparent 70%);animation:transaura 1.8s ease-out infinite;z-index:-1}
+@keyframes transaura{0%{transform:scale(.4);opacity:1}100%{transform:scale(1.6);opacity:0}}
+.transic.big{margin:0 auto}.transic.big .aportrait{box-shadow:0 0 0 3px #ffe08a,0 0 30px rgba(255,200,60,.9),0 0 70px rgba(255,170,40,.5)}
+.transic.big .translb{font-size:16px;margin-top:8px}.transic.big .translb::before{width:120px;height:40px;margin:-20px 0 0 -60px}
+.acard.transc{border-color:#ffd76a;box-shadow:0 0 0 1px rgba(255,215,106,.6),0 0 18px rgba(255,190,60,.35)}
+.transtag{display:inline-block;font-size:10px;font-weight:900;padding:1px 6px;border-radius:8px;background:linear-gradient(135deg,#fff1b0,#ffb52e);color:#4a2a00;box-shadow:0 0 8px rgba(255,190,60,.8)}
+.btn.transbtn{background:linear-gradient(135deg,#6a4a10,#c89420);border-color:#ffd76a;color:#fff6d8}
 /* 행운의 룰렛 */
 .rlwrap{position:relative;width:min(260px,72vw);aspect-ratio:1;margin:8px auto 12px}
 .rlwheel{position:absolute;inset:0;border-radius:50%;border:6px solid #e8c76a;box-shadow:0 0 0 3px #6b4a16,0 0 24px rgba(232,199,106,.45);transition:transform 3.4s cubic-bezier(.12,.75,.12,1);overflow:hidden}
@@ -1170,7 +1184,7 @@ const allyImg=id=>{const c=cosOf(id);return c&&c.img?c.img:ALLY_IMG[id];};
 /* 신화 승급 동료 이름: 푸른빛으로 빛남 */
 const nameHTML=id=>isMyth(id)?`<span class="mythname">${ALLIES[id].name}</span>`:ALLIES[id].name;
 function allyFace(id,cls){
-  const im=allyImg(id);
+  const im=allyImg(id);if(transOn(id))cls=(cls||'')+' trans';
   return im?`<span class="aface ${cls||''}" style="background-image:url(${im.src});background-position:${im.face}${im.size?';background-size:'+im.size+' auto':''}"></span>`:`<span class="aemo ${cls||''}">${ALLIES[id].icon}</span>`;
 }
 /* 천사의 날개 (★6 소환 연출) — 깃털을 부채꼴로 겹쳐 그린 오른쪽 날개, 왼쪽은 좌우 반전 */
@@ -2662,7 +2676,11 @@ function trustHTML(id){
   const nxt=l<TRUST_MAX?` · 다음 ${p-TRUST_REQ[l]}/${TRUST_REQ[l+1]-TRUST_REQ[l]}`:' · 최대';
   return `${txp&&l<TRUST_MAX?`<button class="btn txpbtn" data-txp="${id}">💗 신뢰도 XP 사용 (+2) · 보유 ${txp}</button>`:''}<div class="trust"><span class="hearts">${'❤️'.repeat(l)}${'🤍'.repeat(TRUST_MAX-l)}</span><span class="small">신뢰도 ${l}/${TRUST_MAX}${nxt}${l?` · 전투력 +${Math.round((trustMult(id)-1)*100)}%`:''}</span></div>`;
 }
-const allyMult=id=>multOf(id,P.awaken[id],isMyth(id))*trustMult(id);
+/* 초월: 5각성 + 신화 승급을 마친 ★5만 · 구원의 조각 1개 · 성공 20% · 초월하면 전투력 2배 */
+const TRANS_RATE=0.2, TRANS_DROP=0.05, TRANS_MULT=2, SALV_ITEM={name:'구원의 조각',icon:'✴️'};
+const transOn=id=>!!(P.trans&&P.trans[id]);
+const transReady=id=>ALLIES[id]&&ALLIES[id].star===5&&isMyth(id)&&(P.awaken[id]||0)>=5&&!transOn(id);
+const allyMult=id=>multOf(id,P.awaken[id],isMyth(id))*trustMult(id)*(transOn(id)?TRANS_MULT:1);
 function allyGainXp(id,n){
   const d=aData(id);let c=0;
   if(d.lv>=aCap(id)){d.xp=0;return 0;}
@@ -3636,7 +3654,7 @@ function renderDungeonParty(msg){
   const tabs=[['all','전체'],[6,'★6'],[5,'★5'],[4,'★4'],[3,'★3'],[2,'★2'],[1,'★1']];
   const card=id=>{const al=ALLIES[id],d=aData(id),aw=P.awaken[id]||0,my=isMyth(id),on=ids.includes(id);
     return `<div class="acard ${my?'mythc':''} ${aw>=5?'aw5':aw>=4?'aw4':''}"><div class="ally"><div class="ic">${allyFace(id,'md')}</div><div style="flex:1">
-      <span class="gold">${'★'.repeat(al.star)}</span> ${nameHTML(id)}${my?' <span class="mytag">신화</span>':''}${aw?` <span class="gold">각성 ${aw}</span>`:''}${TIER5[id]?` <span class="small">${TIER5[id]}티어</span>`:''}
+      <span class="gold">${'★'.repeat(al.star)}</span> ${nameHTML(id)}${my?' <span class="mytag">신화</span>':''}${transOn(id)?' <span class="transtag">초월</span>':''}${aw?` <span class="gold">각성 ${aw}</span>`:''}${TIER5[id]?` <span class="small">${TIER5[id]}티어</span>`:''}
       <span class="small">Lv ${d.lv}/${aCap(id)} · ⚔ ${fmt(allyCP(id))}</span><small>${al.role}</small></div></div>
       <div class="abtns"><button class="btn ${on?'primary':''}" data-dgsortie="${id}">${on?'출전 중':'대기'}</button><button class="btn" data-dginfo="${id}">📖 상세</button></div></div>`;};
   const act=shown.filter(id=>ids.includes(id)),rest=shown.filter(id=>!ids.includes(id));
@@ -3890,11 +3908,15 @@ function allyCard(id){
     const st=al.star>=5?MYTH_STONE5:0,ok=P.gold>=mc&&P.items.stone>=st;
     btns.push(`<button class="btn myth ${ok?'':'off'}" data-myth="${id}" ${ok?'':'disabled'}>🔱 신화 승급 ${fmt(mc)} G${st?` · ${AWAKEN_ITEM.icon}${st}`:''}</button>`);
   }
+  if(al.star===5&&!transOn(id)){const sv=P.items.salv||0;
+    btns.push(transReady(id)?`<button class="btn transbtn" data-trans="${id}" ${sv>0?'':'disabled'}>✴️ 초월 · 성공 ${Math.round(TRANS_RATE*100)}%<small>${SALV_ITEM.name} 1개 (보유 ${sv})</small></button>`
+      :`<button class="btn" disabled>🔒 초월<small>5각성 + 신화 승급 필요 (각성 ${aw}/5${my?' · 신화 ✔':' · 신화 ✖'})</small></button>`);}
   if(al.star>=5)btns.push(aw>=awakenMax(id)?`<button class="btn" disabled>각성 완료</button>`
     :aw>=AWAKEN_BASE&&!worldCleared()?`<button class="btn" disabled>🔒 ${aw+1}각성<small>지역 이동의 모든 지역 클리어 필요 (${worldClearCount()}/${realmStart()})</small></button>`
     :(()=>{const c=awakenCost(id),ok=P.items.stone>=c.stone&&cnt>=1+c.card;if(c.rate<1)return `<button class="btn ${ok?'danger':''}" data-awk="${id}" ${ok?'':'disabled'}>각성 ${aw}/${awakenMax(id)} · 성공 ${Math.round(c.rate*100)}%<small>${AWAKEN_ITEM.icon}${c.stone}${c.card?` · 같은 카드 1장 (${Math.max(0,cnt-1)}/1)`:''} · 실패 시 성유물만 소모</small></button>`;return `<button class="btn ${ok?'danger':''}" data-awk="${id}" ${ok?'':'disabled'}>각성 ${aw}/${awakenMax(id)}<small>${c.card?`${AWAKEN_ITEM.icon}1 · 같은 카드 1장 (${Math.max(0,cnt-1)}/1)`:`${AWAKEN_ITEM.icon}${c.stone} (전용 캐릭터 · 카드 불필요)`}</small></button>`;})());
-  return `<div class="acard ${isFixed?'fixed':''} ${my?'mythc':''} ${aw>=5?'aw5':aw>=4?'aw4':''}"><div class="ally"><div class="ic">${allyFace(id,'md')}</div><div style="flex:1">
-    ${isFixed?'<span class="tag t-ally">고정 조력자</span>':`<span class="gold">${'★'.repeat(al.star)}</span>`} ${nameHTML(id)}${my?' <span class="mytag">신화</span>':''}${aw?` <span class="gold">각성 ${aw}</span>`:''}${TIER5[id]?` <span class="small">${TIER5[id]}티어</span>`:''}
+  const tr=transOn(id);
+  return `<div class="acard ${isFixed?'fixed':''} ${my?'mythc':''} ${aw>=5?'aw5':aw>=4?'aw4':''} ${tr?'transc':''}"><div class="ally"><div class="ic ${tr?'transic':''}">${allyFace(id,'md')}${tr?'<span class="translb">초월자</span>':''}</div><div style="flex:1">
+    ${isFixed?'<span class="tag t-ally">고정 조력자</span>':`<span class="gold">${'★'.repeat(al.star)}</span>`} ${nameHTML(id)}${my?' <span class="mytag">신화</span>':''}${transOn(id)?' <span class="transtag">초월</span>':''}${aw?` <span class="gold">각성 ${aw}</span>`:''}${TIER5[id]?` <span class="small">${TIER5[id]}티어</span>`:''}
     <span class="small">Lv ${d.lv}/${cap} · ⚔ ${fmt(allyCP(id))}${!isFixed&&!needSyn?' · ×'+cnt:''}</span>
     ${trustHTML(id)}
     <small>${al.role} · ${al.desc}</small>${MYTH_SKILL[id]?`<small class="mysk ${my?'on':''}">🔱 신화 고유 능력 「${MYTH_SKILL[id].name}」 — ${MYTH_SKILL[id].desc}${my?'':' (신화 승급 시 해금)'}</small>`:''}</div></div>
@@ -4005,7 +4027,7 @@ function renderAllies(msg){
       <div class="teamcp">⚔ 팀 전투력 <b>${fmt(teamCP())}</b></div>
       <div class="small cpbreak">주인공 ${fmt(heroCP())}${partyIds().map(id=>` · ${ALLIES[id].name} ${fmt(allyCP(id))}`).join('')}</div></div>
     <div class="panel"><div class="ptitle">🕊️ 고정 조력자</div>${allyCard(FIXED)}</div>
-    <div class="panel"><div class="ptitle">🤝 보유 동료 <span class="small">도감 ${own.length}/${Object.keys(ALLIES).length-1} · 출전 ${P.active.length}/${MAX_ACTIVE} · ${AWAKEN_ITEM.icon} ${AWAKEN_ITEM.name} ${P.items.stone}개</span></div>
+    <div class="panel"><div class="ptitle">🤝 보유 동료 <span class="small">도감 ${own.length}/${Object.keys(ALLIES).length-1} · 출전 ${P.active.length}/${MAX_ACTIVE} · ${AWAKEN_ITEM.icon} ${AWAKEN_ITEM.name} ${P.items.stone}개 · ${SALV_ITEM.icon} ${SALV_ITEM.name} ${P.items.salv||0}개</span></div>
       <div class="desc">출전 동료와 이사벨은 전투 경험치를 함께 얻는다. 골드로 바로 레벨업할 수도 있다.</div>
       ${(()=>{const pl=synthPlan(),t=pl.reduce((s,x)=>s+x.n,0);return `<button class="btn ${t?'danger':''} synall" id="synall" ${t?'':'disabled'}>🔮 일괄 합성${t?` (${t}회 가능)`:''}<small>${t?'재료가 모인 모든 캐릭터를 한 번에 합성':'합성할 수 있는 캐릭터가 없음'}</small></button>`;})()}
       <div class="sortbar sticky">${starTabs.map(([k,l])=>`<button class="sortbtn ${String(allyStar)===String(k)?'on':''}" data-astar="${k}">${l}${k==='all'?'':` <span class="small">${cntStar(k)}</span>`}</button>`).join('')}</div>
@@ -4017,6 +4039,7 @@ function renderAllies(msg){
   document.querySelectorAll('[data-alv]').forEach(b=>b.onclick=()=>allyLevelUp(b.dataset.alv));
   document.querySelectorAll('[data-awk]').forEach(b=>b.onclick=()=>awaken(b.dataset.awk));
   document.querySelectorAll('[data-myth]').forEach(b=>b.onclick=()=>mythUp(b.dataset.myth));
+  document.querySelectorAll('[data-trans]').forEach(b=>b.onclick=()=>transUp(b.dataset.trans));
   if($('#synall'))$('#synall').onclick=synthAllAsk;
   document.querySelectorAll('[data-astar]').forEach(b=>b.onclick=()=>{allyStar=b.dataset.astar;
     const pn=b.closest('.panel'),y=pn?pn.offsetTop:window.scrollY;renderAllies();window.scrollTo(0,Math.min(window.scrollY,y));});
@@ -4029,6 +4052,16 @@ function allyLevelUp(id){
   if(d.lv>=aCap(id)||P.gold<c)return;
   P.gold-=c;d.lv++;d.xp=0;save();
   renderAllies(`⬆ ${ALLIES[id].name} Lv ${d.lv} (−${c} G)`);
+}
+function transUp(id){
+  const al=ALLIES[id];if(!transReady(id)||(P.items.salv||0)<1)return;
+  const before=allyCP(id);P.items.salv--;
+  if(Math.random()>=TRANS_RATE){save();renderAllies(`✴️ 초월 실패… ${SALV_ITEM.name}이(가) 빛을 잃고 부서졌다 (남은 조각 ${P.items.salv}개 · 성공 확률 ${Math.round(TRANS_RATE*100)}%)`);return;}
+  P.trans=P.trans||{};P.trans[id]=true;save();
+  summonFx(5,()=>showStory(`<div class="sum s5 strans"><div class="sum-title">✴️ 초월</div><div class="sum-stars">${'★'.repeat(al.star)}</div><div class="transic big">${allyPortrait(id)}<span class="translb">초월자</span></div>
+    <div class="sum-name">${al.name} <span class="mytag">신화</span> <span class="transtag">초월</span></div>
+    <div class="small">전투력 ${fmt(before)} → <b class="gold">${fmt(allyCP(id))}</b> · 전투력 ${TRANS_MULT}배</div></div>`,
+    ()=>renderAllies(`✴️ ${al.name} 초월 성공! 전투력 ${fmt(before)} → ${fmt(allyCP(id))}`),true));
 }
 function mythUp(id){
   const al=ALLIES[id],mc=MYTH_COST[al.star],st=al.star>=5?MYTH_STONE5:0;
@@ -5470,6 +5503,7 @@ function victory(){
   if(firstClear&&e.trustXpFirst){P.items.trustxp=(P.items.trustxp||0)+e.trustXpFirst;extra.push(`🏁 첫 클리어 보상: 💗 신뢰도 XP ×${e.trustXpFirst} — 동료 관리에서 ★5 동료 한 명에게 사용하면 신뢰도 +2`);}
   if(firstClear&&e.itemFirst&&RELICS[e.itemFirst]&&!P.relics.includes(e.itemFirst)){gainRelic(e.itemFirst);const it=RELICS[e.itemFirst];extra.push(`🏁 첫 클리어 보상: ${it.icon} 희귀 아이템 「${it.name}」 — ${it.desc.replace('희귀 아이템 · ','')}`);}
   if(firstClear&&e.stoneFirst){P.items.stone+=e.stoneFirst;stoneToast(e.stoneFirst,'첫 클리어 보상');extra.push(`🏁 첫 클리어 보상: ${AWAKEN_ITEM.icon} 「${AWAKEN_ITEM.name}」 ×${e.stoneFirst}`);}
+  if(stype==='boss'&&!fromHunt&&AREAS[area].realm&&Math.random()<TRANS_DROP){P.items.salv=(P.items.salv||0)+1;extra.push(`${SALV_ITEM.icon} 희귀 드랍! 「${SALV_ITEM.name}」 획득 — 5각성·신화 ★5를 초월시킬 수 있다 (보유 ${P.items.salv}개)`);}
   if(stype==='normal'&&Math.random()<0.15){P.items.water++;extra.push('성수 획득');}
   if(stype==='normal'&&Math.random()<DROP.stoneNormal){P.items.stone++;stoneToast(1,'희귀 드랍');extra.push(`${AWAKEN_ITEM.icon} 희귀 아이템 「${AWAKEN_ITEM.name}」 획득!`);}
   const first=!fromHunt&&stage>P.prog[area];
