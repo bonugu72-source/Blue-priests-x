@@ -1121,7 +1121,7 @@ const ALLIES={
   karma:   {star:5,name:'카르마',        icon:'📜', role:'부적술', kit:'talisman',
             desc:'봉인 부적(3턴간 적의 시야 차단 — 적 공격 35% 빗나감) · 부적 투척 · 5초마다 무작위 부적(주인공 치유 / 적 저주 / 적 불태움)'},
   danian:  {star:5,name:'다니안',        icon:'🗡️', role:'대검', kit:'earth',
-            desc:'대검으로 대지를 갈라 공격 · 적이 힘을 모으거나 4턴마다 대지 분쇄(다음 적 공격 무력화) · 회피(적의 광역 공격 50% 회피)'},
+            desc:'대검으로 대지를 갈라 공격 · 적이 힘을 모으거나 4턴마다 대지 분쇄(다음 적 공격 무력화) · 회피(적의 광역 공격 50% 회피) · 출전 시 마계 최종 보스의 구원의 조각 획득 확률 +3%p (5% → 8%)'},
   elia:    {star:5,name:'엘리아',        icon:'🌹', role:'꽃의 수호', kit:'flower',
             desc:'색이 다른 꽃의 보호막(주인공 피해 흡수 · 동료 피해 절반, 2턴) · 꽃의 속박(적 1턴 행동 불가, 4턴마다) · 꽃잎 공격'},
   pasri:   {star:5,name:'파스리',        icon:'🏮', role:'고정 피해', kit:'fixed',
@@ -2729,7 +2729,7 @@ function trustHTML(id){
   return `${txp&&l<TRUST_MAX?`<button class="btn txpbtn" data-txp="${id}">💗 신뢰도 XP 사용 (+2) · 보유 ${txp}</button>`:''}<div class="trust"><span class="hearts">${'❤️'.repeat(l)}${'🤍'.repeat(TRUST_MAX-l)}</span><span class="small">신뢰도 ${l}/${TRUST_MAX}${nxt}${l?` · 전투력 +${Math.round((trustMult(id)-1)*100)}%`:''}</span></div>`;
 }
 /* 초월: 5각성 + 신화 승급을 마친 ★5만 · 구원의 조각 1개 · 성공 20% · 초월하면 전투력 2배 */
-const TRANS_RATE=0.2, TRANS_DROP=0.05, TRANS_MULT=2, SALV_ITEM={name:'구원의 조각',icon:'✴️'};
+const TRANS_RATE=0.2, TRANS_DROP=0.05, TRANS_DROP_DANIAN=0.03, TRANS_MULT=2, SALV_ITEM={name:'구원의 조각',icon:'✴️'};
 const transOn=id=>!!(P.trans&&P.trans[id]);
 const transReady=id=>ALLIES[id]&&ALLIES[id].star===5&&isMyth(id)&&(P.awaken[id]||0)>=5&&!transOn(id);
 const allyMult=id=>multOf(id,P.awaken[id],isMyth(id))*trustMult(id)*(transOn(id)?TRANS_MULT:1);
@@ -5573,7 +5573,7 @@ function victory(){
   if(firstClear&&e.trustXpFirst){P.items.trustxp=(P.items.trustxp||0)+e.trustXpFirst;extra.push(`🏁 첫 클리어 보상: 💗 신뢰도 XP ×${e.trustXpFirst} — 동료 관리에서 ★5 동료 한 명에게 사용하면 신뢰도 +2`);}
   if(firstClear&&e.itemFirst&&RELICS[e.itemFirst]&&!P.relics.includes(e.itemFirst)){gainRelic(e.itemFirst);const it=RELICS[e.itemFirst];extra.push(`🏁 첫 클리어 보상: ${it.icon} 희귀 아이템 「${it.name}」 — ${it.desc.replace('희귀 아이템 · ','')}`);}
   if(firstClear&&e.stoneFirst){P.items.stone+=e.stoneFirst;stoneToast(e.stoneFirst,'첫 클리어 보상');extra.push(`🏁 첫 클리어 보상: ${AWAKEN_ITEM.icon} 「${AWAKEN_ITEM.name}」 ×${e.stoneFirst}`);}
-  if(stype==='boss'&&!fromHunt&&AREAS[area].realm&&Math.random()<TRANS_DROP){P.items.salv=(P.items.salv||0)+1;extra.push(`${SALV_ITEM.icon} 희귀 드랍! 「${SALV_ITEM.name}」 획득 — 5각성·신화 ★5를 초월시킬 수 있다 (보유 ${P.items.salv}개)`);}
+  if(stype==='boss'&&!fromHunt&&AREAS[area].realm&&Math.random()<TRANS_DROP+(inParty('danian')?TRANS_DROP_DANIAN:0)){P.items.salv=(P.items.salv||0)+1;extra.push(`${SALV_ITEM.icon} 희귀 드랍! 「${SALV_ITEM.name}」 획득${inParty('danian')?' (다니안 +3%p)':''} — 5각성·신화 ★5를 초월시킬 수 있다 (보유 ${P.items.salv}개)`);}
   if(stype==='normal'&&Math.random()<0.15){P.items.water++;extra.push('성수 획득');}
   if(stype==='normal'&&Math.random()<DROP.stoneNormal){P.items.stone++;stoneToast(1,'희귀 드랍');extra.push(`${AWAKEN_ITEM.icon} 희귀 아이템 「${AWAKEN_ITEM.name}」 획득!`);}
   const first=!fromHunt&&stage>P.prog[area];
