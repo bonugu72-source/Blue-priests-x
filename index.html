@@ -2865,8 +2865,9 @@ const towerRewardText=f=>{const w=TOWER_REWARD[f];if(!w)return '';const a=[];if(
 const towerOpen=()=>P.lv>=TOWER_MIN_LV&&worldCleared(); // Lv 50 이상 + 지역 이동 15곳 모두 클리어
 const towerState=()=>{P.tower=P.tower||{best:0,tries:0};return P.tower;};
 /* 엔드 콘텐츠: 활옥사원~고대 원단수의 적이 6층마다 바뀌고, 층이 오를수록 체력 +3% · 공격력 +2%씩 강해진다 */
+/* 10층마다 보스(동료 1명 기준 조정): 체력 0.85+2%/층 · 공격 0.8+1%/층 · 2페이즈 체력 60%(교대 50%) · 각성 치명 피해 최대 1.5배 · 영혼 일격 5초 · 추격 참격 최대 2회 · 주인공 반사 최대 30% · 흡혈·생명력 흡수 절반 */
 const towerArea=f=>Math.min(realmStart()-1,10+Math.floor((f-1)/6));
-const towerMul=f=>({hp:1+0.03*(f-1),atk:1+0.02*(f-1)});
+const towerMul=f=>f%10===0?{hp:0.85+0.02*(f-1),atk:0.8+0.01*(f-1)}:{hp:1+0.03*(f-1),atk:1+0.02*(f-1)};
 const towerType=f=>f%10===0?'boss':f%5===0?'mid':'normal';
 function towerEnemy(f){
   const a=towerArea(f),ty=towerType(f);
@@ -2874,10 +2875,12 @@ function towerEnemy(f){
   const em=(ty==='boss'&&a>=4)?LATE_BOSS_MULT:ENEMY_MULT,tm=towerMul(f);
   const sc=v=>v?Math.round(v*tm.hp):v; // 페이즈 체력(광기·각성·쌍둥이·교대)도 함께 강화
   if(t.madness)t={...t,madness:{...t.madness,at:sc(t.madness.at),to:sc(t.madness.to)}};
-  if(t.awaken)t={...t,awaken:{...t.awaken,at:sc(t.awaken.at),to:sc(t.awaken.to)}};
+  if(t.awaken)t={...t,awaken:{...t.awaken,at:sc(t.awaken.at),to:ty==='boss'?Math.round(sc(t.awaken.to)*0.6):sc(t.awaken.to),...(ty==='boss'&&t.awaken.critMult?{critMult:Math.min(1.5,t.awaken.critMult)}:{}),...(ty==='boss'&&t.awaken.soulTick?{soulTick:5000}:{})}};
+  if(ty==='boss'&&t.slashes>2)t={...t,slashes:2};
+  if(ty==='boss'&&t.reflectHero)t={...t,reflectHero:Math.min(0.3,t.reflectHero)};
   if(t.berserk)t={...t,berserk:{...t.berserk,at:sc(t.berserk.at),to:sc(t.berserk.to)}};
   if(t.twin)t={...t,twin:{...t.twin,at:sc(t.twin.at),hp:sc(t.twin.hp),atk:Math.round(t.twin.atk*tm.atk)}};
-  if(t.relay)t={...t,relay:{...t.relay,at:sc(t.relay.at),lord:{...t.relay.lord,hp:sc(t.relay.lord.hp),atk:Math.round(t.relay.lord.atk*tm.atk)},back:{...t.relay.back,hp:sc(t.relay.back.hp)}}};
+  if(t.relay){const pk=v=>ty==='boss'?Math.round(sc(v)*0.5):sc(v);t={...t,relay:{...t.relay,at:sc(t.relay.at),lord:{...t.relay.lord,hp:pk(t.relay.lord.hp),atk:Math.round(t.relay.lord.atk*tm.atk)},back:{...t.relay.back,hp:pk(t.relay.back.hp),...(ty==='boss'&&t.relay.back.vamp?{vamp:t.relay.back.vamp/2}:{}),...(ty==='boss'&&t.relay.back.drainMul?{drainMul:t.relay.back.drainMul/2}:{})}}};}
   t={...t,hp:Math.round((t.exactHp?t.hp:t.hp*em)*tm.hp),atk:Math.round(t.atk*em*tm.atk),goldFirst:undefined,goldRepeat:undefined,stoneFirst:undefined,drop:undefined,itemAt:undefined};
   return t;
 }
