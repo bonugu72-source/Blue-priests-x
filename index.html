@@ -639,6 +639,26 @@ body.battle .log{flex:none;height:clamp(64px,13dvh,112px);min-height:0;overflow:
 body.battle .cmds{flex:none}
 body.battle .cmds .grid{gap:6px}
 body.battle .cmds .btn{min-height:44px;padding:6px 10px}
+/* 보스전 화면 테마: 보스 일러스트(없으면 보스 고유색)에 맞춰 화면 전체 색을 바꿈 — --ba 강조색 · --bm 중간 톤 · --bd 가장 어두운 바탕 */
+body.battle.btheme{background:radial-gradient(ellipse at 50% 28%,var(--bm) 0%,var(--bd) 72%) fixed;background-color:var(--bd)}
+body.battle.btheme.flash{background:radial-gradient(ellipse at 50% 28%,#5a1420 0%,var(--bd) 72%) fixed}
+body.battle.btheme.holyflash{background:radial-gradient(ellipse at 50% 28%,#3a4a70 0%,var(--bd) 72%) fixed}
+body.battle.btheme .status{background:color-mix(in srgb,var(--bm) 62%,#0a0a12);box-shadow:0 0 0 1px color-mix(in srgb,var(--ba) 22%,transparent) inset,0 6px 20px rgba(0,0,0,.35)}
+body.battle.btheme .enemy.boss{background:radial-gradient(ellipse at 50% 42%,color-mix(in srgb,var(--bm) 85%,var(--ba) 15%) 0%,var(--bd) 78%);
+  border-color:color-mix(in srgb,var(--ba) 55%,transparent);box-shadow:0 0 26px color-mix(in srgb,var(--ba) 22%,transparent),inset 0 0 44px rgba(0,0,0,.7)}
+body.battle.btheme .boss .eicon.art{filter:drop-shadow(0 0 22px color-mix(in srgb,var(--ba) 60%,transparent))}
+body.battle.btheme .ename{color:color-mix(in srgb,var(--ba) 25%,#ffffff);text-shadow:0 0 14px color-mix(in srgb,var(--ba) 45%,transparent)}
+body.battle.btheme .ename em{background:color-mix(in srgb,var(--ba) 62%,#000000);color:#fff}
+body.battle.btheme .eflag{color:color-mix(in srgb,var(--ba) 45%,#9aa3bd)}
+body.battle.btheme .etitle{color:color-mix(in srgb,var(--ba) 55%,#d8dbe6)}
+body.battle.btheme .epass{color:color-mix(in srgb,var(--ba) 70%,#ffffff)}
+body.battle.btheme .bar.ehp{background:color-mix(in srgb,var(--bd) 70%,#000000)}
+body.battle.btheme .bar.ehp i{background:linear-gradient(90deg,color-mix(in srgb,var(--ba) 50%,#1a0a10),var(--ba))}
+body.battle.btheme .chip{background:color-mix(in srgb,var(--bm) 75%,#10131f)}
+body.battle.btheme .log{background:color-mix(in srgb,var(--bd) 70%,#000000);box-shadow:0 0 0 1px color-mix(in srgb,var(--ba) 14%,transparent) inset}
+body.battle.btheme .cmds .btn:not(.guardon){background:color-mix(in srgb,var(--bm) 80%,#1c2030)}
+body.battle.btheme .cmds .btn.primary:not(.guardon){background:linear-gradient(135deg,color-mix(in srgb,var(--ba) 48%,var(--bm)),color-mix(in srgb,var(--ba) 30%,var(--bm)))}
+body.battle.btheme .cdbar i{background:linear-gradient(90deg,color-mix(in srgb,var(--ba) 70%,#ffffff),var(--ba))}
 .synall{width:100%;margin:8px 0 2px}
 .synlist{text-align:left;margin:8px 0;max-height:46vh;overflow:auto}
 .synrow{display:flex;align-items:center;gap:6px;font-size:13px;padding:5px 0;border-bottom:1px solid #1d2a50}
@@ -1835,6 +1855,48 @@ const PORTRAIT={
   amon:{img:'amon.jpg',cls:'pf-amon',pos:'50% 16%'},
   amon2:{img:'amon.jpg',cls:'pf-amon',pos:'50% 16%'}
 };
+/* 보스전 화면 색 테마 (디자인 전용 · 전투 계산과 무관): 일러스트 키 → [강조색, 중간 톤, 바탕]
+   일러스트(jpg)가 있는 보스는 그림 색, 없는 보스(SVG)는 ART[키].c 고유색에 맞춤. 형태가 바뀌면(교대·각성·발악) 색도 따라 바뀜 */
+const BOSS_THEME={
+  glasya:['#ff4a4a','#3a0c14','#120509'],          // 붉은 날개의 개 (SVG 고유색 빨강)
+  bune:['#b07cff','#2a1648','#0d0817'],            // 세 머리 용 (SVG 고유색 보라)
+  andras:['#cdd6f5','#232a44','#0a0c16'],          // 창백한 은빛 (SVG 고유색)
+  furfur:['#7fd4ff','#16284a','#070d1a'],          // 번개·폭풍의 푸른빛
+  naberius:['#ff3b4e','#36101a','#0f0609'],        // 검은 정장과 붉은 군단
+  naberius2:['#ff2a2a','#40100f','#110506'],
+  botis:['#e6c9a2','#2c2426','#0f0c0d'],           // 대리석 로비 · 붉은 머리 (상아·와인)
+  barbatos:['#9d7bff','#2a1f5a','#0b0818'],        // 보라·푸른 불꽃의 기사
+  amon2:['#ff7a3a','#33190f','#100907'],           // 용암 균열과 검은 연기
+  valefor:['#ff8a3d','#3d1a0e','#120806'],         // 불타는 숲
+  valefor2:['#ff4a2a','#4a120a','#140605'],
+  gamigin:['#e0485a','#331016','#0e0609'],         // 피에 물든 검붉은 그림자
+  terazio:['#ff5a4a','#3e1418','#12070a'],         // 붉은 번개의 용
+  terazio2:['#ff3030','#4c0e12','#150506'],
+  agares:['#a66bff','#2a1554','#0b0716'],          // 보랏빛 검기
+  agares2:['#c27bff','#3a1670','#0f071c'],
+  laia:['#ff8a3a','#401a0c','#120806'],            // 불꽃의 동생
+  teria:['#9fdcff','#16324a','#07101a'],           // 얼음의 언니
+  naberius3:['#ff2a3a','#3c0c14','#0e0507'],       // 각성한 나베리우스 · 피의 십자가
+  darklord:['#d01830','#300810','#0a0305'],
+  mumyeong:['#b8c97a','#1f2a1a','#0a0d09'],        // 이끼 낀 숲 · 금빛 문양
+  perta:['#e6e2f5','#2c2a3a','#0d0d14'],           // 하얀 시간의 폭풍
+  merem:['#c08bff','#2e1a48','#0c0816'],           // 보랏빛 날개 · 금빛 마법진
+  chahuia:['#9fc4ff','#1c2850','#080c1c'],         // 푸른 마법진의 대천사
+  chahuia2:['#ff4a50','#40121a','#12060a']         // 붉게 타락한 모습
+};
+function bossTheme(e){
+  if(!e||!B||B.pvp||B.stype!=='boss'||!e.art)return null;
+  if(BOSS_THEME[e.art])return BOSS_THEME[e.art];
+  const c=ART[e.art]&&ART[e.art].c;                // 표에 없는 보스: 고유색으로 자동
+  return c?[c,`color-mix(in srgb,${c} 22%,#0b0b14)`,`color-mix(in srgb,${c} 6%,#050508)`]:null;
+}
+function applyBossTheme(e){
+  try{
+    const b=document.body,t=bossTheme(e);
+    if(!t){if(b.classList.contains('btheme')){b.classList.remove('btheme');['--ba','--bm','--bd'].forEach(k=>b.style.removeProperty(k));}return;}
+    b.style.setProperty('--ba',t[0]);b.style.setProperty('--bm',t[1]);b.style.setProperty('--bd',t[2]);b.classList.add('btheme');
+  }catch(err){}
+}
 function portraitHTML(key,size){
   const p=PORTRAIT[key];
   const bolts=key==='furfur'?`<svg class="pbolts" viewBox="0 0 100 140" preserveAspectRatio="none"><path class="bolt" d="M7,0 L3,18 L9,17 L2,42"/><path class="bolt b2" d="M95,58 L99,76 L93,77 L99,100"/><path class="bolt b3" d="M90,0 L86,12 L92,12 L87,26"/></svg><div class="prain"></div>`:'';
@@ -3734,7 +3796,7 @@ function synthAll(){
 }
 
 /* ===================== 전투 ===================== */
-function clearBattle(){forcedMv=null;if(B&&B.enemyT)clearInterval(B.enemyT);if(B&&B.allyT)clearInterval(B.allyT);document.body.classList.remove('pfrozen');if(B&&B.freezeT)clearInterval(B.freezeT);if(B&&B.sakuraT)clearInterval(B.sakuraT);document.body.classList.remove('battle');if(B&&B.waveT)clearInterval(B.waveT);if(B&&B.soulT)clearInterval(B.soulT);if(B&&B.drainT)clearInterval(B.drainT);if(B&&B.tsT)clearInterval(B.tsT);if(B&&B.paraT)clearInterval(B.paraT);if(B&&B.zapT)clearInterval(B.zapT);if(B&&B.karmaT)clearInterval(B.karmaT);if(B&&B.trainT)clearInterval(B.trainT);if(B&&B.aoraT)clearInterval(B.aoraT);if(B&&B.heartT)clearInterval(B.heartT);if(B&&B.halfT)clearInterval(B.halfT);if(B&&B.fallT)clearInterval(B.fallT);if(B&&B.isaT)clearInterval(B.isaT);B=null;}
+function clearBattle(){forcedMv=null;if(B&&B.enemyT)clearInterval(B.enemyT);if(B&&B.allyT)clearInterval(B.allyT);document.body.classList.remove('pfrozen');if(B&&B.freezeT)clearInterval(B.freezeT);if(B&&B.sakuraT)clearInterval(B.sakuraT);document.body.classList.remove('battle');applyBossTheme(null);if(B&&B.waveT)clearInterval(B.waveT);if(B&&B.soulT)clearInterval(B.soulT);if(B&&B.drainT)clearInterval(B.drainT);if(B&&B.tsT)clearInterval(B.tsT);if(B&&B.paraT)clearInterval(B.paraT);if(B&&B.zapT)clearInterval(B.zapT);if(B&&B.karmaT)clearInterval(B.karmaT);if(B&&B.trainT)clearInterval(B.trainT);if(B&&B.aoraT)clearInterval(B.aoraT);if(B&&B.heartT)clearInterval(B.heartT);if(B&&B.halfT)clearInterval(B.halfT);if(B&&B.fallT)clearInterval(B.fallT);if(B&&B.isaT)clearInterval(B.isaT);B=null;}
 /* 반사·부적 등으로 적이 턴 밖에서 쓰러졌을 때 */
 function winNow(){
   if(!B||B.won)return;
@@ -4144,6 +4206,7 @@ function cmdHTML(){
 function renderBattle(){
   document.body.classList.add('battle');
   const e=B.e;
+  applyBossTheme(e);
   const st=[];
   if(B.buff)st.push(`✨ 축복 ${B.buff}`);
   if(B.aura)st.push(`🌟 축성 ${B.aura}`);
