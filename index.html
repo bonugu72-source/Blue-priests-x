@@ -1002,6 +1002,8 @@ const ALLIES={
             desc:'천사의 구원(적을 3초간 속박 · 그동안 적 공격력 1.5배 감소 · 주인공 피해 1.5배 증가) · 5초마다 시야를 가리는 안개(2턴간 적 공격 35% 빗나감) · 패시브 「천사의 심판」: 흡혈(준 피해의 50% 회복) + 5초마다 생명력 흡수 · 상점 소환으로만 획득 (합성 불가)'},
   babelord:{star:6,name:'천계의 예언자 바벨로드',icon:'🎲',role:'천계의 예언자',kit:'dice',
             desc:'운명의 점(4초마다 운명의 주사위를 굴린다 — 1: 주인공 현재 HP의 절반만큼 회복 · 2: 동료 전원 보호막 500 · 3: 바벨로드 공격력 2배 · 4: 모든 디버프 제거 · 5: 공격 속도 증가(한 번에 두 번 공격) · 6: 4초간 자신이 받는 모든 피해 반사 / 3·5는 다음 주사위까지 유지) · 상점 소환으로만 획득 (합성 불가)'},
+  akira:   {star:5,name:'아키라',        icon:'🏹', role:'얼어붙은 활', kit:'frost',
+            desc:'얼어붙은 화살(적을 2초간 얼려 행동 불능 · 끝나면 4초 쉬었다가 다시 사용) · 40% 확률로 급소를 찾아 쏘면 치명타(피해 2배) + 들어간 피해의 절반만큼 주인공 HP 회복 · 🔱 신화: 혹한의 화살(4초마다 아키라의 공격력 2배씩 증가 · 최대 32배)'},
   miner:   {star:5,name:'미네르',        icon:'🌊', role:'물의 여신', kit:'tide', hpMul:0.6,
             desc:'침몰(적을 물속으로 끌어내려 3턴간 적 공격력 감소) · 물보라(2턴간 동료가 받는 피해 절반) · 체력이 적어 쉽게 쓰러지지만, 쓰러지면 물의 여신 「미네르바」로 각성해 HP 60%로 부활(1회) — 이후 공격이 고정 피해 + 치명타'},
   vista5:  {star:5,name:'비스타',        icon:'🚂', role:'열차 소환', kit:'train',
@@ -1012,7 +1014,7 @@ const ALLIES={
             desc:'보석처럼 반짝이는 광선 공격 · 적이 힘을 모으거나 3턴마다 프리즘 굴절(다음 적 공격 피해 절반, 절반은 적에게 반사)'}
 };
 /* ★5 티어 — 신화 제외 최대 전투력: 1티어 4000 · 2티어 3300 · 3티어 2700 */
-const TIER5={guseju:1,asiris:1,karma:1,pasri:1,vista5:1,roa:1,lumeon:1,danian:2,elia:2,kirie:2,gaia:2,elise:2,miner:1,muhee:3,siren:3,mikael:3,sakura:3};
+const TIER5={akira:1,guseju:1,asiris:1,karma:1,pasri:1,vista5:1,roa:1,lumeon:1,danian:2,elia:2,kirie:2,gaia:2,elise:2,miner:1,muhee:3,siren:3,mikael:3,sakura:3};
 const TIER5_CP={1:4000,2:3300,3:2700};
 /* 신화: 최대 레벨에서 열림 · 능력치 2배 */
 const MYTH_COST={1:3000,2:5000,3:5000,4:10000,5:30000,6:50000}, MYTH_STONE5=2;
@@ -1031,6 +1033,7 @@ const MYTH_SKILL={
   roa:   {name:'매혹의 여왕',desc:'하트 회복량 2배 · 유혹 중 치명타 피해 1.5배 → 2배'},
   muhee: {name:'심판의 춤',desc:'정의 발동까지 5초 → 3초'},
   aora:  {name:'대천사의 강림',desc:'천사의 구원 지속 3초 → 5초 · 생명력 흡수량 2배'},
+  akira: {name:'혹한의 화살',desc:'4초마다 아키라의 공격력이 2배씩 증가 (최대 32배)'},
   babelord:{name:'운명의 지배자',desc:'주사위를 굴리는 주기 4초 → 3초'},
   miner: {name:'바다의 여왕',desc:'물보라 보호막 2턴 → 3턴 · 미네르바의 치명타 피해 1.5배 → 2배'},
   vista5:{name:'특급 열차',desc:'열차 관통 피해가 기본 공격의 2배 → 3배 · 시야 차단 3턴'},
@@ -1057,6 +1060,7 @@ const ALLY_IMG={
   roa:{src:'ally_roa.jpg',pos:'50% 24%',face:'50% 31%',size:'400%'},
   muhee:{src:'ally_muhee.jpg',pos:'50% 20%',face:'50% 24%',size:'420%'},
   aora:{src:'ally_aora.jpg',pos:'50% 18%',face:'50% 24%',size:'420%'},
+  akira:{src:'ally_akira.jpg',pos:'50% 18%',face:'51% 25%',size:'420%'},
   babelord:{src:'ally_babelord.jpg',pos:'50% 22%',face:'48% 28%',size:'420%'},
   miner:{src:'ally_miner.jpg',pos:'50% 15%',face:'50% 21%',size:'450%'},
   vista5:{src:'ally_vista5.jpg',pos:'55% 18%',face:'57% 27%',size:'400%'},
@@ -3007,6 +3011,7 @@ function pvpEnemyActs(e){
       case 'charm':    dmg((12+lv*3.6)*1.5,0.4,`${nm}의 하트 화살 (치명타)`);break;
       case 'justice':  if(!B.pvpMuhee&&Date.now()-(B.startAt||0)>=(a.my?3000:5000)){B.pvpMuhee=true;const d=Math.floor(P.hp/2);P.hp-=d;estat('dmg',a.id,d);addLog(`⚖️ ${nm}의 정의! 주인공 체력 절반(${d})을 앗아갔다`);queueFx('player','⚖️-'+d,'pdmg');}break;
       case 'aora':     if(Math.random()<0.3){B.curse=Math.max(B.curse,2);addLog(`${nm}의 천사의 구원 — 주인공이 속박되어 방어력 감소`);}else dmg(16+lv*5,0.3,`${nm}의 천사의 심판`);break;
+      case 'frost':    if(Math.random()<0.4){const d=dmg((13+lv*4.2)*2,0.4,`${nm}의 급소 사격 (치명타)`);if(e.hp<e.maxHp)heal(0.05);}else dmg(13+lv*4.2,0.4,`${nm}의 서리 화살`);break;
       case 'dice':     {const n=1+Math.floor(Math.random()*6);if(n===1&&e.hp<e.maxHp)heal(0.15);else dmg((14+lv*4.5)*(n===3?2:1),0.4,`${nm}의 운명의 점 ${n} — 예언의 광선`);if(n===5)dmg(14+lv*4.5,0.4,`${nm}의 예언의 광선 — 연속`);}break;
       case 'tide':     dmg(12+lv*4,0.5,`${nm}의 물살`);break;
       case 'train':    if(Math.random()<0.4)dmg(vistaBase(lv)*(a.my?3:2),0,`${nm}의 열차 관통`);else dmg(vistaBase(lv),0.5,`${nm}의 군도 베기`);break;
@@ -3733,7 +3738,7 @@ function winNow(){
   if(!B||B.won)return;
   if((B.e.berserk&&!B.berserked)||(B.e.madness&&!B.maddened)||(B.e.awaken&&!B.awoke)||(B.e.twin&&!B.twinned)||(B.e.relay&&(B.relayStage||0)<2)){B.e.hp=Math.max(1,B.e.hp);renderBattle();return;}
   B.won=true;B.busy=true;if(B.enemyT)clearInterval(B.enemyT);if(B.allyT)clearInterval(B.allyT);if(B.freezeT)clearInterval(B.freezeT);document.body.classList.remove('pfrozen');if(B.sakuraT)clearInterval(B.sakuraT);if(B.paraT)clearInterval(B.paraT);if(B.waveT)clearInterval(B.waveT);if(B.soulT)clearInterval(B.soulT);if(B.drainT)clearInterval(B.drainT);if(B.tsT)clearInterval(B.tsT);
-  if(B.zapT)clearInterval(B.zapT);if(B.karmaT)clearInterval(B.karmaT);if(B.trainT)clearInterval(B.trainT);if(B.aoraT)clearInterval(B.aoraT);if(B.autoT)clearInterval(B.autoT);if(B.diceT)clearInterval(B.diceT);if(B.heartT)clearInterval(B.heartT);if(B.halfT)clearInterval(B.halfT);if(B.fallT)clearInterval(B.fallT);if(B.isaT)clearInterval(B.isaT);
+  if(B.zapT)clearInterval(B.zapT);if(B.karmaT)clearInterval(B.karmaT);if(B.trainT)clearInterval(B.trainT);if(B.aoraT)clearInterval(B.aoraT);if(B.autoT)clearInterval(B.autoT);if(B.diceT)clearInterval(B.diceT);if(B.coldT)clearInterval(B.coldT);if(B.heartT)clearInterval(B.heartT);if(B.halfT)clearInterval(B.halfT);if(B.fallT)clearInterval(B.fallT);if(B.isaT)clearInterval(B.isaT);
   renderBattle();setTimeout(victory,750);
 }
 /* 이사벨 부제: 5초마다 주인공 HP 40% 회복 */
@@ -3796,6 +3801,15 @@ function aoraTick(){
   }
   if(e.hp<=0){winNow();return;}
   renderBattle();
+}
+/* 아키라: 얼어붙은 화살(2초 빙결) · 급소 40% · 신화 혹한의 화살(4초마다 공격력 2배, 최대 32배) */
+const AKIRA_FREEZE=2000, AKIRA_REST=4000, AKIRA_VITAL=0.4, AKIRA_COLD_MS=4000, AKIRA_COLD_MAX=32;
+const eFrozenOn=()=>!!(B&&B.eFrozenUntil&&Date.now()<B.eFrozenUntil);
+function akiraColdTick(){
+  if(!B||B.over||B.won||!$('#modal').classList.contains('hidden'))return;
+  const id='akira',h=B.ahp[id];if(!inParty(id)||!isMyth(id)||(h&&h.hp<=0))return;
+  if((B.akiraMul||1)>=AKIRA_COLD_MAX)return;
+  B.akiraMul=Math.min(AKIRA_COLD_MAX,(B.akiraMul||1)*2);addLog(`❄️ 혹한의 화살 — 아키라의 공격력 ×${B.akiraMul}`);renderBattle();
 }
 /* 바벨로드: 운명의 점 — 주사위 1~6 무작위 */
 const diceMs=()=>isMyth('babelord')?3000:4000, DICE_REFL=4000, DICE_SHIELD=500;
@@ -3914,6 +3928,7 @@ function startBattle(spec){
     if(B&&inParty('vista5'))B.trainT=setInterval(trainTick,TRAIN_MS);
     if(B&&inParty('aora'))B.aoraT=setInterval(aoraTick,AORA_MS);
     if(B&&inParty('babelord'))B.diceT=setInterval(diceTick,diceMs());
+    if(B&&inParty('akira')&&isMyth('akira'))B.coldT=setInterval(akiraColdTick,AKIRA_COLD_MS);
     if(B&&inParty('roa'))B.heartT=setInterval(heartTick,HEART_MS);
     if(B&&t.halfTick&&!t.pvp){B.halfAt=Date.now()+t.halfTick;B.halfT=setInterval(halfTick,t.halfTick);}
     if(B&&inParty('sakura')){B.sakuraT=setInterval(sakuraTick,1000);sakuraTick();}
@@ -4145,6 +4160,8 @@ function renderBattle(){
   if(B.evadeNext)st.push('🔦 눈부심');
   if(B.blind)st.push(`📜 시야 차단 ${B.blind}`);
   if(B.sealed>0)st.push(`⛓ 적 속박 ${B.sealed}`);
+  if(eFrozenOn())st.push(`🧊 적 빙결 ${Math.ceil((B.eFrozenUntil-Date.now())/1000)}초`);
+  if((B.akiraMul||1)>1)st.push(`❄️ 아키라 공격 ×${B.akiraMul}`);
   if(B.eburn)st.push(`🔥 적 불태움 ${B.eburn.turns}`);
   if(B.ebleed)st.push(`🩸 적 출혈 ${B.ebleed.turns}`);
   if(inParty('pasri')&&B.startAt&&Date.now()-B.startAt<PASRI_WAIT)st.push(`🏮 파스리 충전 ${Math.ceil((PASRI_WAIT-(Date.now()-B.startAt))/1000)}초`);
@@ -4506,6 +4523,12 @@ function alliesAct(){
           const h=B.ahp[id];if(d&&h&&h.hp>0){const vh=Math.min(h.max-h.hp,Math.round(d*0.5));if(vh>0){h.hp+=vh;stat('heal',id,vh);}}
         }
         break;}
+      case 'frost':{ // 아키라: 얼어붙은 화살 · 급소 사격(치명타 + 피해 절반 회복) · 신화 혹한의 화살
+        const base=(13+lv*4.2)*(B.akiraMul||1);
+        if(Date.now()>=(B.akiraCD||0)&&!B.immune){B.eFrozenUntil=Date.now()+AKIRA_FREEZE;B.akiraCD=B.eFrozenUntil+AKIRA_REST;addLog(`🧊 ${nm}의 얼어붙은 화살! ${e.name}이(가) ${AKIRA_FREEZE/1000}초간 얼어붙었다 (행동 불능)`);queueFx('enemy','🧊 빙결','mpf');allyHit(base,`${nm}의 얼어붙은 화살`,0.4);}
+        else if(Math.random()<AKIRA_VITAL){const d=allyHit(base*2,`🎯 ${nm} — 급소 사격 (치명타)`,0.4);const hh=d?Math.min(P.maxHp-P.hp,Math.round(d*0.5*pHealMul())):0;if(hh>0){P.hp+=hh;stat('heal',id,hh);addLog(`🎯 급소 사격 — 주인공 HP ${hh} 회복`);queueFx('player','🎯+'+hh,'heal');}}
+        else allyHit(base,`${nm}의 서리 화살`,0.4);
+        break;}
       case 'dice':{ // 바벨로드: 운명의 점 (주사위는 diceTick) · 평소엔 예언의 지팡이
         const base=(14+lv*4.5)*(diceAtkOn()?2:1),lb=`${nm}의 예언의 광선${diceAtkOn()?' (공격력 2배)':''}`;
         allyHit(base,lb,0.4);if(diceSpdOn()&&B.e.hp>0)allyHit(base,lb+' — 연속',0.4);
@@ -4745,6 +4768,7 @@ function enemyTurn(){
   const e=B.e;let mv;
   if(forcedMv){mv=forcedMv;forcedMv=null;}
   else if(B.invisNext){B.invisNext=false;mv={t:'invisslash',n:'보이지 않는 참격'};forcedMv={t:'bleedstorm',n:'무수한 출혈 참격',hits:8,m:0.25};}
+  else if(eFrozenOn())mv={t:'frozen'};
   else if(B.sealed>0){mv={t:'sealed'};B.sealed--;}
   else if(B.charging){mv={t:'release',n:B.chargeName,kind:B.chargeKind};B.charging=false;B.chargeKind=null;}
   else if(e.pvp)mv={t:'pvp',n:''};
@@ -4755,6 +4779,7 @@ function enemyTurn(){
 
   switch(mv.t){
     case 'sealed':  addLog(`${e.name} — 봉인되어 움직일 수 없다!`);break;
+    case 'frozen':  addLog(`🧊 ${e.name} — 얼어붙어 움직일 수 없다!`);break;
     case 'pvp':     pvpEnemyActs(e);break;
     case 'nullify': B.immune=2;addLog(`${label} — ⏸ 잠시 동안 모든 피해가 무효화된다!`);break;
     case 'reflect': B.reflect=2;addLog(`${label} — ↩ 잠시 동안 준 피해의 절반이 되돌아온다!`);break;
