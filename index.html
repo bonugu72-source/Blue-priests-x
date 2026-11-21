@@ -499,6 +499,13 @@ body.pfrozen #cmds .btn{filter:saturate(.2) brightness(1.2);background:linear-gr
 .relicbox[open]>summary .chev{transform:rotate(180deg)}
 .relicbox[open]>summary{margin-bottom:8px}
 .relicbox .rlist{display:flex;flex-direction:column;gap:8px}
+.relicbtn{width:100%;text-align:left;cursor:pointer;color:inherit;font:inherit;border:1px solid rgba(232,199,106,.4);border-radius:16px;padding:16px 14px;background:linear-gradient(140deg,#3a2f1c,#2a2140 70%);box-shadow:0 0 18px rgba(232,199,106,.12);display:flex;flex-direction:column;gap:10px}
+.relicbtn .rtop{display:flex;align-items:center;justify-content:space-between;font-weight:800;font-size:18px}
+.relicbtn .rtop .go{color:var(--gold);font-size:20px}
+.relicsum{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.relicsum div{background:rgba(0,0,0,.25);border-radius:10px;padding:8px 4px;text-align:center;font-size:12px;color:#d9cfb0}
+.relicsum b{display:block;font-size:18px;color:var(--gold);margin-top:2px}
+.relicfx{font-size:12px;color:#e2b9c8;line-height:1.6}
 .dexgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
 .dexcell{border:none;border-radius:12px;background:#141d3b;padding:10px 4px 8px;display:flex;flex-direction:column;align-items:center;gap:3px;min-width:0;color:inherit;font-family:inherit;cursor:pointer}
 .dexcell .dface{width:52px;height:52px;border-radius:12px;margin-bottom:2px}
@@ -2924,14 +2931,38 @@ function sortieSlotsHTML(inMgmt){
 }
 document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('[data-slot]');if(b){e.preventDefault();renderAllies();window.scrollTo(0,0);}});
 /* 동료 탭 */
-let relicOpen=false;
+/* 유물·희귀 아이템으로 오른 능력치 합계 (각 유물의 apply를 빈 능력치에 적용해서 계산) */
+function relicTotals(){
+  const t={atk:0,def:0,maxHp:0,hp:0};
+  P.relics.forEach(r=>{if(RELICS[r])RELICS[r].apply(t);});
+  return t;
+}
+function relicSumHTML(){
+  const t=relicTotals();
+  const fx=[P.relics.includes('blood_orb')?`🩸 흡혈 ${Math.round(BLOOD_ORB_PCT*100)}%`:'',P.relics.includes('time_belt')?'⏳ HP 절반 이하 시 보호막':''].filter(Boolean);
+  return `<div class="relicsum"><div>⚔ 공격력<b>+${fmt(t.atk)}</b></div><div>🛡 방어력<b>+${fmt(t.def)}</b></div><div>❤ 최대 HP<b>+${fmt(t.maxHp)}</b></div></div>
+    ${fx.length?`<div class="relicfx">특수 효과 · ${fx.join(' · ')}</div>`:''}`;
+}
+function renderRelics(){
+  const relicHTML=P.relics.length
+    ?P.relics.filter(r=>RELICS[r]).map(r=>RELICS[r].img?`<button class="ally memrow" data-mem="1"><div class="ic memthumb" style="background-image:url(${RELICS[r].img})"></div><div>${RELICS[r].name}<small>${RELICS[r].desc}</small></div></button>`:`<div class="ally"><div class="ic">${RELICS[r].icon}</div><div>${RELICS[r].name}<small>${RELICS[r].desc}</small></div></div>`).join('')
+    :'<div class="desc">보스를 쓰러뜨리거나 미션을 완료해 유물을 얻자.</div>';
+  $('#app').innerHTML=`${statusHTML()}${topBack()}
+    <div class="panel"><div class="ptitle">✨ 유물 · 희귀 아이템 <span class="small">${P.relics.length}개</span></div>
+      <div class="small">유물·아이템으로 오른 능력치 총합</div>
+      ${relicSumHTML()}</div>
+    <div class="panel"><div class="ptitle">📜 보유 목록</div><div class="rlist" style="display:flex;flex-direction:column;gap:8px">${relicHTML}</div></div>
+    <button class="btn" id="back">← 돌아가기</button>${tabBar()}`;
+  document.querySelectorAll('[data-mem]').forEach(b=>b.onclick=()=>showMemory(renderRelics));
+  $('#back').onclick=()=>renderHub();
+  window.scrollTo(0,0);
+}
 function renderAllyTab(msg){
   hubTab='ally';
-  const relicHTML=P.relics.length
-    ?P.relics.map(r=>RELICS[r].img?`<button class="ally memrow" data-mem="1"><div class="ic memthumb" style="background-image:url(${RELICS[r].img})"></div><div>${RELICS[r].name}<small>${RELICS[r].desc}</small></div></button>`:`<div class="ally"><div class="ic">${RELICS[r].icon}</div><div>${RELICS[r].name}<small>${RELICS[r].desc}</small></div></div>`).join('')
-    :'<div class="desc">보스를 쓰러뜨리거나 미션을 완료해 유물을 얻자.</div>';
   $('#app').innerHTML=`${statusHTML()}
     ${msg?`<div class="notice">${msg}</div>`:''}
+    <button class="relicbtn" id="relics"><div class="rtop"><span>✨ 유물 · 희귀 아이템 <span class="small">${P.relics.length}개</span></span><span class="go">›</span></div>
+      ${relicSumHTML()}</button>
     <div class="panel"><div class="ptitle">⚔ 출전 동료 <span class="small">${P.active.length}/${MAX_ACTIVE}</span></div>
       ${sortieSlotsHTML()}
       <div class="teamcp">⚔ 팀 전투력 <b>${fmt(teamCP())}</b> <span class="small">주인공 ${fmt(heroCP())} + 동료 ${fmt(teamCP()-heroCP())}</span></div>
@@ -2940,11 +2971,8 @@ function renderAllyTab(msg){
         <button class="btn m-coll" id="dex">📖 동료 도감<small>모든 동료의 이름·능력</small></button>
       </div>
     </div>
-    <details class="relicbox" id="relicbox" ${relicOpen?'open':''}><summary><span>✨ 유물 · 희귀 아이템 <span class="small">${P.relics.length}개</span></span><span class="chev">▾</span></summary>
-      <div class="rlist">${relicHTML}</div></details>
     ${tabBar()}`;
-  $('#relicbox').ontoggle=e=>{relicOpen=e.target.open;};
-  document.querySelectorAll('[data-mem]').forEach(b=>b.onclick=showMemory);
+  $('#relics').onclick=()=>renderRelics();
   $('#allies').onclick=()=>{renderAllies();window.scrollTo(0,0);};
   $('#dex').onclick=()=>renderDex();
 }
@@ -3157,7 +3185,7 @@ function awaken(id){
 
 /* ===================== 상점 ===================== */
 const BLOOD_ORB_COST=200000, BLOOD_ORB_PCT=0.10, MEMORY_KILLS=11;
-function showMemory(){const r=RELICS.our_memory;showStory(`<div class="sum s5"><div class="sum-title">희귀한 유물</div><img class="memimg" src="${r.img}" alt="우리들의 추억"><div class="sum-name">📸 ${r.name}</div><p class="sum-desc">아무런 힘도 없다.<br>하지만 시간 속에 잠긴, 다시 오지 않을 그날의 추억.</p></div>`,()=>renderAllyTab(),true);}
+function showMemory(back){const r=RELICS.our_memory;showStory(`<div class="sum s5"><div class="sum-title">희귀한 유물</div><img class="memimg" src="${r.img}" alt="우리들의 추억"><div class="sum-name">📸 ${r.name}</div><p class="sum-desc">아무런 힘도 없다.<br>하지만 시간 속에 잠긴, 다시 오지 않을 그날의 추억.</p></div>`,()=>(typeof back==='function'?back:renderAllyTab)(),true);}
 const realmStart=()=>{const i=AREAS.findIndex(a=>a.realm);return i<0?AREAS.length:i;};
 function renderShop(msg){
   hubTab='shop';
