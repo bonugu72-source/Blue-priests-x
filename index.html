@@ -1437,8 +1437,8 @@ const AREAS=[
       moves:[{t:'atk',n:'발굽 짓밟기'},{t:'strong',n:'왕자의 돌진'},{t:'multi',n:'갈기 채찍',hits:3,m:0.5},{t:'curse',n:'진실의 눈'},{t:'charge',n:'20군단의 질주'}]},
     boss:{name:'차후이아', art:'chahuia', title:'추방당한 대천사', hp:30000, exactHp:true, atk:200, def:62, xp:48000, gold:60000, goldFirst:0, goldRepeat:60000, demon:true, trustXpFirst:1,
       voidAlly:0.5, reflectAlly:0.5,
-      madness:{at:10000,to:40000,atkMult:1,art:'chahuia2',title:'타락',logName:'타락',fallen:{rageEvery:4000,maxMul:32},
-        line:'"하늘이 나를 버렸다면… 나도 하늘을 버리겠어."\n\n푸른 머리칼이 붉게 물들고, 하얀 날개가 검게 타들어 간다. 머리 위로 뒤틀린 뿔이 솟아오르고, 붉은 마법진이 하늘을 뒤덮는다.\n\n— 타락천사 차후이아: 체력 40,000 · 주인공과 동료 모두 출혈 · 4초마다 방어하지 않으면 공격력 2배 —'},
+      madness:{at:10000,to:70000,atkMult:1,art:'chahuia2',title:'타락',logName:'타락',fallen:{rageEvery:3000,maxMul:32},
+        line:'"하늘이 나를 버렸다면… 나도 하늘을 버리겠어."\n\n푸른 머리칼이 붉게 물들고, 하얀 날개가 검게 타들어 간다. 머리 위로 뒤틀린 뿔이 솟아오르고, 붉은 마법진이 하늘을 뒤덮는다.\n\n— 타락천사 차후이아: 체력 70,000 · 주인공과 동료 모두 출혈 · 3초마다 방어하지 않으면 공격력 2배 —'},
       pre:'수정 조각이 떠다니는 별빛 마법진 한가운데, 하얀 예복을 입은 푸른 머리칼의 대천사가 미소 짓는다.\n\n"너희 동료들의 칼끝은 다른 차원으로 흘려보낼게. 그리고 너의 칼끝은… 네 동료들에게 돌려줄게."',
       moves:[{t:'atk',n:'수정 지팡이'},{t:'strong',n:'별빛 마법진 폭발'},{t:'multi',n:'수정 비',hits:4,m:0.35},{t:'curse',n:'추방의 선고'},{t:'sweep',n:'차원의 균열',m:0.18},{t:'charge',n:'대천사의 심판'}]}
   }
@@ -3731,9 +3731,9 @@ function freezeTick(){
 /* 메르엠: 체력이 떨어질수록 마법력 증가 (HP 0에 가까울수록 최대 1+magicGrow배) */
 const magicMul=()=>(B&&B.e&&B.e.magicGrow)?1+B.e.magicGrow*(1-Math.max(0,B.e.hp)/B.e.maxHp):1;
 /* 메르엠: 3초마다 저승의 대마법 — 방어하지 않으면 주인공·동료 현재 HP 절반, 방어하면 무력화 */
-/* 타락천사 차후이아: 4초마다 방어 확인 — 방어하지 않으면 공격력 2배 (누적) · 동료 출혈 */
+/* 타락천사 차후이아: 3초마다 방어 확인 — 방어하지 않으면 공격력 2배 (누적) · 동료 출혈 */
 function fallTick(){
-  if(!B||B.over||B.won||P.hp<=0||!$('#modal').classList.contains('hidden')){if(B)B.fallAt=Date.now()+4000;return;}
+  if(!B||B.over||B.won||P.hp<=0||!$('#modal').classList.contains('hidden')){if(B&&B.e.madness&&B.e.madness.fallen)B.fallAt=Date.now()+B.e.madness.fallen.rageEvery;return;}
   const e=B.e,f=e.madness&&e.madness.fallen;if(!f)return;B.fallAt=Date.now()+f.rageEvery;
   if(B.guard)addLog(`🛡 방어 태세 — ${e.name}의 타락한 분노를 억눌렀다 (공격력 ×${B.fallMul})`);
   else if(B.fallMul<f.maxMul){B.fallMul*=2;addLog(`💢 ${e.name}의 타락한 분노! 방어하지 않아 공격력이 두 배로 — ×${B.fallMul}`);document.body.classList.add('flash');setTimeout(()=>document.body.classList.remove('flash'),250);}
@@ -3889,7 +3889,7 @@ function renderBattle(){
   if(e.critAll)passive.push(`💥 모든 공격 치명타 ×${e.critAll*(B.awoke&&e.awaken?e.awaken.critMult:1)}`);
   if(e.awaken)passive.push(B.awoke?'💢 각성: 3초마다 영혼을 가르는 일격':`💢 HP ${fmt(e.awaken.at)} 이하 각성`);
   if(e.burnBleed)passive.push('🔥🩸 끝없는 화상·출혈');
-  if(e.madness)passive.push(B.maddened?(e.madness.fallen?`💢 타락: 출혈 · 4초마다 방어 필요 (공격력 ×${B.fallMul||1})`:`💢 ${e.madness.logName||'광기'}: 공격력 ${e.madness.atkMult}배`):`💢 HP ${fmt(e.madness.at)} 이하 ${e.madness.logName||'광기'}`);
+  if(e.madness)passive.push(B.maddened?(e.madness.fallen?`💢 타락: 출혈 · ${e.madness.fallen.rageEvery/1000}초마다 방어 필요 (공격력 ×${B.fallMul||1})`:`💢 ${e.madness.logName||'광기'}: 공격력 ${e.madness.atkMult}배`):`💢 HP ${fmt(e.madness.at)} 이하 ${e.madness.logName||'광기'}`);
   if(e.wave)passive.push('🌀 5초마다 거스르는 파동');
   if(e.fixedDmg)passive.push('🎯 방어력 무시 고정 피해');
   if(e.paralyze)passive.push('⚡ 3초마다 동료 마비');
