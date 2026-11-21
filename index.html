@@ -904,7 +904,7 @@ const ALLIES={
   mikael:  {star:5,name:'미카엘',        icon:'🛡️', role:'정화의 날개', kit:'purify',
             desc:'정화(걸려 있는 모든 디버프 제거 + 주인공 현재 HP의 절반만큼 방어막, 3턴마다) · 평소엔 날개 베기'},
   lumeon:  {star:5,name:'루메온',        icon:'🌌', role:'은하계의 지배자', kit:'galaxy', exclusive:true,
-            desc:'은하 충돌(적을 3초간 속박 + 6초간 둔화: 적 공격 속도 절반) · 마법 피해라 적 방어력의 50%를 무시 · 🗼 구원의 탑 25층 돌파 보상으로만 획득'},
+            desc:'은하 충돌(적을 3초간 속박 + 6초간 둔화: 적 공격 속도 절반 · 끝나면 6초 쉬었다가 다시 사용) · 마법 피해라 적 방어력의 50%를 무시 · 🗼 구원의 탑 25층 돌파 보상으로만 획득'},
   roa:     {star:5,name:'로아',          icon:'💗', role:'유혹', kit:'charm', exclusive:true,
             desc:'유혹(적을 유혹해 5초간 적에게 가하는 모든 공격이 치명타 · 끝나면 3초 쉬었다가 다시 사용) · 3초마다 하트를 날려 주인공 HP 조금씩 회복 · 🏆 랭크전 챌린저 승급 보상으로만 획득'},
   muhee:   {star:5,name:'무희',          icon:'⚖️', role:'정의', kit:'justice',
@@ -3456,6 +3456,7 @@ function sakuraTick(){
 }
 /* 카르마: 5초마다 무작위 부적 (주인공 치유 / 적 저주 / 적 불태움) */
 /* 비스타: 3초마다 열차 소환 — 관통(기본 공격 2배, 방어 무시) + 폭파로 시야 차단 */
+const GALAXY_REST=6000; // 루메온: 둔화가 끝난 뒤 6초 쉬고 다시 은하 충돌
 const HEART_MS=3000;
 function heartTick(){
   if(!B||B.over||B.won||!$('#modal').classList.contains('hidden'))return;
@@ -4109,7 +4110,7 @@ function alliesAct(){
         const base=14+lv*4.3;
         if(Date.now()>=(B.galaxyCD||0)){
           const bind=isMyth(id)?5000:3000,slow=isMyth(id)?9000:6000;
-          B.sealed=Math.max(B.sealed||0,Math.ceil(bind/1500));B.eslowUntil=Date.now()+slow;B.galaxyCD=Date.now()+slow+3000;
+          B.sealed=Math.max(B.sealed||0,Math.ceil(bind/1500));B.eslowUntil=Date.now()+slow;B.galaxyCD=Date.now()+slow+GALAXY_REST;
           addLog(`🌌 ${nm}의 은하 충돌! ${e.name}을(를) ${bind/1000}초간 속박하고 ${slow/1000}초간 둔화 (공격 속도 절반)`);queueFx('enemy','🌌 은하 충돌','mpf');
           allyHit(base*1.5,`${nm}의 은하 충돌`,0.25);
         }else allyHit(base,`${nm}의 성운 마탄`,0.25);
