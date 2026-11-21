@@ -402,7 +402,7 @@ body.pfrozen #cmds .btn{filter:saturate(.2) brightness(1.2);background:linear-gr
 .rlwheel{position:absolute;inset:0;border-radius:50%;border:6px solid #e8c76a;box-shadow:0 0 0 3px #6b4a16,0 0 24px rgba(232,199,106,.45);transition:transform 3.4s cubic-bezier(.12,.75,.12,1);overflow:hidden}
 .rlwheel .rlbg{position:absolute;inset:0;border-radius:50%}
 .rlwheel .rllb{position:absolute;left:50%;top:50%;width:0;height:0}
-.rlwheel .rllb span{position:absolute;left:-36px;top:calc(-1 * min(115px,32vw));width:72px;text-align:center;font-size:12px;font-weight:800;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.6);line-height:1.15}
+.rlwheel .rllb span{position:absolute;left:-30px;top:calc(-1 * min(115px,32vw));width:60px;text-align:center;font-size:11px;font-weight:800;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.6);line-height:1.15}
 .rlwheel .rllb span i{display:block;font-style:normal;font-size:22px;margin-bottom:2px}
 .rlpin{position:absolute;left:50%;top:-12px;margin-left:-13px;width:0;height:0;border-left:13px solid transparent;border-right:13px solid transparent;border-top:26px solid #ff4f6a;filter:drop-shadow(0 2px 3px rgba(0,0,0,.5));z-index:3}
 .rlhub{position:absolute;left:50%;top:50%;width:46px;height:46px;margin:-23px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff6d0,#e8c76a 60%,#8a6420);box-shadow:0 2px 8px rgba(0,0,0,.5);z-index:2;display:flex;align-items:center;justify-content:center;font-size:20px}
@@ -1924,15 +1924,17 @@ function renderGarden(msg){
   $('#back').onclick=()=>{clearInterval(gardenTimer);renderAllyTab();};window.scrollTo(0,0);
 }
 /* ===================== 행운의 룰렛 ===================== */
-/* 무료 뽑기 전용: 첫 1회 무료 · 이후 15분마다 무료 1회 · 6칸 중 무작위(각 1/6) */
+/* 무료 뽑기 전용: 첫 1회 무료 · 이후 15분마다 무료 1회 · 8칸 중 무작위(각 1/8) */
 const RL_FREE_MS=15*60*1000;
 const RL_SEG=[
-  {k:'gold',ic:'💰',t:'10,000 코인',c:'#d89a2b'},
+  {k:'gold',g:10000,ic:'💰',t:'10,000 코인',c:'#d89a2b'},
   {k:'none',ic:'💨',t:'꽝',c:'#59627a'},
   {k:'trust',ic:'💗',t:'신뢰도 XP',c:'#d0507a'},
   {k:'xp',ic:'✨',t:'경험치 10,000',c:'#3a8fd8'},
   {k:'s4',ic:'★4',t:'4성 동료',c:'#8a5ad8'},
-  {k:'s5',ic:'★5',t:'5성 동료',c:'#e0b030'}];
+  {k:'s5',ic:'★5',t:'5성 동료',c:'#e0b030'},
+  {k:'gold',g:1000,ic:'🪙',t:'1,000 코인',c:'#9a7a3a'},
+  {k:'gold',g:5000,ic:'💵',t:'5,000 코인',c:'#3f9a6a'}];
 const rlFreeLeft=()=>Math.max(0,(P.rlFreeAt||0)-Date.now()); // 0이면 무료 가능 (처음엔 0)
 const rlTime=ms=>{const t=Math.ceil(ms/1000);return `${Math.floor(t/60)}:${String(t%60).padStart(2,'0')}`;};
 let rlRot=0,rlTimer=null,rlSpinning=false;
@@ -1942,7 +1944,7 @@ function renderRoulette(msg,win){
   const bg=`conic-gradient(${RL_SEG.map((g,i)=>`${g.c} ${i*deg}deg ${(i+1)*deg}deg`).join(',')})`;
   $('#app').innerHTML=`${statusHTML()}${topBack()}
     <div class="panel"><div class="ptitle">🎡 행운의 룰렛</div>
-      <div class="desc">💰 10,000 코인 · 💨 꽝 · 💗 신뢰도 XP 1개 · ✨ 경험치 10,000 · ★4 무작위 동료 · ★5 무작위 동료 중 하나가 무작위로 나온다.<br>무료 뽑기 전용 — 처음 한 번 무료 · 이후 15분마다 다시 무료로 돌릴 수 있다</div>
+      <div class="desc">🪙 1,000 코인 · 💵 5,000 코인 · 💰 10,000 코인 · 💨 꽝 · 💗 신뢰도 XP 1개 · ✨ 경험치 10,000 · ★4 무작위 동료 · ★5 무작위 동료 중 하나가 무작위로 나온다.<br>무료 뽑기 전용 — 처음 한 번 무료 · 이후 15분마다 다시 무료로 돌릴 수 있다</div>
       <div class="rlwrap"><div class="rlpin"></div><div class="rlwheel" id="rlw" style="transform:rotate(${rlRot}deg)"><div class="rlbg" style="background:${bg}"></div>
         ${RL_SEG.map((g,i)=>`<div class="rllb" style="transform:rotate(${i*deg+deg/2}deg)"><span><i>${g.ic}</i>${g.t}</span></div>`).join('')}</div><div class="rlhub">🍀</div></div>
       <div class="rlres ${win?'win':''}" id="rlres">${msg||'&nbsp;'}</div>
@@ -1960,7 +1962,7 @@ function rlSpin(){
   const n=RL_SEG.length,deg=360/n,i=Math.floor(Math.random()*n),g=RL_SEG[i];
   // 보상은 돌리는 순간 확정·저장 (연출 중 화면을 벗어나도 지급)
   let txt='',win=true;
-  if(g.k==='gold'){P.gold+=10000;txt='💰 10,000 코인 획득!';}
+  if(g.k==='gold'){P.gold+=g.g;txt=`${g.ic} ${fmt(g.g)} 코인 획득!`;}
   else if(g.k==='none'){txt='💨 꽝… 다음 기회에!';win=false;}
   else if(g.k==='trust'){P.items.trustxp=(P.items.trustxp||0)+1;txt='💗 신뢰도 XP ×1 획득! (동료 관리에서 ★5·★6 동료에게 사용)';}
   else if(g.k==='xp'){const ups=gainXp(10000);txt='✨ 경험치 10,000 획득!'+(ups.length?' '+ups[ups.length-1]:'');}
