@@ -903,6 +903,8 @@ const ALLIES={
             desc:'날갯짓으로 폭풍을 일으켜 5초 동안 주인공 치명타 확률 2배 · 전투에서 처음 쓰러진 동료를 HP 50%로 부활(1회) · 폭풍 중엔 깃털 칼날 공격'},
   mikael:  {star:5,name:'미카엘',        icon:'🛡️', role:'정화의 날개', kit:'purify',
             desc:'정화(걸려 있는 모든 디버프 제거 + 주인공 현재 HP의 절반만큼 방어막, 3턴마다) · 평소엔 날개 베기'},
+  lumeon:  {star:5,name:'루메온',        icon:'🌌', role:'은하계의 지배자', kit:'galaxy', exclusive:true,
+            desc:'은하 충돌(적을 3초간 속박 + 6초간 둔화: 적 공격 속도 절반) · 마법 피해라 적 방어력의 50%를 무시 · 🗼 구원의 탑 25층 돌파 보상으로만 획득'},
   roa:     {star:5,name:'로아',          icon:'💗', role:'유혹', kit:'charm', exclusive:true,
             desc:'유혹(적을 유혹해 5초간 적에게 가하는 모든 공격이 치명타 · 끝나면 3초 쉬었다가 다시 사용) · 3초마다 하트를 날려 주인공 HP 조금씩 회복 · 🏆 랭크전 챌린저 승급 보상으로만 획득'},
   muhee:   {star:5,name:'무희',          icon:'⚖️', role:'정의', kit:'justice',
@@ -919,7 +921,7 @@ const ALLIES={
             desc:'보석처럼 반짝이는 광선 공격 · 적이 힘을 모으거나 3턴마다 프리즘 굴절(다음 적 공격 피해 절반, 절반은 적에게 반사)'}
 };
 /* ★5 티어 — 신화 제외 최대 전투력: 1티어 4000 · 2티어 3300 · 3티어 2700 */
-const TIER5={guseju:1,asiris:1,karma:1,pasri:1,vista5:1,roa:1,danian:2,elia:2,kirie:2,gaia:2,elise:2,miner:1,muhee:3,siren:3,mikael:3,sakura:3};
+const TIER5={guseju:1,asiris:1,karma:1,pasri:1,vista5:1,roa:1,lumeon:1,danian:2,elia:2,kirie:2,gaia:2,elise:2,miner:1,muhee:3,siren:3,mikael:3,sakura:3};
 const TIER5_CP={1:4000,2:3300,3:2700};
 /* 신화: 최대 레벨에서 열림 · 능력치 2배 */
 const MYTH_COST={1:3000,2:5000,3:5000,4:10000,5:30000,6:50000}, MYTH_STONE5=2;
@@ -934,6 +936,7 @@ const MYTH_SKILL={
   sakura:{name:'만개',desc:'부활 대기 9초 → 4초 · 벚꽃바람이 적의 치명타 확률을 75% 낮춤'},
   kirie: {name:'폭풍의 수호천사',desc:'부활을 두 번까지 · 폭풍 중 치명타 피해 2배'},
   mikael:{name:'대천사의 가호',desc:'방어막이 현재 HP 전부만큼 · 정화 주기 2턴'},
+  lumeon:{name:'초신성',desc:'은하 충돌 속박 3초 → 5초 · 둔화 6초 → 9초'},
   roa:   {name:'매혹의 여왕',desc:'하트 회복량 2배 · 유혹 중 치명타 피해 1.5배 → 2배'},
   muhee: {name:'심판의 춤',desc:'정의 발동까지 5초 → 3초'},
   aora:  {name:'대천사의 강림',desc:'천사의 구원 지속 3초 → 5초 · 생명력 흡수량 2배'},
@@ -1006,6 +1009,7 @@ const RELICS={
   seal_andras: {name:'안드라스의 인장',         icon:'⚪', desc:'방어력 +6 · 최대 HP +20',        apply:p=>{p.def+=6;p.maxHp+=20;p.hp+=20;}},
   seal_furfur: {name:'푸르푸르의 인장',         icon:'🔵', desc:'최대 HP +40 · 공격력 +4',        apply:p=>{p.maxHp+=40;p.hp+=40;p.atk+=4;}},
   time_belt:{name:'시간에 갇힌 벨트', icon:'⏳', desc:'희귀 아이템 · 전투마다 주인공 HP가 처음으로 절반 이하가 되면 남은 HP만큼 보호막',apply:p=>{}},
+  lis26_badge:{name:'문헌정보학과 26학번 명찰', icon:'📛', desc:'희귀 아이템 · 주인공 공격력 +50 (구원의 탑 30층 이스터에그)',apply:p=>{p.atk+=50;}},
   bangeo_hoe:{name:'최고급 방어회', icon:'🐟', desc:'희귀 아이템 · 주인공 최대 HP +100 (챌린저 1300 LP 이스터에그)',apply:p=>{p.maxHp+=100;p.hp+=100;}},
   jihu_suit:{name:'지후의 맞춤형 정장', icon:'👔', desc:'희귀 아이템 · 주인공 공격력 +50 (챌린저 900 LP 이스터에그)',apply:p=>{p.atk+=50;}},
   yujun_suit:{name:'유준이의 맞춤형 정장', icon:'🤵', desc:'희귀 아이템 · 주인공 공격력 +50 (챌린저 800 LP 이스터에그)',apply:p=>{p.atk+=50;}},
@@ -2697,6 +2701,7 @@ function pvpEnemyActs(e){
       case 'twin':     dmg(6+lv*1.8,0.5,`${nm}의 쌍검 ①`);dmg(6+lv*1.8,0.5,`${nm}의 쌍검 ②`);break;
       case 'guard':    if(e.hp<e.maxHp*0.5&&Math.random()<0.3)heal(0.06);else dmg(9+lv*2.8,0.4,`${nm}의 방패 강타`);break;
       case 'chant':    if(e.hp<e.maxHp*0.7&&Math.random()<0.4)heal(0.12);else dmg(7+lv*2.4,0.5,`${nm}의 빛의 음표`);break;
+      case 'galaxy':   dmg((14+lv*4.3)*(Math.random()<0.3?1.5:1),0.25,`${nm}의 은하 마탄`);break;
       case 'charm':    dmg((12+lv*3.6)*1.5,0.4,`${nm}의 하트 화살 (치명타)`);break;
       case 'justice':  if(!B.pvpMuhee&&Date.now()-(B.startAt||0)>=(a.my?3000:5000)){B.pvpMuhee=true;const d=Math.floor(P.hp/2);P.hp-=d;estat('dmg',a.id,d);addLog(`⚖️ ${nm}의 정의! 주인공 체력 절반(${d})을 앗아갔다`);queueFx('player','⚖️-'+d,'pdmg');}break;
       case 'aora':     if(Math.random()<0.3){B.curse=Math.max(B.curse,2);addLog(`${nm}의 천사의 구원 — 주인공이 속박되어 방어력 감소`);}else dmg(16+lv*5,0.3,`${nm}의 천사의 심판`);break;
@@ -2806,6 +2811,8 @@ function rankEnd(win,e,pst,pparty){
 /* ===================== 구원의 탑 ===================== */
 /* 30층 · 동료 1명만 출전 (이사벨 부제 불가) · 5층마다 악마, 10층마다 보스 · 층이 오를수록 후반 지역의 적 */
 const TOWER_MAX=30, TOWER_MIN_LV=50;
+const TOWER_REWARD={5:{stone:3},10:{stone:5},15:{stone:10},20:{gold:150000},25:{ally:'lumeon'},30:{stone:10,relic:'lis26_badge'}}; // 첫 돌파 보상
+const towerRewardText=f=>{const w=TOWER_REWARD[f];if(!w)return '';const a=[];if(w.stone)a.push(`💠 성유물 ×${w.stone}`);if(w.gold)a.push(`${fmt(w.gold)} 코인`);if(w.ally)a.push(`★5 ${ALLIES[w.ally].name} (탑 전용)`);if(w.relic)a.push(`${RELICS[w.relic].icon} ${RELICS[w.relic].name}`);return a.join(' + ');};
 const towerOpen=()=>P.lv>=TOWER_MIN_LV&&worldCleared(); // Lv 50 이상 + 지역 이동 15곳 모두 클리어
 const towerState=()=>{P.tower=P.tower||{best:0,tries:0};return P.tower;};
 /* 엔드 콘텐츠: 활옥사원~고대 원단수의 적이 6층마다 바뀌고, 층이 오를수록 체력 +3% · 공격력 +2%씩 강해진다 */
@@ -2833,6 +2840,7 @@ function renderTower(msg){
   $('#app').innerHTML=`${statusHTML()}${topBack()}
     ${msg?`<div class="notice">${msg}</div>`:''}
     <div class="panel"><div class="ptitle">🗼 구원의 탑 <span class="small">최고 ${T.best}층 / ${TOWER_MAX}층</span></div>
+      <div class="desc"><b>돌파 보상</b> ${Object.keys(TOWER_REWARD).map(k=>`${k}층: ${towerRewardText(+k)}${(T.got||{})[k]?' ✔':''}`).join(' · ')}</div>
       <div class="tlad">${Array.from({length:TOWER_MAX},(_,i)=>{const n=i+1,tt=towerType(n);return `<span class="${n<=T.best?'done':''} ${n===f&&!done?'on':''} ${tt==='boss'?'bos':tt==='mid'?'mid':''}">${n<=T.best?'✔':n}</span>`;}).join('')}</div>
       ${done?`<div class="notice">🕊️ 구원의 탑 ${TOWER_MAX}층을 모두 정복했다!</div>`:`
       <div class="desc"><b>${f}층</b> ${ty==='boss'?'☠ 보스':ty==='mid'?'😈 악마':'⚔ 일반'} — <b>${esc(en.name)}</b> <span class="small">(${AREAS[a].flag} ${AREAS[a].name}의 적 · HP ${fmt(en.hp)} · 공격 ${fmt(en.atk)} · 탑 강화 체력 ×${towerMul(f).hp.toFixed(2)} 공격 ×${towerMul(f).atk.toFixed(2)})</span></div>`}
@@ -2853,7 +2861,14 @@ function towerEnd(win){
   const f=B.tower,e=B.e,pst=B.st,pparty=partyIds().slice();clearBattle();
   if(P._towerRestore){P.hp=P._towerRestore.hp;P.mp=P._towerRestore.mp;delete P._towerRestore;}
   const T=towerState(),lines=[];
-  if(win){const first=f>T.best;if(first)T.best=f;lines.push(first?`🗼 ${f}층 돌파!${f>=TOWER_MAX?' — 구원의 탑 정복!':` 다음은 ${f+1}층`}`:`🗼 ${f}층 재도전 승리`);}
+  if(win){const first=f>T.best;if(first)T.best=f;lines.push(first?`🗼 ${f}층 돌파!${f>=TOWER_MAX?' — 구원의 탑 정복!':` 다음은 ${f+1}층`}`:`🗼 ${f}층 재도전 승리`);
+    T.got=T.got||{};const w=TOWER_REWARD[f];
+    if(w&&!T.got[f]){T.got[f]=true;
+      if(w.stone){P.items.stone+=w.stone;stoneToast(w.stone,`구원의 탑 ${f}층 돌파`);}
+      if(w.gold)P.gold+=w.gold;
+      if(w.ally){addAlly(w.ally);aData(w.ally);}
+      lines.push(`🎁 ${f}층 돌파 보상: ${towerRewardText(f)}`);
+      if(w.relic&&!P.relics.includes(w.relic)){gainRelic(w.relic);lines.push(`${RELICS[w.relic].icon} 이스터에그! 희귀 아이템 「${RELICS[w.relic].name}」 획득 (공격력 +50)`);}}}
   else lines.push(`${f}층에서 쓰러졌다… 다시 도전하자`);
   lines.push(`최고 기록 ${T.best}/${TOWER_MAX}층`);
   save();renderTower();
@@ -3574,6 +3589,7 @@ function startBattle(spec){
 /* 실시간 루프: 적·동료가 각자 속도로 행동 */
 function enemyStep(){
   if(!B||B.over||B.won||B.busy||!$('#modal').classList.contains('hidden'))return;
+  if(B.eslowUntil&&Date.now()<B.eslowUntil){B.eslowSkip=!B.eslowSkip;if(B.eslowSkip)return;} // 루메온의 둔화: 적 공격 속도 절반
   enemyTurn();
 }
 function allyStep(){
@@ -3772,6 +3788,7 @@ function renderBattle(){
   if(sakuraWind())st.push('🌸 벚꽃바람');
   if(B.sakuraDeadAt)st.push(`🌸 부활까지 ${Math.max(0,Math.ceil(((isMyth('sakura')?4000:SAKURA_REVIVE)-(Date.now()-B.sakuraDeadAt))/1000))}초`);
   if(B.tsAt)st.push(`⏳ 시간정지 ${Math.max(0,Math.ceil((B.tsAt-Date.now())/1000))}초`);
+  if(B.eslowUntil&&Date.now()<B.eslowUntil)st.push(`🌌 둔화 ${Math.ceil((B.eslowUntil-Date.now())/1000)}초`);
   if(charmOn())st.push(`💗 유혹 ${Math.ceil((B.charmUntil-Date.now())/1000)}초`);
   else if(inParty('roa')&&B.charmCD&&Date.now()<B.charmCD)st.push(`💗 유혹 대기 ${Math.ceil((B.charmCD-Date.now())/1000)}초`);
   if(salvOn())st.push(`👼 천사의 구원 ${Math.ceil((B.salvUntil-Date.now())/1000)}초`);
@@ -4083,6 +4100,15 @@ function alliesAct(){
             addLog(`${nm}의 정화 — ${debuffs.length?debuffs.join(', ')+' 제거 · ':''}방어막 ${B.mshield}`);queueFx('player','🛡'+B.mshield,'mpf');
           }else addLog(`${nm}의 정화 — ${debuffs.join(', ')} 제거`);
         }else allyHit(10+lv*3.6,`${nm}의 날개 베기`,0.4);
+        break;}
+      case 'galaxy':{ // 루메온: 은하 충돌 (속박 + 둔화) · 마법 피해 (방어력 50% 무시)
+        const base=14+lv*4.3;
+        if(Date.now()>=(B.galaxyCD||0)){
+          const bind=isMyth(id)?5000:3000,slow=isMyth(id)?9000:6000;
+          B.sealed=Math.max(B.sealed||0,Math.ceil(bind/1500));B.eslowUntil=Date.now()+slow;B.galaxyCD=Date.now()+slow+3000;
+          addLog(`🌌 ${nm}의 은하 충돌! ${e.name}을(를) ${bind/1000}초간 속박하고 ${slow/1000}초간 둔화 (공격 속도 절반)`);queueFx('enemy','🌌 은하 충돌','mpf');
+          allyHit(base*1.5,`${nm}의 은하 충돌`,0.25);
+        }else allyHit(base,`${nm}의 성운 마탄`,0.25);
         break;}
       case 'charm':{ // 로아: 유혹 (5초간 모든 공격 치명타) · 평소엔 하트 화살
         if(!charmOn()&&Date.now()>=(B.charmCD||0)){B.charmUntil=Date.now()+CHARM_MS;B.charmCD=B.charmUntil+CHARM_REST;addLog(`💗 ${nm}의 유혹 — ${e.name}이(가) 빈틈을 드러냈다! 5초간 모든 공격이 치명타`);queueFx('enemy','💗 유혹','mpf');}
