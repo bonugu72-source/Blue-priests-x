@@ -1013,6 +1013,7 @@ const RELICS={
   seal_andras: {name:'안드라스의 인장',         icon:'⚪', desc:'방어력 +6 · 최대 HP +20',        apply:p=>{p.def+=6;p.maxHp+=20;p.hp+=20;}},
   seal_furfur: {name:'푸르푸르의 인장',         icon:'🔵', desc:'최대 HP +40 · 공격력 +4',        apply:p=>{p.maxHp+=40;p.hp+=40;p.atk+=4;}},
   time_belt:{name:'시간에 갇힌 벨트', icon:'⏳', desc:'희귀 아이템 · 전투마다 주인공 HP가 처음으로 절반 이하가 되면 남은 HP만큼 보호막',apply:p=>{}},
+  heaven_ring:{name:'천상의 반지', icon:'💍', desc:'희귀 아이템 · 스테이지 클리어 시 골드 획득량 +20% (구원자 500 LP 이스터에그)',apply:p=>{}},
   lis26_badge:{name:'문헌정보학과 26학번 명찰', icon:'📛', desc:'희귀 아이템 · 주인공 공격력 +50 (구원의 탑 30층 이스터에그)',apply:p=>{p.atk+=50;}},
   bangeo_hoe:{name:'최고급 방어회', icon:'🐟', desc:'희귀 아이템 · 주인공 최대 HP +100 (챌린저 1300 LP 이스터에그)',apply:p=>{p.maxHp+=100;p.hp+=100;}},
   jihu_suit:{name:'지후의 맞춤형 정장', icon:'👔', desc:'희귀 아이템 · 주인공 공격력 +50 (챌린저 900 LP 이스터에그)',apply:p=>{p.atk+=50;}},
@@ -2761,6 +2762,7 @@ const rankRewardText=t=>{const w=RANK_REWARD[t];if(!w)return '';return w.ally?`�
 const RANK_LP=100, RANK_WIN=20, RANK_LOSS=15, RANK_MIN_LV=20, RANK_EGG_LP=500;
 const RANK_CH=6, RANK_SAVIOR_LP=1500; // 챌린저에서 1500 LP를 모으면 구원자로 승급
 const rankNeed=t=>t<RANK_CH?RANK_LP:t===RANK_CH?RANK_SAVIOR_LP:0; // 0 = 최고 티어
+const RANK_SAVIOR_EGGS=[[500,'heaven_ring']]; // 구원자 LP 이스터에그
 const RANK_EGGS=[[500,'bonu_staff'],[800,'yujun_suit'],[900,'jihu_suit'],[1000,'gonggu_paper'],[1300,'bangeo_hoe']]; // 챌린저 LP 이스터에그 // 플레이어 Lv 20부터 랭크전 개방
 const RANK_AI_NAMES=['푸른 기사','심연의 사제','은빛 순례자','붉은 수도사','밤의 성가대','새벽의 파수꾼','잿빛 집행자','별빛 부제'];
 const rankState=()=>{P.rank=P.rank||{tier:0,lp:0,w:0,l:0,best:0};return P.rank;};
@@ -2798,6 +2800,7 @@ function rankEnd(win,e,pst,pparty){
   if(win){r.w++;r.lp+=RANK_WIN;lines.push(`🏆 승리! +${RANK_WIN} LP`);}
   else{r.l++;const lost=Math.min(r.lp,RANK_LOSS);r.lp-=lost;lines.push(`패배… −${lost} LP`);}
   if(r.tier===RANK_CH)for(const [lp,id] of RANK_EGGS){if(r.lp>=lp&&!P.relics.includes(id)){gainRelic(id);const it=RELICS[id];lines.push(`${it.icon} 이스터에그! 챌린저 ${lp} LP 달성 — 희귀 아이템 「${it.name}」 획득 (${it.desc.replace(/^희귀 아이템 · /,'').replace(/ \(.*\)$/,'')})`);}}
+  if(r.tier===RANK_CH+1)for(const [lp,id] of RANK_SAVIOR_EGGS){if(r.lp>=lp&&!P.relics.includes(id)){gainRelic(id);const it=RELICS[id];lines.push(`${it.icon} 이스터에그! 구원자 ${lp} LP 달성 — 희귀 아이템 「${it.name}」 획득 (${it.desc.replace(/^희귀 아이템 · /,'').replace(/ \(.*\)$/,'')})`);}}
   let promo=false;
   while(rankNeed(r.tier)&&r.lp>=rankNeed(r.tier)){r.lp-=rankNeed(r.tier);r.tier++;promo=true;}
   if(promo){r.lp=0;r.best=Math.max(r.best||0,r.tier);lines.push(`${RANKS[r.tier].icon} ${RANKS[before].n} → ${RANKS[r.tier].n} 승급!`);
@@ -4516,7 +4519,9 @@ function victory(){
   const tName=B.baseName;
   B.over=true;
   const firstClear=!fromHunt&&stage>P.prog[area];
-  const gold=e.goldRepeat!=null?(firstClear?e.goldFirst:e.goldRepeat):B.isBoss?Math.round(e.gold*BOSS_GOLD_MULT):e.gold;
+  const gold0=e.goldRepeat!=null?(firstClear?e.goldFirst:e.goldRepeat):B.isBoss?Math.round(e.gold*BOSS_GOLD_MULT):e.gold;
+  const ringOn=!fromHunt&&P.relics.includes('heaven_ring'); // 천상의 반지: 스테이지 클리어 골드 +20%
+  const gold=ringOn?Math.round(gold0*1.2):gold0;
   P.gold+=gold;
   P.kills[tName]=(P.kills[tName]||0)+1;
   const memEgg=tName==='푸르푸르'&&P.kills[tName]>=MEMORY_KILLS&&!P.relics.includes('our_memory'); // 이스터에그
@@ -4556,7 +4561,7 @@ function victory(){
   const ups=gainXp(e.xp);
   if(allyUps.length)ups.push('🤝 동료 레벨업: '+allyUps.join(', '));
   const lines=[`✨ 경험치 +${fmt(e.xp)}`];
-  if(gold)lines.push(`💰 ${fmt(gold)} G${e.goldRepeat!=null?(firstClear?' (첫 클리어 보상)':' (재도전 보상)'):gold!==e.gold?' (보스 보너스 ×1.25)':''}`);
+  if(gold)lines.push(`💰 ${fmt(gold)} G${e.goldRepeat!=null?(firstClear?' (첫 클리어 보상)':' (재도전 보상)'):gold0!==e.gold?' (보스 보너스 ×1.25)':''}${ringOn&&gold>gold0?` · 💍 천상의 반지 +${fmt(gold-gold0)}`:''}`);
   const rep={title:`${AREAS[area].flag} ${esc(e.twin?`${tName} · ${e.twin.name}`:tName)} 처치`,won:true,lines:[...lines,...extra,...ups],st:B.st,party:partyIds().slice()};
   clearBattle();
   victoryFlow(area,stype,first,wasFinal,fromHunt,'',stage,rep);
