@@ -378,6 +378,25 @@ body.pfrozen #cmds .btn{filter:saturate(.2) brightness(1.2);background:linear-gr
 .sumcell.s6{border-color:#bfe6ff;box-shadow:0 0 18px rgba(190,230,255,.9),0 0 30px rgba(255,220,120,.5);background:linear-gradient(160deg,#20304a,#3a2a08)}
 .sum.s6 .sum-stars{color:#e6f6ff;text-shadow:0 0 12px #9fd8ff,0 0 24px #ffd24a}
 .sum.s6 .aportrait{box-shadow:0 0 30px #bfe6ff,0 0 70px rgba(255,220,120,.55);border:2px solid #fff6d8;position:relative;z-index:2}
+/* 우리의 정원 */
+.gtabs{display:flex;gap:6px;margin:6px 0 8px}.gtabs button{flex:1}
+.ggrid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.gcard{background:#0c1329;border-radius:10px;padding:6px 4px;text-align:center;font-size:12px;border:1px solid transparent}
+.gcard.own{border-color:#5fd39a}.gcard svg{width:54px;height:44px;display:block;margin:0 auto 2px}
+.gcard .btn{min-height:30px;font-size:11px;padding:4px 6px;margin-top:4px;width:100%}
+.room{position:relative;width:100%;aspect-ratio:4/3;border-radius:12px;overflow:hidden;margin-top:6px;background:linear-gradient(#f3e3cf 0 46%,#c99a6b 46% 100%);box-shadow:inset 0 0 0 3px #6b4a2f,0 6px 18px rgba(0,0,0,.4)}
+.room::before{content:'';position:absolute;left:0;right:0;top:46%;height:4px;background:#8a5f3c}
+.room::after{content:'';position:absolute;left:0;right:0;top:calc(46% + 4px);bottom:0;background:repeating-linear-gradient(90deg,transparent 0 46px,rgba(0,0,0,.08) 46px 48px)}
+.room .fu{position:absolute;z-index:2;transform:translate(-50%,-100%);filter:drop-shadow(0 3px 2px rgba(0,0,0,.25));animation:pop .45s ease-out}
+.room .fu svg{width:100%;height:auto;display:block}
+.room .empty{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#7a5a3c;font-size:14px;z-index:3;text-align:center;padding:0 20px}
+.room .fr{position:absolute;z-index:5;width:44px;transform:translate(-50%,-100%);transition:left 2.6s linear,top 2.6s linear;cursor:pointer}
+.room .fr .bd{animation:bob .45s ease-in-out infinite alternate}.room .fr.idle .bd{animation:none}
+.room .fr.flip svg{transform:scaleX(-1)}
+.room .fr svg{width:44px;height:58px;display:block}
+.room .fr .nm{font-size:10px;font-weight:700;color:#3b2614;background:rgba(255,255,255,.8);border-radius:6px;padding:0 4px;text-align:center;white-space:nowrap;margin-top:-2px}
+.room .fr .say{position:absolute;bottom:100%;left:50%;transform:translateX(-50%);background:#fff;color:#222;font-size:11px;border-radius:8px;padding:2px 6px;white-space:nowrap;box-shadow:0 2px 6px rgba(0,0,0,.25);animation:pop .3s ease-out}
+@keyframes bob{from{transform:translateY(0)}to{transform:translateY(-3px)}}
 /* 기억 보관소: 퍼즐 연출 */
 .pzfx{position:fixed;inset:0;z-index:72;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at 50% 45%,#2a2140,#05060d 75%);animation:sfxfade .35s ease-out;cursor:pointer;overflow:hidden}
 .pzfx .pzbox{position:relative;width:min(300px,78vw);aspect-ratio:4/5}
@@ -1843,6 +1862,56 @@ const ggDone=m=>!!(P.done&&P.done[m.id]);
 function ggClaim(id){const m=GG_MISSIONS.find(x=>x.id===id);if(!m||ggDone(m)||ggProg(m)<ggNeed(m))return;
   P.done[m.id]=true;P.items.puzzle=(P.items.puzzle||0)+1;save();
   renderHub(`👥 공구방 특별 미션 완료: ${m.boss} ${ggNeed(m)}회 처치 — 🧩 기억의 퍼즐 조각 ×1 (동료 탭 › 기억 보관소에서 사용)`);}
+/* ===================== 우리의 정원 ===================== */
+/* 빈방을 생활용품으로 꾸미고, 뽑은 친구들이 방 안을 돌아다닌다 (꾸미기 전용 · 능력치 없음) */
+const GARDEN_ITEMS={
+  window:{name:'창문',price:10000,x:22,y:30,w:20,svg:'<svg viewBox="0 0 60 50"><rect x="2" y="2" width="56" height="46" rx="3" fill="#7a5130"/><rect x="6" y="6" width="22" height="38" fill="#bfe6ff"/><rect x="32" y="6" width="22" height="38" fill="#bfe6ff"/><path d="M8 40 L18 26 L24 34 L28 30 V44 H8Z" fill="#9ad19a"/><circle cx="46" cy="14" r="4" fill="#fff6b0"/></svg>'},
+  aircon:{name:'에어컨',price:50000,x:80,y:16,w:22,svg:'<svg viewBox="0 0 70 30"><rect x="1" y="2" width="68" height="22" rx="6" fill="#f7f9fc" stroke="#c9d2de" stroke-width="2"/><rect x="8" y="17" width="54" height="3" rx="1.5" fill="#c9d2de"/><circle cx="60" cy="9" r="2" fill="#5fd39a"/><path d="M14 27 q4 4 0 8 M30 27 q4 4 0 8 M46 27 q4 4 0 8" stroke="#9fd8ff" stroke-width="1.5" fill="none"/></svg>'},
+  tv:{name:'TV',price:40000,x:50,y:52,w:24,svg:'<svg viewBox="0 0 70 56"><rect x="2" y="2" width="66" height="40" rx="3" fill="#20242c"/><rect x="6" y="6" width="58" height="32" fill="#3d6fd6"/><path d="M6 38 L26 18 L40 30 L50 22 L64 34 V38Z" fill="#5fb0ff"/><rect x="14" y="44" width="42" height="10" rx="2" fill="#7a5130"/></svg>'},
+  sofa:{name:'소파',price:30000,x:50,y:86,w:30,svg:'<svg viewBox="0 0 90 46"><rect x="8" y="4" width="74" height="24" rx="8" fill="#c26b8a"/><rect x="2" y="16" width="16" height="26" rx="6" fill="#a8557a"/><rect x="72" y="16" width="16" height="26" rx="6" fill="#a8557a"/><rect x="14" y="24" width="62" height="16" rx="5" fill="#d98aa6"/><rect x="10" y="40" width="5" height="6" fill="#5a3a22"/><rect x="75" y="40" width="5" height="6" fill="#5a3a22"/></svg>'},
+  bed:{name:'침대',price:30000,x:16,y:78,w:28,svg:'<svg viewBox="0 0 80 54"><rect x="2" y="4" width="10" height="46" rx="3" fill="#7a5130"/><rect x="10" y="26" width="66" height="18" rx="3" fill="#f2f2f2"/><rect x="10" y="30" width="66" height="14" rx="3" fill="#8ab4f0"/><rect x="14" y="20" width="18" height="10" rx="4" fill="#fff"/><rect x="10" y="44" width="68" height="6" fill="#7a5130"/></svg>'},
+  desk:{name:'책상',price:20000,x:82,y:66,w:24,svg:'<svg viewBox="0 0 70 44"><rect x="2" y="4" width="66" height="8" rx="2" fill="#a06d43"/><rect x="6" y="12" width="6" height="30" fill="#7a5130"/><rect x="58" y="12" width="6" height="30" fill="#7a5130"/><rect x="40" y="12" width="18" height="16" fill="#8d5e38"/><rect x="47" y="18" width="4" height="2" fill="#e8c76a"/></svg>'},
+  computer:{name:'컴퓨터',price:50000,x:80,y:56,w:14,svg:'<svg viewBox="0 0 40 36"><rect x="2" y="2" width="36" height="24" rx="2" fill="#20242c"/><rect x="5" y="5" width="30" height="18" fill="#7fe0c4"/><rect x="8" y="9" width="14" height="2" fill="#1e6f5c"/><rect x="8" y="14" width="20" height="2" fill="#1e6f5c"/><rect x="17" y="26" width="6" height="5" fill="#555"/><rect x="10" y="31" width="20" height="3" rx="1" fill="#777"/></svg>'},
+  chair:{name:'의자',price:15000,x:70,y:84,w:12,svg:'<svg viewBox="0 0 30 44"><rect x="5" y="2" width="20" height="20" rx="4" fill="#4f6fb0"/><rect x="3" y="22" width="24" height="7" rx="2" fill="#3e5a96"/><rect x="13" y="29" width="4" height="9" fill="#555"/><path d="M5 42 L15 37 L25 42" stroke="#555" stroke-width="3" fill="none"/></svg>'},
+  fan:{name:'선풍기',price:15000,x:92,y:86,w:12,svg:'<svg viewBox="0 0 30 50"><circle cx="15" cy="13" r="12" fill="#e9f4ff" stroke="#9fb8d6" stroke-width="2"/><path d="M15 13 L15 3 A10 10 0 0 1 23 8Z M15 13 L24 18 A10 10 0 0 1 16 23Z M15 13 L6 19 A10 10 0 0 1 6 8Z" fill="#9fd8ff"/><circle cx="15" cy="13" r="2.5" fill="#5f7fa6"/><rect x="13" y="25" width="4" height="18" fill="#9fb8d6"/><rect x="5" y="43" width="20" height="5" rx="2" fill="#9fb8d6"/></svg>'}
+};
+const GARDEN_FRIENDS=['본우','유준','주은','지후','설우','주원','수연','효서','채윤','은빛','준희'];
+const GARDEN_DRAW=30000; // 친구 뽑기 1회 (아직 없는 친구 중 무작위)
+const GF_HAIR=['#2b2018','#3a2a1e','#1c1c22','#4a3222','#2e241c','#5a3b26','#241a14','#3d2b20','#1f1a18','#6b4a30','#2a1e16'];
+const gardenState=()=>{P.garden=P.garden||{items:[],friends:[]};return P.garden;};
+const friendSVG=n=>{const i=GARDEN_FRIENDS.indexOf(n),h=GF_HAIR[i%GF_HAIR.length],long=[2,6,7,8,9].includes(i);
+  return `<svg viewBox="0 0 44 58"><g class="bd">${long?`<rect x="10" y="10" width="24" height="22" rx="8" fill="${h}"/>`:''}<rect x="9" y="30" width="26" height="20" rx="7" fill="#c9a3b4"/><rect x="5" y="31" width="7" height="15" rx="3.5" fill="#fff"/><rect x="32" y="31" width="7" height="15" rx="3.5" fill="#fff"/><text x="22" y="45" font-size="9" font-weight="700" text-anchor="middle" fill="#fff">L</text><rect x="12" y="49" width="8" height="7" rx="2" fill="#2a2a34"/><rect x="24" y="49" width="8" height="7" rx="2" fill="#2a2a34"/><circle cx="22" cy="18" r="11" fill="#ffe0c8"/><path d="M11 17 Q12 5 22 6 Q33 5 33 17 Q28 11 22 12 Q15 11 11 17Z" fill="${h}"/><circle cx="18" cy="19" r="1.4" fill="#222"/><circle cx="26" cy="19" r="1.4" fill="#222"/><path d="M19 23 Q22 25.5 25 23" stroke="#c0605a" stroke-width="1.2" fill="none"/><circle cx="15.5" cy="22" r="1.6" fill="#ffb3b3" opacity=".7"/><circle cx="28.5" cy="22" r="1.6" fill="#ffb3b3" opacity=".7"/></g></svg>`;};
+const FRIEND_LINES=['안녕!','여기 좋다~','오늘 뭐 먹지?','과제 했어?','공구방 최고!','놀러 왔어!','ㅋㅋㅋㅋ','배고파…','사진 찍자!','잠 온다…'];
+let gardenTab='items',gardenTimer=null;
+function renderGarden(msg){
+  hubTab='ally';const G=gardenState();clearInterval(gardenTimer);
+  const itemCards=Object.entries(GARDEN_ITEMS).map(([k,it])=>{const own=G.items.includes(k);
+    return `<div class="gcard ${own?'own':''}">${it.svg}<b>${it.name}</b><div class="small">${own?'배치 완료':fmt(it.price)+' 코인'}</div>${own?'':`<button class="btn primary" data-gbuy="${k}" ${P.gold>=it.price?'':'disabled'}>구입</button>`}</div>`;}).join('');
+  const left=GARDEN_FRIENDS.filter(n=>!G.friends.includes(n));
+  const friendShop=`<div class="desc">아직 방에 오지 않은 친구 중 한 명이 무작위로 놀러 온다. (${G.friends.length}/${GARDEN_FRIENDS.length}명)</div>
+    <div class="grid"><button class="btn primary full" id="gdraw" ${left.length&&P.gold>=GARDEN_DRAW?'':'disabled'}>${left.length?`🎲 친구 뽑기 · ${fmt(GARDEN_DRAW)} 코인`:'모든 친구가 모였다 ✔'}</button></div>
+    <div class="desc small">${GARDEN_FRIENDS.map(n=>G.friends.includes(n)?`<b>${n}</b>`:'❔').join(' · ')}</div>`;
+  const furn=G.items.map(k=>{const it=GARDEN_ITEMS[k];return `<div class="fu" style="left:${it.x}%;top:${it.y}%;width:${it.w}%">${it.svg}</div>`;}).join('');
+  $('#app').innerHTML=`${statusHTML()}${topBack()}
+    ${msg?`<div class="notice">${msg}</div>`:''}
+    <div class="panel"><div class="ptitle">🏡 우리의 정원 <span class="small">생활용품 ${G.items.length}/${Object.keys(GARDEN_ITEMS).length} · 친구 ${G.friends.length}/${GARDEN_FRIENDS.length}</span></div>
+      <div class="gtabs"><button class="btn ${gardenTab==='items'?'primary':''}" data-gtab="items">🛋 생활용품</button><button class="btn ${gardenTab==='friends'?'primary':''}" data-gtab="friends">🎲 친구</button></div>
+      ${gardenTab==='items'?`<div class="ggrid">${itemCards}</div>`:friendShop}
+      <div class="room" id="room">${furn}${!G.items.length&&!G.friends.length?'<div class="empty">아직 텅 빈 방이다.<br>생활용품을 사고 친구들을 불러 보자.</div>':''}
+        ${G.friends.map((n,i)=>`<div class="fr" data-fr="${esc(n)}" style="left:${10+Math.random()*80}%;top:${62+Math.random()*30}%">${friendSVG(n)}<div class="nm">${esc(n)}</div></div>`).join('')}</div>
+      <div class="grid"><button class="btn full" id="back">← 돌아가기</button></div></div>${tabBar()}`;
+  document.querySelectorAll('[data-gtab]').forEach(b=>b.onclick=()=>{gardenTab=b.dataset.gtab;renderGarden();});
+  document.querySelectorAll('[data-gbuy]').forEach(b=>b.onclick=()=>{const k=b.dataset.gbuy,it=GARDEN_ITEMS[k],G=gardenState();if(G.items.includes(k)||P.gold<it.price)return;P.gold-=it.price;G.items.push(k);save();renderGarden(`🛋 ${it.name}을(를) 방에 들여놓았다`);});
+  if($('#gdraw'))$('#gdraw').onclick=()=>{const G=gardenState(),L=GARDEN_FRIENDS.filter(n=>!G.friends.includes(n));if(!L.length||P.gold<GARDEN_DRAW)return;
+    const n=L[Math.floor(Math.random()*L.length)];P.gold-=GARDEN_DRAW;G.friends.push(n);save();renderGarden(`🎉 ${n}이(가) 우리의 정원에 놀러 왔다!`);};
+  document.querySelectorAll('.room .fr').forEach(el=>el.onclick=()=>{el.querySelector('.say')?.remove();const d=document.createElement('div');d.className='say';d.textContent=FRIEND_LINES[Math.floor(Math.random()*FRIEND_LINES.length)];el.appendChild(d);setTimeout(()=>d.remove(),1800);});
+  const wander=()=>{if(!document.getElementById('room')){clearInterval(gardenTimer);return;}
+    document.querySelectorAll('.room .fr').forEach(el=>{if(Math.random()<0.3){el.classList.add('idle');return;}el.classList.remove('idle');
+      const ox=parseFloat(el.style.left),nx=Math.max(6,Math.min(94,ox+(Math.random()-0.5)*50)),ny=58+Math.random()*36;
+      el.classList.toggle('flip',nx<ox);el.style.left=nx+'%';el.style.top=ny+'%';el.style.zIndex=5+Math.round(ny);});};
+  setTimeout(wander,100);gardenTimer=setInterval(wander,2700);
+  $('#back').onclick=()=>{clearInterval(gardenTimer);renderAllyTab();};window.scrollTo(0,0);
+}
 /* 기억의 퍼즐: 사진이 나타났다가 퍼즐 조각으로 갈라져 흩어지고, 희귀 아이템이 나온다 */
 function puzzleFx(rid,cb){
   const C=5,Rw=6,r=RELICS[rid];
@@ -3235,6 +3304,7 @@ function renderAllyTab(msg){
         <button class="btn m-ally" id="allies">🤝 동료 관리<small>출전·레벨업·합성·각성</small></button>
         <button class="btn m-coll" id="dex">📖 동료 도감<small>모든 동료의 이름·능력</small></button>
         <button class="btn m-coll full" id="memvault">🧩 기억 보관소<small>기억의 퍼즐 조각 ${P.items.puzzle||0}개 · 희귀 아이템 ${MEMORY_ITEMS.filter(k=>P.relics.includes(k)).length}/${MEMORY_ITEMS.length}</small></button>
+        <button class="btn m-coll full" id="garden">🏡 우리의 정원<small>빈방 꾸미기 · 친구 ${(P.garden&&P.garden.friends.length)||0}/11명</small></button>
       </div>
     </div>
     ${tabBar()}`;
@@ -3242,6 +3312,7 @@ function renderAllyTab(msg){
   $('#allies').onclick=()=>{renderAllies();window.scrollTo(0,0);};
   $('#dex').onclick=()=>renderDex();
   $('#memvault').onclick=()=>renderMemVault();
+  $('#garden').onclick=()=>renderGarden();
 }
 
 function claim(id){
