@@ -704,7 +704,7 @@ body.battle.btheme .cdbar i{background:linear-gradient(90deg,color-mix(in srgb,v
 .status.mini{padding:9px 12px}
 /* 하단 탭 */
 #app:has(.tabbar){padding-bottom:calc(84px + env(safe-area-inset-bottom))}
-.tabbar{position:fixed;left:0;right:0;bottom:0;z-index:30;margin:0 auto;max-width:480px;display:grid;grid-template-columns:repeat(4,1fr);gap:4px;
+.tabbar{position:fixed;left:0;right:0;bottom:0;z-index:30;margin:0 auto;max-width:480px;display:grid;grid-template-columns:repeat(5,1fr);gap:4px;
   padding:6px 8px calc(6px + env(safe-area-inset-bottom));background:rgba(8,12,26,.94);box-shadow:0 -8px 24px rgba(0,0,0,.45);
   backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
 .tab{border:none;background:none;border-radius:12px;padding:6px 0 5px;display:flex;flex-direction:column;align-items:center;gap:2px;
@@ -716,6 +716,7 @@ body.battle.btheme .cdbar i{background:linear-gradient(90deg,color-mix(in srgb,v
 .tab.t-shop{--tc:#e0b56a;--tb:#4a3a1f}
 .tab.t-ally{--tc:#e59ab4;--tb:#4a2a39}
 .tab.t-adv{--tc:#7fb0f0;--tb:#22406e}
+.tab.t-dungeon{--tc:#c9a0ff;--tb:#3b2660}
 .tab.t-friend{--tc:#6fd0c0;--tb:#1d4a47}
 .tab .ti{filter:grayscale(.3) brightness(.9)}
 .tab.on{opacity:1;background:var(--tb);color:#f3f6ff}
@@ -723,7 +724,7 @@ body.battle.btheme .cdbar i{background:linear-gradient(90deg,color-mix(in srgb,v
 .tab:active{transform:scale(.95)}
 #app:has(.tabbar) .sheet{bottom:76px}
 /* 탭별 화면 테마: 배경 빛·패널·제목이 탭 색을 은은하게 띰 (탭바가 있는 화면에서만) */
-body[data-theme=shop]{--tc:#e0b56a}body[data-theme=ally]{--tc:#e59ab4}body[data-theme=adv]{--tc:#7fb0f0}body[data-theme=friend]{--tc:#6fd0c0}
+body[data-theme=shop]{--tc:#e0b56a}body[data-theme=ally]{--tc:#e59ab4}body[data-theme=adv]{--tc:#7fb0f0}body[data-theme=friend]{--tc:#6fd0c0}body[data-theme=dungeon]{--tc:#c9a0ff}
 body:has(.tabbar){--panel:color-mix(in srgb,var(--tc) 14%,#0f162c);
   background:radial-gradient(ellipse at 50% -10%,color-mix(in srgb,var(--tc) 42%,#0b1020) 0%,var(--bg) 65%) fixed;background-color:var(--bg)}
 body:has(.tabbar) .ptitle{color:color-mix(in srgb,var(--tc) 60%,#ffffff)}
@@ -732,6 +733,42 @@ body:has(.tabbar) .btn:not(.primary):not(.danger):not(.myth):not([class*=m-]){ba
 body:has(.tabbar) .notice{background:color-mix(in srgb,var(--tc) 16%,#101831)}
 body:has(.tabbar) .backtop{background:color-mix(in srgb,var(--tc) 18%,#141d3b)}
 body:has(.tabbar) .tabbar{background:color-mix(in srgb,var(--tc) 6%,rgba(8,12,26,.95))}
+/* 던전 탭 */
+.dginfo{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:2px 0 10px}
+.dginfo div{background:color-mix(in srgb,var(--tc) 12%,#0a1024);border:1px solid color-mix(in srgb,var(--tc) 30%,transparent);border-radius:12px;padding:10px 4px;text-align:center;display:flex;flex-direction:column;gap:3px}
+.dginfo b{font-size:19px;color:#f1e6ff}.dginfo span{font-size:12px;color:#c9bde6}
+.dgmine{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:10px 0}
+.dgmine div{background:rgba(0,0,0,.22);border-radius:10px;padding:7px 4px;text-align:center;display:flex;flex-direction:column}
+.dgmine b{font-size:16px;color:var(--gold)}
+.btn.dgmore{display:flex;flex-direction:column;align-items:center;width:100%;margin-top:4px;font-size:15px}
+.dglife{display:flex;flex-direction:column;align-items:center;gap:4px;padding:6px 0}
+.dglife b{font-size:30px;color:var(--gold);text-shadow:0 0 16px rgba(232,199,106,.35)}
+.dglife .dgparty{display:flex;gap:4px}
+.dghrow{display:grid;grid-template-columns:28px 1fr 70px;align-items:center;gap:8px;padding:8px 10px;border-radius:10px;background:color-mix(in srgb,var(--tc) 7%,#0a1024);margin-bottom:5px}
+.dghrow .dgr{font-weight:900;color:#9aa3c2;text-align:center}
+.dghrow .dgn{display:flex;flex-direction:column;gap:2px;min-width:0}.dghrow .dgn b{color:var(--gold);font-size:16px}
+.dghrow .dgn small{display:flex;align-items:center;gap:3px;color:#9aa3c2;font-size:11px;flex-wrap:wrap}
+.dghbar{height:8px;border-radius:5px;background:rgba(255,255,255,.07);overflow:hidden}.dghbar i{display:block;height:100%;background:linear-gradient(90deg,#8a5ad8,#e8c76a)}
+.dghrow.life{box-shadow:0 0 0 2px rgba(232,199,106,.55) inset}
+.btn.m-dg{background:linear-gradient(135deg,#5a2a8a,#2a1a5e);border-color:rgba(201,160,255,.55);font-size:18px;padding:14px 10px;box-shadow:0 0 18px rgba(170,110,255,.22)}.btn.m-dg small{color:#e2ccff}
+.dgrhead{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:6px;white-space:nowrap}
+.dgrow{display:grid;grid-template-columns:34px 1fr auto;align-items:center;gap:8px;padding:8px 10px;border-radius:10px;background:color-mix(in srgb,var(--tc) 7%,#0a1024);margin-bottom:5px}
+.dgrow .dgr{font-size:17px;font-weight:900;text-align:center;color:#c9bde6}
+.dgrow .dgn{display:flex;flex-direction:column;min-width:0}.dgrow .dgn b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dgrow .dgn small{display:flex;align-items:center;gap:3px;color:#9aa3c2;font-size:11px}
+.dgrow .dgv{font-weight:900;color:var(--gold);font-size:16px}
+.dgrow.r1{background:linear-gradient(90deg,rgba(232,199,106,.22),rgba(10,16,36,.6));border:1px solid rgba(232,199,106,.45)}
+.dgrow.r2{background:linear-gradient(90deg,rgba(200,210,230,.16),rgba(10,16,36,.6))}
+.dgrow.r3{background:linear-gradient(90deg,rgba(205,140,90,.18),rgba(10,16,36,.6))}
+.dgrow.me{box-shadow:0 0 0 2px color-mix(in srgb,var(--tc) 70%,transparent) inset}
+.dgrow .dgme{font-size:10px;padding:1px 6px;vertical-align:middle;margin-left:2px}
+.dgsep{text-align:center;color:#6b7699;margin:2px 0}
+.dghud{display:flex;justify-content:center;gap:14px;align-items:center;margin:4px 0 2px;font-size:14px;color:#e8e2ff}
+.dghud span{background:rgba(0,0,0,.35);border-radius:10px;padding:3px 10px}
+.dghud #dgtime{font-weight:900;font-variant-numeric:tabular-nums;min-width:84px;text-align:center}
+.dghud #dgtime.low{color:#ff7a7a;animation:dglow .6s infinite alternate}
+.dghud b{color:var(--gold);font-variant-numeric:tabular-nums}
+@keyframes dglow{from{opacity:1}to{opacity:.55}}
 /* 모험 탭 */
 .stagecur{display:flex;flex-direction:column;gap:2px;padding:10px 12px;border-radius:10px;background:#0c1329}
 .stagecur b{font-family:'Noto Serif KR',serif;font-size:18px;color:#dbe7ff}
@@ -2703,7 +2740,9 @@ function myPublic(){
   return {hero:String(P.name).slice(0,8),lv:P.lv,cp:teamCP(),area,stage:P.prog[area]||0,
     ended:!!P.ended,friends:(P.friends||[]).slice(0,100),
     team:{atk:P.atk,def:P.def,maxHp:P.maxHp,maxMp:P.maxMp,lv:P.lv,party:partyIds().map(id=>({id,lv:aData(id).lv,aw:P.awaken[id]||0,my:isMyth(id)?1:0,tr:trustLv(id)}))},
-    pvpW:(P.pvp&&P.pvp.w)||0,pvpL:(P.pvp&&P.pvp.l)||0,rankT:(P.rank&&P.rank.tier)||0,rankLP:(P.rank&&P.rank.lp)||0,rankOn:P.lv>=RANK_MIN_LV?1:0,updatedAt:Date.now(),seenAt:Date.now(),off:false};
+    pvpW:(P.pvp&&P.pvp.w)||0,pvpL:(P.pvp&&P.pvp.l)||0,rankT:(P.rank&&P.rank.tier)||0,rankLP:(P.rank&&P.rank.lp)||0,rankOn:P.lv>=RANK_MIN_LV?1:0,
+    ...(P.dg&&P.dg.best>0&&Array.isArray(P.dg.top)?{dgDay:P.dg.day,dgBest:P.dg.best,dgTop:P.dg.top.slice(0,20).map(r=>({v:r.v,p:(r.p||[]).slice(0,MAX_ACTIVE),at:r.at||0}))}:{dgDay:'',dgBest:0,dgTop:[]}),   // 던전 오늘의 기록 (상위 20개)
+    updatedAt:Date.now(),seenAt:Date.now(),off:false};
 }
 function publishProfile(){
   if(!DBX||!myId||!P||canShare===false)return;
@@ -3267,6 +3306,246 @@ function towerEnd(win){
   showResult({title:`🗼 구원의 탑 ${f}층 — ${esc(e.name)}`,won:win,lines,st:pst,party:pparty});
 }
 
+/* ===================== 던전 (공격력 측정) ===================== */
+/* 지역 보스가 순서대로 연속 등장 → 모두 쓰러뜨리면 마계 보스 3명이 계속 반복
+   보스 HP ×10 · 보스는 공격·반격·빙결 등 어떤 효과도 쓰지 않는 샌드백 · 제한 시간 60초
+   기록은 한국 시간 기준 하루 단위(매일 0시 초기화)로 players/{id} 공개 프로필에 함께 올려 모두와 실시간 공유 */
+const DG_MS=60000, DG_HP_MULT=10;
+const dgDay=()=>new Date(Date.now()+9*3600e3).toISOString().slice(0,10);   // 한국 날짜
+const DG_KEEP=20;   // 오늘 기록 상위 20개 · 최근 기록 20회
+function dgState(){
+  const d=dgDay();
+  if(!P.dgLife||typeof P.dgLife!=='object')P.dgLife={v:(P.dg&&P.dg.lifeBest)||0,at:0,p:[]};   // 개인 최고 기록: 매일 지워지지 않음
+  if(!Array.isArray(P.dgHist))P.dgHist=[];                                                    // 최근 기록 20회
+  if(!P.dg||P.dg.day!==d)P.dg={day:d,best:0,runs:0,last:0,top:[]};                             // 오늘 기록: 한국 시간 0시 초기화
+  if(!Array.isArray(P.dg.top))P.dg.top=P.dg.best>0?[{v:P.dg.best,p:P.dg.bestParty||[],at:P.dg.bestAt||0}]:[];
+  return P.dg;
+}
+function dgSeq(){
+  const RS=realmStart(),idx=AREAS.map((a,i)=>i).filter(i=>AREAS[i].boss);
+  return {main:idx.filter(i=>i<RS),realm:idx.filter(i=>i>=RS)};
+}
+function dgAreaAt(n){const q=dgSeq();return n<q.main.length?q.main[n]:q.realm[(n-q.main.length)%q.realm.length];}
+/* 샌드백 보스: 이름·모습·방어력만 남기고 모든 특수 효과를 뺀다 */
+function dgEnemy(a){
+  const b=AREAS[a].boss,em=a>=4?LATE_BOSS_MULT:ENEMY_MULT;
+  const hp=(b.exactHp?b.hp:Math.round(b.hp*em))*DG_HP_MULT;
+  return {name:b.name,title:b.title||'',art:b.art,def:b.def||0,demon:b.demon,atk:0,hp,maxHp:hp};
+}
+/* 던전 전용 출전 동료 (처음엔 지금 출전 동료를 그대로 가져옴) */
+function dgParty(){
+  if(!Array.isArray(P.dgActive))P.dgActive=(P.active||[]).slice();
+  P.dgActive=P.dgActive.filter(id=>id!==FIXED&&ALLIES[id]&&owned(id)).slice(0,MAX_ACTIVE);
+  return P.dgActive;
+}
+const dgTeamCP=()=>heroCP()+[FIXED,...dgParty()].reduce((s,id)=>s+allyCP(id),0);
+const dgTotal=()=>B?B.dgDone+Math.max(0,B.e.maxHp-B.e.hp):0;
+const dgSec=ms=>(Math.max(0,ms)/1000).toFixed(1);
+function dgHudHTML(){
+  return `<div class="dghud"><span id="dgtime" class="${B.dgLeft<10000?'low':''}">⏱ ${dgSec(B.dgLeft)}초</span><span id="dgdmg">총 딜 <b>${fmt(Math.round(dgTotal()))}</b></span><span>💀 ${B.dgKills}</span></div>`;
+}
+function dungeonStart(){
+  if(B)return;
+  P._dgRestore={hp:P.hp,mp:P.mp};P.hp=P.maxHp;P.mp=P.maxMp;
+  startBattle({area:dgAreaAt(0),dungeon:true});
+}
+/* 보스를 쓰러뜨리면 승리 대신 다음 보스가 바로 나온다 */
+function dungeonNextBoss(){
+  if(!B||!B.dungeon||B.over||B.e.hp>0)return;
+  const old=B.e.name;
+  B.dgDone+=B.e.maxHp;B.dgKills++;B.dgN++;
+  const a=dgAreaAt(B.dgN),t=dgEnemy(a);
+  B.e=t;B.area=a;B.baseName=t.name;B.charging=false;B.chargeKind=null;
+  const q=dgSeq();
+  addLog(`💀 ${old} 처치! — ${B.dgN===q.main.length?'😈 마계 보스 반복 시작 · ':''}다음 보스 「${t.name}」 (HP ${fmt(t.hp)})`);
+  renderBattle();
+}
+function dungeonTick(){
+  if(!B||!B.dungeon||B.over||B.won)return;
+  const now=performance.now(),dt=now-(B.dgLast||now);B.dgLast=now;
+  if(!$('#modal').classList.contains('hidden'))return;   // 창이 떠 있는 동안은 전투와 함께 시간도 멈춤
+  B.dgLeft-=dt;
+  if(B.dgLeft<=0){B.dgLeft=0;dungeonEnd('time');return;}
+  const t=$('#dgtime'),d=$('#dgdmg');
+  if(t){t.textContent=`⏱ ${dgSec(B.dgLeft)}초`;t.classList.toggle('low',B.dgLeft<10000);}
+  if(d)d.innerHTML=`총 딜 <b>${fmt(Math.round(dgTotal()))}</b>`;
+}
+function dungeonEnd(why){
+  if(!B||!B.dungeon||B.dgEnded)return;
+  B.dgEnded=true;
+  const total=Math.round(dgTotal()),kills=B.dgKills,cur=B.e.name,pst=B.st,pparty=partyIds().slice(),used=Math.round((DG_MS-B.dgLeft)/1000);
+  clearBattle();
+  if(P._dgRestore){P.hp=P._dgRestore.hp;P.mp=P._dgRestore.mp;delete P._dgRestore;}
+  const D=dgState(),prev=D.best||0,party=pparty.filter(id=>id!==FIXED),at=Date.now();
+  const nb=total>prev,life=total>(P.dgLife.v||0);
+  D.runs=(D.runs||0)+1;D.last=total;
+  if(total>0){D.top.push({v:total,p:party,at});D.top.sort((a,b)=>b.v-a.v||a.at-b.at);D.top=D.top.slice(0,DG_KEEP);}
+  D.best=D.top.length?D.top[0].v:0;
+  if(life)P.dgLife={v:total,at,p:party,k:kills};
+  P.dgHist.unshift({v:total,at,p:party,k:kills,w:why,u:used});P.dgHist=P.dgHist.slice(0,DG_KEEP);
+  save();publishProfile();
+  renderDungeon();
+  const lines=[`⚔ 총 피해 <b class="gold">${fmt(total)}</b>`,
+    `💀 쓰러뜨린 보스 ${kills}명 · 마지막 상대 「${esc(cur)}」`,
+    why==='time'?'⏱ 60초 종료':why==='quit'?`⏹ ${used}초에 측정 종료`:`💫 ${used}초에 쓰러짐`,
+    nb?`🏆 오늘의 최고 기록 갱신!${prev?` (이전 ${fmt(prev)})`:''}`:`오늘의 최고 기록 ${fmt(D.best)}`,
+    life?'✨ 개인 최고 기록!':`개인 최고 ${fmt(P.dgLife.v)}`];
+  showResult({title:'🏰 던전 — 공격력 측정 결과',head:'🏰 측정 완료',won:true,lines,st:pst,party:pparty},null,'확인',()=>dungeonStart());
+}
+/* 오늘의 랭킹: 실시간 구독 (players 중 오늘 기록이 있는 사람만) */
+let dgUnsub=null,dgRank=null,dgRankDay='',dgRankState='off';
+function dgUnsubscribe(){if(dgUnsub){try{dgUnsub();}catch(e){}dgUnsub=null;}}
+function dgSubscribe(){
+  const day=dgDay();
+  if(dgUnsub&&dgRankDay===day)return;
+  dgUnsubscribe();
+  if(!(FB&&DBX===FB&&myId)){dgRankState=(hasFirebaseHost()&&(cloudState==='checking'||cloudState==='ready'||fbBinding))?'wait':'off';return;}
+  dgRankState='wait';dgRankDay=day;
+  try{
+    dgUnsub=FB.collection('players').where('dgDay','==',day).onSnapshot(q=>{
+      dgRank=q.docs.filter(d=>d.exists).map(d=>({id:d.id,...d.data()})).filter(x=>(x.dgBest||0)>0);
+      dgRankState='live';paintDgRank();
+    },()=>{dgRankState='err';paintDgRank();});
+  }catch(e){dgRankState='err';}
+}
+function dgRankList(){
+  const day=dgDay(),me=myId||P.uid,D=dgState(),rows=[];
+  (dgRank&&dgRankDay===day?dgRank:[]).forEach(x=>{
+    if(x.id===me)return;   // 내 기록은 이 기기의 최신 기록으로 넣음
+    const runs=Array.isArray(x.dgTop)&&x.dgTop.length?x.dgTop:(x.dgBest>0?[{v:x.dgBest,p:x.dgParty||[],at:x.dgAt||0}]:[]);   // 예전 버전은 최고 기록 1개
+    runs.slice(0,DG_KEEP).forEach(r=>{if(r&&r.v>0)rows.push({id:x.id,hero:x.hero,lv:x.lv,v:r.v,p:r.p||[],at:r.at||0});});
+  });
+  D.top.forEach(r=>rows.push({id:me,hero:P.name,lv:P.lv,v:r.v,p:r.p||[],at:r.at||0,me:true}));
+  return rows.sort((a,b)=>b.v-a.v||a.at-b.at).slice(0,DG_KEEP);
+}
+function dgRankHTML(full){   // full: 랭킹 상세 화면(20위까지) · 아니면 상위 3명만
+  const list=dgRankList(),n=full?DG_KEEP:3,shown=list.slice(0,n),myR=list.findIndex(x=>x.me)+1;
+  const medal=r=>r===1?'🥇':r===2?'🥈':r===3?'🥉':r;
+  const row=(x,r)=>`<div class="dgrow ${x.me?'me':''} ${r<=3?'r'+r:''}"><span class="dgr">${medal(r)}</span>
+    <span class="dgn"><b>${esc(x.hero||'모험가')}${x.me?' <span class="tag t-ally dgme">나</span>':''}</b><small>Lv ${x.lv||'?'} · ${(x.p||[]).filter(id=>ALLIES[id]).map(id=>allyFace(id,'xs')).join('')||'동료 없음'}</small></span>
+    <span class="dgv">${fmt(x.v||0)}</span></div>`;
+  const st=dgRankState==='live'?'<span class="pres on">🟢 실시간</span>':dgRankState==='wait'?'<span class="small">⏳ 연결 중…</span>':dgRankState==='err'?'<span class="small">⚠ 불러오기 실패</span>':'<span class="small">☁ 연결 전 · 내 기록만</span>';
+  return `<div class="dgrhead"><span class="small">${dgDay().slice(5).replace('-','월 ')}일 · 매일 0시 초기화</span>${st}</div>
+    ${shown.length?shown.map((x,i)=>row(x,i+1)).join(''):'<div class="desc">아직 오늘 기록이 없어요. 첫 번째 기록을 세워 보세요!</div>'}
+    ${myR>n?`<div class="dgsep">⋯ 내 최고 순위</div>${row(list[myR-1],myR)}`:''}
+    ${full?'':`<button class="btn full dgmore" data-dgmore>🏆 전체 랭킹 보기<small>20위까지 · 지금 ${Math.min(list.length,DG_KEEP)}개 기록</small></button>`}`;
+}
+document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('[data-dgmore]');if(b){e.preventDefault();renderDungeonRank();}});
+function paintDgRank(){const el=$('#dgrank');if(el){const h=dgRankHTML(el.dataset.full==='1');if(el.innerHTML!==h)el.innerHTML=h;}}
+/* 던전 출전 동료 3칸 */
+function dgSlotsHTML(tap){
+  const ids=dgParty();
+  const slot=i=>{const id=ids[i];
+    if(!id)return `<button class="slot empty" ${tap?'data-dgslot':''}><span class="sface">＋</span><b>비어있음</b><small>${tap?'탭해서 편성':'아래에서 출전'}</small></button>`;
+    const al=ALLIES[id],aw=P.awaken[id]||0;
+    return `<button class="slot ${aw>=5?'aw5':aw>=4?'aw4':''}" ${tap?'data-dgslot':`data-dginfo="${id}"`}>${allyFace(id,'sface')}<span class="sstar">${'★'.repeat(al.star)}${isMyth(id)?' 🔱':''}</span>
+      <b>${nameHTML(id)}</b><small>Lv ${aData(id).lv} · ⚔ ${fmt(allyCP(id))}</small></button>`;};
+  return `<div class="slots">${[0,1,2].slice(0,MAX_ACTIVE).map(slot).join('')}</div>
+    <div class="fixedrow">${allyFace(FIXED,'xs')} 고정 조력자 <b>${ALLIES[FIXED].name}</b> <span class="small">Lv ${aData(FIXED).lv} · 항상 함께 출전</span></div>`;
+}
+function renderDungeon(msg){
+  hubTab='dungeon';
+  const D=dgState(),q=dgSeq();
+  dgSubscribe();
+  $('#app').innerHTML=`${statusHTML()}
+    ${msg?`<div class="notice">${msg}</div>`:''}
+    <div class="panel"><div class="ptitle">🏰 던전 입장 <span class="small">공격력 측정</span></div>
+      <div class="dginfo">
+        <div><b>🐉 ×${DG_HP_MULT}</b><span>보스 HP</span></div>
+        <div><b>🕊️</b><span>보스는 공격 안 함</span></div>
+        <div><b>⏱ ${DG_MS/1000}초</b><span>제한 시간</span></div>
+      </div>
+      <div class="desc">지역 보스 ${q.main.length}명이 순서대로 쉬지 않고 나오고, 모두 쓰러뜨리면 😈 마계 보스 ${q.realm.length}명(${q.realm.map(i=>AREAS[i].boss.name).join(' → ')})이 계속 반복돼요.<br>
+        보스는 반격·공격·빙결 같은 어떤 효과도 쓰지 않는 샌드백이에요. HP는 가득 찬 채로 시작하고, 끝나면 원래대로 돌아와요. 보상은 없고 기록만 남아요.</div>
+      <button class="btn m-dg full" id="dggo">⚔ 던전 입장<small>던전 팀 전투력 ${fmt(dgTeamCP())} · 오늘 ${D.runs||0}회 도전</small></button>
+    </div>
+    <div class="panel"><div class="ptitle">🏆 오늘의 랭킹 <span class="small">같은 사람도 여러 번 기록 가능</span></div><div id="dgrank">${dgRankHTML()}</div></div>
+    <div class="panel"><div class="ptitle">⚔ 던전 출전 동료 <span class="small">${dgParty().length}/${MAX_ACTIVE} · 던전에서만 사용</span></div>
+      ${dgSlotsHTML(true)}
+      <div class="teamcp">⚔ 던전 팀 전투력 <b>${fmt(dgTeamCP())}</b></div>
+      <button class="btn full" id="dgparty">🤝 던전 출전 동료 편성<small>출전 선택 · 상세 보기 (레벨업·합성은 동료 탭에서)</small></button>
+    </div>
+    <div class="panel"><div class="ptitle">📜 나의 기록</div>
+      <div class="dgmine"><div><span class="small">🏅 개인 최고</span><b>${fmt(P.dgLife.v||0)}</b><span class="small">${P.dgLife.at?dgWhen(P.dgLife.at):'기록 없음'}</span></div>
+        <div><span class="small">오늘 최고</span><b>${fmt(D.best||0)}</b><span class="small">오늘 ${D.runs||0}회</span></div>
+        <div><span class="small">마지막 기록</span><b>${fmt((P.dgHist[0]&&P.dgHist[0].v)||0)}</b><span class="small">${P.dgHist[0]?dgWhen(P.dgHist[0].at):'-'}</span></div></div>
+      <button class="btn full" id="dghist">📜 기록 상세 보기<small>최근 ${DG_KEEP}회 기록 · 개인 최고 기록은 매일 초기화되지 않아요</small></button>
+    </div>
+    ${tabBar()}`;
+  $('#dggo').onclick=dungeonStart;
+  $('#dgparty').onclick=()=>renderDungeonParty();
+  $('#dghist').onclick=()=>renderDungeonHistory();
+  document.querySelectorAll('[data-dgslot]').forEach(b=>b.onclick=()=>renderDungeonParty());
+}
+/* 오늘의 랭킹 상세: 1위 ~ 20위 (실시간) */
+function renderDungeonRank(){
+  hubTab='dungeon';
+  dgState();dgSubscribe();
+  $('#app').innerHTML=`${statusHTML()}${topBack()}
+    <div class="panel"><div class="ptitle">🏆 오늘의 랭킹 <span class="small">1위 ~ ${DG_KEEP}위 · 같은 사람도 여러 번 기록 가능</span></div>
+      <div id="dgrank" data-full="1">${dgRankHTML(true)}</div></div>
+    <button class="btn" id="back">← 던전으로</button>${tabBar()}`;
+  $('#back').onclick=()=>renderHub();
+  window.scrollTo(0,0);
+}
+/* 나의 기록 상세: 최근 20회 */
+const dgWhen=t=>{const d=new Date(t+9*3600e3);return `${d.getUTCMonth()+1}/${d.getUTCDate()} ${String(d.getUTCHours()).padStart(2,'0')}:${String(d.getUTCMinutes()).padStart(2,'0')}`;};
+function renderDungeonHistory(){
+  hubTab='dungeon';
+  dgState();
+  const L=P.dgLife,H=P.dgHist,mx=Math.max(1,...H.map(r=>r.v));
+  const why=r=>r.w==='time'?'⏱ 60초':r.w==='quit'?`⏹ ${r.u}초 종료`:r.w==='down'?`💫 ${r.u}초 쓰러짐`:'';
+  const face=p=>(p||[]).filter(id=>ALLIES[id]).map(id=>allyFace(id,'xs')).join('')||'<span class="small">동료 없음</span>';
+  $('#app').innerHTML=`${statusHTML()}${topBack()}
+    <div class="panel"><div class="ptitle">🏅 개인 최고 기록 <span class="small">매일 초기화되지 않아요</span></div>
+      ${L.v>0?`<div class="dglife"><b>${fmt(L.v)}</b><span class="small">${L.at?dgWhen(L.at):''}${L.k!=null?` · 💀 ${L.k}명`:''}</span><span class="dgparty">${face(L.p)}</span></div>`:'<div class="desc">아직 기록이 없어요.</div>'}</div>
+    <div class="panel"><div class="ptitle">📜 최근 기록 <span class="small">최근 ${DG_KEEP}회 · 최신순</span></div>
+      ${H.length?H.map((r,i)=>`<div class="dghrow ${L.v>0&&r.v===L.v&&r.at===L.at?'life':''}">
+        <span class="dgr">${i+1}</span>
+        <span class="dgn"><b>${fmt(r.v)}${L.v>0&&r.v===L.v&&r.at===L.at?' <span class="tag item">최고</span>':''}</b><small>${dgWhen(r.at)} · 💀 ${r.k||0}명 · ${why(r)}</small><small>${face(r.p)}</small></span>
+        <span class="dghbar"><i style="width:${(r.v/mx*100).toFixed(1)}%"></i></span></div>`).join(''):'<div class="desc">아직 기록이 없어요. 던전에 입장해 보세요!</div>'}</div>
+    <button class="btn" id="back">← 던전으로</button>${tabBar()}`;
+  $('#back').onclick=()=>renderHub();
+  window.scrollTo(0,0);
+}
+let dgStar='all';
+function renderDungeonParty(msg){
+  hubTab='dungeon';
+  const ids=dgParty();
+  const own=Object.keys(ALLIES).filter(id=>id!==FIXED&&owned(id)).sort((x,y)=>ALLIES[y].star-ALLIES[x].star||allyCP(y)-allyCP(x));
+  const shown=own.filter(id=>dgStar==='all'||ALLIES[id].star===+dgStar);
+  const tabs=[['all','전체'],[6,'★6'],[5,'★5'],[4,'★4'],[3,'★3'],[2,'★2'],[1,'★1']];
+  const card=id=>{const al=ALLIES[id],d=aData(id),aw=P.awaken[id]||0,my=isMyth(id),on=ids.includes(id);
+    return `<div class="acard ${my?'mythc':''} ${aw>=5?'aw5':aw>=4?'aw4':''}"><div class="ally"><div class="ic">${allyFace(id,'md')}</div><div style="flex:1">
+      <span class="gold">${'★'.repeat(al.star)}</span> ${nameHTML(id)}${my?' <span class="mytag">신화</span>':''}${aw?` <span class="gold">각성 ${aw}</span>`:''}${TIER5[id]?` <span class="small">${TIER5[id]}티어</span>`:''}
+      <span class="small">Lv ${d.lv}/${aCap(id)} · ⚔ ${fmt(allyCP(id))}</span><small>${al.role}</small></div></div>
+      <div class="abtns"><button class="btn ${on?'primary':''}" data-dgsortie="${id}">${on?'출전 중':'대기'}</button><button class="btn" data-dginfo="${id}">📖 상세</button></div></div>`;};
+  const act=shown.filter(id=>ids.includes(id)),rest=shown.filter(id=>!ids.includes(id));
+  $('#app').innerHTML=`${statusHTML()}${topBack()}
+    ${msg?`<div class="notice">${msg}</div>`:''}
+    <div class="panel"><div class="ptitle">⚔ 던전 출전 동료 <span class="small">${ids.length}/${MAX_ACTIVE} · 던전에서만 사용</span></div>
+      ${dgSlotsHTML(false)}
+      <div class="teamcp">⚔ 던전 팀 전투력 <b>${fmt(dgTeamCP())}</b></div>
+      <div class="small cpbreak">주인공 ${fmt(heroCP())}${[FIXED,...ids].map(id=>` · ${ALLIES[id].name} ${fmt(allyCP(id))}`).join('')}</div>
+      <div class="desc">여기서 고른 동료는 던전에서만 함께 싸워요. 모험·탑·대결의 출전 동료는 그대로예요.</div></div>
+    <div class="panel"><div class="ptitle">🤝 보유 동료 <span class="small">${own.length}명</span></div>
+      <div class="sortbar sticky">${tabs.map(([k,l])=>`<button class="sortbtn ${String(dgStar)===String(k)?'on':''}" data-dgstar="${k}">${l}</button>`).join('')}</div>
+      ${own.length?(shown.length?(act.length?`<div class="stargrp actgrp">⚔ 던전 출전 중 <span>${act.length}명</span></div>${act.map(card).join('')}`:'')+rest.map(card).join(''):'<div class="desc">이 등급의 동료가 아직 없다.</div>'):'<div class="desc">아직 동료가 없다. 상점에서 소환하자.</div>'}</div>
+    <button class="btn" id="back">← 던전으로</button>${tabBar()}`;
+  document.querySelectorAll('[data-dgsortie]').forEach(b=>b.onclick=()=>{const y=window.scrollY;renderDungeonParty(dgToggle(b.dataset.dgsortie));window.scrollTo(0,y);});
+  document.querySelectorAll('[data-dgstar]').forEach(b=>b.onclick=()=>{dgStar=b.dataset.dgstar;const y=window.scrollY;renderDungeonParty();window.scrollTo(0,y);});
+  $('#back').onclick=()=>renderHub();
+}
+function dgToggle(id){
+  if(!owned(id)||id===FIXED)return '';
+  const ids=dgParty();let m;
+  if(ids.includes(id)){P.dgActive=ids.filter(x=>x!==id);m=`${ALLIES[id].name} — 던전 대기`;}
+  else if(ids.length<MAX_ACTIVE){P.dgActive=[...ids,id];m=`${ALLIES[id].name} — 던전 출전`;}
+  else m=`던전 출전 동료는 최대 ${MAX_ACTIVE}명이다. 먼저 다른 동료를 대기로 바꾸자.`;
+  save();return m;
+}
+document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('[data-dginfo]');if(b){e.preventDefault();showDexDetail(b.dataset.dginfo);}});
+
 /* ===================== 거점 ===================== */
 /* 성당 휴식: 3분에 한 번 */
 const REST_CD=3*60*1000;
@@ -3279,6 +3558,7 @@ function restLabel(){
   return `⛪ 성당 휴식<small>다시 가능까지 ${Math.floor(sec/60)}:${String(sec%60).padStart(2,'0')}</small>`;
 }
 function migrateSave(){
+  if(P._dgRestore&&!B){P.hp=P._dgRestore.hp;P.mp=P._dgRestore.mp;delete P._dgRestore;} // 던전 도중 나간 경우 HP 원래대로
   if(!P.uid)P.uid='u'+Date.now().toString(36)+Math.random().toString(36).slice(2,8);
   if(!P.noMp){P.noMp=1;if(P.relics&&P.relics.includes('seal_glasya'))P.atk+=5;if(P.items&&P.items.rosary){P.items.water+=P.items.rosary;P.items.rosary=0;}}
   if(!P.myth)P.myth={};
@@ -3294,10 +3574,12 @@ function renderHub(msg){
   BGM.play('lobby');
   if(pendingFriend&&P){migrateSave();if(takePendingFriend())return;}
   clearBattle();
+  if(hubTab!=='dungeon')dgUnsubscribe();   // 던전 화면을 떠나면 랭킹 실시간 구독 해제
   const opened=migrateSave();
   if(opened!=null){save();showStory(AREAS[opened].intro,()=>renderHub(`🔓 새 지역 개방: ${AREAS[opened].flag} ${AREAS[opened].name}`));return;}
   if(hubTab==='shop'){renderShop(msg);return;}
   if(hubTab==='ally'){renderAllyTab(msg);return;}
+  if(hubTab==='dungeon'){renderDungeon(msg);return;}
   if(hubTab==='friend'){renderFriends(msg);return;}
   const a=AREAS[P.cur],prog=P.prog[P.cur],cleared=prog>=STAGES,nxt=Math.min(STAGES,prog+1);
   // 개방된 지역 + 다음 잠긴 지역 1곳만 보여 화면을 짧게 유지
@@ -3359,9 +3641,9 @@ function renderHub(msg){
     b.disabled=restLeft()>0;b.innerHTML=restLabel();
   },1000);
 }
-/* 하단 탭: 상점 · 동료 · 모험 · 친구 */
+/* 하단 탭: 상점 · 동료 · 모험 · 던전 · 친구 */
 let hubTab='adv';
-const TABS=[['shop','🕯','상점'],['ally','🤝','동료'],['adv','🗺','모험'],['friend','👥','친구']];
+const TABS=[['shop','🕯','상점'],['ally','🤝','동료'],['adv','🗺','모험'],['dungeon','🏰','던전'],['friend','👥','친구']];
 const tabBar=()=>{document.body.dataset.theme=hubTab;return `<nav class="tabbar">${TABS.map(([k,ic,l])=>`<button class="tab t-${k} ${hubTab===k?'on':''}" data-tab="${k}"><span class="ti">${ic}</span>${l}</button>`).join('')}</nav>`;};
 document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('.tabbar [data-tab]');if(b){e.preventDefault();hubTab=b.dataset.tab;renderHub();window.scrollTo(0,0);}});
 const footHTML=()=>`<div class="foot">${FB?'<button class="link" id="devlink">📱 기기 연결</button> · ':''}<button class="link" id="savecode">💾 저장 코드 복사</button> · <button class="link" id="totitle">타이틀로</button>
@@ -3809,10 +4091,11 @@ function synthAll(){
 }
 
 /* ===================== 전투 ===================== */
-function clearBattle(){forcedMv=null;if(B&&B.enemyT)clearInterval(B.enemyT);if(B&&B.allyT)clearInterval(B.allyT);document.body.classList.remove('pfrozen');if(B&&B.freezeT)clearInterval(B.freezeT);if(B&&B.sakuraT)clearInterval(B.sakuraT);document.body.classList.remove('battle');applyBossTheme(null);if(B&&B.waveT)clearInterval(B.waveT);if(B&&B.soulT)clearInterval(B.soulT);if(B&&B.drainT)clearInterval(B.drainT);if(B&&B.tsT)clearInterval(B.tsT);if(B&&B.paraT)clearInterval(B.paraT);if(B&&B.zapT)clearInterval(B.zapT);if(B&&B.karmaT)clearInterval(B.karmaT);if(B&&B.trainT)clearInterval(B.trainT);if(B&&B.aoraT)clearInterval(B.aoraT);if(B&&B.heartT)clearInterval(B.heartT);if(B&&B.halfT)clearInterval(B.halfT);if(B&&B.fallT)clearInterval(B.fallT);if(B&&B.isaT)clearInterval(B.isaT);B=null;}
+function clearBattle(){forcedMv=null;if(B&&B.dgT)clearInterval(B.dgT);if(B&&B.enemyT)clearInterval(B.enemyT);if(B&&B.allyT)clearInterval(B.allyT);document.body.classList.remove('pfrozen');if(B&&B.freezeT)clearInterval(B.freezeT);if(B&&B.sakuraT)clearInterval(B.sakuraT);document.body.classList.remove('battle');applyBossTheme(null);if(B&&B.waveT)clearInterval(B.waveT);if(B&&B.soulT)clearInterval(B.soulT);if(B&&B.drainT)clearInterval(B.drainT);if(B&&B.tsT)clearInterval(B.tsT);if(B&&B.paraT)clearInterval(B.paraT);if(B&&B.zapT)clearInterval(B.zapT);if(B&&B.karmaT)clearInterval(B.karmaT);if(B&&B.trainT)clearInterval(B.trainT);if(B&&B.aoraT)clearInterval(B.aoraT);if(B&&B.heartT)clearInterval(B.heartT);if(B&&B.halfT)clearInterval(B.halfT);if(B&&B.fallT)clearInterval(B.fallT);if(B&&B.isaT)clearInterval(B.isaT);B=null;}
 /* 반사·부적 등으로 적이 턴 밖에서 쓰러졌을 때 */
 function winNow(){
   if(!B||B.won)return;
+  if(B.dungeon){dungeonNextBoss();return;}   // 던전: 승리 대신 다음 보스
   if((B.e.berserk&&!B.berserked)||(B.e.madness&&!B.maddened)||(B.e.awaken&&!B.awoke)||(B.e.twin&&!B.twinned)||(B.e.relay&&(B.relayStage||0)<2)){B.e.hp=Math.max(1,B.e.hp);renderBattle();return;}
   B.won=true;B.busy=true;if(B.enemyT)clearInterval(B.enemyT);if(B.allyT)clearInterval(B.allyT);if(B.freezeT)clearInterval(B.freezeT);document.body.classList.remove('pfrozen');if(B.sakuraT)clearInterval(B.sakuraT);if(B.paraT)clearInterval(B.paraT);if(B.waveT)clearInterval(B.waveT);if(B.soulT)clearInterval(B.soulT);if(B.drainT)clearInterval(B.drainT);if(B.tsT)clearInterval(B.tsT);
   if(B.zapT)clearInterval(B.zapT);if(B.karmaT)clearInterval(B.karmaT);if(B.trainT)clearInterval(B.trainT);if(B.aoraT)clearInterval(B.aoraT);if(B.autoT)clearInterval(B.autoT);if(B.diceT)clearInterval(B.diceT);if(B.coldT)clearInterval(B.coldT);if(B.heartT)clearInterval(B.heartT);if(B.halfT)clearInterval(B.halfT);if(B.fallT)clearInterval(B.fallT);if(B.isaT)clearInterval(B.isaT);
@@ -3958,30 +4241,32 @@ function karmaTick(){
 }
 function startBattle(spec){
   BGM.play('battle');
-  hubTab=spec.pvp?'friend':'adv';
+  hubTab=spec.pvp?'friend':spec.dungeon?'dungeon':'adv';
   // spec: {area, stage} 스테이지 전투 / {area, hunt:true} 자유 사냥
   const a=spec.area;
   let s=spec.stage,t;
   if(spec.pvp){t=spec.pvp;s=0;}
+  else if(spec.dungeon){t=dgEnemy(a);s=15;}   // 던전: 샌드백 보스 (HP ×10 · 효과 없음)
   else if(spec.tower){t=towerEnemy(spec.tower);s=0;}
   else if(spec.hunt){s=Math.min(14,Math.max(1,P.prog[a]));if(stageType(s)!=='normal')s=Math.max(1,s-1);t=scaledEnemy(a,s,huntPick(AREAS[a].enemies));}
   else t=stageEnemy(a,s);
-  if(!spec.pvp&&!spec.tower){const em=(!spec.hunt&&stageType(s)==='boss'&&a>=4)?LATE_BOSS_MULT:ENEMY_MULT;t={...t,hp:t.exactHp?t.hp:Math.round(t.hp*em),atk:Math.round(t.atk*em)};} // 적 체력·공격력 배율 (exactHp: 체력 고정)
-  const type=spec.pvp?'pvp':spec.tower?towerType(spec.tower):spec.hunt?'normal':stageType(s);
+  if(!spec.pvp&&!spec.tower&&!spec.dungeon){const em=(!spec.hunt&&stageType(s)==='boss'&&a>=4)?LATE_BOSS_MULT:ENEMY_MULT;t={...t,hp:t.exactHp?t.hp:Math.round(t.hp*em),atk:Math.round(t.atk*em)};} // 적 체력·공격력 배율 (exactHp: 체력 고정)
+  const type=spec.pvp?'pvp':spec.dungeon?'boss':spec.tower?towerType(spec.tower):spec.hunt?'normal':stageType(s);
   const isBoss=type==='boss'||type==='mid'||type==='pvp';
   clearBattle();
   const ahp={};
-  const noFixed=spec.tower?true:!spec.pvp&&sortieRule(a)&&sortieRule(a).noFixed;
-  const smax=spec.tower?1:!spec.pvp&&sortieRule(a)&&sortieRule(a).max;
-  const okList=P.active.filter(id=>spec.pvp||spec.tower||sortieOk(a,id)).slice(0,smax||9);
+  const noFixed=spec.tower?true:!spec.pvp&&!spec.dungeon&&sortieRule(a)&&sortieRule(a).noFixed;
+  const smax=spec.tower?1:!spec.pvp&&!spec.dungeon&&sortieRule(a)&&sortieRule(a).max;
+  const okList=(spec.dungeon?dgParty():P.active).filter(id=>spec.pvp||spec.tower||spec.dungeon||sortieOk(a,id)).slice(0,smax||9);
   const party=[...(noFixed?[]:[FIXED]),...okList];
-  const benched=spec.pvp||spec.tower?[]:P.active.filter(id=>!okList.includes(id));
+  const benched=spec.pvp||spec.tower||spec.dungeon?[]:P.active.filter(id=>!okList.includes(id));
   party.forEach(id=>{const al=ALLIES[id],mx=Math.round((50+aData(id).lv*10)*(0.7+0.15*al.star)*(isMyth(id)?2:1)*(al.hpMul||1));ahp[id]={hp:mx,max:mx};});
   B={e:{...t,maxHp:t.hp},spec,area:a,stage:spec.hunt?0:s,stype:type,baseName:t.name,isBoss,isFinal:!!t.final,
      charging:false,chargeName:'',chargeKind:null,phase:1,tornadoCD:0,
      buff:0,aura:0,hex:0,immune:0,reflect:0,curAlly:null,stun:{},stunWhy:{},ahp,agatoUsed:false,curse:0,silence:0,weak:0,ward:false,rage:0,turn:0,
      party,healCut:0,mikaCD:0,mshield:0,st:{dmg:{},heal:{}},dot:null,evade:false,sealed:0,over:false,won:false,shield:0,ashield:0,prism:0,negate:0,blind:0,eburn:null,eliaCD:0,sirenT:0,danT:0,
      defending:false,busy:false,menu:'main',log:[],fxq:[]};
+  if(spec.dungeon){B.dungeon=true;B.dgN=0;B.dgDone=0;B.dgKills=0;B.dgLeft=DG_MS;addLog(`🏰 던전 — ${DG_MS/1000}초 동안 최대한 많은 피해를 넣자!`);}
   if(spec.tower){B.tower=spec.tower;B.towerReplay=!!spec.replay;addLog(`🗼 구원의 탑 ${spec.tower}층 — 동료 1명만 함께 오른다`);}
   else if(noFixed)addLog('⚠ 출전 조건 — 이사벨 부제는 이 지역에 함께할 수 없다');
   if(benched.length)addLog(`⚠ 출전 조건 — ${benched.map(id=>ALLIES[id].name).join(', ')} 출전 불가 (${sortieRule(a).text})`);
@@ -4000,6 +4285,7 @@ function startBattle(spec){
         addLog(`🏹 ${t.name}의 사냥 표식 — ${ALLIES[id].name}이(가) 전투가 끝날 때까지 행동 불능!`);}
     }
     if(B)B.startAt=Date.now();
+    if(B&&spec.dungeon){B.dgLast=performance.now();B.dgT=setInterval(dungeonTick,200);}
     if(B&&spec.hunt&&autoHunt.on){B.auto=true;B.autoT=setInterval(autoTick,AUTO_MS);}
     if(B&&inParty('karma'))B.karmaT=setInterval(karmaTick,5000);
     if(B&&inParty('vista5'))B.trainT=setInterval(trainTick,TRAIN_MS);
@@ -4024,6 +4310,10 @@ function startBattle(spec){
     showStory(`<div class="sum s4"><div class="sum-title">⚔ 친구 대결</div><div class="pvpvs">${esc(P.name)} <span>VS</span> ${t.heroName}</div>
       <div class="pvpteam">✝ ${t.heroName} Lv ${t.hero.lv}</div><div class="pvpteam">${teamIconsHTML(t.party)}</div>
       <p class="sum-desc">친구가 마지막으로 저장한 팀을 AI가 조종해요.<br>대결은 연습 경기라 HP는 가득 찬 상태로 시작하고, 끝나면 원래대로 돌아와요.</p></div>`,begin,true);
+  }else if(spec.dungeon){
+    showStory(`<div class="sum s5"><div class="sum-title">🏰 던전 — 공격력 측정</div><div class="intro-art">${PORTRAIT[t.art]?portraitHTML(t.art,'big'):bossSVG(t.art)}</div><div class="sum-name">첫 상대 · ${t.name}</div>
+      <p class="sum-desc" style="color:#cdd6f0">보스 HP ×${DG_HP_MULT} · 보스는 공격하지 않아요 · 제한 시간 ${DG_MS/1000}초<br>보스를 쓰러뜨리면 다음 보스가 바로 나와요. 시작을 누르면 시간이 흘러요!</p></div>`,begin,true);
+    $('#mbtn').textContent='⚔ 시작';
   }else if(isBoss){
     addLog(`${type==='boss'?(t.final?'최종 보스':'나라 보스'):'솔로몬 72악마'} 「${t.name}」 강림!`);
     if(t.dimension)addLog('🌀 차원 전이 — 주인공의 공격 절반이 다른 차원으로 흘러간다');
@@ -4212,7 +4502,7 @@ function cmdHTML(){
     <button class="btn ${B.defending?'guardon':''}" data-act="defend" ${B.defending||B.busy||pFrozen()?'disabled':''}>${B.defending?'🛡 방어 중':'🛡 방어'}<small>${B.defending?'공격하면 해제':'피해 40% 감소 · 동료도 공격 멈춤'}</small></button>
     <button class="btn" data-act="itemmenu" ${dis}>🧪 아이템</button>
     ${B.auto?`<button class="btn danger full" data-act="autostop">⏹ 자동 사냥 멈추기 <small>${autoSum()}</small></button>`:''}
-    <button class="btn full" data-act="flee" ${(B.busy||B.isBoss||B.tower)?'disabled':''}>${B.pvp?'대결 중에는 도망칠 수 없다':B.tower?'탑에서는 도망칠 수 없다':B.isBoss?'보스전에서는 도망칠 수 없다':'🏃 도망 (60%)'}</button>
+    ${B.dungeon?`<button class="btn full" data-act="dgquit">⏹ 측정 끝내기<small>지금까지 넣은 딜로 기록</small></button>`:`<button class="btn full" data-act="flee" ${(B.busy||B.isBoss||B.tower)?'disabled':''}>${B.pvp?'대결 중에는 도망칠 수 없다':B.tower?'탑에서는 도망칠 수 없다':B.isBoss?'보스전에서는 도망칠 수 없다':'🏃 도망 (60%)'}</button>`}
   </div>`;
 }
 
@@ -4270,6 +4560,7 @@ function renderBattle(){
   const vis=e.pvp?`<div class="eicon pvpvis" id="eicon"><div class="pvphero">✝</div><div class="pvpteam">${teamIconsHTML(e.party)}</div></div>`:e.art?`<div class="eicon art ${B.charging?'charge':''}" id="eicon" style="--t:${t}s">${bossSVG(e.art)}</div>`
     :`<div class="eicon sil ${e.elite?'elite':''} ${B.charging?'charge':''}" id="eicon" style="--gc:${e.elite?'#ff3040':AREAS[B.area].glow}">${e.icon}</div>`;
   const passive=[];
+  if(B.dungeon)passive.push(`🏰 샌드백 — 공격·반격·상태이상 없음 · HP ×${DG_HP_MULT}`);
   if(e.dimension)passive.push('🌀 차원 전이');
   if(e.zap)passive.push('⚡ 흐르는 전류 (3초마다)');
   // 실시간 전투: 별도 맹공 없음
@@ -4311,7 +4602,8 @@ function renderBattle(){
   }
   $('#app').innerHTML=`${statusHTML()}
     <div class="enemy ${B.isBoss?'boss':''} ${B.isFinal?'final':''}">
-      <div class="eflag">${B.tower?`🗼 구원의 탑 ${B.tower}층 · ${AREAS[B.area].name}의 적`:`${AREAS[B.area].flag} ${AREAS[B.area].name}`}${B.tower?'':B.pvp?' · 친구 대결':B.stage?` · 스테이지 ${B.stage}`:' · 자유 사냥'}</div>
+      <div class="eflag">${B.dungeon?`🏰 던전 · ${B.dgN+1}번째 보스 · ${AREAS[B.area].flag} ${AREAS[B.area].name}${B.dgN>=dgSeq().main.length?' · 마계 반복':''}`:B.tower?`🗼 구원의 탑 ${B.tower}층 · ${AREAS[B.area].name}의 적`:`${AREAS[B.area].flag} ${AREAS[B.area].name}`}${B.tower||B.dungeon?'':B.pvp?' · 친구 대결':B.stage?` · 스테이지 ${B.stage}`:' · 자유 사냥'}</div>
+      ${B.dungeon?dgHudHTML():''}
       <div class="ename">${e.name}${tag}</div>
       ${e.title?`<div class="etitle">${e.title}</div>`:''}
       ${vis}
@@ -4705,6 +4997,7 @@ function autoHuntStop(why){
 }
 function act(kind,arg){
   if(!B||B.busy||B.over||B.won)return;
+  if(kind==='dgquit'){if(B.dungeon)dungeonEnd('quit');return;}
   if(kind==='itemmenu'||kind==='skillmenu'||kind==='back'){B.menu=kind==='itemmenu'?'item':'main';renderBattle();return;}
   if(Date.now()<(B.cdUntil||0))return;
   if(pFrozen()){addLog(`🧊 얼어붙어 움직일 수 없다… (${Math.ceil((B.pFrozenUntil-Date.now())/1000)}초)`);renderBattle();return;}
@@ -4844,7 +5137,8 @@ function enemyTurnForced(mv){forcedMv=mv;enemyTurn();}
 function enemyTurn(){
   if(!B||B.over||B.won)return;
   const e=B.e;let mv;
-  if(forcedMv){mv=forcedMv;forcedMv=null;}
+  if(B.dungeon){mv={t:'idle',n:''};forcedMv=null;}   // 던전 샌드백: 아무것도 하지 않음 (버프·지속 피해 턴만 흐름)
+  else if(forcedMv){mv=forcedMv;forcedMv=null;}
   else if(B.invisNext){B.invisNext=false;mv={t:'invisslash',n:'보이지 않는 참격'};forcedMv={t:'bleedstorm',n:'무수한 출혈 참격',hits:8,m:0.25};}
   else if(eFrozenOn())mv={t:'frozen'};
   else if(B.sealed>0){mv={t:'sealed'};B.sealed--;}
@@ -4856,6 +5150,7 @@ function enemyTurn(){
   const label=`${e.name} — ${mv.n}`;
 
   switch(mv.t){
+    case 'idle':    break;
     case 'sealed':  addLog(`${e.name} — 봉인되어 움직일 수 없다!`);break;
     case 'frozen':  addLog(`🧊 ${e.name} — 얼어붙어 움직일 수 없다!`);break;
     case 'pvp':     pvpEnemyActs(e);break;
@@ -5111,7 +5406,7 @@ function resultHTML(r){
     body=`<div class="rs-tabs"><button class="btn primary" data-rstab="me">내 팀</button><button class="btn" data-rstab="foe">${esc(f.name)}의 팀</button></div>
     <div class="rs-sides"><div data-rsside="me">${mine}</div><div data-rsside="foe" style="visibility:hidden">${theirs}</div></div>`;
   }
-  return `<div class="report result"><div class="rs-head ${r.won?'win':'lose'}">${r.won?'🏆 승리':'💀 패배'}</div>
+  return `<div class="report result"><div class="rs-head ${r.won?'win':'lose'}">${r.head||(r.won?'🏆 승리':'💀 패배')}</div>
     <div class="sum-title">${r.title}</div>
     ${r.note?`<div class="rs-note">${r.note}</div>`:''}
     <div class="rs-rew">${(r.lines&&r.lines.length?r.lines:['획득한 보상 없음']).map(l=>`<div>${l}</div>`).join('')}</div>
@@ -5160,6 +5455,7 @@ function autoNext(a,s,rep){
 }
 
 function defeat(){
+  if(B&&B.dungeon){dungeonEnd('down');return;}
   if(B&&B.pvp){pvpEnd(false);return;}
   if(B&&B.tower){towerEnd(false);return;}
   const autoWas=autoHunt.on&&B&&B.auto;autoHunt.on=false;
