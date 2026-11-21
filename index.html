@@ -415,6 +415,58 @@ body.pfrozen #cmds .btn{filter:saturate(.2) brightness(1.2);background:linear-gr
 .acard.transc{border-color:#ffd76a;box-shadow:0 0 0 1px rgba(255,215,106,.6),0 0 18px rgba(255,190,60,.35)}
 .transtag{display:inline-block;font-size:10px;font-weight:900;padding:1px 6px;border-radius:8px;background:linear-gradient(135deg,#fff1b0,#ffb52e);color:#4a2a00;box-shadow:0 0 8px rgba(255,190,60,.8)}
 .btn.transbtn{background:linear-gradient(135deg,#6a4a10,#c89420);border-color:#ffd76a;color:#fff6d8}
+/* 초월 연출 */
+.tfx{position:fixed;inset:0;z-index:72;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at 50% 45%,#2a2110,#050408 72%);animation:sfxfade .35s ease-out;overflow:hidden;cursor:pointer}
+.tfx .tstage{position:relative;width:220px;height:300px}
+.tfx .tpor{position:absolute;left:30px;top:20px;width:160px;height:216px;border-radius:14px;background-size:cover;background-position:50% 20%;filter:grayscale(.6) brightness(.7);box-shadow:0 0 20px rgba(0,0,0,.6);z-index:2}
+.tfx .tpor.emo{display:flex;align-items:center;justify-content:center;font-size:80px;background:#141a30}
+.tfx .tring{position:absolute;left:50%;top:128px;width:280px;height:280px;margin:-140px;z-index:1;animation:tspin 6s linear infinite,tin .6s ease-out}
+.tfx .tring circle{fill:none;stroke:#e8c66a;stroke-width:1.2;opacity:.75}
+.tfx .tring text{fill:#ffe39a;font-size:11px;letter-spacing:3px;opacity:.85}
+@keyframes tspin{to{transform:rotate(360deg)}}@keyframes tin{from{opacity:0;transform:scale(.6)}}
+.tfx .tshard{position:absolute;left:50%;top:128px;width:34px;height:34px;margin:-17px;z-index:4;animation:trise 1.4s .2s cubic-bezier(.3,.7,.3,1) both}
+.tfx .tshard i{position:absolute;inset:0;transform:rotate(45deg);background:linear-gradient(135deg,#fff8d8,#ffcf4a 45%,#c07a10);box-shadow:0 0 14px #ffd76a,0 0 30px rgba(255,190,60,.8);border-radius:4px}
+@keyframes trise{0%{transform:translateY(190px) scale(.6);opacity:0}20%{opacity:1}100%{transform:translateY(0) scale(1);opacity:1}}
+.tfx .tspk{position:absolute;left:50%;top:128px;width:4px;height:4px;border-radius:50%;background:#ffe39a;box-shadow:0 0 8px #ffcc33;z-index:3;opacity:0;animation:tconv 1s var(--d) ease-in forwards}
+@keyframes tconv{0%{opacity:0;transform:translate(var(--x),var(--y))}20%{opacity:1}100%{opacity:0;transform:translate(0,0)}}
+.tfx .tmsg{position:absolute;left:0;right:0;top:250px;text-align:center;z-index:6;opacity:0;animation:tmsg .6s var(--t,2s) cubic-bezier(.2,1.4,.4,1) forwards}
+.tfx .tmsg b{display:block;font-family:'Noto Serif KR',serif;font-size:26px;font-weight:900}
+.tfx .tmsg small{display:block;font-size:13px;margin-top:4px;opacity:.85}
+@keyframes tmsg{from{opacity:0;transform:scale(.4)}to{opacity:1;transform:scale(1)}}
+.tfx .tsk{position:absolute;bottom:26px;left:0;right:0;text-align:center;font-size:12px;color:rgba(255,255,255,.5);opacity:0;animation:tmsg .4s 2.6s forwards}
+/* 성공 */
+.tfx.ok .tshard{animation:trise 1.4s .2s cubic-bezier(.3,.7,.3,1) both,tabsorb .4s 1.6s ease-in forwards}
+@keyframes tabsorb{to{transform:scale(.1);opacity:0}}
+.tfx.ok .tflash{position:absolute;inset:0;background:radial-gradient(circle at 50% 45%,#fff,#ffe9a0 30%,transparent 70%);opacity:0;z-index:5;pointer-events:none;animation:tflash 1s 1.85s ease-out forwards}
+@keyframes tflash{0%{opacity:0}15%{opacity:1}100%{opacity:0}}
+.tfx.ok .tpor{animation:tgold .6s 1.95s ease-out forwards}
+@keyframes tgold{to{filter:none;box-shadow:0 0 0 3px #ffe08a,0 0 30px rgba(255,200,60,.95),0 0 80px rgba(255,170,40,.6)}}
+.tfx.ok .trays{position:absolute;left:50%;top:128px;width:700px;height:700px;margin:-350px;z-index:0;opacity:0;background:repeating-conic-gradient(rgba(255,214,110,.35) 0 6deg,transparent 6deg 18deg);border-radius:50%;-webkit-mask:radial-gradient(circle,#000 20%,transparent 70%);mask:radial-gradient(circle,#000 20%,transparent 70%);animation:trays 1s 1.9s ease-out forwards,tspin 14s 1.9s linear infinite}
+@keyframes trays{to{opacity:1}}
+.tfx.ok .tbr{position:absolute;left:50%;top:128px;width:40px;height:40px;margin:-20px;border-radius:50%;border:3px solid #ffe08a;box-shadow:0 0 20px #ffcc33;z-index:5;opacity:0;animation:tburst 1.2s var(--d) ease-out forwards}
+@keyframes tburst{0%{opacity:1;transform:scale(.3)}100%{opacity:0;transform:scale(9)}}
+.tfx.ok .tup{position:absolute;bottom:-10px;width:5px;height:5px;border-radius:50%;background:#ffe39a;box-shadow:0 0 8px #ffcc33;z-index:5;opacity:0;animation:tup 2.4s var(--d) linear infinite}
+@keyframes tup{0%{opacity:0;transform:translateY(0)}20%{opacity:1}100%{opacity:0;transform:translateY(-110vh)}}
+.tfx.ok .tmsg b{color:#fff1b8;text-shadow:0 0 12px #ffcc33,0 0 30px #ff9a1a}
+.tfx.ok .tmsg small{color:#ffe39a}
+/* 실패 */
+.tfx.ng .tcrack{position:absolute;inset:-8px;z-index:5;opacity:0;animation:tcrk .4s 1.65s forwards}
+@keyframes tcrk{0%,98%{opacity:1}100%{opacity:0}}
+.tfx.ng .tcrack path{fill:none;stroke:#fff;stroke-width:2;filter:drop-shadow(0 0 3px #fff)}
+@keyframes tshow{to{opacity:1}}
+.tfx.ng .tshard{animation:trise 1.4s .2s cubic-bezier(.3,.7,.3,1) both,tshake .45s 1.6s linear,thide .01s 2.05s forwards}
+@keyframes tshake{0%,100%{transform:translate(0,0)}20%{transform:translate(-3px,1px)}40%{transform:translate(3px,-1px)}60%{transform:translate(-2px,-1px)}80%{transform:translate(2px,1px)}}
+@keyframes thide{to{opacity:0}}
+.tfx.ng .tfrag{position:absolute;left:50%;top:128px;width:22px;height:22px;margin:-11px;box-shadow:0 0 8px #ffd76a;z-index:4;opacity:0;background:linear-gradient(135deg,#fff3c0,#d8a030);clip-path:polygon(50% 0,100% 60%,30% 100%);animation:tfall 1.4s 2.05s cubic-bezier(.3,0,.8,1) forwards}
+@keyframes tfall{0%{opacity:1;transform:translate(0,0) rotate(0);filter:none}35%{filter:grayscale(1) brightness(.9)}100%{opacity:0;transform:translate(var(--x),var(--y)) rotate(var(--r));filter:grayscale(1) brightness(.6)}}
+.tfx.ng .tring{animation:tspin 6s linear infinite,tin .6s ease-out,tdim .8s 2.05s ease-out forwards}
+@keyframes tdim{to{opacity:.15;filter:grayscale(1)}}
+.tfx.ng .tstage{animation:tquake .5s 2.05s linear}
+@keyframes tquake{0%,100%{transform:translate(0,0)}15%{transform:translate(-8px,3px)}30%{transform:translate(7px,-4px)}45%{transform:translate(-6px,-2px)}60%{transform:translate(5px,4px)}80%{transform:translate(-3px,1px)}}
+.tfx.ng .tdark{position:absolute;inset:0;background:rgba(10,0,0,.55);opacity:0;z-index:0;animation:trays .8s 2.05s forwards}
+.tfx.ng .tpor{animation:tgray .8s 2.05s forwards}@keyframes tgray{to{filter:grayscale(1) brightness(.45)}}
+.tfx.ng .tmsg b{color:#c9c9d6;text-shadow:0 0 10px rgba(120,0,0,.8)}
+.tfx.ng .tmsg small{color:#b89a9a}
 /* 행운의 룰렛 */
 .rlwrap{position:relative;width:min(260px,72vw);aspect-ratio:1;margin:8px auto 12px}
 .rlwheel{position:absolute;inset:0;border-radius:50%;border:6px solid #e8c76a;box-shadow:0 0 0 3px #6b4a16,0 0 24px rgba(232,199,106,.45);transition:transform 3.4s cubic-bezier(.12,.75,.12,1);overflow:hidden}
@@ -4053,12 +4105,30 @@ function allyLevelUp(id){
   P.gold-=c;d.lv++;d.xp=0;save();
   renderAllies(`⬆ ${ALLIES[id].name} Lv ${d.lv} (−${c} G)`);
 }
+/* 초월 연출: 조각이 떠올라 빛이 모이고 — 성공하면 금빛 폭발, 실패하면 조각이 갈라져 부서진다 */
+function transFx(id,ok,cb){
+  const im=allyImg(id),al=ALLIES[id];
+  const spk=Array.from({length:24},()=>{const a=Math.random()*Math.PI*2,d=110+Math.random()*90;return `<b class="tspk" style="--x:${Math.round(Math.cos(a)*d)}px;--y:${Math.round(Math.sin(a)*d)}px;--d:${(0.4+Math.random()*0.9).toFixed(2)}s"></b>`;}).join('');
+  const ring=`<svg class="tring" viewBox="0 0 280 280"><circle cx="140" cy="140" r="132"/><circle cx="140" cy="140" r="118" stroke-dasharray="4 6"/><circle cx="140" cy="140" r="96"/><path id="tpath" d="M140,140 m-108,0 a108,108 0 1,1 216,0 a108,108 0 1,1 -216,0" fill="none"/><text><textPath href="#tpath">✴ TRANSCENDENTIA · SALVATIO · ✴ TRANSCENDENTIA · SALVATIO ·</textPath></text></svg>`;
+  const bg=ok?'<div class="trays"></div>':'<div class="tdark"></div>';
+  const fg=ok?`<div class="tflash"></div>${[0,0.15,0.3].map(d=>`<b class="tbr" style="--d:${(1.85+d).toFixed(2)}s"></b>`).join('')}`
+    :`<svg class="tcrack" viewBox="0 0 50 50" style="position:absolute;left:50%;top:128px;width:50px;height:50px;margin:-25px;z-index:5"><path d="M25 4 L22 18 L28 24 L20 34 L25 46"/><path d="M22 18 L12 16"/><path d="M28 24 L40 28"/><path d="M20 34 L10 38"/></svg>${Array.from({length:10},(_,i)=>{const a=-Math.PI/2+(i/10)*Math.PI*2+(Math.random()-0.5)*0.5,d=60+Math.random()*60;return `<b class="tfrag" style="--x:${Math.round(Math.cos(a)*d)}px;--y:${Math.round(Math.sin(a)*d+220)}px;--r:${Math.round(Math.random()*720-360)}deg"></b>`;}).join('')}`;
+  const ups=ok?Array.from({length:22},()=>`<b class="tup" style="left:${Math.round(Math.random()*100)}%;--d:${(2+Math.random()*2.4).toFixed(2)}s"></b>`).join(''):'';
+  const ov=document.createElement('div');ov.className='tfx '+(ok?'ok':'ng');
+  ov.innerHTML=`${bg}${ups}<div class="tstage">${ring}${im?`<div class="tpor" style="background-image:url(${im.src});background-position:${im.pos||'50% 20%'}"></div>`:`<div class="tpor emo">${al.icon}</div>`}
+    ${spk}<div class="tshard"><i></i></div>${fg}
+    <div class="tmsg" style="--t:${ok?2.1:2.4}s">${ok?`<b>✴ 초월 성공 ✴</b><small>${esc(al.name)} — 초월자</small>`:`<b>초월 실패…</b><small>구원의 조각이 빛을 잃고 부서졌다</small>`}</div></div>
+    <div class="tsk">탭하여 계속</div>`;
+  document.body.appendChild(ov);
+  const t0=Date.now();let done=false;
+  ov.onclick=()=>{if(done)return;if(Date.now()-t0<2700){ov.querySelectorAll('*').forEach(e=>{e.getAnimations&&e.getAnimations().forEach(a=>{try{a.finish()}catch(_){}})});return;}done=true;ov.remove();cb&&cb();};
+}
 function transUp(id){
   const al=ALLIES[id];if(!transReady(id)||(P.items.salv||0)<1)return;
   const before=allyCP(id);P.items.salv--;
-  if(Math.random()>=TRANS_RATE){save();renderAllies(`✴️ 초월 실패… ${SALV_ITEM.name}이(가) 빛을 잃고 부서졌다 (남은 조각 ${P.items.salv}개 · 성공 확률 ${Math.round(TRANS_RATE*100)}%)`);return;}
+  if(Math.random()>=TRANS_RATE){save();transFx(id,false,()=>renderAllies(`✴️ 초월 실패… ${SALV_ITEM.name}이(가) 빛을 잃고 부서졌다 (남은 조각 ${P.items.salv}개 · 성공 확률 ${Math.round(TRANS_RATE*100)}%)`));return;}
   P.trans=P.trans||{};P.trans[id]=true;save();
-  summonFx(5,()=>showStory(`<div class="sum s5 strans"><div class="sum-title">✴️ 초월</div><div class="sum-stars">${'★'.repeat(al.star)}</div><div class="transic big">${allyPortrait(id)}<span class="translb">초월자</span></div>
+  transFx(id,true,()=>showStory(`<div class="sum s5 strans"><div class="sum-title">✴️ 초월</div><div class="sum-stars">${'★'.repeat(al.star)}</div><div class="transic big">${allyPortrait(id)}<span class="translb">초월자</span></div>
     <div class="sum-name">${al.name} <span class="mytag">신화</span> <span class="transtag">초월</span></div>
     <div class="small">전투력 ${fmt(before)} → <b class="gold">${fmt(allyCP(id))}</b> · 전투력 ${TRANS_MULT}배</div></div>`,
     ()=>renderAllies(`✴️ ${al.name} 초월 성공! 전투력 ${fmt(before)} → ${fmt(allyCP(id))}`),true));
