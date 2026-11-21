@@ -3770,6 +3770,12 @@ function restLabel(){
   return `⛪ 성당 휴식<small>다시 가능까지 ${Math.floor(sec/60)}:${String(sec%60).padStart(2,'0')}</small>`;
 }
 const GLASYA_BONUS=50000;
+/* 로마(최종 보스 푸르푸르)까지 클리어한 플레이어에게 100,000 코인 1회 — 이미 깬 계정도, 앞으로 깨는 계정도 */
+const ROME_AREA=3, ROME_BONUS=100000;
+function romeBonusCheck(delay){
+  if(!P||P.romeBonus||!((P.prog[ROME_AREA]||0)>=STAGES||(P.cleared&&P.cleared[ROME_AREA])))return false;
+  P.romeBonus=1;P.gold+=ROME_BONUS;setTimeout(()=>goldToast(ROME_BONUS,'로마 최종 보스까지 클리어 보상'),delay||0);return true;
+}
 function goldToast(n,why){
   const d=document.createElement('div');d.className='stoast';d.style.background='linear-gradient(135deg,rgba(120,80,10,.96),rgba(200,150,40,.96))';d.style.borderColor='#ffe8a0';
   d.innerHTML=`<div class="st-ic">💰</div><div><b>${fmt(n)} 코인 획득!</b><small>${why||''}</small></div>`;
@@ -3786,6 +3792,7 @@ function migrateSave(){
   if(P.ended&&P.unlocked<5)P.unlocked=5;
   // 서울 글라시아라볼라스 첫 클리어 50,000 코인: 업데이트 전에 이미 깬 계정도 한 번 지급
   if(!P.glasyaBonus&&((P.prog[0]||0)>=STAGES||P.cleared[0])){P.glasyaBonus=1;P.gold+=GLASYA_BONUS;setTimeout(()=>goldToast(GLASYA_BONUS,'서울 글라시아라볼라스 첫 클리어 보상 (소급 지급)'),800);}
+  romeBonusCheck(800);
   // 이전 버전에서 마지막 지역 보스를 이미 깬 경우: 새로 추가된 다음 지역을 연다
   let opened=null;
   for(let i=0;i<AREAS.length-1;i++)if((P.prog[i]>=STAGES||P.cleared[i])&&P.unlocked<i+1){P.unlocked=i+1;opened=i+1;}
@@ -5621,6 +5628,7 @@ function victory(){
     if(stype==='elite'){P.tickets+=1;extra.push('🏁 첫 클리어: 🎫 소환권 ×1');}
     if(stype==='mid'){P.tickets+=2;extra.push('🏁 첫 클리어: 🎫 소환권 ×2');}
     if(stype==='boss'){P.tickets+=3;extra.push('🏁 첫 클리어: 🎫 소환권 ×3');}
+    if(romeBonusCheck(1200))extra.push(`🏛️ 로마 최종 보스까지 클리어 보상: 💰 ${fmt(ROME_BONUS)} G`);
   }
   // 희귀 유물: 확률 드롭 (재도전으로 다시 노릴 수 있음)
   if(stype==='mid'&&Math.random()<DROP.stoneMid){P.items.stone++;stoneToast(1,'솔로몬 72악마 드랍');extra.push(`${AWAKEN_ITEM.icon} 희귀 아이템 「${AWAKEN_ITEM.name}」 획득!`);}
