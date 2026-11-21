@@ -2894,13 +2894,13 @@ function renderTower(msg){
     <div class="panel"><div class="ptitle">🗼 구원의 탑 <span class="small">최고 ${T.best}층 / ${TOWER_MAX}층${T.clears?` · 재정복 ${T.clears}회`:''}</span></div>
       <div class="desc"><b>돌파 보상</b> ${Object.keys(TOWER_REWARD).map(k=>`${k}층: ${towerRewardText(+k)}${(T.got||{})[k]?' ✔':''}`).join(' · ')} · 그 외 층: 💠 성유물 ×1</div>
       <div class="tlad">${Array.from({length:TOWER_MAX},(_,i)=>{const n=i+1,tt=towerType(n);return `<span class="${n<=T.best?'done':''} ${n===f?'on':''} ${tt==='boss'?'bos':tt==='mid'?'mid':''}">${n<=T.best?'✔':n}</span>`;}).join('')}</div>
-      ${done?`<div class="notice">🕊️ 구원의 탑 ${TOWER_MAX}층을 모두 정복했다! 🔁 다시 오르기 — 1층부터 다시 도전할 수 있다 (보상 없음)</div>`:''}
+      ${done?`<div class="notice">🕊️ 구원의 탑 ${TOWER_MAX}층을 모두 정복했다! 🔁 다시 오르기 — 1층부터 다시 도전할 수 있다 (층 보상 없음 · 30층까지 다시 정복하면 💠 성유물 ×1)</div>`:''}
       <div class="desc"><b>${f}층</b> ${ty==='boss'?'☠ 보스':ty==='mid'?'😈 악마':'⚔ 일반'} — <b>${esc(en.name)}</b> <span class="small">(${AREAS[a].flag} ${AREAS[a].name}의 적 · HP ${fmt(en.hp)} · 공격 ${fmt(en.atk)} · 탑 강화 체력 ×${towerMul(f).hp.toFixed(2)} 공격 ×${towerMul(f).atk.toFixed(2)})</span></div>
       <div class="desc">⚠ 출전 조건 — 동료 <b>1명</b>만 함께 오를 수 있다 (출전 동료 중 첫 번째 · 이사벨 부제 불가)<br>
         이번 동료: ${ally?`${allyFace(ally,'sm')} <b>${nameHTML(ally)}</b> Lv ${aData(ally).lv}`:'<span class="small">없음 — 주인공 혼자 오른다 (동료 관리에서 출전 동료를 정하자)</span>'}<br>
         탑에서는 HP가 가득 찬 상태로 싸우고, 끝나면 원래 HP로 돌아온다. 도망칠 수 없다.</div>
       <div class="grid">
-        <button class="btn danger full" id="tgo">⚔ ${f}층 ${done?'다시 도전 (보상 없음)':'도전'}</button>
+        <button class="btn danger full" id="tgo">⚔ ${f}층 ${done?'다시 도전':'도전'}</button>
         ${done&&f>1?`<button class="btn full" id="trst">🔁 1층부터 다시 오르기</button>`:''}
         <button class="btn full" id="tally">🤝 출전 동료 바꾸기</button>
         <button class="btn full" id="back">← 거점으로</button>
@@ -2915,8 +2915,8 @@ function towerEnd(win){
   const f=B.tower,rp=B.towerReplay,e=B.e,pst=B.st,pparty=partyIds().slice();clearBattle();
   if(P._towerRestore){P.hp=P._towerRestore.hp;P.mp=P._towerRestore.mp;delete P._towerRestore;}
   const T=towerState(),lines=[];
-  if(win&&rp){T.run=f+1;lines.push(`🔁 ${f}층 다시 오르기 승리 (보상 없음)${f>=TOWER_MAX?'':` — 다음은 ${f+1}층`}`);
-    if(f>=TOWER_MAX){T.run=1;T.clears=(T.clears||0)+1;lines.push(`🕊️ 구원의 탑 재정복! (${T.clears}회) — 다시 1층부터`);}}
+  if(win&&rp){T.run=f+1;lines.push(`🔁 ${f}층 다시 오르기 승리${f>=TOWER_MAX?'':` — 다음은 ${f+1}층`}`);
+    if(f>=TOWER_MAX){T.run=1;T.clears=(T.clears||0)+1;P.items.stone+=1;stoneToast(1,'구원의 탑 재정복');lines.push(`🕊️ 구원의 탑 재정복! (${T.clears}회) — 💠 성유물 ×1 · 다시 1층부터`);}}
   else if(win){const first=f>T.best;if(first)T.best=f;lines.push(first?`🗼 ${f}층 돌파!${f>=TOWER_MAX?' — 구원의 탑 정복!':` 다음은 ${f+1}층`}`:`🗼 ${f}층 재도전 승리`);
     T.got=T.got||{};const w=TOWER_REWARD[f]||{stone:1}; // 보상이 없는 층은 첫 돌파 시 성유물 1개
     if(w&&!T.got[f]){T.got[f]=true;
