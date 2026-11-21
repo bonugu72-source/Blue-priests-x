@@ -1003,7 +1003,7 @@ const ALLIES={
   babelord:{star:6,name:'천계의 예언자 바벨로드',icon:'🎲',role:'천계의 예언자',kit:'dice',
             desc:'운명의 점(4초마다 운명의 주사위를 굴린다 — 1: 주인공 현재 HP의 절반만큼 회복 · 2: 동료 전원 보호막 500 · 3: 바벨로드 공격력 2배 · 4: 모든 디버프 제거 · 5: 공격 속도 증가(한 번에 두 번 공격) · 6: 4초간 자신이 받는 모든 피해 반사 / 3·5는 다음 주사위까지 유지) · 상점 소환으로만 획득 (합성 불가)'},
   akira:   {star:5,name:'아키라',        icon:'🏹', role:'얼어붙은 활', kit:'frost',
-            desc:'얼어붙은 화살(적을 2초간 얼려 행동 불능 · 끝나면 4초 쉬었다가 다시 사용) · 40% 확률로 급소를 찾아 쏘면 치명타(피해 2배) + 들어간 피해의 절반만큼 주인공 HP 회복 · 🔱 신화: 혹한의 화살(4초마다 아키라의 공격력 2배씩 증가 · 최대 32배)'},
+            desc:'얼어붙은 화살(적을 2초간 얼려 행동 불능 · 끝나면 4초 쉬었다가 다시 사용) · 40% 확률로 급소를 찾아 쏘면 치명타(피해 2배) + 들어간 피해의 절반만큼 주인공 HP 회복 · 🔱 신화: 혹한의 화살(4초마다 아키라의 공격력 2배씩 증가 · 최대 4배)'},
   miner:   {star:5,name:'미네르',        icon:'🌊', role:'물의 여신', kit:'tide', hpMul:0.6,
             desc:'침몰(적을 물속으로 끌어내려 3턴간 적 공격력 감소) · 물보라(2턴간 동료가 받는 피해 절반) · 체력이 적어 쉽게 쓰러지지만, 쓰러지면 물의 여신 「미네르바」로 각성해 HP 60%로 부활(1회) — 이후 공격이 고정 피해 + 치명타'},
   vista5:  {star:5,name:'비스타',        icon:'🚂', role:'열차 소환', kit:'train',
@@ -1033,7 +1033,7 @@ const MYTH_SKILL={
   roa:   {name:'매혹의 여왕',desc:'하트 회복량 2배 · 유혹 중 치명타 피해 1.5배 → 2배'},
   muhee: {name:'심판의 춤',desc:'정의 발동까지 5초 → 3초'},
   aora:  {name:'대천사의 강림',desc:'천사의 구원 지속 3초 → 5초 · 생명력 흡수량 2배'},
-  akira: {name:'혹한의 화살',desc:'4초마다 아키라의 공격력이 2배씩 증가 (최대 32배)'},
+  akira: {name:'혹한의 화살',desc:'4초마다 아키라의 공격력이 2배씩 증가 (최대 4배)'},
   babelord:{name:'운명의 지배자',desc:'주사위를 굴리는 주기 4초 → 3초'},
   miner: {name:'바다의 여왕',desc:'물보라 보호막 2턴 → 3턴 · 미네르바의 치명타 피해 1.5배 → 2배'},
   vista5:{name:'특급 열차',desc:'열차 관통 피해가 기본 공격의 2배 → 3배 · 시야 차단 3턴'},
@@ -3802,8 +3802,8 @@ function aoraTick(){
   if(e.hp<=0){winNow();return;}
   renderBattle();
 }
-/* 아키라: 얼어붙은 화살(2초 빙결) · 급소 40% · 신화 혹한의 화살(4초마다 공격력 2배, 최대 32배) */
-const AKIRA_FREEZE=2000, AKIRA_REST=4000, AKIRA_VITAL=0.4, AKIRA_COLD_MS=4000, AKIRA_COLD_MAX=32;
+/* 아키라: 얼어붙은 화살(2초 빙결) · 급소 40% · 신화 혹한의 화살(4초마다 공격력 2배, 최대 4배) */
+const AKIRA_FREEZE=2000, AKIRA_REST=4000, AKIRA_VITAL=0.4, AKIRA_COLD_MS=4000, AKIRA_COLD_MAX=4;
 const eFrozenOn=()=>!!(B&&B.eFrozenUntil&&Date.now()<B.eFrozenUntil);
 function akiraColdTick(){
   if(!B||B.over||B.won||!$('#modal').classList.contains('hidden'))return;
