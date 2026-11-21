@@ -58,6 +58,8 @@ button:disabled{cursor:default}
 .btn.m-adv{background:#223a63}.btn.m-adv small{color:#b4c9ec}
 .btn.m-adv.main{background:#2d5290}
 .rankrow{display:grid;grid-template-columns:1fr 1fr;gap:8px;grid-column:1/-1}
+.btn.m-gg{background:linear-gradient(135deg,#2c3a1e,#1e2a44);border-color:rgba(190,230,140,.4)}.btn.m-gg small{color:#cfe6a8}
+.ggnew{display:inline-block;font-size:11px;font-weight:700;color:#1a1200;background:var(--gold);border-radius:9px;padding:1px 7px;margin-left:4px;vertical-align:middle}
 .btn.m-tower{background:linear-gradient(135deg,#123a4a,#2a1a4e);border-color:rgba(140,220,255,.45)}.btn.m-tower small{color:#a8e6ff}
 .tlad{display:grid;grid-template-columns:repeat(10,1fr);gap:3px;margin:10px 0}.tlad span{font-size:10px;text-align:center;padding:4px 0;border-radius:6px;background:rgba(255,255,255,.05);opacity:.5}.tlad span.done{opacity:.95;background:rgba(120,220,255,.16)}.tlad span.on{opacity:1;background:rgba(255,210,110,.25);box-shadow:0 0 0 1px rgba(255,210,110,.6) inset}.tlad span.mid{color:#d9a8ff}.tlad span.bos{color:#ff9a8a;font-weight:700}
 .btn.m-rank{background:linear-gradient(135deg,#4a2a0e,#2a1a3e);border-color:rgba(255,200,90,.45)}.btn.m-rank small{color:#ffd99a}
@@ -1938,7 +1940,18 @@ const ggProg=m=>Math.min(ggNeed(m),m.fresh?((P.ggk||{})[m.area]||0):m.boss==='�
 const ggDone=m=>!!(P.done&&P.done[m.id]);
 function ggClaim(id){const m=GG_MISSIONS.find(x=>x.id===id);if(!m||ggDone(m)||ggProg(m)<ggNeed(m))return;
   P.done[m.id]=true;P.items.puzzle=(P.items.puzzle||0)+1;save();
-  renderHub(`👥 공구방 특별 미션 완료: ${m.boss} ${ggNeed(m)}회 처치 — 🧩 기억의 퍼즐 조각 ×1 (동료 탭 › 기억 보관소에서 사용)`);}
+  renderGG(`👥 공구방 특별 미션 완료: ${m.boss} ${ggNeed(m)}회 처치 — 🧩 기억의 퍼즐 조각 ×1 (동료 탭 › 기억 보관소에서 사용)`);}
+/* 공구방 특별 미션 화면 (모험 탭에서 버튼으로 들어옴) */
+function renderGG(msg){
+  $('#app').innerHTML=`${statusHTML()}${topBack()}
+    ${msg?`<div class="notice">${msg}</div>`:''}
+    <div class="panel"><div class="ptitle">👥 공구방 특별 미션 <span class="small">보상: 🧩 기억의 퍼즐 조각 · 완료 ${GG_MISSIONS.filter(ggDone).length}/${GG_MISSIONS.length}</span></div>${GG_MISSIONS.map(m=>{const pr=ggProg(m),dn=ggDone(m);
+      return `<div class="mission"><div class="info"><span class="tag item">퍼즐</span>${m.boss} 처치<small>${AREAS[m.area].flag} ${AREAS[m.area].name}의 최종 보스 ${m.boss}${/[가-힣]/.test(m.boss.slice(-1))&&(m.boss.slice(-1).charCodeAt(0)-44032)%28?'을':'를'} ${ggNeed(m)}번 쓰러뜨려라.${m.fresh?' (미션이 생긴 뒤부터 센다)':''}<br>보상: 🧩 기억의 퍼즐 조각 ×1</small></div>${dn?'<span class="tag done">완료</span>':pr>=ggNeed(m)?`<button class="btn primary" data-gg="${m.id}">보상 받기</button>`:`<span class="small">${pr} / ${ggNeed(m)}</span>`}</div>`;}).join('')}</div>
+    <button class="btn" id="back">← 돌아가기</button>${tabBar()}`;
+  document.querySelectorAll('[data-gg]').forEach(b=>b.onclick=()=>ggClaim(b.dataset.gg));
+  $('#back').onclick=()=>renderHub();
+  window.scrollTo(0,0);
+}
 /* ===================== 우리의 정원 ===================== */
 /* 빈방을 생활용품으로 꾸미고, 뽑은 친구들이 방 안을 돌아다닌다 (꾸미기 전용 · 능력치 없음) */
 const GARDEN_ITEMS={
@@ -3325,12 +3338,12 @@ function renderHub(msg){
     <div class="panel realmp ${realmOpen?'':'lockp'}"><div class="ptitle">😈 마계 이동 <span class="small">${realmOpen?`개방 ${Math.min(P.unlocked+1,AREAS.length)-RS}/${AREAS.length-RS}`:'🔒 잠김'}</span></div>
       ${realmOpen?`<div class="areas">${realms}</div>`:`<div class="desc">🔒 ${AREAS[RS-1].name}까지 클리어하면 마계로 가는 문이 열린다.</div>`}</div>
     <div class="panel"><div class="ptitle">📜 미션</div>${missionHTML}</div>
-    <div class="panel"><div class="ptitle">👥 공구방 특별 미션 <span class="small">보상: 🧩 기억의 퍼즐 조각</span></div>${GG_MISSIONS.map(m=>{const pr=ggProg(m),dn=ggDone(m);
-      return `<div class="mission"><div class="info"><span class="tag item">퍼즐</span>${m.boss} 처치<small>${AREAS[m.area].flag} ${AREAS[m.area].name}의 최종 보스 ${m.boss}${/[가-힣]/.test(m.boss.slice(-1))&&(m.boss.slice(-1).charCodeAt(0)-44032)%28?'을':'를'} ${ggNeed(m)}번 쓰러뜨려라.${m.fresh?' (미션이 생긴 뒤부터 센다)':''}<br>보상: 🧩 기억의 퍼즐 조각 ×1</small></div>${dn?'<span class="tag done">완료</span>':pr>=ggNeed(m)?`<button class="btn primary" data-gg="${m.id}">보상 받기</button>`:`<span class="small">${pr} / ${ggNeed(m)}</span>`}</div>`;}).join('')}</div>
+    ${(()=>{const dn=GG_MISSIONS.filter(ggDone).length,rd=GG_MISSIONS.filter(m=>!ggDone(m)&&ggProg(m)>=ggNeed(m)).length;
+      return `<button class="btn m-gg full" id="ggbtn">👥 공구방 특별 미션${rd?` <span class="ggnew">보상 ${rd}개</span>`:''}<small>완료 ${dn}/${GG_MISSIONS.length} · 보상: 🧩 기억의 퍼즐 조각</small></button>`;})()}
     ${tabBar()}`;
   document.querySelectorAll('.area').forEach(b=>b.onclick=()=>{P.cur=+b.dataset.i;save();renderHub();});
   document.querySelectorAll('[data-claim]').forEach(b=>b.onclick=()=>claim(b.dataset.claim));
-  document.querySelectorAll('[data-gg]').forEach(b=>b.onclick=()=>ggClaim(b.dataset.gg));
+  $('#ggbtn').onclick=()=>renderGG();
   $('#hunt').onclick=()=>{autoHunt={on:true,area:P.cur,n:0,xp:0,gold:0};startBattle({area:P.cur,hunt:true});};
   $('#map').onclick=()=>renderMap(P.cur);
   if($('#rank'))$('#rank').onclick=()=>renderRank();
