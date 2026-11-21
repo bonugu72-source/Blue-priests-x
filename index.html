@@ -397,6 +397,17 @@ body.pfrozen #cmds .btn{filter:saturate(.2) brightness(1.2);background:linear-gr
 .room .fr .nm{font-size:10px;font-weight:700;color:#3b2614;background:rgba(255,255,255,.8);border-radius:6px;padding:0 4px;text-align:center;white-space:nowrap;margin-top:-2px}
 .room .fr .say{position:absolute;bottom:100%;left:50%;transform:translateX(-50%);background:#fff;color:#222;font-size:11px;border-radius:8px;padding:2px 6px;white-space:nowrap;box-shadow:0 2px 6px rgba(0,0,0,.25);animation:pop .3s ease-out}
 @keyframes bob{from{transform:translateY(0)}to{transform:translateY(-3px)}}
+/* 행운의 룰렛 */
+.rlwrap{position:relative;width:min(260px,72vw);aspect-ratio:1;margin:8px auto 12px}
+.rlwheel{position:absolute;inset:0;border-radius:50%;border:6px solid #e8c76a;box-shadow:0 0 0 3px #6b4a16,0 0 24px rgba(232,199,106,.45);transition:transform 3.4s cubic-bezier(.12,.75,.12,1);overflow:hidden}
+.rlwheel .rlbg{position:absolute;inset:0;border-radius:50%}
+.rlwheel .rllb{position:absolute;left:50%;top:50%;width:0;height:0}
+.rlwheel .rllb span{position:absolute;left:-36px;top:calc(-1 * min(115px,32vw));width:72px;text-align:center;font-size:12px;font-weight:800;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.6);line-height:1.15}
+.rlwheel .rllb span i{display:block;font-style:normal;font-size:22px;margin-bottom:2px}
+.rlpin{position:absolute;left:50%;top:-12px;margin-left:-13px;width:0;height:0;border-left:13px solid transparent;border-right:13px solid transparent;border-top:26px solid #ff4f6a;filter:drop-shadow(0 2px 3px rgba(0,0,0,.5));z-index:3}
+.rlhub{position:absolute;left:50%;top:50%;width:46px;height:46px;margin:-23px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff6d0,#e8c76a 60%,#8a6420);box-shadow:0 2px 8px rgba(0,0,0,.5);z-index:2;display:flex;align-items:center;justify-content:center;font-size:20px}
+.rlres{text-align:center;font-size:15px;font-weight:700;min-height:24px;margin:4px 0 8px}
+.rlres.win{color:#ffe38a;text-shadow:0 0 10px rgba(255,214,110,.6);animation:pop .4s ease-out}
 /* 기억 보관소: 퍼즐 연출 */
 .pzfx{position:fixed;inset:0;z-index:72;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at 50% 45%,#2a2140,#05060d 75%);animation:sfxfade .35s ease-out;cursor:pointer;overflow:hidden}
 .pzfx .pzbox{position:relative;width:min(300px,78vw);aspect-ratio:4/5}
@@ -1911,6 +1922,59 @@ function renderGarden(msg){
       el.classList.toggle('flip',nx<ox);el.style.left=nx+'%';el.style.top=ny+'%';el.style.zIndex=5+Math.round(ny);});};
   setTimeout(wander,100);gardenTimer=setInterval(wander,2700);
   $('#back').onclick=()=>{clearInterval(gardenTimer);renderAllyTab();};window.scrollTo(0,0);
+}
+/* ===================== 행운의 룰렛 ===================== */
+/* 첫 1회 무료 · 이후 무료는 15분마다 · 유료 1회 10,000 코인 · 6칸 중 무작위(각 1/6) */
+const RL_COST=10000, RL_FREE_MS=15*60*1000;
+const RL_SEG=[
+  {k:'gold',ic:'💰',t:'10,000 코인',c:'#d89a2b'},
+  {k:'none',ic:'💨',t:'꽝',c:'#59627a'},
+  {k:'trust',ic:'💗',t:'신뢰도 XP',c:'#d0507a'},
+  {k:'xp',ic:'✨',t:'경험치 10,000',c:'#3a8fd8'},
+  {k:'s4',ic:'★4',t:'4성 동료',c:'#8a5ad8'},
+  {k:'s5',ic:'★5',t:'5성 동료',c:'#e0b030'}];
+const rlFreeLeft=()=>Math.max(0,(P.rlFreeAt||0)-Date.now()); // 0이면 무료 가능 (처음엔 0)
+const rlTime=ms=>{const t=Math.ceil(ms/1000);return `${Math.floor(t/60)}:${String(t%60).padStart(2,'0')}`;};
+let rlRot=0,rlTimer=null,rlSpinning=false;
+function renderRoulette(msg,win){
+  hubTab='shop';clearInterval(rlTimer);
+  const n=RL_SEG.length,deg=360/n;
+  const bg=`conic-gradient(${RL_SEG.map((g,i)=>`${g.c} ${i*deg}deg ${(i+1)*deg}deg`).join(',')})`;
+  $('#app').innerHTML=`${statusHTML()}${topBack()}
+    <div class="panel"><div class="ptitle">🎡 행운의 룰렛</div>
+      <div class="desc">💰 10,000 코인 · 💨 꽝 · 💗 신뢰도 XP 1개 · ✨ 경험치 10,000 · ★4 무작위 동료 · ★5 무작위 동료 중 하나가 무작위로 나온다.<br>처음 한 번은 무료 · 이후 무료 뽑기는 15분마다 · 유료 1회 ${fmt(RL_COST)} 코인</div>
+      <div class="rlwrap"><div class="rlpin"></div><div class="rlwheel" id="rlw" style="transform:rotate(${rlRot}deg)"><div class="rlbg" style="background:${bg}"></div>
+        ${RL_SEG.map((g,i)=>`<div class="rllb" style="transform:rotate(${i*deg+deg/2}deg)"><span><i>${g.ic}</i>${g.t}</span></div>`).join('')}</div><div class="rlhub">🍀</div></div>
+      <div class="rlres ${win?'win':''}" id="rlres">${msg||'&nbsp;'}</div>
+      <div class="grid">
+        <button class="btn primary full" id="rlfree" ${rlFreeLeft()>0?'disabled':''}>${rlFreeLeft()>0?`🎁 무료 뽑기 · <span id="rlcd">${rlTime(rlFreeLeft())}</span> 후`:'🎁 무료 뽑기'}</button>
+        <button class="btn danger full" id="rlpay" ${P.gold<RL_COST?'disabled':''}>🎡 룰렛 돌리기 · ${fmt(RL_COST)} 코인</button>
+        <button class="btn full" id="back">← 상점으로</button></div></div>${tabBar()}`;
+  $('#rlfree').onclick=()=>rlSpin(true);
+  $('#rlpay').onclick=()=>rlSpin(false);
+  $('#back').onclick=()=>{clearInterval(rlTimer);renderShop();};
+  if(rlFreeLeft()>0)rlTimer=setInterval(()=>{const el=document.getElementById('rlcd');if(!document.getElementById('rlw')){clearInterval(rlTimer);return;}
+    if(rlFreeLeft()<=0){clearInterval(rlTimer);if(!rlSpinning){const b=$('#rlfree');b.disabled=false;b.innerHTML='🎁 무료 뽑기';}}else if(el)el.textContent=rlTime(rlFreeLeft());},1000);
+}
+function rlSpin(free){
+  if(rlSpinning)return;
+  if(free){if(rlFreeLeft()>0)return;P.rlFreeAt=Date.now()+RL_FREE_MS;}
+  else{if(P.gold<RL_COST)return;P.gold-=RL_COST;}
+  const n=RL_SEG.length,deg=360/n,i=Math.floor(Math.random()*n),g=RL_SEG[i];
+  // 보상은 돌리는 순간 확정·저장 (연출 중 화면을 벗어나도 지급)
+  let txt='',win=true;
+  if(g.k==='gold'){P.gold+=10000;txt='💰 10,000 코인 획득!';}
+  else if(g.k==='none'){txt='💨 꽝… 다음 기회에!';win=false;}
+  else if(g.k==='trust'){P.items.trustxp=(P.items.trustxp||0)+1;txt='💗 신뢰도 XP ×1 획득! (동료 관리에서 ★5·★6 동료에게 사용)';}
+  else if(g.k==='xp'){const ups=gainXp(10000);txt='✨ 경험치 10,000 획득!'+(ups.length?' '+ups[ups.length-1]:'');}
+  else{const st=g.k==='s5'?5:4,pool=allyIds(st),id=pool[Math.floor(Math.random()*pool.length)],isNew=!P.roster[id];addAlly(id);aData(id);txt=`${'★'.repeat(st)} ${ALLIES[id].name} 획득!${isNew?' (새 동료)':' (보유 수 +1 · 합성 재료)'}`;}
+  save();rlSpinning=true;
+  ['rlfree','rlpay','back'].forEach(x=>{const b=document.getElementById(x);if(b)b.disabled=true;});
+  $('#rlres').className='rlres';$('#rlres').innerHTML='두근두근…';
+  const target=360-(i*deg+deg/2)+(Math.random()*deg*0.6-deg*0.3);
+  rlRot=rlRot+360*6+((target-rlRot)%360+360)%360;
+  $('#rlw').style.transform=`rotate(${rlRot}deg)`;
+  setTimeout(()=>{rlSpinning=false;if(document.getElementById('rlw'))renderRoulette(txt,win);},3500);
 }
 /* 기억의 퍼즐: 사진이 나타났다가 퍼즐 조각으로 갈라져 흩어지고, 희귀 아이템이 나온다 */
 function puzzleFx(rid,cb){
@@ -3549,9 +3613,11 @@ function renderShop(msg){
         <button class="btn danger full" id="sumG11" ${P.gold<SUMMON11_COST?'disabled':''}>💰 골드 11회 연속<small>${fmt(SUMMON11_COST)} G (${SUMMON_COST*11-SUMMON11_COST} G 할인)</small></button>
       </div>
     </div>
+    <button class="btn m-coll" id="roul">🎡 행운의 룰렛<small>${rlFreeLeft()<=0?'🎁 무료 뽑기 가능!':`${fmt(RL_COST)} 코인 · 무료까지 ${rlTime(rlFreeLeft())}`}</small></button>
     <button class="btn m-coll" id="cos">👗 동료 코스튬<small>새 의상 해금 · 갈아입히기</small></button>
     ${tabBar()}`;
   $('#cos').onclick=()=>{renderCostume();};
+  $('#roul').onclick=()=>renderRoulette();
   $('#sumT1').onclick=()=>summon(1,true);
   $('#sumT10').onclick=()=>summon(10,true);
   $('#sumG1').onclick=()=>summon(1,false);
