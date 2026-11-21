@@ -57,6 +57,9 @@ button:disabled{cursor:default}
 /* 메뉴 성격별 색상 (거점 화면) */
 .btn.m-adv{background:#223a63}.btn.m-adv small{color:#b4c9ec}
 .btn.m-adv.main{background:#2d5290}
+.rankrow{display:grid;grid-template-columns:1fr 1fr;gap:8px;grid-column:1/-1}
+.btn.m-tower{background:linear-gradient(135deg,#123a4a,#2a1a4e);border-color:rgba(140,220,255,.45)}.btn.m-tower small{color:#a8e6ff}
+.tlad{display:grid;grid-template-columns:repeat(10,1fr);gap:3px;margin:10px 0}.tlad span{font-size:10px;text-align:center;padding:4px 0;border-radius:6px;background:rgba(255,255,255,.05);opacity:.5}.tlad span.done{opacity:.95;background:rgba(120,220,255,.16)}.tlad span.on{opacity:1;background:rgba(255,210,110,.25);box-shadow:0 0 0 1px rgba(255,210,110,.6) inset}.tlad span.mid{color:#d9a8ff}.tlad span.bos{color:#ff9a8a;font-weight:700}
 .btn.m-rank{background:linear-gradient(135deg,#4a2a0e,#2a1a3e);border-color:rgba(255,200,90,.45)}.btn.m-rank small{color:#ffd99a}
 .rankbadge{text-align:center;padding:10px 0 4px}.rankbadge .ri{font-size:56px;line-height:1.1;filter:drop-shadow(0 0 14px var(--rc))}.rankbadge b{display:block;font-size:24px;color:var(--rc);margin-top:4px}
 .ranklad{display:flex;justify-content:space-between;gap:2px;margin:10px 0}.ranklad span{flex:1;text-align:center;font-size:11px;padding:5px 0;border-radius:8px;background:rgba(255,255,255,.05);opacity:.55}.ranklad span.on{opacity:1;background:rgba(255,210,110,.18);box-shadow:0 0 0 1px rgba(255,210,110,.5) inset}.ranklad span.done{opacity:.9}
@@ -2800,6 +2803,53 @@ function rankEnd(win,e,pst,pparty){
   showResult({title:`🏆 랭크전 — ${esc(e.heroName)}의 팀`,won:win,lines,st:pst,party:pparty},promo?()=>showStory(`<div class="sum s5"><div class="sum-title">승급</div><div class="rankbadge" style="--rc:${RANKS[r.tier].c}"><div class="ri">${RANKS[r.tier].icon}</div><b>${RANKS[r.tier].n}</b></div><p class="sum-desc">${RANKS[before].n}에서 ${RANKS[r.tier].n}(으)로 승급했다!${RANK_REWARD[r.tier]?`<br>🎁 승급 보상: ${rankRewardText(r.tier)}`:''}</p>${RANK_REWARD[r.tier]&&RANK_REWARD[r.tier].ally?`<div style="margin-top:8px">${allyPortrait(RANK_REWARD[r.tier].ally)}</div>`:''}</div>`,()=>renderRank(),true):null);
 }
 
+/* ===================== 구원의 탑 ===================== */
+/* 30층 · 동료 1명만 출전 (이사벨 부제 불가) · 5층마다 악마, 10층마다 보스 · 층이 오를수록 후반 지역의 적 */
+const TOWER_MAX=30;
+const towerState=()=>{P.tower=P.tower||{best:0,tries:0};return P.tower;};
+const towerArea=f=>Math.min(realmStart()-1,Math.floor((f-1)/2));
+const towerType=f=>f%10===0?'boss':f%5===0?'mid':'normal';
+function towerEnemy(f){
+  const a=towerArea(f),ty=towerType(f);
+  let t=ty==='boss'?stageEnemy(a,15):ty==='mid'?stageEnemy(a,10):scaledEnemy(a,11+(f%4));
+  const em=(ty==='boss'&&a>=4)?LATE_BOSS_MULT:ENEMY_MULT;
+  t={...t,hp:t.exactHp?t.hp:Math.round(t.hp*em),atk:Math.round(t.atk*em),goldFirst:undefined,goldRepeat:undefined,stoneFirst:undefined,drop:undefined,itemAt:undefined};
+  return t;
+}
+function renderTower(msg){
+  hubTab='adv';
+  const T=towerState(),f=Math.min(TOWER_MAX,T.best+1),done=T.best>=TOWER_MAX;
+  const ally=P.active[0],a=towerArea(f),ty=towerType(f),en=towerEnemy(f);
+  $('#app').innerHTML=`${statusHTML()}${topBack()}
+    ${msg?`<div class="notice">${msg}</div>`:''}
+    <div class="panel"><div class="ptitle">🗼 구원의 탑 <span class="small">최고 ${T.best}층 / ${TOWER_MAX}층</span></div>
+      <div class="tlad">${Array.from({length:TOWER_MAX},(_,i)=>{const n=i+1,tt=towerType(n);return `<span class="${n<=T.best?'done':''} ${n===f&&!done?'on':''} ${tt==='boss'?'bos':tt==='mid'?'mid':''}">${n<=T.best?'✔':n}</span>`;}).join('')}</div>
+      ${done?`<div class="notice">🕊️ 구원의 탑 ${TOWER_MAX}층을 모두 정복했다!</div>`:`
+      <div class="desc"><b>${f}층</b> ${ty==='boss'?'☠ 보스':ty==='mid'?'😈 악마':'⚔ 일반'} — <b>${esc(en.name)}</b> <span class="small">(${AREAS[a].flag} ${AREAS[a].name}의 적 · HP ${fmt(en.hp)})</span></div>`}
+      <div class="desc">⚠ 출전 조건 — 동료 <b>1명</b>만 함께 오를 수 있다 (출전 동료 중 첫 번째 · 이사벨 부제 불가)<br>
+        이번 동료: ${ally?`${allyFace(ally,'sm')} <b>${nameHTML(ally)}</b> Lv ${aData(ally).lv}`:'<span class="small">없음 — 주인공 혼자 오른다 (동료 관리에서 출전 동료를 정하자)</span>'}<br>
+        탑에서는 HP가 가득 찬 상태로 싸우고, 끝나면 원래 HP로 돌아온다. 도망칠 수 없다.</div>
+      <div class="grid">
+        ${done?'':`<button class="btn danger full" id="tgo">⚔ ${f}층 도전</button>`}
+        <button class="btn full" id="tally">🤝 출전 동료 바꾸기</button>
+        <button class="btn full" id="back">← 거점으로</button>
+      </div></div>${tabBar()}`;
+  if($('#tgo'))$('#tgo').onclick=()=>{const T=towerState();T.tries=(T.tries||0)+1;P._towerRestore={hp:P.hp,mp:P.mp};P.hp=P.maxHp;P.mp=P.maxMp;startBattle({area:towerArea(f),tower:f});};
+  $('#tally').onclick=()=>renderAllies();
+  $('#back').onclick=()=>renderHub();
+  window.scrollTo(0,0);
+}
+function towerEnd(win){
+  const f=B.tower,e=B.e,pst=B.st,pparty=partyIds().slice();clearBattle();
+  if(P._towerRestore){P.hp=P._towerRestore.hp;P.mp=P._towerRestore.mp;delete P._towerRestore;}
+  const T=towerState(),lines=[];
+  if(win){const first=f>T.best;if(first)T.best=f;lines.push(first?`🗼 ${f}층 돌파!${f>=TOWER_MAX?' — 구원의 탑 정복!':` 다음은 ${f+1}층`}`:`🗼 ${f}층 재도전 승리`);}
+  else lines.push(`${f}층에서 쓰러졌다… 다시 도전하자`);
+  lines.push(`최고 기록 ${T.best}/${TOWER_MAX}층`);
+  save();renderTower();
+  showResult({title:`🗼 구원의 탑 ${f}층 — ${esc(e.name)}`,won:win,lines,st:pst,party:pparty});
+}
+
 /* ===================== 거점 ===================== */
 /* 성당 휴식: 3분에 한 번 */
 const REST_CD=3*60*1000;
@@ -2861,7 +2911,8 @@ function renderHub(msg){
         <b>${cleared?'✔ '+a.name+' 정화 완료':stageName(P.cur,nxt)}</b></div>
       <div class="grid">
         <button class="btn m-adv main full" id="map">🗺 스테이지 지도<small>진행 ${prog}/${STAGES}</small></button>
-        <button class="btn m-rank full" id="rank" ${P.lv<RANK_MIN_LV?'disabled':''}>${P.lv<RANK_MIN_LV?`🔒 랭크전<small>Lv ${RANK_MIN_LV}부터 열림 (현재 Lv ${P.lv})</small></button>`:`${rankOf().icon} 랭크전<small>${rankOf().n}${rankNeed(rankState().tier)?` · ${rankState().lp}/${rankNeed(rankState().tier)} LP`:` · ${rankState().lp} LP`} · ${rankState().w}승 ${rankState().l}패</small></button>`}
+        <div class="rankrow">        <button class="btn m-rank" id="rank" ${P.lv<RANK_MIN_LV?'disabled':''}>${P.lv<RANK_MIN_LV?`🔒 랭크전<small>Lv ${RANK_MIN_LV}부터 열림 (현재 Lv ${P.lv})</small></button>`:`${rankOf().icon} 랭크전<small>${rankOf().n}${rankNeed(rankState().tier)?` · ${rankState().lp}/${rankNeed(rankState().tier)} LP`:` · ${rankState().lp} LP`} · ${rankState().w}승 ${rankState().l}패</small></button>`}
+        <button class="btn m-tower" id="tower">🗼 구원의 탑<small>${towerState().best>=TOWER_MAX?`${TOWER_MAX}층 정복 ✔`:`${towerState().best}/${TOWER_MAX}층 · 동료 1명`}</small></button></div>
         <button class="btn m-adv" id="hunt">⚔ 자유 사냥<small>경험치·골드 모으기</small></button>
         <button class="btn m-rest" id="rest" ${restLeft()>0?'disabled':''}>${restLabel()}</button>
       </div>
@@ -2876,6 +2927,7 @@ function renderHub(msg){
   $('#hunt').onclick=()=>startBattle({area:P.cur,hunt:true});
   $('#map').onclick=()=>renderMap(P.cur);
   if($('#rank'))$('#rank').onclick=()=>renderRank();
+  $('#tower').onclick=()=>renderTower();
   $('#rest').onclick=()=>{
     if(restLeft()>0)return;
     P.hp=P.maxHp;P.mp=P.maxMp;P.restAt=Date.now();save();
@@ -3441,25 +3493,27 @@ function startBattle(spec){
   const a=spec.area;
   let s=spec.stage,t;
   if(spec.pvp){t=spec.pvp;s=0;}
+  else if(spec.tower){t=towerEnemy(spec.tower);s=0;}
   else if(spec.hunt){s=Math.min(14,Math.max(1,P.prog[a]));if(stageType(s)!=='normal')s=Math.max(1,s-1);t=scaledEnemy(a,s,huntPick(AREAS[a].enemies));}
   else t=stageEnemy(a,s);
-  if(!spec.pvp){const em=(!spec.hunt&&stageType(s)==='boss'&&a>=4)?LATE_BOSS_MULT:ENEMY_MULT;t={...t,hp:t.exactHp?t.hp:Math.round(t.hp*em),atk:Math.round(t.atk*em)};} // 적 체력·공격력 배율 (exactHp: 체력 고정)
-  const type=spec.pvp?'pvp':spec.hunt?'normal':stageType(s);
+  if(!spec.pvp&&!spec.tower){const em=(!spec.hunt&&stageType(s)==='boss'&&a>=4)?LATE_BOSS_MULT:ENEMY_MULT;t={...t,hp:t.exactHp?t.hp:Math.round(t.hp*em),atk:Math.round(t.atk*em)};} // 적 체력·공격력 배율 (exactHp: 체력 고정)
+  const type=spec.pvp?'pvp':spec.tower?towerType(spec.tower):spec.hunt?'normal':stageType(s);
   const isBoss=type==='boss'||type==='mid'||type==='pvp';
   clearBattle();
   const ahp={};
-  const noFixed=!spec.pvp&&sortieRule(a)&&sortieRule(a).noFixed;
-  const smax=!spec.pvp&&sortieRule(a)&&sortieRule(a).max;
-  const okList=P.active.filter(id=>spec.pvp||sortieOk(a,id)).slice(0,smax||9);
+  const noFixed=spec.tower?true:!spec.pvp&&sortieRule(a)&&sortieRule(a).noFixed;
+  const smax=spec.tower?1:!spec.pvp&&sortieRule(a)&&sortieRule(a).max;
+  const okList=P.active.filter(id=>spec.pvp||spec.tower||sortieOk(a,id)).slice(0,smax||9);
   const party=[...(noFixed?[]:[FIXED]),...okList];
-  const benched=spec.pvp?[]:P.active.filter(id=>!okList.includes(id));
+  const benched=spec.pvp||spec.tower?[]:P.active.filter(id=>!okList.includes(id));
   party.forEach(id=>{const al=ALLIES[id],mx=Math.round((50+aData(id).lv*10)*(0.7+0.15*al.star)*(isMyth(id)?2:1)*(al.hpMul||1));ahp[id]={hp:mx,max:mx};});
   B={e:{...t,maxHp:t.hp},spec,area:a,stage:spec.hunt?0:s,stype:type,baseName:t.name,isBoss,isFinal:!!t.final,
      charging:false,chargeName:'',chargeKind:null,phase:1,tornadoCD:0,
      buff:0,aura:0,hex:0,immune:0,reflect:0,curAlly:null,stun:{},stunWhy:{},ahp,agatoUsed:false,curse:0,silence:0,weak:0,ward:false,rage:0,turn:0,
      party,healCut:0,mikaCD:0,mshield:0,st:{dmg:{},heal:{}},dot:null,evade:false,sealed:0,over:false,won:false,shield:0,ashield:0,prism:0,negate:0,blind:0,eburn:null,eliaCD:0,sirenT:0,danT:0,
      defending:false,busy:false,menu:'main',log:[],fxq:[]};
-  if(noFixed)addLog('⚠ 출전 조건 — 이사벨 부제는 이 지역에 함께할 수 없다');
+  if(spec.tower){B.tower=spec.tower;addLog(`🗼 구원의 탑 ${spec.tower}층 — 동료 1명만 함께 오른다`);}
+  else if(noFixed)addLog('⚠ 출전 조건 — 이사벨 부제는 이 지역에 함께할 수 없다');
   if(benched.length)addLog(`⚠ 출전 조건 — ${benched.map(id=>ALLIES[id].name).join(', ')} 출전 불가 (${sortieRule(a).text})`);
   const begin=()=>{
     if(B&&t.paralyze)B.paraT=setInterval(paraTick,t.paralyze);
@@ -3673,7 +3727,7 @@ function cmdHTML(){
     <button class="btn primary full" data-act="attack" ${dis}>${pFrozen()?`🧊 얼음을 깨는 중… ${Math.ceil((B.pFrozenUntil-Date.now())/1000)}초`:`⚔ 공격<span class="awkc ${(B.atkN||0)===AWAKEN_SKILL.every-1?'ready':''}">✨ 각성 ${'●'.repeat(B.atkN||0)}${'○'.repeat(AWAKEN_SKILL.every-(B.atkN||0))} ${(B.atkN||0)===AWAKEN_SKILL.every-1?'다음 공격 발동!':''}</span>`}</button>
     <button class="btn ${B.defending?'guardon':''}" data-act="defend" ${B.defending||B.busy||pFrozen()?'disabled':''}>${B.defending?'🛡 방어 중':'🛡 방어'}<small>${B.defending?'공격하면 해제':'피해 40% 감소 · 동료도 공격 멈춤'}</small></button>
     <button class="btn" data-act="itemmenu" ${dis}>🧪 아이템</button>
-    <button class="btn full" data-act="flee" ${(B.busy||B.isBoss)?'disabled':''}>${B.pvp?'대결 중에는 도망칠 수 없다':B.isBoss?'보스전에서는 도망칠 수 없다':'🏃 도망 (60%)'}</button>
+    <button class="btn full" data-act="flee" ${(B.busy||B.isBoss||B.tower)?'disabled':''}>${B.pvp?'대결 중에는 도망칠 수 없다':B.tower?'탑에서는 도망칠 수 없다':B.isBoss?'보스전에서는 도망칠 수 없다':'🏃 도망 (60%)'}</button>
   </div>`;
 }
 
@@ -3766,7 +3820,7 @@ function renderBattle(){
   }
   $('#app').innerHTML=`${statusHTML()}
     <div class="enemy ${B.isBoss?'boss':''} ${B.isFinal?'final':''}">
-      <div class="eflag">${AREAS[B.area].flag} ${AREAS[B.area].name}${B.pvp?' · 친구 대결':B.stage?` · 스테이지 ${B.stage}`:' · 자유 사냥'}</div>
+      <div class="eflag">${B.tower?`🗼 구원의 탑 ${B.tower}층 · ${AREAS[B.area].name}의 적`:`${AREAS[B.area].flag} ${AREAS[B.area].name}`}${B.tower?'':B.pvp?' · 친구 대결':B.stage?` · 스테이지 ${B.stage}`:' · 자유 사냥'}</div>
       <div class="ename">${e.name}${tag}</div>
       ${e.title?`<div class="etitle">${e.title}</div>`:''}
       ${vis}
@@ -4156,7 +4210,7 @@ function act(kind,arg){
       P.mp+=m;addLog(`묵주 사용 — 성력 ${m} 회복`);queueFx('player','+'+m,'mpf');
     }else return;
   }else if(kind==='flee'){
-    if(B.isBoss)return;
+    if(B.isBoss||B.tower)return;
     if(Math.random()<0.6){
       B.busy=true;addLog('무사히 도망쳤다!');renderBattle();
       setTimeout(()=>{save();renderHub('무사히 도망쳤다.');},600);return;
@@ -4416,6 +4470,7 @@ function gainXp(n){
 function victory(){
   if(!B)return;
   if(B.pvp){pvpEnd(true);return;}
+  if(B.tower){towerEnd(true);return;}
   const e=B.e,area=B.area,stype=B.stype,stage=B.stage,wasFinal=B.isFinal,fromHunt=!!B.spec.hunt;
   const tName=B.baseName;
   B.over=true;
@@ -4561,6 +4616,7 @@ function autoNext(a,s,rep){
 
 function defeat(){
   if(B&&B.pvp){pvpEnd(false);return;}
+  if(B&&B.tower){towerEnd(false);return;}
   const rep=B?{title:`${esc(B.baseName||B.e.name)}에게 패배`,won:false,st:B.st,party:partyIds().slice()}:null;
   clearBattle();
   const lost=Math.floor(P.gold/2);
