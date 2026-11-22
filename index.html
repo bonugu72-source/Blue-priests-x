@@ -4143,9 +4143,11 @@ function allyCard(id){
 const topBack=()=>`<div class="backtop-row"><button class="backtop" data-backtop>← 돌아가기</button></div>`;
 document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('[data-backtop]');if(b){e.preventDefault();renderHub();}});
 /* 동료 코스튬 */
+let cosSel=null; // 코스튬: 선택한 캐릭터 (null이면 아이콘 목록)
 function renderCostume(msg){
   P.cos=P.cos||{owned:{},eq:{}};
-  const ids=Object.keys(COSTUMES);
+  const ids=Object.keys(COSTUMES).sort((x,y)=>ALLIES[y].star-ALLIES[x].star);
+  if(cosSel&&!COSTUMES[cosSel])cosSel=null;
   const block=id=>{
     const al=ALLIES[id],has=id===FIXED||owned(id),cur=cosOf(id);
     const base=ALLY_IMG[id];
@@ -4164,10 +4166,15 @@ function renderCostume(msg){
     return `<div class="panel"><div class="ptitle">${allyFace(id,'xs')} ${'★'.repeat(al.star)} ${al.name} ${has?'':'<span class="small">(미보유 — 동료를 얻어야 해금·착용 가능)</span>'}</div>
       <div class="cosgrid">${card(null)}${COSTUMES[id].map(card).join('')}</div></div>`;
   };
+  const cell=id=>{const al=ALLIES[id],has=id===FIXED||owned(id),L=COSTUMES[id],ownN=L.filter(c=>P.cos.owned[c.id]).length,cur=cosOf(id);
+    return `<button class="dexcell ${has?'':'unown'} ${cur?'mine':''}" data-cossel="${id}">${allyFace(id,'dface')}<span class="dstar">${'★'.repeat(al.star)}</span><b>${al.name}</b><span class="small">👗 ${ownN}/${L.length}${cur?' · 착용 중':''}</span></button>`;};
   $('#app').innerHTML=`${statusHTML()}${topBack()}${msg?`<div class="notice">${msg}</div>`:''}
-    <div class="panel"><div class="ptitle">👗 동료 코스튬</div><div class="desc">골드로 새 의상을 해금하고 갈아입힐 수 있어요. 한 번 해금한 의상은 언제든 다시 입힐 수 있어요. 의상은 모습만 바뀌고 능력치는 그대로예요.</div></div>
-    ${ids.map(block).join('')}
+    ${cosSel?`${block(cosSel)}<button class="btn full" id="coslist">← 캐릭터 목록</button>`
+      :`<div class="panel"><div class="ptitle">👗 동료 코스튬 <span class="small">캐릭터를 눌러 의상 보기</span></div><div class="desc">골드로 새 의상을 해금하고 갈아입힐 수 있어요. 한 번 해금한 의상은 언제든 다시 입힐 수 있어요. 의상은 모습만 바뀌고 능력치는 그대로예요.</div>
+        <div class="dexgrid">${ids.map(cell).join('')}</div></div>`}
     <button class="btn" id="back">← 돌아가기</button>${tabBar()}`;
+  document.querySelectorAll('[data-cossel]').forEach(b=>b.onclick=()=>{cosSel=b.dataset.cossel;renderCostume();});
+  if($('#coslist'))$('#coslist').onclick=()=>{cosSel=null;renderCostume();};
   document.querySelectorAll('[data-cosbuy]').forEach(b=>b.onclick=()=>{
     const [id,cid]=b.dataset.cosbuy.split('|'),c=COSTUMES[id].find(x=>x.id===cid);
     if(!c||!(id===FIXED||owned(id))||P.cos.owned[cid]||(c.stone?P.items.stone<c.stone:P.gold<c.cost))return;
@@ -4382,7 +4389,7 @@ function renderShop(msg){
     <button class="btn m-coll" id="roul">🎡 행운의 룰렛<small>${rlFreeLeft()<=0?'🎁 무료 뽑기 가능!':`다음 무료 뽑기까지 ${rlTime(rlFreeLeft())}`}</small></button>
     <button class="btn m-coll" id="cos">👗 동료 코스튬<small>새 의상 해금 · 갈아입히기</small></button>
     ${tabBar()}`;
-  $('#cos').onclick=()=>{renderCostume();};
+  $('#cos').onclick=()=>{cosSel=null;renderCostume();};
   $('#roul').onclick=()=>renderRoulette();
   $('#sumT1').onclick=()=>summon(1,true);
   $('#sumT10').onclick=()=>summon(10,true);
