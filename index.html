@@ -1122,9 +1122,9 @@ function stoneToast(n,why){
   document.body.appendChild(d);d.onclick=()=>d.remove();
   setTimeout(()=>d.classList.add('out'),3200);setTimeout(()=>d.remove(),3800);
 }
-function salvToast(why){
+function salvToast(why,n){
   const d=document.createElement('div');d.className='stoast salv';
-  d.innerHTML=`<div class="st-ic">✴️</div><div><b>구원의 조각 ×1 획득!</b><small>${why||''} · 보유 ${P.items.salv||0}개</small></div>${Array.from({length:9},(_,i)=>`<i class="sp" style="left:${8+Math.round(Math.random()*84)}%;top:${10+Math.round(Math.random()*75)}%;--d:${(i*0.16).toFixed(2)}s"></i>`).join('')}`;
+  d.innerHTML=`<div class="st-ic">✴️</div><div><b>구원의 조각 ×${n||1} 획득!</b><small>${why||''} · 보유 ${P.items.salv||0}개</small></div>${Array.from({length:9},(_,i)=>`<i class="sp" style="left:${8+Math.round(Math.random()*84)}%;top:${10+Math.round(Math.random()*75)}%;--d:${(i*0.16).toFixed(2)}s"></i>`).join('')}`;
   const prev=document.querySelectorAll('.stoast').length;d.style.top=`${14+prev*70}px`;
   document.body.appendChild(d);d.onclick=()=>d.remove();
   setTimeout(()=>d.classList.add('out'),4200);setTimeout(()=>d.remove(),4800);
@@ -2286,12 +2286,18 @@ function rlSpin(){
 /* 50초 동안 무작위 ★5·★6 동료의 사진을 보고 이름을 4지선다로 맞힌다 */
 const QUIZ_MS=50000;
 let quiz=null;
-const quizPool=()=>Object.keys(ALLIES).filter(id=>ALLIES[id].star>=5&&ALLY_IMG[id]&&ALLY_IMG[id].src);
+const quizChars=()=>Object.keys(ALLIES).filter(id=>ALLIES[id].star>=5&&ALLY_IMG[id]&&ALLY_IMG[id].src);
+/* 문제 카드: 기본 사진 + 코스튬 사진 (정답은 캐릭터 이름) */
+const quizPool=()=>{const L=[];quizChars().forEach(id=>{L.push({id,img:ALLY_IMG[id]});(COSTUMES[id]||[]).forEach(c=>{if(c.img&&c.img.src)L.push({id,img:c.img,cos:c.name});});});return L;};
+/* 한 판에 맞힌 개수 보상 — 구간마다 처음 달성할 때 한 번 */
+const QUIZ_REWARD=[{n:15,stone:5},{n:20,salv:1},{n:25,salv:1},{n:28,salv:3},{n:30,salv:3}];
+const quizRwText=r=>r.stone?`${AWAKEN_ITEM.icon} ${AWAKEN_ITEM.name} ×${r.stone}`:`${SALV_ITEM.icon} ${SALV_ITEM.name} ×${r.salv}`;
 function renderQuiz(){
   hubTab='ally';if(quiz&&quiz.t)clearInterval(quiz.t);quiz=null;
   $('#app').innerHTML=`${statusHTML()}${topBack()}
     <div class="panel"><div class="ptitle">🎯 캐릭터 맞추기 <span class="small">최고 기록 ${P.quizBest||0}개</span></div>
-      <div class="desc">제한 시간 <b>50초</b> 안에 나타나는 ★5·★6 동료의 이름을 맞혀 보자.<br>사진 아래 네 개의 이름 중 하나를 고르면 바로 다음 문제가 나온다. 틀리면 정답을 잠깐 보여 준다.<br>출제 범위: 사진이 있는 ★5·★6 동료 ${quizPool().length}명</div>
+      <div class="desc">제한 시간 <b>50초</b> 안에 나타나는 ★5·★6 동료의 이름을 맞혀 보자. 코스튬 사진도 나온다!<br>사진 아래 네 개의 이름 중 하나를 고르면 바로 다음 문제가 나온다. 틀리면 정답을 잠깐 보여 준다.<br>출제 범위: ★5·★6 동료 ${quizChars().length}명 · 사진 ${quizPool().length}장 (기본 + 코스튬)</div>
+      <div class="desc"><b>🎁 한 판 정답 보상</b> (구간마다 처음 달성 시 1회)<br>${QUIZ_REWARD.map(r=>`${r.n}개: ${quizRwText(r)}${(P.quizGot||{})[r.n]?' ✔':''}`).join(' · ')}</div>
       <div class="grid"><button class="btn danger full" id="qstart">▶ 시작</button><button class="btn full" id="back">← 돌아가기</button></div></div>${tabBar()}`;
   $('#qstart').onclick=quizStart;$('#back').onclick=()=>renderAllyTab();window.scrollTo(0,0);
 }
@@ -2305,8 +2311,8 @@ function quizStart(){
 function quizNext(){
   if(!quiz)return;
   if(!quiz.bag.length)quiz.bag=quiz.pool.slice().sort(()=>Math.random()-0.5); // 한 바퀴 돌기 전엔 같은 동료가 다시 안 나온다
-  const id=quiz.bag.pop(),others=quiz.pool.filter(x=>x!==id).sort(()=>Math.random()-0.5).slice(0,3),opts=[id,...others].sort(()=>Math.random()-0.5);
-  const im=ALLY_IMG[id];quiz.cur=id;quiz.lock=false;
+  const card=quiz.bag.pop(),id=card.id,others=quizChars().filter(x=>x!==id).sort(()=>Math.random()-0.5).slice(0,3),opts=[id,...others].sort(()=>Math.random()-0.5);
+  const im=card.img;quiz.cur=id;quiz.lock=false;
   $('#app').innerHTML=`${statusHTML()}
     <div class="panel"><div class="ptitle">🎯 캐릭터 맞추기 <span class="small">정답 ${quiz.score} / ${quiz.total}</span></div>
       <div class="qtimer"><i id="qbar" style="width:${Math.max(0,(quiz.end-Date.now())/QUIZ_MS*100)}%"></i><span id="qtime">${(Math.max(0,quiz.end-Date.now())/1000).toFixed(1)}초</span></div>
@@ -2321,11 +2327,15 @@ function quizNext(){
 }
 function quizEnd(quit){
   if(!quiz)return;clearInterval(quiz.t);const q=quiz;quiz=null;
-  const best=P.quizBest||0,nb=!quit&&q.score>best;if(nb){P.quizBest=q.score;save();}
+  const best=P.quizBest||0,nb=!quit&&q.score>best;if(nb)P.quizBest=q.score;
+  const got=[];if(!quit){P.quizGot=P.quizGot||{};QUIZ_REWARD.forEach(r=>{if(q.score>=r.n&&!P.quizGot[r.n]){P.quizGot[r.n]=1;if(r.stone){P.items.stone+=r.stone;stoneToast(r.stone,`캐릭터 맞추기 ${r.n}개 달성`);}if(r.salv){P.items.salv=(P.items.salv||0)+r.salv;salvToast(`캐릭터 맞추기 ${r.n}개 달성`,r.salv);}got.push(`${r.n}개 달성: ${quizRwText(r)}`);}});}
+  save();
   $('#app').innerHTML=`${statusHTML()}
     <div class="panel"><div class="ptitle">🎯 캐릭터 맞추기 — ${quit?'중단':'시간 종료!'}</div>
       <div class="qres"><b>${q.score}</b><small>개 정답 (${q.total}문제 중${q.total?` · 정답률 ${Math.round(q.score/q.total*100)}%`:''})</small></div>
       ${nb?'<div class="notice">🏆 새 최고 기록!</div>':`<div class="desc" style="text-align:center">최고 기록 ${P.quizBest||0}개</div>`}
+      ${got.length?`<div class="notice">🎁 ${got.join('<br>🎁 ')}</div>`:''}
+      <div class="desc" style="text-align:center">${QUIZ_REWARD.map(r=>`${r.n}개 ${(P.quizGot||{})[r.n]?'✔':'·'}`).join('  ')}</div>
       <div class="grid"><button class="btn danger full" id="qagain">🔁 다시 하기</button><button class="btn full" id="back">← 돌아가기</button></div></div>${tabBar()}`;
   $('#qagain').onclick=quizStart;$('#back').onclick=()=>renderAllyTab();
 }
