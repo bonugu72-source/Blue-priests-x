@@ -1233,7 +1233,7 @@ const ALLIES={
             desc:'심판(3초마다 적에게 무작위로 출혈 · 속박 · 시야 차단 · 공격 반사 중 하나를 3초간 + 공격력의 절반만큼 주인공에게 보호막 · 보호막 중첩 가능) · 천상의 탑 30층 돌파 보상으로만 획득 (상점·합성 불가)'},
   hari:    {star:5,pet:true,name:'하리뭉',   icon:'🐲', role:'펫 · 아기 번개용', kit:'firepet',
             desc:'불꽃쇼(3초마다 적에게 화상 · 화상으로 입힌 피해만큼 동료 전원에게 보호막) · 🐾 펫: 출전 펫으로 고르면 자동 출전 (출전 칸 차지 안 함 · 펫은 1마리만) · 상점 동료 소환에서만 획득'},
-  baem:    {star:5,pet:true,name:'뱀뱀',     icon:'🐍', role:'펫 · 아기 황금뱀', kit:'bloodpet',
+  baem:    {star:5,pet:true,name:'뱀뱀이',   icon:'🐍', role:'펫 · 아기 황금뱀', kit:'bloodpet',
             desc:'흡혈 송곳니(3초마다 적에게 출혈 · 출혈로 입힌 피해만큼 주인공과 동료 전원 HP 회복) · 🐾 펫: 출전 펫으로 고르면 자동 출전 (출전 칸 차지 안 함 · 펫은 1마리만) · 상점 동료 소환에서만 획득'},
   miner:   {star:5,name:'미네르',        icon:'🌊', role:'물의 여신', kit:'tide', hpMul:0.6,
             desc:'침몰(적을 물속으로 끌어내려 3턴간 적 공격력 감소) · 물보라(2턴간 동료가 받는 피해 절반) · 체력이 적어 쉽게 쓰러지지만, 쓰러지면 물의 여신 「미네르바」로 각성해 HP 60%로 부활(1회) — 이후 공격이 고정 피해 + 치명타'},
@@ -4771,7 +4771,7 @@ function hariTick(){
   if(e.hp<=0){winNow();return;}
   renderBattle();
 }
-/* 펫 뱀뱀: 3초마다 흡혈 송곳니 — 적에게 출혈(고정 피해) · 그만큼 주인공·동료 전원 회복 */
+/* 펫 뱀뱀이: 3초마다 흡혈 송곳니 — 적에게 출혈(고정 피해) · 그만큼 주인공·동료 전원 회복 */
 const BAEM_MS=3000;
 function baemTick(){
   if(!B||B.over||B.won||!$('#modal').classList.contains('hidden'))return;
@@ -4781,7 +4781,7 @@ function baemTick(){
   if(!B.immune){stat('dmg',id,Math.min(d,e.hp));e.hp=Math.max(0,e.hp-d);}
   const hh=Math.min(P.maxHp-P.hp,Math.round(d*pHealMul()));if(hh>0){P.hp+=hh;stat('heal',id,hh);queueFx('player','🐍+'+hh,'heal');}
   partyIds().forEach(x=>{const a=B.ahp[x];if(a&&a.hp>0){const g=Math.min(a.max-a.hp,d);if(g>0){a.hp+=g;stat('heal',id,g);}}});
-  addLog(`🐍 뱀뱀의 흡혈 송곳니! ${e.name}에게 출혈 ${d} · 주인공과 동료 전원 HP +${d}`);queueFx('enemy','🩸'+d,'dmg');
+  addLog(`🐍 뱀뱀이의 흡혈 송곳니! ${e.name}에게 출혈 ${d} · 주인공과 동료 전원 HP +${d}`);queueFx('enemy','🩸'+d,'dmg');
   if(e.hp<=0){winNow();return;}
   renderBattle();
 }
@@ -5722,7 +5722,7 @@ function alliesAct(){
         }
         break;}
       case 'firepet': break; // 하리뭉: 불꽃쇼는 hariTick
-      case 'bloodpet': break; // 뱀뱀: 흡혈 송곳니는 baemTick
+      case 'bloodpet': break; // 뱀뱀이: 흡혈 송곳니는 baemTick
       case 'queen':{ // 엘리자베스: 여왕의 검 (심판은 judgeTick)
         allyHit(16+lv*5,`${nm}의 여왕의 검`,0.4);break;}
       case 'frost':{ // 아키라: 얼어붙은 화살 · 급소 사격(치명타 + 피해 절반 회복) · 신화 혹한의 화살
