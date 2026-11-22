@@ -413,6 +413,18 @@ body.pfrozen #cmds .btn{filter:saturate(.2) brightness(1.2);background:linear-gr
 .room .fr .nm{font-size:10px;font-weight:700;color:#3b2614;background:rgba(255,255,255,.8);border-radius:6px;padding:0 4px;text-align:center;white-space:nowrap;margin-top:-2px}
 .room .fr .say{position:absolute;bottom:100%;left:50%;transform:translateX(-50%);background:#fff;color:#222;font-size:11px;border-radius:8px;padding:2px 6px;white-space:nowrap;box-shadow:0 2px 6px rgba(0,0,0,.25);animation:pop .3s ease-out}
 @keyframes bob{from{transform:translateY(0)}to{transform:translateY(-3px)}}
+/* 캐릭터 맞추기 */
+.qtimer{position:relative;height:22px;border-radius:11px;background:#0c1329;overflow:hidden;margin:6px 0 10px;border:1px solid #2a3a6a}
+.qtimer i{position:absolute;left:0;top:0;bottom:0;background:linear-gradient(90deg,#4a8cff,#7fd0ff);transition:width .1s linear}
+.qtimer i.low{background:linear-gradient(90deg,#ff4f6a,#ffa04a)}
+.qtimer span{position:relative;display:block;text-align:center;font-size:12px;font-weight:800;line-height:22px;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.6)}
+.qimg{position:relative;width:min(240px,64vw);aspect-ratio:3/4;margin:0 auto 12px;border-radius:16px;background-size:cover;box-shadow:0 0 0 2px #3a5aa0,0 8px 22px rgba(0,0,0,.5);animation:pop .3s ease-out}
+.qimg .qstar{position:absolute;left:8px;top:6px;font-size:13px;color:#ffe38a;text-shadow:0 0 6px #000,0 0 10px #ffb52e}
+.qopts{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
+.qopts .btn{min-height:46px;font-size:14px}
+.qopts .btn.qok{background:#2f8f5a;border-color:#7fe0a8;color:#fff}
+.qopts .btn.qng{background:#9a2f3f;border-color:#ff8f9f;color:#fff}
+.qres{text-align:center;margin:14px 0}.qres b{display:block;font-size:56px;color:#ffe38a;text-shadow:0 0 16px rgba(255,200,60,.6)}
 /* 탑 선택 슬라이드 */
 .tsel{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;padding:6px 2px 10px;scrollbar-width:none}
 .tsel::-webkit-scrollbar{display:none}
@@ -2270,6 +2282,53 @@ function rlSpin(){
   $('#rlw').style.transform=`rotate(${rlRot}deg)`;
   setTimeout(()=>{rlSpinning=false;if(document.getElementById('rlw'))renderRoulette(txt,win);},3500);
 }
+/* ===================== 캐릭터 맞추기 (미니게임) ===================== */
+/* 50초 동안 무작위 ★5·★6 동료의 사진을 보고 이름을 4지선다로 맞힌다 */
+const QUIZ_MS=50000;
+let quiz=null;
+const quizPool=()=>Object.keys(ALLIES).filter(id=>ALLIES[id].star>=5&&ALLY_IMG[id]&&ALLY_IMG[id].src);
+function renderQuiz(){
+  hubTab='ally';if(quiz&&quiz.t)clearInterval(quiz.t);quiz=null;
+  $('#app').innerHTML=`${statusHTML()}${topBack()}
+    <div class="panel"><div class="ptitle">🎯 캐릭터 맞추기 <span class="small">최고 기록 ${P.quizBest||0}개</span></div>
+      <div class="desc">제한 시간 <b>50초</b> 안에 나타나는 ★5·★6 동료의 이름을 맞혀 보자.<br>사진 아래 네 개의 이름 중 하나를 고르면 바로 다음 문제가 나온다. 틀리면 정답을 잠깐 보여 준다.<br>출제 범위: 사진이 있는 ★5·★6 동료 ${quizPool().length}명</div>
+      <div class="grid"><button class="btn danger full" id="qstart">▶ 시작</button><button class="btn full" id="back">← 돌아가기</button></div></div>${tabBar()}`;
+  $('#qstart').onclick=quizStart;$('#back').onclick=()=>renderAllyTab();window.scrollTo(0,0);
+}
+function quizStart(){
+  const pool=quizPool();quiz={pool,bag:[],score:0,total:0,end:Date.now()+QUIZ_MS,lock:false,t:null};
+  quizNext();
+  quiz.t=setInterval(()=>{if(!quiz||!document.getElementById('qtime')){if(quiz)clearInterval(quiz.t);return;}const left=Math.max(0,quiz.end-Date.now());
+    $('#qtime').textContent=(left/1000).toFixed(1)+'초';$('#qbar').style.width=(left/QUIZ_MS*100)+'%';if(left<=10000)$('#qbar').classList.add('low');
+    if(left<=0)quizEnd();},100);
+}
+function quizNext(){
+  if(!quiz)return;
+  if(!quiz.bag.length)quiz.bag=quiz.pool.slice().sort(()=>Math.random()-0.5); // 한 바퀴 돌기 전엔 같은 동료가 다시 안 나온다
+  const id=quiz.bag.pop(),others=quiz.pool.filter(x=>x!==id).sort(()=>Math.random()-0.5).slice(0,3),opts=[id,...others].sort(()=>Math.random()-0.5);
+  const im=ALLY_IMG[id];quiz.cur=id;quiz.lock=false;
+  $('#app').innerHTML=`${statusHTML()}
+    <div class="panel"><div class="ptitle">🎯 캐릭터 맞추기 <span class="small">정답 ${quiz.score} / ${quiz.total}</span></div>
+      <div class="qtimer"><i id="qbar" style="width:${Math.max(0,(quiz.end-Date.now())/QUIZ_MS*100)}%"></i><span id="qtime">${(Math.max(0,quiz.end-Date.now())/1000).toFixed(1)}초</span></div>
+      <div class="qimg" style="background-image:url(${im.src});background-position:${im.pos||'50% 20%'}"><span class="qstar">${'★'.repeat(ALLIES[id].star)}</span></div>
+      <div class="qopts">${opts.map(o=>`<button class="btn full" data-q="${o}">${esc(ALLIES[o].name)}</button>`).join('')}</div>
+      <button class="btn full" id="qquit">그만하기</button></div>`;
+  document.querySelectorAll('[data-q]').forEach(b=>b.onclick=()=>{
+    if(!quiz||quiz.lock)return;quiz.lock=true;quiz.total++;const ok=b.dataset.q===quiz.cur;
+    if(ok){quiz.score++;b.classList.add('qok');}else{b.classList.add('qng');document.querySelector(`[data-q="${quiz.cur}"]`).classList.add('qok');}
+    setTimeout(()=>{if(quiz&&Date.now()<quiz.end)quizNext();},ok?350:900);});
+  $('#qquit').onclick=()=>quizEnd(true);window.scrollTo(0,0);
+}
+function quizEnd(quit){
+  if(!quiz)return;clearInterval(quiz.t);const q=quiz;quiz=null;
+  const best=P.quizBest||0,nb=!quit&&q.score>best;if(nb){P.quizBest=q.score;save();}
+  $('#app').innerHTML=`${statusHTML()}
+    <div class="panel"><div class="ptitle">🎯 캐릭터 맞추기 — ${quit?'중단':'시간 종료!'}</div>
+      <div class="qres"><b>${q.score}</b><small>개 정답 (${q.total}문제 중${q.total?` · 정답률 ${Math.round(q.score/q.total*100)}%`:''})</small></div>
+      ${nb?'<div class="notice">🏆 새 최고 기록!</div>':`<div class="desc" style="text-align:center">최고 기록 ${P.quizBest||0}개</div>`}
+      <div class="grid"><button class="btn danger full" id="qagain">🔁 다시 하기</button><button class="btn full" id="back">← 돌아가기</button></div></div>${tabBar()}`;
+  $('#qagain').onclick=quizStart;$('#back').onclick=()=>renderAllyTab();
+}
 /* 기억의 퍼즐: 사진이 나타났다가 퍼즐 조각으로 갈라져 흩어지고, 희귀 아이템이 나온다 */
 function puzzleFx(rid,cb){
   const C=5,Rw=6,r=RELICS[rid];
@@ -4003,6 +4062,7 @@ function renderAllyTab(msg){
         <button class="btn m-coll" id="dex">📖 동료 도감<small>모든 동료의 이름·능력</small></button>
         <button class="btn m-coll full" id="memvault">🧩 기억 보관소<small>기억의 퍼즐 조각 ${P.items.puzzle||0}개 · 희귀 아이템 ${MEMORY_ITEMS.filter(k=>P.relics.includes(k)).length}/${MEMORY_ITEMS.length}</small></button>
         <button class="btn m-coll full" id="garden">🏡 우리의 정원<small>빈방 꾸미기 · 친구 ${(P.garden&&P.garden.friends.length)||0}/11명</small></button>
+        <button class="btn m-coll full" id="quiz">🎯 캐릭터 맞추기<small>50초 동안 ★5·★6 동료 이름 맞히기 · 최고 기록 ${P.quizBest||0}개</small></button>
       </div>
     </div>
     ${tabBar()}`;
@@ -4011,6 +4071,7 @@ function renderAllyTab(msg){
   $('#dex').onclick=()=>renderDex();
   $('#memvault').onclick=()=>renderMemVault();
   $('#garden').onclick=()=>renderGarden();
+  $('#quiz').onclick=()=>renderQuiz();
 }
 
 function claim(id){
