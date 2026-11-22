@@ -4515,7 +4515,8 @@ const heavenMul=f=>({hp:(0.85+0.02*(f-1))*0.9,atk:(0.8+0.01*(f-1))*0.9}); // 구
 function heavenEnemy(f){
   const a=heavenArea(f);let t=stageEnemy(a,15);
   const em=LATE_BOSS_MULT,tm=heavenMul(f),sc=v=>v?Math.round(v*tm.hp):v;
-  if(t.madness)t={...t,madness:{...t.madness,at:sc(t.madness.at),to:Math.round(sc(t.madness.to)*0.6)}};
+  if(t.madness)t={...t,madness:{...t.madness,at:sc(t.madness.at),to:Math.round(sc(t.madness.to)*0.6),...(t.madness.fallen?{fallen:{...t.madness.fallen,maxMul:Math.min(8,t.madness.fallen.maxMul)}}:{})}}; // 천상의 탑: 차후이아 분노 최대 32배 → 8배
+  if(t.magicGrow)t={...t,magicGrow:t.magicGrow*0.5}; // 천상의 탑: 메르엠 마법력 증가 절반 (최대 2배 → 1.5배)
   if(t.awaken)t={...t,awaken:{...t.awaken,at:sc(t.awaken.at),to:Math.round(sc(t.awaken.to)*0.6),...(t.awaken.critMult?{critMult:Math.min(1.5,t.awaken.critMult)}:{}),...(t.awaken.soulTick?{soulTick:5000}:{})}};
   if(t.lastStand)t={...t,lastStand:{...t.lastStand,at:sc(t.lastStand.at)}};
   if(t.slashes>2)t={...t,slashes:2};
