@@ -417,6 +417,19 @@ body.pfrozen #cmds .btn{filter:saturate(.2) brightness(1.2);background:linear-gr
 @keyframes bob{from{transform:translateY(0)}to{transform:translateY(-3px)}}
 .petstar{color:#8fdcff!important;text-shadow:0 0 6px #4ab8ff,0 0 12px rgba(80,180,255,.7)!important}
 .petpanel{border-color:#5ab8ff;box-shadow:0 0 0 1px rgba(90,184,255,.35),0 0 16px rgba(90,184,255,.18)}
+/* 튜토리얼 · 가이드 */
+.tut{position:fixed;inset:0;z-index:70;background:rgba(4,6,16,.82);display:flex;align-items:center;justify-content:center;padding:16px;animation:sfxfade .3s ease-out}
+.tutbox{width:min(380px,100%);background:linear-gradient(160deg,#1c2a55,#0d1430);border:1px solid #4a6ab0;border-radius:18px;padding:20px 16px 14px;box-shadow:0 10px 30px rgba(0,0,0,.6);animation:pop .3s ease-out}
+.tutic{font-size:46px;text-align:center;filter:drop-shadow(0 0 12px rgba(150,190,255,.6))}
+.tutt{font-family:'Noto Serif KR',serif;font-size:20px;font-weight:900;text-align:center;color:#fff;margin:6px 0 10px}
+.tutb{font-size:13.5px;line-height:1.65;color:#d6e2ff}.tutb b{color:#ffe38a}
+.tutrw{margin:12px 0 4px;padding:8px;border-radius:10px;background:rgba(255,214,110,.12);border:1px solid rgba(255,214,110,.4);color:#ffe9a8;font-size:13px;text-align:center;font-weight:700}
+.tutdots{display:flex;justify-content:center;gap:6px;margin:12px 0}.tutdots i{width:7px;height:7px;border-radius:50%;background:#3a4a7a}.tutdots i.on{background:#ffe08a}
+.tutbtns{display:grid;grid-template-columns:1fr 1.4fr;gap:8px}
+.tuttip{text-align:left}.tuttip .tutt{text-align:left;font-size:18px}.tuttip .small{margin-top:10px}
+.gsec{background:#0c1329;border:1px solid #2a3a6a;border-radius:12px;margin:8px 0;padding:0 12px}
+.gsec summary{cursor:pointer;padding:12px 0;font-weight:800;font-size:14.5px;list-style:none}.gsec summary::after{content:'＋';float:right;color:var(--dim)}.gsec[open] summary::after{content:'－'}
+.gsec .tutb{padding:0 0 12px}
 /* 캐릭터 맞추기 */
 .qtimer{position:relative;height:22px;border-radius:11px;background:#0c1329;overflow:hidden;margin:6px 0 10px;border:1px solid #2a3a6a}
 .qtimer i{position:absolute;left:0;top:0;bottom:0;background:linear-gradient(90deg,#4a8cff,#7fd0ff);transition:width .1s linear}
@@ -2392,6 +2405,59 @@ function quizEnd(quit){
       <div class="grid"><button class="btn danger full" id="qagain">🔁 다시 하기</button><button class="btn full" id="back">← 돌아가기</button></div></div>${tabBar()}`;
   $('#qagain').onclick=quizStart;$('#back').onclick=()=>renderAllyTab();
 }
+/* ===================== 튜토리얼 · 게임 가이드 ===================== */
+const TUT_REWARD={gold:10000,tickets:10};
+const TUT_PAGES=[
+  {ic:'🕊️',t:'푸른사제들에 온 것을 환영해!',b:'너는 악마를 쫓는 견습 사제야. 세계 곳곳의 솔로몬 72악마를 쓰러뜨리며 동료들과 함께 성장해 나가자.<br><br>화면 아래 탭으로 이동할 수 있어.<br><b>🕯 상점</b> 동료 소환 · 장비 · 아이템<br><b>🤝 동료</b> 출전 편성 · 성장 · 도감<br><b>🗺 모험</b> 스테이지 · 지역 이동 · 미션<br><b>🏰 던전</b> 60초 공격력 측정<br><b>👥 친구</b> 친구 · 랭킹'},
+  {ic:'⚔️',t:'모험과 전투',b:'모험 탭의 <b>🗺 스테이지 지도</b>에서 스테이지를 골라 싸워. 지역마다 15스테이지가 있고, 마지막에 <b>최종 보스</b>가 기다려. 최종 보스를 쓰러뜨리면 다음 지역이 열려.<br><br>전투는 실시간이야.<br><b>공격</b> 적을 때린다 — <b>5번마다 각성 스킬</b>이 자동으로 나간다<br><b>방어</b> 적이 <b>기를 모으면</b> 방어해서 큰 피해를 막자<br><b>아이템</b> 성수로 HP 회복<br>동료들은 알아서 함께 싸워.'},
+  {ic:'🤝',t:'동료 모으기',b:'<b>🕯 상점 › 동료 소환</b>에서 골드나 🎫 소환권으로 동료를 뽑아. 1성부터 6성까지 있고, 아주 드물게 🐾 펫도 나와.<br><br><b>🤝 동료 탭</b>에서 최대 <b>3명</b>을 출전시킬 수 있어. <b>이사벨 부제</b>(고정 조력자)와 <b>펫</b>은 자리를 차지하지 않고 항상 함께 출전해.<br><br>출전 프리셋 1·2에 파티를 저장해 두면 편해.'},
+  {ic:'📈',t:'성장시키기',b:'<b>레벨업</b> 전투 경험치나 골드로 동료 레벨을 올린다<br><b>합성</b> 같은 동료 카드가 모이면 한 단계 위 등급의 무작위 동료로 바꾼다 (★1 6장 · ★2 5장 · ★3 4장 · ★4 3장)<br><b>장비</b> 상점에서 검·갑옷을 강화해 주인공을 강하게<br><b>유물</b> 보스와 미션에서 얻는 유물은 능력치를 영구히 올려 준다'},
+  {ic:'💠',t:'5성 · 6성 동료 키우기',b:'<b>각성</b> 💠 천상의 성유물로 5성의 전투력을 올린다<br><b>신화 승급</b> 최대 레벨에 도달하면 골드(5성은 성유물도)로 승급 — 고유 능력이 생긴다<br><b>신뢰도</b> 💗 신뢰도 XP를 써서 전투력을 더 올린다<br><b>초월</b> 5각성 + 신화 5성을 ✴️ 구원의 조각으로 초월 (성공 20% · 전투력 2배)'},
+  {ic:'🏆',t:'더 즐길 거리',b:'<b>📜 미션</b> 지역 미션으로 소환권·유물 획득<br><b>⚔ 자유 사냥</b> 경험치·골드 3배, 자동으로 계속<br><b>🏅 랭크전</b> Lv 20부터 — 티어를 올려 보상<br><b>🗼 구원의 탑</b> Lv 50 + 지역 15곳 클리어 후<br><b>😈 마계</b> 지역 이동을 모두 끝내면 열리는 강한 보스들<br><b>🎡 행운의 룰렛</b> 15분마다 무료<br><br>언제든 모험 탭의 <b>📖 게임 가이드</b>에서 다시 볼 수 있어!'}];
+function startTutorial(fromGuide){
+  let i=0;const ov=document.createElement('div');ov.className='tut';document.body.appendChild(ov);
+  const draw=()=>{const pg=TUT_PAGES[i],last=i===TUT_PAGES.length-1,got=P.tutReward;
+    ov.innerHTML=`<div class="tutbox"><div class="tutic">${pg.ic}</div><div class="tutt">${pg.t}</div><div class="tutb">${pg.b}</div>
+      ${last?`<div class="tutrw">${got?'🎁 튜토리얼 보상은 이미 받았다':`🎁 완료 보상: 💰 ${fmt(TUT_REWARD.gold)} 코인 · 🎫 소환권 ${TUT_REWARD.tickets}장`}</div>`:''}
+      <div class="tutdots">${TUT_PAGES.map((_,j)=>`<i class="${j===i?'on':''}"></i>`).join('')}</div>
+      <div class="tutbtns">${i>0?'<button class="btn" id="tprev">← 이전</button>':'<button class="btn" id="tskip">건너뛰기</button>'}
+        <button class="btn primary" id="tnext">${last?(got?'닫기':'완료하고 보상 받기'):'다음 →'}</button></div></div>`;
+    if($('#tprev'))$('#tprev').onclick=()=>{i--;draw();};
+    if($('#tskip'))$('#tskip').onclick=()=>{ov.remove();P.tut=1;save();if(!fromGuide)renderHub('📖 튜토리얼은 모험 탭의 「게임 가이드」에서 언제든 다시 볼 수 있다 (완료 보상도 그때 받을 수 있다)');};
+    $('#tnext').onclick=()=>{if(!last){i++;draw();return;}ov.remove();P.tut=1;
+      if(!P.tutReward){P.tutReward=1;P.gold+=TUT_REWARD.gold;P.tickets+=TUT_REWARD.tickets;save();goldToast(TUT_REWARD.gold,'튜토리얼 완료 보상');renderHub(`🎁 튜토리얼 완료! 💰 ${fmt(TUT_REWARD.gold)} 코인 · 🎫 소환권 ${TUT_REWARD.tickets}장을 받았다 — 상점에서 동료를 소환해 보자`);}
+      else{save();fromGuide?renderGuide():renderHub();}};};
+  draw();
+}
+/* 시스템을 처음 열 때 한 번만 나오는 안내 */
+const TIPS={
+  rank:['🏅 랭크전','5성 동료 3명을 고른 AI 상대와 싸워 이기면 LP가 오르고, 100 LP를 모으면 다음 티어로 승급해. 티어가 오를수록 상대가 강해지고 승급 보상도 좋아져.'],
+  tower:['🗼 탑','동료 <b>1명</b>만 데리고 30층까지 오르는 도전이야. HP가 가득 찬 상태로 싸우고, 끝나면 원래 HP로 돌아와. 층을 처음 돌파할 때마다 보상이 있어. 구원의 탑을 정복하면 <b>천상의 탑</b>이 열려.'],
+  awaken:['💠 각성 · 신뢰도','5성 동료부터 💠 천상의 성유물로 <b>각성</b>할 수 있어. 각성할수록 전투력이 크게 오르고, 4·5번째 각성은 지역 이동을 모두 클리어해야 해.<br>티어가 있는 5성과 6성은 💗 신뢰도 XP로 <b>신뢰도</b>도 올릴 수 있어.'],
+  trans:['✴️ 초월','5각성과 신화 승급을 모두 마친 5성은 ✴️ 구원의 조각 1개로 <b>초월</b>에 도전할 수 있어 (성공 20%). 초월하면 전투력이 2배가 돼. 구원의 조각은 마계 최종 보스(5%) · 천상의 탑 · 캐릭터 맞추기에서 얻어.'],
+  dungeon:['🏰 던전','보스들이 차례로 나오는 <b>60초 공격력 측정</b>이야. 보스는 반격하지 않아. 기록은 매일 0시에 초기화되고 다른 플레이어와 랭킹으로 겨뤄.'],
+  realm:['😈 마계','지역 이동을 모두 끝내면 열리는 강한 보스들의 영역이야. 마계 최종 보스를 쓰러뜨리면 ✴️ 구원의 조각이 낮은 확률로 나와.']};
+function firstTip(k,cb){
+  P.tips=P.tips||{};if(P.tips[k]||!TIPS[k]){cb&&cb();return;}P.tips[k]=1;save();
+  const [t,b]=TIPS[k];showStory(`<div class="tuttip"><div class="tutt">${t}</div><div class="tutb">${b}</div><div class="small">📖 모험 탭 「게임 가이드」에서 다시 볼 수 있다</div></div>`,cb,true);
+}
+const GUIDE=()=>[
+  ['⚔️ 전투',TUT_PAGES[1].b.split('<br><br>')[1]],
+  ['🤝 동료 · 소환',`${TUT_PAGES[2].b}<br><br>소환 가격: 골드 1회 ${fmt(SUMMON_COST)} G · 11회 ${fmt(SUMMON11_COST)} G · 50회 ${fmt(SUMMON50_COST)} G`],
+  ['📈 성장',TUT_PAGES[3].b],
+  ['💠 5성 · 6성',TUT_PAGES[4].b],
+  ['🎒 아이템',`<b>💠 천상의 성유물</b> 각성 · 신뢰도 XP 구매 · 일부 코스튬 — 보스 첫 클리어, 탑, 랭크전, 미션 등에서 획득<br><b>✴️ 구원의 조각</b> 초월 — 마계 최종 보스(5%, 다니안 출전 시 +10%p), 천상의 탑, 캐릭터 맞추기<br><b>💗 신뢰도 XP</b> 신뢰도 +2 — 상점(성유물 10개), 행운의 룰렛, 일부 보스<br><b>🧩 기억의 퍼즐 조각</b> 기억 보관소에서 희귀 아이템으로 — 공구방 특별 미션<br><b>🎫 소환권</b> 동료 소환 — 미션, 첫 클리어 보상`],
+  ['🏆 콘텐츠',TUT_PAGES[5].b.split('<br><br>')[0]+'<br><b>☁️ 천상의 탑</b> 구원의 탑 정복 후<br><b>🏰 던전</b> 60초 공격력 측정 · 매일 랭킹<br><b>🎯 캐릭터 맞추기 · 🏡 우리의 정원</b> 동료 탭의 미니 콘텐츠'],
+  ...Object.values(TIPS).filter((_,i)=>i===0||i===1||i===3||i===5)];
+function renderGuide(){
+  hubTab='adv';
+  $('#app').innerHTML=`${statusHTML()}${topBack()}
+    <div class="panel"><div class="ptitle">📖 게임 가이드</div>
+      <button class="btn primary full" id="gtut">▶ 튜토리얼 다시 보기<small>${P.tutReward?'완료 보상 받음 ✔':`완료 보상: 💰 ${fmt(TUT_REWARD.gold)} 코인 · 🎫 소환권 ${TUT_REWARD.tickets}장`}</small></button>
+      ${GUIDE().map(([t,b])=>`<details class="gsec"><summary>${t}</summary><div class="tutb">${b}</div></details>`).join('')}
+      <button class="btn full" id="back">← 거점으로</button></div>${tabBar()}`;
+  $('#gtut').onclick=()=>startTutorial(true);$('#back').onclick=()=>renderHub();window.scrollTo(0,0);
+}
 /* 기억의 퍼즐: 사진이 나타났다가 퍼즐 조각으로 갈라져 흩어지고, 희귀 아이템이 나온다 */
 function puzzleFx(rid,cb){
   const C=5,Rw=6,r=RELICS[rid];
@@ -3018,8 +3084,8 @@ function renderTitle(){
   $('#newg').onclick=()=>{
     if(sv&&!overwriteArmed){overwriteArmed=true;$('#newg').textContent='기존 기록을 덮어씁니다 · 한 번 더 누르기';return;}
     const n=$('#nm').value.trim()||'견습 사제';
-    P=newPlayer(n);save();leaveTitle();
-    storyChain([INTRO,AREAS[0].intro],()=>renderHub());
+    P=newPlayer(n);P.tut=0;save();leaveTitle();
+    storyChain([INTRO,AREAS[0].intro],()=>{renderHub();startTutorial(false);});
   };
   if(sv)$('#cont').onclick=()=>{P=sv;leaveTitle();renderHub();};
   $('#loadcode').onclick=showLoadCode;
@@ -3831,6 +3897,7 @@ function renderDungeon(msg){
   $('#dgparty').onclick=()=>renderDungeonParty();
   $('#dghist').onclick=()=>renderDungeonHistory();
   document.querySelectorAll('[data-dgslot]').forEach(b=>b.onclick=()=>renderDungeonParty());
+  firstTip('dungeon');
 }
 /* 기록 하나의 딜 그래프 (주인공·이사벨·동료별 준 피해) */
 function showDgRecord(r,heroName,sub){
@@ -4009,6 +4076,7 @@ function renderHub(msg){
         <button class="btn m-tower" id="tower" ${towerOpen()?'':'disabled'}>${towerOpen()?`🗼 구원의 탑<small>${towerState().best>=TOWER_MAX?`${TOWER_MAX}층 정복 ✔`:`${towerState().best}/${TOWER_MAX}층 · 동료 1명`}</small>`:`🔒 구원의 탑<small>Lv ${TOWER_MIN_LV} · 지역 ${realmStart()}곳 클리어 (${worldClearCount()}/${realmStart()})</small>`}</button></div>
         <button class="btn m-adv" id="hunt">⚔ 자유 사냥 (자동)<small>경험치·골드 ×${HUNT_MULT} · 멈출 때까지 반복</small></button>${farmReady()?`<button class="btn m-adv" id="gfarm">🔁 천상의 성유물작<small>서울 최종 보스 자동 반복 · ${FARM_TARGET}번 잡으면 멈춤</small></button>`:''}
         <button class="btn m-rest" id="rest" ${restLeft()>0?'disabled':''}>${restLabel()}</button>
+        <button class="btn m-adv full" id="guide">📖 게임 가이드<small>${P.tutReward?'시스템 설명 · 튜토리얼 다시 보기':`튜토리얼 완료 보상: 💰 ${fmt(TUT_REWARD.gold)} · 🎫 ${TUT_REWARD.tickets}장`}</small></button>
       </div>
     </div>
     <div class="panel"><div class="ptitle">🧭 지역 이동 <span class="small">개방 ${Math.min(P.unlocked+1,RS)}/${RS}</span></div><div class="areas">${areas}</div></div>
@@ -4024,8 +4092,9 @@ function renderHub(msg){
   if($('#gfarm'))$('#gfarm').onclick=()=>startGlasyaFarm();
   $('#hunt').onclick=()=>{autoHunt={on:true,area:P.cur,n:0,xp:0,gold:0};startBattle({area:P.cur,hunt:true});};
   $('#map').onclick=()=>renderMap(P.cur);
-  if($('#rank'))$('#rank').onclick=()=>renderRank();
-  if($('#tower'))$('#tower').onclick=()=>renderTowerSelect();
+  $('#guide').onclick=()=>renderGuide();
+  if($('#rank'))$('#rank').onclick=()=>firstTip('rank',()=>renderRank());
+  if($('#tower'))$('#tower').onclick=()=>firstTip('tower',()=>renderTowerSelect());
   $('#rest').onclick=()=>{
     if(restLeft()>0)return;
     P.hp=P.maxHp;P.mp=P.maxMp;P.restAt=Date.now();save();
@@ -4036,6 +4105,7 @@ function renderHub(msg){
     const b=$('#rest');if(!b){clearInterval(restTimer);return;}
     b.disabled=restLeft()>0;b.innerHTML=restLabel();
   },1000);
+  if(AREAS[P.cur]&&AREAS[P.cur].realm&&!document.querySelector('.tut'))firstTip('realm');
 }
 /* 하단 탭: 상점 · 동료 · 모험 · 던전 · 친구 */
 let hubTab='adv';
@@ -4331,6 +4401,7 @@ function renderAllies(msg){
   document.querySelectorAll('[data-sort]').forEach(b=>b.onclick=()=>{allySort=b.dataset.sort;try{localStorage.setItem('bp_ally_sort',allySort)}catch(e){}
     const y=window.scrollY;renderAllies();window.scrollTo(0,y);});
   $('#back').onclick=()=>renderHub();
+  if(Object.keys(ALLIES).some(id=>owned(id)&&ALLIES[id].star>=5&&!ALLIES[id].pet))firstTip('awaken',()=>{if(Object.keys(ALLIES).some(transReady))firstTip('trans');});
 }
 function allyLevelUp(id){
   const d=aData(id),c=aCost(id);
