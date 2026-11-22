@@ -416,6 +416,7 @@ body.pfrozen #cmds .btn{filter:saturate(.2) brightness(1.2);background:linear-gr
 .room .fr .say{position:absolute;bottom:100%;left:50%;transform:translateX(-50%);background:#fff;color:#222;font-size:11px;border-radius:8px;padding:2px 6px;white-space:nowrap;box-shadow:0 2px 6px rgba(0,0,0,.25);animation:pop .3s ease-out}
 @keyframes bob{from{transform:translateY(0)}to{transform:translateY(-3px)}}
 .petstar{color:#8fdcff!important;text-shadow:0 0 6px #4ab8ff,0 0 12px rgba(80,180,255,.7)!important}
+.petpanel{border-color:#5ab8ff;box-shadow:0 0 0 1px rgba(90,184,255,.35),0 0 16px rgba(90,184,255,.18)}
 /* 캐릭터 맞추기 */
 .qtimer{position:relative;height:22px;border-radius:11px;background:#0c1329;overflow:hidden;margin:6px 0 10px;border:1px solid #2a3a6a}
 .qtimer i{position:absolute;left:0;top:0;bottom:0;background:linear-gradient(90deg,#4a8cff,#7fd0ff);transition:width .1s linear}
@@ -4081,7 +4082,7 @@ function sortieSlotsHTML(inMgmt){
       <b>${nameHTML(id)}</b><small>Lv ${aData(id).lv} · ⚔ ${fmt(allyCP(id))}</small></button>`;
   };
   return `<div class="slots">${[0,1,2].slice(0,MAX_ACTIVE).map(slot).join('')}</div>
-    ${inMgmt?'':`<div class="fixedrow">${allyFace(FIXED,'xs')} 고정 조력자 <b>${ALLIES[FIXED].name}</b> <span class="small">Lv ${aData(FIXED).lv} · 항상 함께 출전</span></div>`}`;
+    ${inMgmt?'':`<div class="fixedrow">${allyFace(FIXED,'xs')} 고정 조력자 <b>${ALLIES[FIXED].name}</b> <span class="small">Lv ${aData(FIXED).lv} · 항상 함께 출전</span></div>${petParty().map(k=>`<div class="fixedrow">${allyFace(k,'xs')} 🐾 펫 <b>${ALLIES[k].name}</b> <span class="small">Lv ${aData(k).lv} · 자동 출전</span></div>`).join('')}`}`;
 }
 document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('[data-slot]');if(b){e.preventDefault();renderAllies();window.scrollTo(0,0);}});
 /* 동료 탭 */
@@ -4270,7 +4271,7 @@ let allyQuery='';
 function renderAllies(msg){
   const tierRank=id=>TIER5[id]?(10-TIER5[id]):0;   // 1티어가 가장 위
   const key={tier:id=>tierRank(id)*1e7+allyCP(id),lv:id=>aData(id).lv,cp:id=>allyCP(id),cnt:id=>P.roster[id]||0}[allySort]||(id=>allyCP(id));
-  const own=Object.keys(ALLIES).filter(id=>owned(id)&&id!==FIXED).sort((x,y)=>ALLIES[y].star-ALLIES[x].star||key(y)-key(x)||allyCP(y)-allyCP(x));
+  const own=Object.keys(ALLIES).filter(id=>owned(id)&&id!==FIXED&&!ALLIES[id].pet).sort((x,y)=>ALLIES[y].star-ALLIES[x].star||key(y)-key(x)||allyCP(y)-allyCP(x));
   const qn=t=>String(t||'').replace(/\s+/g,'').toLowerCase();
   let shown=[];
   const calcShown=()=>{const q=qn(allyQuery);shown=q?own.filter(id=>qn(ALLIES[id].name).includes(q)):own.filter(id=>allyStar==='all'||ALLIES[id].star===+allyStar);};
@@ -4301,7 +4302,9 @@ function renderAllies(msg){
       <div class="teamcp">⚔ 팀 전투력 <b>${fmt(teamCP())}</b></div>
       <div class="small cpbreak">주인공 ${fmt(heroCP())}${partyIds().map(id=>` · ${ALLIES[id].name} ${fmt(allyCP(id))}`).join('')}</div></div>
     <div class="panel"><div class="ptitle">🕊️ 고정 조력자</div>${allyCard(FIXED)}</div>
-    <div class="panel"><div class="ptitle">🤝 보유 동료 <span class="small">도감 ${own.length}/${Object.keys(ALLIES).length-1} · 출전 ${P.active.length}/${MAX_ACTIVE} · ${AWAKEN_ITEM.icon} ${AWAKEN_ITEM.name} ${P.items.stone}개 · ${SALV_ITEM.icon} ${SALV_ITEM.name} ${P.items.salv||0}개</span></div>
+    <div class="panel petpanel"><div class="ptitle">🐾 펫 <span class="small">보유 ${PET_IDS().filter(owned).length}/${PET_IDS().length} · 이사벨 부제처럼 자동 출전</span></div>
+      ${PET_IDS().filter(owned).length?PET_IDS().filter(owned).map(allyCard).join(''):`<div class="desc">아직 펫이 없다. 상점 동료 소환에서 🐾 0.05% 확률로 만날 수 있다.<br>${PET_IDS().map(k=>`${allyFace(k,'xs')} <span class="petstar">★★★★★</span> ${ALLIES[k].name}`).join(' · ')}</div>`}</div>
+    <div class="panel"><div class="ptitle">🤝 보유 동료 <span class="small">도감 ${own.length}/${Object.keys(ALLIES).filter(k=>!ALLIES[k].pet).length-1} · 출전 ${P.active.length}/${MAX_ACTIVE} · ${AWAKEN_ITEM.icon} ${AWAKEN_ITEM.name} ${P.items.stone}개 · ${SALV_ITEM.icon} ${SALV_ITEM.name} ${P.items.salv||0}개</span></div>
       <div class="desc">출전 동료와 이사벨은 전투 경험치를 함께 얻는다. 골드로 바로 레벨업할 수도 있다.</div>
       ${(()=>{const pl=synthPlan(),t=pl.reduce((s,x)=>s+x.n,0);return `<button class="btn ${t?'danger':''} synall" id="synall" ${t?'':'disabled'}>🔮 일괄 합성${t?` (${t}회 가능)`:''}<small>${t?'재료가 모인 모든 캐릭터를 한 번에 합성':'합성할 수 있는 캐릭터가 없음'}</small></button>`;})()}
       <div class="asearch"><input id="aq" type="text" enterkeyhint="search" autocomplete="off" placeholder="🔍 동료 이름 검색" value="${esc(allyQuery)}"><button class="btn" id="aqx" ${allyQuery?'':'hidden'}>✕</button></div>
