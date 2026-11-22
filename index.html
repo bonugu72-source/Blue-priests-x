@@ -1232,7 +1232,9 @@ const ALLIES={
   elizabeth:{star:6,name:'엘리자베스',   icon:'👑', role:'최후의 여왕', kit:'queen', exclusive:true,
             desc:'심판(3초마다 적에게 무작위로 출혈 · 속박 · 시야 차단 · 공격 반사 중 하나를 3초간 + 공격력의 절반만큼 주인공에게 보호막 · 보호막 중첩 가능) · 천상의 탑 30층 돌파 보상으로만 획득 (상점·합성 불가)'},
   hari:    {star:5,pet:true,name:'하리뭉',   icon:'🐲', role:'펫 · 아기 번개용', kit:'firepet',
-            desc:'불꽃쇼(3초마다 적에게 화상 · 화상으로 입힌 피해만큼 동료 전원에게 보호막) · 🐾 펫: 이사벨 부제처럼 자동으로 출전 (출전 칸 차지 안 함) · 상점 동료 소환에서만 획득 (0.05%)'},
+            desc:'불꽃쇼(3초마다 적에게 화상 · 화상으로 입힌 피해만큼 동료 전원에게 보호막) · 🐾 펫: 출전 펫으로 고르면 자동 출전 (출전 칸 차지 안 함 · 펫은 1마리만) · 상점 동료 소환에서만 획득'},
+  baem:    {star:5,pet:true,name:'뱀뱀',     icon:'🐍', role:'펫 · 아기 황금뱀', kit:'bloodpet',
+            desc:'흡혈 송곳니(3초마다 적에게 출혈 · 출혈로 입힌 피해만큼 주인공과 동료 전원 HP 회복) · 🐾 펫: 출전 펫으로 고르면 자동 출전 (출전 칸 차지 안 함 · 펫은 1마리만) · 상점 동료 소환에서만 획득'},
   miner:   {star:5,name:'미네르',        icon:'🌊', role:'물의 여신', kit:'tide', hpMul:0.6,
             desc:'침몰(적을 물속으로 끌어내려 3턴간 적 공격력 감소) · 물보라(2턴간 동료가 받는 피해 절반) · 체력이 적어 쉽게 쓰러지지만, 쓰러지면 물의 여신 「미네르바」로 각성해 HP 60%로 부활(1회) — 이후 공격이 고정 피해 + 치명타'},
   vista5:  {star:5,name:'비스타',        icon:'🚂', role:'열차 소환', kit:'train',
@@ -1289,6 +1291,7 @@ const ALLY_IMG={
   roa:{src:'ally_roa.jpg',pos:'50% 24%',face:'53% 24%',size:'380%'},
   muhee:{src:'ally_muhee.jpg',pos:'50% 20%',face:'50% 24%',size:'420%'},
   aora:{src:'ally_aora.jpg',pos:'50% 18%',face:'52% 18%',size:'400%'},
+  baem:{src:'pet_baem.jpg',pos:'40% 40%',face:'38% 39%',size:'260%'},
   hari:{src:'pet_hari.jpg',pos:'40% 26%',face:'38% 34%',size:'240%'},
   elizabeth:{src:'ally_elizabeth.jpg',pos:'50% 16%',face:'50% 17%',size:'560%'},
   akira:{src:'ally_akira.jpg',pos:'50% 18%',face:'50% 21%',size:'560%'},
@@ -1368,7 +1371,7 @@ function allyPortrait(id){
 const allyIds=star=>Object.keys(ALLIES).filter(k=>ALLIES[k].star===star&&!ALLIES[k].exclusive&&!ALLIES[k].pet); // exclusive: 보상으로만 획득 · pet: 펫 전용 확률
 /* 펫: 소환 0.05% · 별은 하늘색 · 보유하면 이사벨 부제처럼 자동 출전 */
 const PET_IDS=()=>Object.keys(ALLIES).filter(k=>ALLIES[k].pet);
-const petParty=()=>PET_IDS().filter(k=>owned(k)).slice(0,1);
+const petParty=()=>{const L=PET_IDS().filter(k=>owned(k));if(!L.length)return [];return [P.petSel&&L.includes(P.petSel)?P.petSel:L[0]];}; // 출전 펫은 1마리 (동료 관리에서 선택)
 const starsOf=al=>al.pet?`<span class="petstar">${'★'.repeat(al.star)}</span>`:'★'.repeat(al.star);
 
 /* 유물 (보스 인장) */
@@ -3564,6 +3567,7 @@ function pvpEnemyActs(e){
       case 'justice':  if(!B.pvpMuhee&&Date.now()-(B.startAt||0)>=(a.my?3000:5000)){B.pvpMuhee=true;const d=Math.floor(P.hp/2);P.hp-=d;estat('dmg',a.id,d);addLog(`⚖️ ${nm}의 정의! 주인공 체력 절반(${d})을 앗아갔다`);queueFx('player','⚖️-'+d,'pdmg');}break;
       case 'aora':     if(Math.random()<0.3){B.curse=Math.max(B.curse,2);addLog(`${nm}의 천사의 구원 — 주인공이 속박되어 방어력 감소`);}else dmg(16+lv*5,0.3,`${nm}의 천사의 심판`);break;
       case 'firepet':  dmg(12+lv*4,0.4,`${nm}의 불꽃쇼`);break;
+      case 'bloodpet': dmg(12+lv*4,0.4,`${nm}의 흡혈 송곳니`);if(e.hp<e.maxHp)heal(0.03);break;
       case 'queen':    dmg(16+lv*5,0.4,`${nm}의 여왕의 검`);break;
       case 'frost':    if(Math.random()<0.4){const d=dmg((13+lv*4.2)*2,0.4,`${nm}의 급소 사격 (치명타)`);if(e.hp<e.maxHp)heal(0.05);}else dmg(13+lv*4.2,0.4,`${nm}의 서리 화살`);break;
       case 'dice':     {const n=1+Math.floor(Math.random()*6);if(n===1&&e.hp<e.maxHp)heal(0.15);else dmg((14+lv*4.5)*(n===3?2:1),0.4,`${nm}의 운명의 점 ${n} — 예언의 광선`);if(n===5)dmg(14+lv*4.5,0.4,`${nm}의 예언의 광선 — 연속`);}break;
@@ -4291,7 +4295,7 @@ function allyCard(id){
   const on=P.active.includes(id),cnt=P.roster[id]||0,needSyn=SYN_NEED[al.star];
   const aw=P.awaken[id]||0;
   const btns=[];
-  if(al.pet)btns.push(`<button class="btn" disabled>🐾 자동 출전</button>`);
+  if(al.pet)btns.push(petParty()[0]===id?`<button class="btn primary" disabled>🐾 출전 중</button>`:`<button class="btn" data-petsel="${id}">🐾 이 펫으로 출전</button>`);
   else if(!isFixed)btns.push(`<button class="btn ${on?'primary':''}" data-sortie="${id}">${on?'출전 중':'대기'}</button>`);
   btns.push(d.lv>=cap?`<button class="btn" disabled>최대 레벨</button>`
     :`<button class="btn ${P.gold>=aCost(id)?'primary':''}" data-alv="${id}" ${P.gold<aCost(id)?'disabled':''}>레벨업 ${aCost(id)} G</button>`);
@@ -4433,7 +4437,7 @@ function renderAllies(msg){
       <div class="teamcp">⚔ 팀 전투력 <b>${fmt(teamCP())}</b></div>
       <div class="small cpbreak">주인공 ${fmt(heroCP())}${partyIds().map(id=>` · ${ALLIES[id].name} ${fmt(allyCP(id))}`).join('')}</div></div>
     <div class="panel"><div class="ptitle">🕊️ 고정 조력자</div>${allyCard(FIXED)}</div>
-    <div class="panel petpanel"><div class="ptitle">🐾 펫 <span class="small">보유 ${PET_IDS().filter(owned).length}/${PET_IDS().length} · 이사벨 부제처럼 자동 출전</span></div>
+    <div class="panel petpanel"><div class="ptitle">🐾 펫 <span class="small">보유 ${PET_IDS().filter(owned).length}/${PET_IDS().length} · 고른 펫 1마리가 자동 출전</span></div>
       ${PET_IDS().filter(owned).length?PET_IDS().filter(owned).map(allyCard).join(''):`<div class="desc">아직 펫이 없다. 상점 동료 소환에서 🐾 0.05% 확률로 만날 수 있다.<br>${PET_IDS().map(k=>`${allyFace(k,'xs')} <span class="petstar">★★★★★</span> ${ALLIES[k].name}`).join(' · ')}</div>`}</div>
     <div class="panel"><div class="ptitle">🤝 보유 동료 <span class="small">도감 ${own.length}/${Object.keys(ALLIES).filter(k=>!ALLIES[k].pet).length-1} · 출전 ${P.active.length}/${MAX_ACTIVE} · ${AWAKEN_ITEM.icon} ${AWAKEN_ITEM.name} ${P.items.stone}개 · ${SALV_ITEM.icon} ${SALV_ITEM.name} ${P.items.salv||0}개</span></div>
       <div class="desc">출전 동료와 이사벨은 전투 경험치를 함께 얻는다. 골드로 바로 레벨업할 수도 있다.</div>
@@ -4445,6 +4449,7 @@ function renderAllies(msg){
     <button class="btn" id="back">← 돌아가기</button>${tabBar()}`;
   const bindCards=()=>{
   document.querySelectorAll('[data-sortie]').forEach(b=>b.onclick=()=>toggleSortie(b.dataset.sortie));
+  document.querySelectorAll('[data-petsel]').forEach(b=>b.onclick=()=>{P.petSel=b.dataset.petsel;save();renderAllies(`🐾 ${ALLIES[P.petSel].name}이(가) 출전 펫이 되었다`);});
   document.querySelectorAll('[data-syn]').forEach(b=>b.onclick=()=>synthesize(b.dataset.syn));
   document.querySelectorAll('[data-alv]').forEach(b=>b.onclick=()=>allyLevelUp(b.dataset.alv));
   document.querySelectorAll('[data-awk]').forEach(b=>b.onclick=()=>awaken(b.dataset.awk));
@@ -4689,7 +4694,7 @@ function winNow(){
   if(B.dungeon){dungeonNextBoss();return;}   // 던전: 승리 대신 다음 보스
   if((B.e.berserk&&!B.berserked)||(B.e.madness&&!B.maddened)||(B.e.awaken&&!B.awoke)||(B.e.twin&&!B.twinned)||(B.e.relay&&(B.relayStage||0)<2)||(B.e.lastStand&&!B.lastStood)||(B.e.rampage&&!B.rampaged)||(B.e.duckHide&&!B.remHid)){B.e.hp=Math.max(1,B.e.hp);renderBattle();return;}
   B.won=true;B.busy=true;if(B.enemyT)clearInterval(B.enemyT);if(B.allyT)clearInterval(B.allyT);if(B.freezeT)clearInterval(B.freezeT);document.body.classList.remove('pfrozen');if(B.sakuraT)clearInterval(B.sakuraT);if(B.paraT)clearInterval(B.paraT);if(B.waveT)clearInterval(B.waveT);if(B.soulT)clearInterval(B.soulT);if(B.drainT)clearInterval(B.drainT);if(B.tsT)clearInterval(B.tsT);
-  if(B.zapT)clearInterval(B.zapT);if(B.karmaT)clearInterval(B.karmaT);if(B.trainT)clearInterval(B.trainT);if(B.aoraT)clearInterval(B.aoraT);if(B.autoT)clearInterval(B.autoT);if(B.diceT)clearInterval(B.diceT);if(B.judgeT)clearInterval(B.judgeT);if(B.hariT)clearInterval(B.hariT);if(B.coldT)clearInterval(B.coldT);if(B.heartT)clearInterval(B.heartT);if(B.halfT)clearInterval(B.halfT);if(B.fallT)clearInterval(B.fallT);if(B.isaT)clearInterval(B.isaT);
+  if(B.zapT)clearInterval(B.zapT);if(B.karmaT)clearInterval(B.karmaT);if(B.trainT)clearInterval(B.trainT);if(B.aoraT)clearInterval(B.aoraT);if(B.autoT)clearInterval(B.autoT);if(B.diceT)clearInterval(B.diceT);if(B.judgeT)clearInterval(B.judgeT);if(B.hariT)clearInterval(B.hariT);if(B.baemT)clearInterval(B.baemT);if(B.coldT)clearInterval(B.coldT);if(B.heartT)clearInterval(B.heartT);if(B.halfT)clearInterval(B.halfT);if(B.fallT)clearInterval(B.fallT);if(B.isaT)clearInterval(B.isaT);
   renderBattle();setTimeout(victory,750);
 }
 /* 이사벨 부제: 5초마다 주인공 HP 40% 회복 */
@@ -4763,6 +4768,20 @@ function hariTick(){
   if(!B.immune){stat('dmg',id,Math.min(d,e.hp));e.hp=Math.max(0,e.hp-d);}
   B.dshield=B.dshield||{};partyIds().forEach(x=>{const a=B.ahp[x];if(a&&a.hp>0)B.dshield[x]=Math.max(B.dshield[x]||0,d);});
   addLog(`🎆 하리뭉의 불꽃쇼! ${e.name}에게 화상 ${d} · 동료 전원 보호막 ${d}`);queueFx('enemy','🔥'+d,'dmg');
+  if(e.hp<=0){winNow();return;}
+  renderBattle();
+}
+/* 펫 뱀뱀: 3초마다 흡혈 송곳니 — 적에게 출혈(고정 피해) · 그만큼 주인공·동료 전원 회복 */
+const BAEM_MS=3000;
+function baemTick(){
+  if(!B||B.over||B.won||!$('#modal').classList.contains('hidden'))return;
+  const id='baem',h=B.ahp[id],e=B.e;
+  if(!inParty(id)||(h&&h.hp<=0)||(B.stun[id]>0)||aFrozen()||e.hp<=0||P.hp<=0)return;
+  const d=Math.max(1,Math.round((12+aData(id).lv*4)*allyMult(id)));
+  if(!B.immune){stat('dmg',id,Math.min(d,e.hp));e.hp=Math.max(0,e.hp-d);}
+  const hh=Math.min(P.maxHp-P.hp,Math.round(d*pHealMul()));if(hh>0){P.hp+=hh;stat('heal',id,hh);queueFx('player','🐍+'+hh,'heal');}
+  partyIds().forEach(x=>{const a=B.ahp[x];if(a&&a.hp>0){const g=Math.min(a.max-a.hp,d);if(g>0){a.hp+=g;stat('heal',id,g);}}});
+  addLog(`🐍 뱀뱀의 흡혈 송곳니! ${e.name}에게 출혈 ${d} · 주인공과 동료 전원 HP +${d}`);queueFx('enemy','🩸'+d,'dmg');
   if(e.hp<=0){winNow();return;}
   renderBattle();
 }
@@ -5008,6 +5027,7 @@ function startBattle(spec){
     if(B&&inParty('babelord'))B.diceT=setInterval(diceTick,diceMs());
     if(B&&inParty('elizabeth'))B.judgeT=setInterval(judgeTick,JUDGE_MS);
     if(B&&inParty('hari'))B.hariT=setInterval(hariTick,HARI_MS);
+    if(B&&inParty('baem'))B.baemT=setInterval(baemTick,BAEM_MS);
     if(B&&inParty('akira')&&isMyth('akira'))B.coldT=setInterval(akiraColdTick,AKIRA_COLD_MS);
     if(B&&inParty('roa'))B.heartT=setInterval(heartTick,HEART_MS);
     if(B&&t.halfTick&&!t.pvp){B.halfAt=Date.now()+t.halfTick;B.halfT=setInterval(halfTick,t.halfTick);}
@@ -5702,6 +5722,7 @@ function alliesAct(){
         }
         break;}
       case 'firepet': break; // 하리뭉: 불꽃쇼는 hariTick
+      case 'bloodpet': break; // 뱀뱀: 흡혈 송곳니는 baemTick
       case 'queen':{ // 엘리자베스: 여왕의 검 (심판은 judgeTick)
         allyHit(16+lv*5,`${nm}의 여왕의 검`,0.4);break;}
       case 'frost':{ // 아키라: 얼어붙은 화살 · 급소 사격(치명타 + 피해 절반 회복) · 신화 혹한의 화살
