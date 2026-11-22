@@ -255,6 +255,8 @@ body.title-mode{overflow:hidden}
 .pf-naberius.p2 img{filter:saturate(1.3) contrast(1.1)}
 .pf-chahuia{box-shadow:0 0 30px rgba(140,180,255,.75),0 0 90px rgba(200,170,255,.35)}
 .pf-chahuia .pglow{background:radial-gradient(ellipse at 50% 100%,rgba(140,170,255,.5),transparent 65%);animation:breathe 2.4s ease-in-out infinite}
+.pf-marteria{box-shadow:0 0 30px rgba(124,255,90,.75),0 0 90px rgba(60,200,60,.4)}
+.pf-marteria .pglow{background:radial-gradient(ellipse at 50% 100%,rgba(124,255,90,.5),transparent 65%);box-shadow:inset 0 0 50px rgba(0,30,0,.7);animation:breathe 2.2s ease-in-out infinite}
 .pf-remian{box-shadow:0 0 30px rgba(255,90,140,.8),0 0 90px rgba(170,90,255,.4)}
 .pf-remian .pglow{background:radial-gradient(ellipse at 50% 100%,rgba(255,90,140,.5),transparent 65%);box-shadow:inset 0 0 50px rgba(40,0,20,.7);animation:breathe 2s ease-in-out infinite}
 .pf-aprabaidon{box-shadow:0 0 30px rgba(90,168,255,.85),0 0 90px rgba(40,100,255,.45)}
@@ -1874,6 +1876,27 @@ const AREAS=[
       ducks:{every:5000,stun:2000,cut:0.5,bigEvery:4000,bigPct:0.4}, duckHide:{at:20000,dur:5000,healPct:0.03,reflect:0.5,line:'"…귀찮아. 너희는 오리랑 놀아."\n\n레미안이 수백 마리 오리 떼 사이로 몸을 숨긴다. 오리들이 꽥꽥거리며 앞을 가로막는다.\n\n— 5초간 레미안은 오리 사이에 숨어 체력을 회복한다 · 오리들은 주인공 공격의 절반을 동료에게 되튕긴다 —'},
       pre:'검은 날개를 펼친 소녀가 양손 가득 푸른 오리를 들어 올린다. 보랏빛 눈동자가 차갑게 빛난다.\n\n"지옥의 공주, 레미안. 길을 잃었으면 내가 안내해 줄게 — 저승으로."',
       moves:[{t:'atk',n:'오리 던지기'},{t:'strong',n:'지옥의 꽥'},{t:'multi',n:'오리 소나기',hits:4,m:0.35},{t:'curse',n:'공주의 저주'},{t:'sweep',n:'검은 깃털 폭풍',m:0.18},{t:'charge',n:'오리 대폭격'}]}
+  },
+  { name:'저승의 낙원', realm:'demon', country:'마계 · 초록 불꽃이 타오르는 죽음의 숲', flag:'🌿', rec:82, recEnd:86, glow:'#7cff5a',
+    desc:'저승 한가운데 숨겨진 낙원. 푸르른 숲과 잔잔한 호수 위로 초록빛 저주의 불꽃이 피어오른다. 숲의 관리인은 침입자를 결코 용서하지 않는다.',
+    intro:'붉은 폐허를 지나자 믿기 어려운 풍경이 펼쳐졌다. 푸른 숲, 잔잔한 호수, 은은한 가로등 불빛.\n\n하지만 나무 사이로 피어오르는 것은 안개가 아니었다 — 초록빛 저주의 불꽃이었다.\n\n"어머, 손님이네. 내 정원을 밟은 대가는… 비싸."',
+    outro:'초록 불꽃이 하나둘 꺼지고, 숲이 처음으로 조용해졌다.\n\n마르테리아가 가시 왕관을 벗어 나뭇가지에 걸었다. "…이 숲도, 언젠가는 진짜 낙원이 될 수 있을까."\n\n호수 위로 맑은 빛이 내려앉는다.\n\n— 저승의 낙원 해방 —',
+    enemies:[
+      {name:'저주받은 덩굴',       icon:'🌿', hp:1120, atk:164, def:74, xp:460, gold:230, demon:true, moves:[{t:'atk',n:'휘감는 덩굴'},{t:'dot',n:'독가시',dn:'중독'},{t:'atk',n:'휘감는 덩굴'}]},
+      {name:'초록 불꽃의 반딧불',   icon:'✨', hp:1040, atk:170, def:62, xp:461, gold:231, demon:true, moves:[{t:'atk',n:'불씨 쏘기'},{t:'sweep',n:'초록 불꽃 비',m:0.15},{t:'silence',n:'홀리는 빛'}]},
+      {name:'호수의 망령 기사',     icon:'⚔️', hp:1180, atk:166, def:80, xp:463, gold:232, demon:true, moves:[{t:'strong',n:'젖은 대검'},{t:'atk',n:'방패 밀치기'},{t:'curse',n:'호수의 저주'}]},
+      {name:'가시 장미 정령',       icon:'🌹', hp:1060, atk:172, def:66, xp:462, gold:231, demon:true, moves:[{t:'multi',n:'가시 꽃잎',hits:3,m:0.45},{t:'drain',n:'피 빠는 장미'},{t:'atk',n:'가시 채찍'}]},
+      {name:'뿔 달린 숲 요정',      icon:'🧝', hp:1100, atk:168, def:70, xp:464, gold:232, demon:true, moves:[{t:'atk',n:'요정의 장난'},{t:'curse',n:'타락한 축복'},{t:'strong',n:'숲의 분노'}]}
+    ],
+    elite:{name:'고목의 수호자', icon:'🌳', hp:19000, atk:210, def:72, xp:2500, gold:1900, demon:true,
+      moves:[{t:'strong',n:'뿌리 강타'},{t:'multi',n:'가지 채찍',hits:3,m:0.55},{t:'curse',n:'썩어 가는 숲'},{t:'charge',n:'대지의 분노'}]},
+    mid:{name:'바알', art:'bael', title:'솔로몬 72악마 · 제1영 · 왕 · 66군단', hp:41000, atk:216, def:68, xp:9800, gold:7400, demon:true,
+      pre:'사람과 고양이와 두꺼비, 세 개의 머리를 가진 왕이 거미 다리로 숲을 가로지른다. 쉰 목소리가 숲 전체에 울린다.\n\n"제1영 바알이다. 보이지 않는 것이 가장 무서운 법이지."',
+      moves:[{t:'atk',n:'거미 다리 찌르기'},{t:'strong',n:'세 머리의 포효'},{t:'multi',n:'66군단의 습격',hits:3,m:0.5},{t:'curse',n:'투명화의 저주'},{t:'charge',n:'왕의 위엄'}]},
+    boss:{name:'마르테리아', art:'marteria', title:'타락천사 · 숲속의 관리인', hp:150000, exactHp:true, atk:225, def:70, xp:65000, gold:90000, goldFirst:0, goldRepeat:90000, salvFirst:4, demon:true,
+      magic:true, allyCritVoid:true, reflectAll:0.5,
+      pre:'초록 불꽃을 두른 타락천사가 고목 위에 앉아 다리를 꼰다. 가시 왕관 아래, 붉은 눈이 즐겁다는 듯 가늘어진다.\n\n"숲속의 관리인, 마르테리아. 이 낙원에서는 내 규칙만 통해 — 너희 칼날은 나에게 닿지 않아."',
+      moves:[{t:'atk',n:'초록 저주탄'},{t:'strong',n:'타락의 불꽃'},{t:'multi',n:'가시 덩굴 폭풍',hits:4,m:0.35},{t:'curse',n:'숲의 저주'},{t:'sweep',n:'낙원의 업화',m:0.18},{t:'charge',n:'관리인의 심판'}]}
   }
 
 ];
@@ -1886,7 +1909,7 @@ const stageRec=(a,s)=>Math.round(AREAS[a].rec+(s-1)*(AREAS[a].recEnd-AREAS[a].re
 const RT={atkCd:1500,defCd:400,itemCd:1500,fleeCd:1000,allyMs:1500,bossMs:1500,midMs:1600,normalMs:1800};
 const DEF_FLOOR=0.3; // 방어력이 아무리 높아도 적 공격의 30%는 들어감
 const ENEMY_MULT=1.3, LATE_BOSS_MULT=1.1; // 적 공격력·체력 1.3배 (나베리우스·보티스는 1.1배)
-const NORMAL_HP=[2.4,4,4.5,5,5.5,6,6.5,7,7.5,8,8.5,9,9.5,10,10.5,11,11.5,12,12.5,13,13.5], NORMAL_REWARD=1.5; // 일반 적이 몇 턴은 버티며 공격하도록
+const NORMAL_HP=[2.4,4,4.5,5,5.5,6,6.5,7,7.5,8,8.5,9,9.5,10,10.5,11,11.5,12,12.5,13,13.5,14], NORMAL_REWARD=1.5; // 일반 적이 몇 턴은 버티며 공격하도록
 function scaleBase(base,a,s){
   const f=1+0.06*(s-1);
   return {...base,hp:Math.round(base.hp*f*NORMAL_HP[a]),atk:Math.round(base.atk*f),def:Math.round(base.def*(1+0.04*(s-1))),
@@ -2071,6 +2094,11 @@ const ART={
       <path d="M92,90 C88,80 92,70 100,68 C108,70 112,80 108,90 Z"/>
       <path d="M90,74 C84,82 82,96 86,106 L90,92 Z M110,74 C116,82 118,96 114,106 L110,92 Z"/>`,
     eyes:`<circle cx="96" cy="80" r="2"/><circle cx="104" cy="80" r="2"/>`},
+  bael:{c:'#9ad07a',eye:'#ffd23a',latin:'BAEL · SPIRITVS I · REX · LXVI LEGIONES · ',
+    body:`<ellipse cx="100" cy="120" rx="34" ry="26"/><circle cx="100" cy="86" r="16"/><circle cx="74" cy="96" r="12"/><circle cx="126" cy="96" r="12"/>
+      <path d="M70,124 L36,104 L40,110 L72,130 Z M70,134 L32,140 L36,146 L72,140 Z M74,144 L44,176 L50,178 L80,148 Z M130,124 L164,104 L160,110 L128,130 Z M130,134 L168,140 L164,146 L128,140 Z M126,144 L156,176 L150,178 L120,148 Z"/>
+      <path d="M88,74 L92,62 L97,70 L100,58 L103,70 L108,62 L112,74 Z"/>`,
+    eyes:`<circle cx="95" cy="86" r="2.2"/><circle cx="105" cy="86" r="2.2"/><circle cx="74" cy="96" r="1.8"/><circle cx="126" cy="96" r="1.8"/>`},
   astaroth:{c:'#c8d0e8',eye:'#7cff6a',latin:'ASTAROTH · SPIRITVS XXIX · DVX MAGNVS · XL LEGIONES · ',
     body:`<path d="M66,192 L78,124 C80,110 90,102 100,102 C110,102 120,110 122,124 L134,192 Z"/>
       <circle cx="100" cy="84" r="15"/><path d="M84,74 C80,62 84,52 92,48 C90,58 94,66 100,68 C106,66 110,58 108,48 C116,52 120,62 116,74 Z"/>
@@ -2161,6 +2189,7 @@ const PORTRAIT={
   nakiroa:{img:'nakiroa.jpg',cls:'pf-nakiroa',pos:'50% 20%'},
   aprabaidon:{img:'aprabaidon.jpg',cls:'pf-aprabaidon',pos:'38% 22%'},
   remian:{img:'remian.jpg',cls:'pf-remian',pos:'50% 22%'},
+  marteria:{img:'marteria.jpg',cls:'pf-marteria',pos:'50% 20%'},
   merem:{img:'merem.jpg',cls:'pf-merem',pos:'40% 18%'},
   perta:{img:'perta.jpg',cls:'pf-perta',pos:'50% 24%'},
   mumyeong:{img:'mumyeong.jpg',cls:'pf-mumyeong',pos:'55% 16%'},
@@ -2209,7 +2238,8 @@ const BOSS_THEME={
   chahuia2:['#ff4a50','#40121a','#12060a'],        // 붉게 타락한 모습
   nakiroa:['#b070ff','#2a1448','#0a0614'],         // 보랏빛 소용돌이 · 타락한 여명의 기사
   aprabaidon:['#5aa8ff','#0a1a40','#040814'],      // 푸른 번개 · 저승의 소환수
-  remian:['#ff5a8a','#3a0c1e','#12040a']           // 붉은 폐허 · 지옥의 공주
+  remian:['#ff5a8a','#3a0c1e','#12040a'],          // 붉은 폐허 · 지옥의 공주
+  marteria:['#7cff5a','#123a14','#040c06']         // 초록 불꽃 · 숲속의 관리인
 };
 function bossTheme(e){
   if(!e||!B||B.pvp||B.stype!=='boss'||!e.art)return null;
@@ -5342,6 +5372,8 @@ function renderBattle(){
   if(e.wave)passive.push('🌀 5초마다 거스르는 파동');
   if(e.fixedDmg)passive.push('🎯 방어력 무시 고정 피해');
   if(e.paralyze)passive.push('⚡ 3초마다 동료 마비');
+  if(e.allyCritVoid)passive.push('🌿 동료 치명타 피해 무효');
+  if(e.reflectAll)passive.push(`🪞 공격 ${Math.round(e.reflectAll*100)}% 확률로 반사 (피해 없음 · 공격한 쪽이 절반을 받음)`);
   if(e.allyCritCut)passive.push(`🛡 동료 치명타 피해 ${e.allyCritCut}배 감소`);
   if(e.ducks)passive.push(`🦆 ${e.ducks.every/1000}초마다 푸른 오리 (1명 ${e.ducks.stun/1000}초 행동 불능 · 현재 체력 절반) · 💥 ${e.ducks.bigEvery/1000}초마다 큰 오리 (주인공 현재 체력 ${Math.round(e.ducks.bigPct*100)}%)`);
   if(e.duckHide)passive.push(B.remHid?(remHideOn()?'🦆 오리 떼 속에서 회복 중 — 공격하면 절반이 동료에게 반사':'🦆 숨기 끝'):`🦆 HP ${fmt(e.duckHide.at)} 이하 — ${e.duckHide.dur/1000}초간 오리 사이에 숨어 회복`);
@@ -5423,6 +5455,7 @@ function hitEnemy(mult,label){
     else addLog(`${label}! — 🦆 오리가 대신 맞았다`);
     queueFx('enemy','🦆','mpf');return;}
   if(B.immune){addLog(`${label}! — ⏸ 시간이 멈춰 피해가 무효화됐다`);queueFx('enemy','무효','mpf');return;}
+  if(e.reflectAll&&Math.random()<e.reflectAll){const d0=Math.max(1,Math.round((P.atk*(B.buff?1.5:1)*mult-enemyDef()/2)*rnd(0.9,1.1))),r=Math.max(1,Math.round(d0*0.5));P.hp=Math.max(0,P.hp-r);addLog(`${label}! — 🪞 ${e.name}이(가) 튕겨 냈다! 주인공에게 ${r} 반사`);queueFx('player','🪞-'+r,'pdmg');queueFx('enemy','반사','mpf');if(P.hp<=0){renderBattle();defeat();}return;}
   if(e.voidHero&&Math.random()<e.voidHero){addLog(`${label}! — 🔥 아몬의 업화에 삼켜져 무효화됐다`);queueFx('enemy','무효','mpf');return;}
   let d=(P.atk*(B.buff?1.5:1)*(B.aura?1.2:1)*mult-enemyDef()/2)*rnd(0.9,1.1)*(salvOn()?1.5:1);
   d=Math.max(1,Math.round(d));
@@ -5447,7 +5480,9 @@ function allyHit(base,label,defFactor,fixed){
   let d=fixed?Math.max(1,Math.round(base*(B.am||1))):Math.max(1,Math.round((base*(B.am||1)-enemyDef()*defFactor)*rnd(0.9,1.1)));
   if(B.vslow&&B.vslow[B.curAlly])d=Math.max(1,Math.round(d*0.6));
   const ch=charmOn();if(ch)d=Math.round(d*charmCrit()); // 로아의 유혹: 동료 공격도 치명타
-  const isCrit=ch||/치명타/.test(label);if(isCrit&&e.allyCritCut){d=Math.max(1,Math.round(d/e.allyCritCut));label+=` (레미안의 오리 방패 — 치명타 피해 ÷${e.allyCritCut})`;} // 레미안: 동료 치명타 피해 절반
+  const isCrit=ch||/치명타/.test(label);
+  if(isCrit&&e.allyCritVoid){addLog(`${label}! — 🌿 ${e.name}의 낙원 규칙: 치명타 무효`);queueFx('enemy','치명타 무효','mpf');return 0;}
+  if(e.reflectAll&&Math.random()<e.reflectAll&&B.curAlly&&B.ahp[B.curAlly]){const h=B.ahp[B.curAlly],r=allyTake(B.curAlly,Math.max(1,Math.round(d*0.5)));h.hp=Math.max(0,h.hp-r);addLog(`${label}! — 🪞 ${e.name}이(가) 튕겨 냈다! ${ALLIES[B.curAlly].name}에게 ${r} 반사${h.hp<=0?' · 쓰러짐':''}`);queueFx('enemy','반사','mpf');if(h.hp<=0)allyDown(B.curAlly);return 0;}if(isCrit&&e.allyCritCut){d=Math.max(1,Math.round(d/e.allyCritCut));label+=` (레미안의 오리 방패 — 치명타 피해 ÷${e.allyCritCut})`;} // 레미안: 동료 치명타 피해 절반
   dgOver(B.curAlly,d,e);
   stat('dmg',B.curAlly,Math.min(d,e.hp));
   e.hp=Math.max(0,e.hp-d);
