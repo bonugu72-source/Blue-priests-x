@@ -1129,8 +1129,8 @@ const STAR_MULT={0:1.0,1:0.35,2:0.6,3:1.0,4:1.2,5:1.45,6:2};
 const FIXED='isabel';                       // 게임 시작부터 함께하는 고정 조력자
 const LV_CAP={0:35,1:15,2:20,3:25,4:30,5:35,6:35}; // 등급별 최대 레벨 (임시)
 const COST_F={0:1.5,1:0.5,2:0.75,3:1,4:1.5,5:2,6:3};
-const AWAKEN_MAX=5, AWAKEN_BASE=3, AWAKEN_ITEM={name:'천상의 성유물',icon:'💠'}; // ★5는 5각성까지 (4·5각성은 확률) · ★6은 3각성까지
-const awakenMax=id=>ALLIES[id].star===5?5:3;
+const AWAKEN_MAX=5, AWAKEN_BASE=3, AWAKEN_ITEM={name:'천상의 성유물',icon:'💠'}; // ★5·★6 모두 5각성까지 (4·5각성은 확률)
+const awakenMax=id=>ALLIES[id].star>=5?5:3;
 const AWAKEN_STAGE={4:{stone:4,rate:0.5},5:{stone:5,rate:0.25}};
 /* 4각성부터: 지역 이동(마계 제외)의 모든 지역을 클리어해야 가능 */
 const worldCleared=()=>{const rs=realmStart();for(let i=0;i<rs;i++)if(!((P.prog[i]||0)>=STAGES||(P.cleared&&P.cleared[i])))return false;return true;};
@@ -3024,7 +3024,8 @@ const isMyth=id=>!!(P.myth&&P.myth[id]);
 const STAR6_CP=7500;
 const baseMult=id=>{const al=ALLIES[id];if(al.star===6)return STAR6_CP/((80+LV_CAP[6]*30)*(1+0.2*AWAKEN_BASE));return al.star===5&&TIER5[id]?TIER5_CP[TIER5[id]]/((80+LV_CAP[5]*30)*(1+0.2*AWAKEN_BASE)):STAR_MULT[al.star];};
 /* 각성 배율: 1~3각성 +20%씩 · 4각성 티어 최대 전투력 +500 · 5각성 +1000 */
-const awF=(id,aw)=>{aw=aw||0;const T=ALLIES[id].star===5&&TIER5[id]?TIER5_CP[TIER5[id]]:0;if(aw<=AWAKEN_BASE||!T)return 1+0.2*Math.min(aw,AWAKEN_BASE);return (1+0.2*AWAKEN_BASE)*(T+500*(aw-AWAKEN_BASE))/T;};
+const STAR6_AW_STEP=STAR6_CP*(20000/17000-1)/2; // ★6 4·5각성: 5각성+신화+신뢰도 10 = 최대 전투력 20,000
+const awF=(id,aw)=>{aw=aw||0;const s6=ALLIES[id].star===6,T=s6?STAR6_CP:(ALLIES[id].star===5&&TIER5[id]?TIER5_CP[TIER5[id]]:0);if(aw<=AWAKEN_BASE||!T)return 1+0.2*Math.min(aw,AWAKEN_BASE);return (1+0.2*AWAKEN_BASE)*(T+(s6?STAR6_AW_STEP:500)*(aw-AWAKEN_BASE))/T;};
 const multOf=(id,aw,myth)=>baseMult(id)*awF(id,aw)*(myth?2:1);
 /* 신뢰도: ★5 동료가 함께 전투에서 승리할수록 상승 (최대 10) — 신뢰도 10이면 최대 전투력 1티어 8,000→10,000 · 2티어 6,600→8,000 · 3티어 5,400→7,000 (신화 기준) */
 const TRUST_MAX=10, TRUST_REQ=[0,5,15,30,50,75,105,140,180,225,275], TRUST_GAIN={normal:1,elite:1,mid:2,boss:3};
