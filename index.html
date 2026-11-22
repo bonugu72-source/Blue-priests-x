@@ -3027,7 +3027,9 @@ const STAR6_CP=7500;
 const baseMult=id=>{const al=ALLIES[id];if(al.star===6)return STAR6_CP/((80+LV_CAP[6]*30)*(1+0.2*AWAKEN_BASE));return al.star===5&&TIER5[id]?TIER5_CP[TIER5[id]]/((80+LV_CAP[5]*30)*(1+0.2*AWAKEN_BASE)):STAR_MULT[al.star];};
 /* 각성 배율: 1~3각성 +20%씩 · 4각성 티어 최대 전투력 +500 · 5각성 +1000 */
 const STAR6_AW_STEP=STAR6_CP*(20000/17000-1)/2; // ★6 4·5각성: 5각성+신화+신뢰도 10 = 최대 전투력 20,000
-const awF=(id,aw)=>{aw=aw||0;const s6=ALLIES[id].star===6,T=s6?STAR6_CP:(ALLIES[id].star===5&&TIER5[id]?TIER5_CP[TIER5[id]]:0);if(aw<=AWAKEN_BASE||!T)return 1+0.2*Math.min(aw,AWAKEN_BASE);return (1+0.2*AWAKEN_BASE)*(T+(s6?STAR6_AW_STEP:500)*(aw-AWAKEN_BASE))/T;};
+const PET_CP_MAX=12000; // 펫: Lv 최대 + 5각성 + 신화 = 전투력 12,000 (4·5각성은 균등하게 상승)
+const PET_AW5F=()=>PET_CP_MAX/((80+LV_CAP[5]*30)*STAR_MULT[5]*2);
+const awF=(id,aw)=>{aw=aw||0;if(ALLIES[id].pet&&aw>AWAKEN_BASE){const b=1+0.2*AWAKEN_BASE;return b+(PET_AW5F()-b)*Math.min(aw-AWAKEN_BASE,2)/2;}const s6=ALLIES[id].star===6,T=s6?STAR6_CP:(ALLIES[id].star===5&&TIER5[id]?TIER5_CP[TIER5[id]]:0);if(aw<=AWAKEN_BASE||!T)return 1+0.2*Math.min(aw,AWAKEN_BASE);return (1+0.2*AWAKEN_BASE)*(T+(s6?STAR6_AW_STEP:500)*(aw-AWAKEN_BASE))/T;};
 const multOf=(id,aw,myth)=>baseMult(id)*awF(id,aw)*(myth?2:1);
 /* 신뢰도: ★5 동료가 함께 전투에서 승리할수록 상승 (최대 10) — 신뢰도 10이면 최대 전투력 1티어 8,000→10,000 · 2티어 6,600→8,000 · 3티어 5,400→7,000 (신화 기준) */
 const TRUST_MAX=10, TRUST_REQ=[0,5,15,30,50,75,105,140,180,225,275], TRUST_GAIN={normal:1,elite:1,mid:2,boss:3};
