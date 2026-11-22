@@ -1870,7 +1870,7 @@ const AREAS=[
     mid:{name:'아스타로트', art:'astaroth', title:'솔로몬 72악마 · 제29영 · 대공작 · 40군단', hp:39000, atk:210, def:66, xp:9400, gold:7100, demon:true,
       pre:'독사를 손에 쥔 창백한 천사가 지옥의 용을 타고 내려온다. 입에서 새어 나오는 숨결에 공기가 썩어 든다.\n\n"과거와 미래를 묻거라. 대가는 너의 숨이다."',
       moves:[{t:'atk',n:'독사의 채찍'},{t:'strong',n:'지옥룡의 발톱'},{t:'multi',n:'40군단의 진군',hits:3,m:0.5},{t:'curse',n:'썩은 숨결'},{t:'charge',n:'대공작의 심판'}]},
-    boss:{name:'레미안', art:'remian', title:'지옥의 공주', hp:80000, exactHp:true, atk:220, def:68, xp:60000, gold:70000, goldFirst:0, goldRepeat:70000, salvFirst:2, demon:true,
+    boss:{name:'레미안', art:'remian', title:'지옥의 공주', hp:80000, exactHp:true, atk:220, def:68, xp:60000, gold:70000, goldFirst:0, goldRepeat:70000, salvFirst:2, demon:true, allyCritCut:2,
       ducks:{every:5000,stun:2000,cut:0.5,bigEvery:4000,bigPct:0.4}, duckHide:{at:20000,dur:5000,healPct:0.03,reflect:0.5,line:'"…귀찮아. 너희는 오리랑 놀아."\n\n레미안이 수백 마리 오리 떼 사이로 몸을 숨긴다. 오리들이 꽥꽥거리며 앞을 가로막는다.\n\n— 5초간 레미안은 오리 사이에 숨어 체력을 회복한다 · 오리들은 주인공 공격의 절반을 동료에게 되튕긴다 —'},
       pre:'검은 날개를 펼친 소녀가 양손 가득 푸른 오리를 들어 올린다. 보랏빛 눈동자가 차갑게 빛난다.\n\n"지옥의 공주, 레미안. 길을 잃었으면 내가 안내해 줄게 — 저승으로."',
       moves:[{t:'atk',n:'오리 던지기'},{t:'strong',n:'지옥의 꽥'},{t:'multi',n:'오리 소나기',hits:4,m:0.35},{t:'curse',n:'공주의 저주'},{t:'sweep',n:'검은 깃털 폭풍',m:0.18},{t:'charge',n:'오리 대폭격'}]}
@@ -5342,6 +5342,7 @@ function renderBattle(){
   if(e.wave)passive.push('🌀 5초마다 거스르는 파동');
   if(e.fixedDmg)passive.push('🎯 방어력 무시 고정 피해');
   if(e.paralyze)passive.push('⚡ 3초마다 동료 마비');
+  if(e.allyCritCut)passive.push(`🛡 동료 치명타 피해 ${e.allyCritCut}배 감소`);
   if(e.ducks)passive.push(`🦆 ${e.ducks.every/1000}초마다 푸른 오리 (1명 ${e.ducks.stun/1000}초 행동 불능 · 현재 체력 절반) · 💥 ${e.ducks.bigEvery/1000}초마다 큰 오리 (주인공 현재 체력 ${Math.round(e.ducks.bigPct*100)}%)`);
   if(e.duckHide)passive.push(B.remHid?(remHideOn()?'🦆 오리 떼 속에서 회복 중 — 공격하면 절반이 동료에게 반사':'🦆 숨기 끝'):`🦆 HP ${fmt(e.duckHide.at)} 이하 — ${e.duckHide.dur/1000}초간 오리 사이에 숨어 회복`);
   if(e.apFreeze)passive.push(`🧊 ${e.apFreeze.every/1000}초마다 주인공·동료 중 1명 ${e.apFreeze.dur/1000}초 빙결 + 출혈·화상 (받는 피해 2배)`);
@@ -5446,6 +5447,7 @@ function allyHit(base,label,defFactor,fixed){
   let d=fixed?Math.max(1,Math.round(base*(B.am||1))):Math.max(1,Math.round((base*(B.am||1)-enemyDef()*defFactor)*rnd(0.9,1.1)));
   if(B.vslow&&B.vslow[B.curAlly])d=Math.max(1,Math.round(d*0.6));
   const ch=charmOn();if(ch)d=Math.round(d*charmCrit()); // 로아의 유혹: 동료 공격도 치명타
+  const isCrit=ch||/치명타/.test(label);if(isCrit&&e.allyCritCut){d=Math.max(1,Math.round(d/e.allyCritCut));label+=` (레미안의 오리 방패 — 치명타 피해 ÷${e.allyCritCut})`;} // 레미안: 동료 치명타 피해 절반
   dgOver(B.curAlly,d,e);
   stat('dmg',B.curAlly,Math.min(d,e.hp));
   e.hp=Math.max(0,e.hp-d);
