@@ -4511,7 +4511,7 @@ const heavenOpen=()=>towerOpen()&&towerState().best>=TOWER_MAX; // 구원의 탑
 const heavenState=()=>{P.heaven=P.heaven||{best:0,tries:0};return P.heaven;};
 const heavenBosses=()=>AREAS.map((a,i)=>i).filter(i=>AREAS[i].realm&&AREAS[i].boss); // 마계 이동의 최종 보스들
 const heavenArea=f=>{const L=heavenBosses();return L[(f-1)%L.length];};
-const heavenMul=f=>({hp:0.85+0.02*(f-1),atk:0.8+0.01*(f-1)}); // 구원의 탑 보스층과 같은 배율
+const heavenMul=f=>({hp:(0.85+0.02*(f-1))*0.9,atk:(0.8+0.01*(f-1))*0.9}); // 구원의 탑 보스층 배율에서 체력·공격 10%씩 낮춤
 function heavenEnemy(f){
   const a=heavenArea(f);let t=stageEnemy(a,15);
   const em=LATE_BOSS_MULT,tm=heavenMul(f),sc=v=>v?Math.round(v*tm.hp):v;
