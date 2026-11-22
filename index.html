@@ -1266,6 +1266,7 @@ const MYTH_SKILL={
   aora:  {name:'대천사의 강림',desc:'천사의 구원 지속 3초 → 5초 · 생명력 흡수량 2배'},
   akira: {name:'혹한의 화살',desc:'4초마다 아키라의 공격력이 2배씩 증가 (최대 4배)'},
   babelord:{name:'운명의 지배자',desc:'주사위를 굴리는 주기 4초 → 3초'},
+  elizabeth:{name:'최후의 여왕의 칙령',desc:'심판 한 번에 서로 다른 효과 2개를 동시에 검'},
   miner: {name:'바다의 여왕',desc:'물보라 보호막 2턴 → 3턴 · 미네르바의 치명타 피해 1.5배 → 2배'},
   vista5:{name:'특급 열차',desc:'열차 관통 피해가 기본 공격의 2배 → 3배 · 시야 차단 3턴'},
   elise: {name:'만추의 축복',desc:'정화할 때도 주인공·동료 HP 10% 회복 · 응원 주기 3턴 → 2턴'},
@@ -4798,14 +4799,17 @@ function judgeTick(){
   if(!B||B.over||B.won||!$('#modal').classList.contains('hidden'))return;
   const id='elizabeth',h=B.ahp[id],e=B.e,now=Date.now();
   if(!inParty(id)||(h&&h.hp<=0)||(B.stun[id]>0)||aFrozen()||e.hp<=0||P.hp<=0)return;
-  const k=Math.floor(Math.random()*4),base=ezBase(),sh=Math.max(1,Math.round(base*0.5)),bb=B;let txt='';
+  const pool=[0,1,2,3].sort(()=>Math.random()-.5),ks=pool.slice(0,isMyth(id)?2:1),base=ezBase(),sh=Math.max(1,Math.round(base*0.5)),bb=B;const txts=[];
+  for(const k of ks){let txt='';
   if(k===0){txt='출혈';const dd=Math.max(1,Math.round(base*0.5));B.ezBleedUntil=now+JUDGE_DUR;
     [1000,2000,3000].forEach(t=>setTimeout(()=>{if(B!==bb||!B||B.over||B.won||B.e.hp<=0||B.immune)return;stat('dmg',id,Math.min(dd,B.e.hp));B.e.hp=Math.max(0,B.e.hp-dd);addLog(`🩸 심판의 출혈 — ${B.e.name} ${dd} 피해`);queueFx('enemy','🩸'+dd,'dmg');if(B.e.hp<=0){winNow();return;}renderBattle();},t));}
   else if(k===1){txt='속박';B.ezBindUntil=now+JUDGE_DUR;}
   else if(k===2){txt='시야 차단';B.blind=Math.max(B.blind||0,2);}
   else {txt='공격 반사';B.ezReflUntil=now+JUDGE_DUR;}
+  txts.push(txt);}
+  const txt=txts.join(' · ');
   B.ezShield=(B.ezShield||0)+sh;stat('heal',id,0);
-  addLog(`👑 엘리자베스의 심판 — ${e.name}에게 ${txt} (3초) · 주인공 보호막 +${sh} (총 ${B.ezShield})`);queueFx('enemy','👑 '+txt,'mpf');renderBattle();
+  addLog(`👑 엘리자베스의 ${ks.length>1?'칙령':'심판'} — ${e.name}에게 ${txt} (3초) · 주인공 보호막 +${sh} (총 ${B.ezShield})`);queueFx('enemy','👑 '+txt,'mpf');renderBattle();
 }
 /* ===================== 탑 선택 (구원의 탑 · 천상의 탑) ===================== */
 const HEAVEN_MAX=30;
