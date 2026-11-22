@@ -2901,6 +2901,7 @@ function fbBind(p){
         try{await cloudRef.set({json:JSON.stringify(mine),savedAt:mine.savedAt||Date.now(),key:SAVE_KEY});}catch(e){}
       }
       if(P&&P.uid===pid){fbMergeFriends();publishProfile();if(pendingFriend)takePendingFriend();}
+      giftListen();
     }catch(e){if(!fbPid)cloudState='denied';}
     fbBinding=null;updateCloudNote();
   })();
@@ -3493,6 +3494,61 @@ function takePendingFriend(){
 const PVP_DAILY=5, PVP_HP=1.25;
 const pvpCl=(v,lo,hi)=>Math.max(lo,Math.min(hi,Number(v)||lo));
 /* 친구 자세히 보기: 레벨·전투력·팀·전적 + 배틀 / 삭제 */
+/* ===================== 친구에게 코인 보내기 (내 코인에서 차감 · 한 번에 최대 100,000) ===================== */
+const GIFT_MAX=100000;
+let giftUnsub=null,giftFor=null;const giftClaiming=new Set();
+const giftReady=()=>!!(FB&&fbPid&&myId===fbPid&&P&&P.uid===fbPid);
+function giftListen(){
+  if(!giftReady()){if(giftUnsub){giftUnsub();giftUnsub=null;giftFor=null;}return;}
+  if(giftFor===fbPid&&giftUnsub)return;
+  if(giftUnsub)giftUnsub();
+  const pid=fbPid;giftFor=pid;
+  try{giftUnsub=FB.collection('gifts').doc(pid).collection('inbox').onSnapshot(q=>{q.docs.forEach(d=>claimGift(pid,d.ref));},()=>{});}catch(e){giftUnsub=null;giftFor=null;}
+}
+async function claimGift(pid,ref){
+  if(giftClaiming.has(ref.id))return;giftClaiming.add(ref.id);
+  try{
+    const g=await FB.runTransaction(async t=>{const sn=await t.get(ref);if(!sn.exists)return null;t.delete(ref);return sn.data();});
+    if(!g||!P||P.uid!==pid)return;
+    const amt=Math.max(0,Math.min(GIFT_MAX,Math.floor(+g.amount||0)));if(!amt)return;
+    const nm=(String(g.fromName||'').replace(/[<>&"'`]/g,'').slice(0,12))||'친구';
+    P.gold+=amt;P.giftLog=(P.giftLog||[]);P.giftLog.unshift({t:'in',n:nm,a:amt,at:Date.now()});P.giftLog=P.giftLog.slice(0,30);
+    save();goldToast(amt,`${nm}님이 보낸 선물`);
+    try{document.querySelectorAll('.row .gold').forEach(el=>{if(/ G$/.test(el.textContent))el.textContent=`${P.gold} G`;});}catch(e){}
+  }catch(e){}
+  finally{giftClaiming.delete(ref.id);}
+}
+function giftSendUI(x){
+  const name=(String(x.hero||'').replace(/[<>&"'`]/g,'').slice(0,12))||'친구';
+  const max=Math.min(GIFT_MAX,P.gold);
+  showStory(`<div class="sum fdetail"><div class="sum-title">💰 코인 보내기</div>
+    <div class="sum-name">${esc(name)}</div>
+    <div class="small">내 코인 ${fmt(P.gold)} · 한 번에 최대 ${fmt(GIFT_MAX)} 코인 · 보낸 코인은 내 코인에서 빠져요</div>
+    <input id="gamt" type="number" inputmode="numeric" min="1" max="${max}" step="1" placeholder="보낼 코인" style="width:100%;margin-top:10px;padding:10px;border-radius:10px;border:1px solid #6a7fb0;background:#0d1530;color:#fff;font-size:16px;box-sizing:border-box">
+    <div class="grid" style="margin-top:8px">${[10000,50000,100000].map(v=>`<button class="btn" data-gq="${v}" ${P.gold<v?'disabled':''}>${fmt(v)}</button>`).join('')}</div>
+    <div id="gmsg" class="small" style="margin-top:8px;min-height:1.2em"></div>
+    <div class="grid" style="margin-top:6px"><button class="btn danger full" id="gsend">💰 보내기</button></div></div>`,null,true);
+  $('#mbtn').textContent='← 닫기';
+  document.querySelectorAll('[data-gq]').forEach(b=>b.onclick=()=>{$('#gamt').value=b.dataset.gq;});
+  const go=$('#gsend');
+  go.onclick=async()=>{
+    const amt=Math.floor(+$('#gamt').value||0),msg=$('#gmsg');
+    if(!giftReady()){msg.textContent='☁ 클라우드에 연결된 상태에서만 보낼 수 있어요.';return;}
+    if(amt<1){msg.textContent='보낼 코인을 입력해 주세요.';return;}
+    if(amt>GIFT_MAX){msg.textContent=`한 번에 최대 ${fmt(GIFT_MAX)} 코인까지 보낼 수 있어요.`;return;}
+    if(amt>P.gold){msg.textContent='코인이 부족해요.';return;}
+    if(go.dataset.armed!==String(amt)){go.dataset.armed=String(amt);go.textContent=`${fmt(amt)} 코인 보내기 — 한 번 더 누르면 전송`;return;}
+    go.disabled=true;go.textContent='보내는 중…';
+    P.gold-=amt;save();
+    try{
+      await withTimeout(FB.collection('gifts').doc(x.id).collection('inbox').add({from:fbPid,fromName:String(P.name||'모험가').slice(0,12),amount:amt,at:Date.now()}));
+      P.giftLog=(P.giftLog||[]);P.giftLog.unshift({t:'out',n:name,a:amt,at:Date.now()});P.giftLog=P.giftLog.slice(0,30);save();
+      msg.textContent=`✔ ${name}님에게 ${fmt(amt)} 코인을 보냈어요. (남은 코인 ${fmt(P.gold)})`;go.textContent='보내기 완료';
+    }catch(e){
+      P.gold+=amt;save();msg.textContent='전송에 실패했어요. 코인은 돌려받았어요. 잠시 뒤 다시 시도해 주세요.';go.disabled=false;go.dataset.armed='';go.textContent='💰 보내기';
+    }
+  };
+}
 function showFriendDetail(x,o){
   const t=x.team||{};
   const party=(Array.isArray(t.party)?t.party:[]).filter(a=>a&&ALLIES[a.id]).slice(0,4).map(a=>({id:a.id,lv:pvpCl(a.lv,1,60)}));
@@ -3505,9 +3561,11 @@ function showFriendDetail(x,o){
     ${party.length?`<div class="pvpteam">${teamIconsHTML(party)}</div>`:'<div class="desc">팀 정보가 아직 없어요.</div>'}
     <div class="small" style="margin-top:8px">나와의 배틀 ${o.rec.w||0}승 ${o.rec.l||0}패${o.live?` · ${presenceHTML(x)}`:x.updatedAt?` · ${agoText(x.updatedAt)} 갱신`:''}</div>
     <div class="grid" style="margin-top:12px">${o.duel?'<button class="btn danger" id="fdduel">⚔ 배틀</button>':'<button class="btn" disabled>⚔ 배틀<small>팀 정보 없음</small></button>'}
-      <button class="btn" id="fddel">친구 삭제</button></div></div>`,null,true);
+      <button class="btn" id="fddel">친구 삭제</button></div>
+    ${x.id&&!x.me&&x.id!==myId?`<div class="grid" style="margin-top:8px"><button class="btn full" id="fdgift" ${giftReady()?'':'disabled'}>💰 코인 보내기${giftReady()?'':'<small>클라우드 연결 필요</small>'}</button></div>`:''}</div>`,null,true);
   $('#mbtn').textContent='← 뒤로';
   if($('#fdduel'))$('#fdduel').onclick=()=>{$('#modal').classList.add('hidden');o.duel();};
+  if($('#fdgift'))$('#fdgift').onclick=()=>giftSendUI(x);
   $('#fddel').onclick=e=>{const b=e.currentTarget;
     if(b.dataset.armed!=='1'){b.dataset.armed='1';b.textContent='한 번 더 누르면 삭제';return;}
     $('#modal').classList.add('hidden');o.del();};
