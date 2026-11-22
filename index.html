@@ -65,7 +65,7 @@ button:disabled{cursor:default}
 .btn.m-rank{background:linear-gradient(135deg,#4a2a0e,#2a1a3e);border-color:rgba(255,200,90,.45)}.btn.m-rank small{color:#ffd99a}
 .rankbadge{text-align:center;padding:10px 0 4px}.rankbadge .ri{font-size:56px;line-height:1.1;filter:drop-shadow(0 0 14px var(--rc))}.rankbadge b{display:block;font-size:24px;color:var(--rc);margin-top:4px}
 .ranklad{display:flex;justify-content:space-between;gap:2px;margin:10px 0}.ranklad span{flex:1;text-align:center;font-size:11px;padding:5px 0;border-radius:8px;background:rgba(255,255,255,.05);opacity:.55}.ranklad span.on{opacity:1;background:rgba(255,210,110,.18);box-shadow:0 0 0 1px rgba(255,210,110,.5) inset}.ranklad span.done{opacity:.9}
-.btn.m-rest{background:#1f3b34}.btn.m-rest small{color:#a6cfbd}.btn.m-coin{background:linear-gradient(135deg,#5a4210,#8a6418)}.btn.m-coin small{color:#ffe8a0}
+.btn.m-rest{background:#1f3b34}.btn.m-rest small{color:#a6cfbd}
 .btn.m-shop{background:#3e3322}.btn.m-shop small{color:#dcc493}
 .btn.m-coll{background:#322b4a}.btn.m-coll small{color:#c4b6e6}
 .btn.m-ally{background:#3d2a35}.btn.m-ally small{color:#e2b9c8}
@@ -4121,7 +4121,6 @@ function dgToggle(id){
 document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('[data-dginfo]');if(b){e.preventDefault();showDexDetail(b.dataset.dginfo);}});
 
 /* ===================== 거점 ===================== */
-const COINCOIN=100000; // 코인코인: 누를 때마다 지급
 /* 성당 휴식: 3분에 한 번 */
 const REST_CD=3*60*1000;
 let restTimer=null;
@@ -4212,9 +4211,8 @@ function renderHub(msg){
         <button class="btn m-adv main full" id="map">🗺 스테이지 지도<small>진행 ${prog}/${STAGES}</small></button>
         <div class="rankrow">        <button class="btn m-rank" id="rank" ${P.lv<RANK_MIN_LV?'disabled':''}>${P.lv<RANK_MIN_LV?`🔒 랭크전<small>Lv ${RANK_MIN_LV}부터 열림 (현재 Lv ${P.lv})</small></button>`:`${rankOf().icon} 랭크전<small>${rankOf().n}${rankNeed(rankState().tier)?` · ${rankState().lp}/${rankNeed(rankState().tier)} LP`:` · ${rankState().lp} LP`} · ${rankState().w}승 ${rankState().l}패</small></button>`}
         <button class="btn m-tower" id="tower" ${towerOpen()?'':'disabled'}>${towerOpen()?`🗼 구원의 탑<small>${towerState().best>=TOWER_MAX?`${TOWER_MAX}층 정복 ✔`:`${towerState().best}/${TOWER_MAX}층 · 동료 1명`}</small>`:`🔒 구원의 탑<small>Lv ${TOWER_MIN_LV} · 지역 ${realmStart()}곳 클리어 (${worldClearCount()}/${realmStart()})</small>`}</button></div>
-        <button class="btn m-adv${farmReady()?'':' full'}" id="hunt">⚔ 자유 사냥 (자동)<small>경험치·골드 ×${HUNT_MULT} · 멈출 때까지 반복</small></button>${farmReady()?`<button class="btn m-adv" id="gfarm">🔁 천상의 성유물작<small>서울 최종 보스 자동 반복 · ${FARM_TARGET}번 잡으면 멈춤</small></button>`:''}
+        <button class="btn m-adv" id="hunt">⚔ 자유 사냥 (자동)<small>경험치·골드 ×${HUNT_MULT} · 멈출 때까지 반복</small></button>${farmReady()?`<button class="btn m-adv" id="gfarm">🔁 천상의 성유물작<small>서울 최종 보스 자동 반복 · ${FARM_TARGET}번 잡으면 멈춤</small></button>`:''}
         <button class="btn m-rest" id="rest" ${restLeft()>0?'disabled':''}>${restLabel()}</button>
-        <button class="btn m-coin" id="coincoin">💰 코인코인<small>누르면 ${fmt(COINCOIN)} 코인</small></button>
         <button class="btn m-adv full" id="guide">📖 게임 가이드<small>${P.tutReward?'시스템 설명 · 튜토리얼 다시 보기':`튜토리얼 완료 보상: 💰 ${fmt(TUT_REWARD.gold)} · 🎫 ${TUT_REWARD.tickets}장`}</small></button>
       </div>
     </div>
@@ -4234,7 +4232,6 @@ function renderHub(msg){
   $('#guide').onclick=()=>renderGuide();
   if($('#rank'))$('#rank').onclick=()=>firstTip('rank',()=>renderRank());
   if($('#tower'))$('#tower').onclick=()=>firstTip('tower',()=>renderTowerSelect());
-  $('#coincoin').onclick=()=>{P.gold+=COINCOIN;save();renderHub(`💰 코인코인! ${fmt(COINCOIN)} 코인을 받았다. (보유 ${fmt(P.gold)} 코인)`);goldToast(COINCOIN,'코인코인');};
   $('#rest').onclick=()=>{
     if(restLeft()>0)return;
     P.hp=P.maxHp;P.mp=P.maxMp;P.restAt=Date.now();save();
