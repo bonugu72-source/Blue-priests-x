@@ -1826,7 +1826,7 @@ const AREAS=[
       pre:'사자의 얼굴을 한 왕이 곰을 타고 나타나, 손에 쥔 독사를 높이 들어 올린다. 나팔 소리가 번개와 함께 울려 퍼진다.\n\n"숨겨진 것도, 다가올 것도 나는 안다. 너희의 끝 또한."',
       moves:[{t:'atk',n:'독사의 송곳니'},{t:'strong',n:'곰의 돌진'},{t:'multi',n:'22군단의 나팔',hits:3,m:0.5},{t:'curse',n:'예언된 몰락'},{t:'charge',n:'왕의 포효'}]},
     boss:{name:'아프라바이던', art:'aprabaidon', title:'저승의 소환수', hp:100000, exactHp:true, atk:215, def:66, xp:56000, gold:70000, goldFirst:0, goldRepeat:70000, salvFirst:3, salvBonus:0.05, demon:true,
-      apFreeze:{every:6000,dur:3000,afflict:5000}, rampage:{at:50000,atkDiv:1.2,stun:4000,line:'날개가 찢어질 듯 펼쳐지고, 하늘 전체가 푸른 번개로 뒤덮인다.\n\n저승의 소환수가 포효하자 검은 불길과 번개가 동료들을 덮친다.\n\n— 폭주: 공격력은 1.2배 낮아졌지만, 동료 전원이 4초간 행동 불능 · 출혈 · 화상 —'},
+      apFreeze:{every:6000,dur:3000,afflict:5000}, rampage:{at:50000,atkDiv:1.2,stun:4000,drainEvery:2000,drainPct:0.05,line:'날개가 찢어질 듯 펼쳐지고, 하늘 전체가 푸른 번개로 뒤덮인다.\n\n저승의 소환수가 포효하자 검은 불길과 번개가 동료들을 덮친다.\n\n— 폭주: 공격력은 1.2배 낮아졌지만, 동료 전원이 4초간 행동 불능 · 출혈 · 화상 · 2초마다 생명력 흡수 —'},
       pre:'찢어진 하늘에서 푸른 번개를 두른 검은 용이 내려온다. 벌어진 아가리 사이로 푸른 불길이 넘실거린다.\n\n저승의 소환수, 아프라바이던. 그 숨결에 닿는 모든 것이 얼어붙고, 찢기고, 타오른다.',
       moves:[{t:'atk',n:'번개 발톱'},{t:'strong',n:'저승의 숨결'},{t:'multi',n:'낙뢰 폭풍',hits:4,m:0.35},{t:'sweep',n:'푸른 화염 브레스',m:0.18},{t:'curse',n:'심판의 포효'},{t:'charge',n:'한계의 심판'}]}
   }
@@ -5000,6 +5000,12 @@ function apTick(){
   // 출혈·화상 지속 피해: 1초마다 최대 HP의 2%씩 두 번 (출혈 + 화상)
   if(apOn('hero')&&!B.immune){const d=Math.max(1,Math.round(P.maxHp*0.04));P.hp=Math.max(0,P.hp-d);queueFx('player','🩸🔥'+d,'dmg');if(P.hp<=0){renderBattle();defeat();return;}}
   partyIds().forEach(x=>{const h=B.ahp[x];if(h&&h.hp>0&&apOn(x)){h.hp=Math.max(0,h.hp-Math.max(1,Math.round(h.max*0.04)));if(h.hp<=0)addLog(`💀 ${ALLIES[x].name} — 출혈과 화상에 쓰러졌다`);}});
+  // 폭주 후: 2초마다 주인공과 동료 전원의 현재 체력에 비례해 생명력 흡수 (흡수한 만큼 회복)
+  if(B.rampaged&&e.rampage.drainEvery){B.apDr=(B.apDr||0)+1000;
+    if(B.apDr>=e.rampage.drainEvery){B.apDr=0;const pc=e.rampage.drainPct;let tot=0;
+      if(!B.immune&&P.hp>1){const d=Math.max(1,Math.floor(P.hp*pc));P.hp=Math.max(1,P.hp-d);tot+=d;queueFx('player','🩸-'+d,'dmg');}
+      partyIds().forEach(x=>{const h=B.ahp[x];if(h&&h.hp>1){const d=Math.max(1,Math.floor(h.hp*pc));h.hp=Math.max(1,h.hp-d);tot+=d;}});
+      if(tot>0){const hl=Math.min(e.maxHp-e.hp,tot);e.hp+=hl;addLog(`🩸 ${e.name}의 생명력 흡수 — 현재 체력의 ${Math.round(pc*100)}%씩 ${tot} 흡수 · 보스 HP +${hl}`);queueFx('enemy','+'+hl,'heal');}}}
   B.apSec=(B.apSec||0)+1000;
   if(B.apSec>=e.apFreeze.every){B.apSec=0;
     const L=['hero',...partyIds().filter(x=>{const h=B.ahp[x];return h&&h.hp>0&&!(B.stun[x]>0);})],w=pick(L);
@@ -5180,7 +5186,7 @@ function renderBattle(){
   if(e.fixedDmg)passive.push('🎯 방어력 무시 고정 피해');
   if(e.paralyze)passive.push('⚡ 3초마다 동료 마비');
   if(e.apFreeze)passive.push(`🧊 ${e.apFreeze.every/1000}초마다 주인공·동료 중 1명 ${e.apFreeze.dur/1000}초 빙결 + 출혈·화상 (받는 피해 2배)`);
-  if(e.rampage)passive.push(B.rampaged?'⚡ 폭주 — 공격력 1.2배 감소':`⚡ HP ${fmt(e.rampage.at)} 이하 폭주 (동료 ${e.rampage.stun/1000}초 행동 불능 · 출혈·화상)`);
+  if(e.rampage)passive.push(B.rampaged?`⚡ 폭주 — 공격력 1.2배 감소 · ${e.rampage.drainEvery/1000}초마다 주인공·동료 현재 체력의 ${Math.round(e.rampage.drainPct*100)}% 흡수`:`⚡ HP ${fmt(e.rampage.at)} 이하 폭주 (동료 ${e.rampage.stun/1000}초 행동 불능 · 출혈·화상)`);
   if(e.sealEvery)passive.push(`⛓ ${e.sealEvery/1000}초마다 동료 1명 ${e.sealDur/1000}초 봉인`);
   if(e.lastStand)passive.push(B.lastStood?'💀 최후의 발악 — 동료 체력 1':`💀 HP ${fmt(e.lastStand.at)} 이하 최후의 발악 (동료 체력 1)`);
   if(e.berserk)passive.push(B.berserked?'💢 폭주 중':`💢 HP ${fmt(e.berserk.at)} 이하 폭주`);
