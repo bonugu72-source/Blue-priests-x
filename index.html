@@ -86,6 +86,7 @@ button:disabled{cursor:default}
 .fpick{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:8px 0}
 .fpick button{position:relative;padding:6px 2px;border-radius:12px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);color:inherit;font-size:10.5px;display:flex;flex-direction:column;align-items:center;gap:3px}
 .fpick button.sel{border-color:#ffd25a;background:rgba(255,210,90,.16);box-shadow:0 0 10px rgba(255,210,90,.4)}
+.fpick button.ban{opacity:.45;filter:grayscale(.7)}.fpick button.ban.sel{opacity:1;border-color:#ff5a5a;box-shadow:0 0 10px rgba(255,90,90,.45)}
 .fpick button .fno{position:absolute;top:2px;left:4px;font-weight:700;color:#ffd25a;font-size:12px}
 .btn.m-shop{background:#3e3322}.btn.m-shop small{color:#dcc493}
 .btn.m-coll{background:#322b4a}.btn.m-coll small{color:#c4b6e6}
@@ -3819,6 +3820,8 @@ const FOREST_UNLOCK_AREA=AREAS.findIndex(a=>a.name==='고대 원단수'); // 고
 const forestOpen=()=>{const i=FOREST_UNLOCK_AREA;return i<0||(P.prog[i]||0)>=STAGES||!!(P.cleared&&P.cleared[i]);};
 const FOREST_REWARD={5:{salv:1},10:{salv:3},15:{salv:4},23:{ally:'atris'}}; // 첫 돌파 보상
 const forestRewardText=f=>{const w=FOREST_REWARD[f];if(!w)return '';return w.ally?`★6 ${ALLIES[w.ally].name}`:`${SALV_ITEM.icon} ${SALV_ITEM.name} ×${w.salv}`;};
+const FOREST_BAN={akira:15}; // 해당 층부터 출전 금지
+const forestBanned=(id,f)=>!!(FOREST_BAN[id]&&f>=FOREST_BAN[id]);
 const forestAreas=()=>AREAS.map((a,i)=>i).filter(i=>AREAS[i].boss);
 const FOREST_MAX_FN=()=>forestAreas().length;
 const FOREST_MAX=FOREST_MAX_FN();
@@ -3831,6 +3834,7 @@ function forestRestore(){
 function forestStart(f){
   if(!forestOpen())return renderHub('🔒 노력의 숲은 고대 원단수를 클리어하면 열린다');
   const F=forestState();if(F.sel.length!==FOREST_PICK)return renderForest(`동료 ${FOREST_PICK}명을 먼저 골라 주세요`);
+  const bn=F.sel.filter(id=>forestBanned(id,f));if(bn.length)return renderForest(`⚠ ${bn.map(id=>ALLIES[id].name).join(', ')}은(는) ${FOREST_BAN[bn[0]]}층부터 출전할 수 없어요. 다른 동료를 골라 주세요`);
   F.tries=(F.tries||0)+1;FOREST=new Set(F.sel);
   P._forestRestore={hp:P.hp,mp:P.mp,maxHp:P.maxHp,atk:P.atk,def:P.def,relics:P.relics,water:P.items.water};
   P.maxHp=FOREST_HP;P.hp=FOREST_HP;P.atk=FOREST_ATK;P.def=FOREST_DEF;P.relics=[];P.items.water=FOREST_WATER;P.mp=P.maxMp;
@@ -3862,7 +3866,8 @@ function renderForest(msg,climb){
   for(let n=FOREST_MAX;n>=1;n--){const a=L[n-1],A=AREAS[a],bs=A.boss,cl=n<=F.best,on=n===cur;
     rows.push(`<div class="trow ${n%2?'l':'r'}"><div class="fnode ${cl?'done':''} ${on?'on':''} ${A.realm?'realm':''} ${on&&climb===n?'climb':''}" ${on?'id="fcur"':''}>
       ${on?'<span class="fclimber">🧗</span>':''}<span class="fn">${n}층 · ${A.flag} ${esc(A.name)}${A.realm?' · 마계':''}</span><br><b>${cl?'✔ ':''}${esc(bs.name)}</b>${FOREST_REWARD[n]?`<br><span class="fn">🎁 ${forestRewardText(n)}${(F.got||{})[n]?' ✔':''}</span>`:''}</div></div>`);}
-  const ce=id=>{const i=F.sel.indexOf(id);return `<button class="${i>=0?'sel':''}" data-fsel="${id}">${i>=0?`<span class="fno">${i+1}</span>`:''}${allyFace(id,'sm')}<span>${esc(ALLIES[id].name)}</span><span class="small">${TIER5[id]?TIER5[id]+'티어':'★5'}</span></button>`;};
+  const ce=id=>{const i=F.sel.indexOf(id),bn=forestBanned(id,cur);return `<button class="${i>=0?'sel':''} ${bn?'ban':''}" data-fsel="${id}" ${bn&&i<0?'disabled':''}>${i>=0?`<span class="fno">${i+1}</span>`:''}${allyFace(id,'sm')}<span>${esc(ALLIES[id].name)}</span><span class="small">${bn?`🚫 ${FOREST_BAN[id]}층~ 금지`:TIER5[id]?TIER5[id]+'티어':'★5'}</span></button>`;};
+  const banSel=F.sel.filter(id=>forestBanned(id,cur)),canGo=F.sel.length===FOREST_PICK&&!banSel.length;
   const A=AREAS[L[cur-1]];
   $('#app').innerHTML=`${statusHTML()}${topBack()}
     ${msg?`<div class="notice">${msg}</div>`:''}
@@ -3870,6 +3875,7 @@ function renderForest(msg,climb){
       <div class="desc">내 동료는 데려갈 수 없다. 대신 <b>모든 ★5 동료(최대 레벨 · 3각성 · 신화)</b> 중 <b>${FOREST_PICK}명</b>을 골라 도전한다.<br>
         주인공은 <b>HP ${fmt(FOREST_HP)} · 공격력 ${FOREST_ATK} · 방어력 ${FOREST_DEF}</b> 고정 · 유물 효과 없음 · 성수 ${FOREST_WATER}개 · 펫·이사벨 부제 없음. 오직 실력으로!<br>
         층마다 지역 이동 → 마계 이동 순서로 각 지역의 최종 보스가 기다린다. 끝나면 원래 능력치로 돌아온다.</div>
+      <div class="desc">🚫 출전 금지: ${Object.keys(FOREST_BAN).map(id=>`${ALLIES[id].name} (${FOREST_BAN[id]}층부터)`).join(' · ')}</div>
       <div class="desc"><b>돌파 보상</b> ${Object.keys(FOREST_REWARD).map(k=>`${k}층: ${forestRewardText(+k)}${(F.got||{})[k]?' ✔':''}`).join(' · ')}</div>
       ${done?`<div class="notice">🌳 노력의 숲 정상까지 올랐다! 🔁 다시 오르기 — 1층부터 다시 도전할 수 있다</div>`:''}
       <div class="ftree"><div class="fcrown">🌳</div>${rows.join('')}<div class="froot">🌱🪵🌱</div></div>
@@ -3877,7 +3883,7 @@ function renderForest(msg,climb){
       <div class="ptitle" style="margin-top:6px">🤝 함께 오를 동료 <span class="small">${F.sel.length}/${FOREST_PICK}명 선택</span></div>
       <div class="fpick">${pool.map(ce).join('')}</div>
       <div class="grid">
-        <button class="btn danger full" id="fgo" ${F.sel.length===FOREST_PICK?'':'disabled'}>⚔ ${cur}층 ${done?'다시 도전':'도전'}${F.sel.length===FOREST_PICK?'':`<small>동료 ${FOREST_PICK}명을 골라 주세요</small>`}</button>
+        <button class="btn danger full" id="fgo" ${canGo?'':'disabled'}>⚔ ${cur}층 ${done?'다시 도전':'도전'}${banSel.length?`<small>${banSel.map(id=>ALLIES[id].name).join(', ')}은(는) 이 층에 출전 금지 — 다른 동료로 바꿔 주세요</small>`:F.sel.length===FOREST_PICK?'':`<small>동료 ${FOREST_PICK}명을 골라 주세요</small>`}</button>
         ${done&&cur>1?`<button class="btn full" id="frst">🔁 1층부터 다시 오르기</button>`:''}
         <button class="btn full" id="back">← 거점으로</button>
       </div></div>${tabBar()}`;
