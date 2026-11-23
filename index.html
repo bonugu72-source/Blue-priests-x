@@ -1256,7 +1256,7 @@ const ALLIES={
   elizabeth:{star:6,name:'엘리자베스',   icon:'👑', role:'최후의 여왕', kit:'queen', exclusive:true,
             desc:'심판(3초마다 적에게 무작위로 출혈 · 속박 · 시야 차단 · 공격 반사 중 하나를 3초간 + 공격력의 절반만큼 주인공에게 보호막 · 보호막 중첩 가능) · 천상의 탑 30층 돌파 보상으로만 획득 (상점·합성 불가)'},
   hinoa:   {star:6,name:'히노아',       icon:'🍰', role:'달콤한 디저트', kit:'dessert',
-            desc:'달콤한 디저트(공격할 때마다 무작위로 던짐 — 주인공: 보호막 +500(중첩) · 동료: HP 500 회복 · 적: 디저트 폭발로 공격력 2배 피해) · 상점 동료 소환에서 획득'},
+            desc:'달콤한 디저트(2초마다 무작위로 던짐 — 주인공: 보호막 +500(중첩) · 동료: HP 500 회복 · 적: 디저트 폭발로 공격력 2배 피해) · 상점 동료 소환에서 획득'},
   atris:   {star:6,name:'아트리스',     icon:'📦', role:'판도라의 여주', kit:'heatwave', exclusive:true,
             desc:'열파(적의 현재 체력에 비례해 적 공격력 감소 · 체력이 많을수록 최대 30%) · 저주(3초간 적 회복 불가) · 피해는 약하지만 공격력·마법력이 절반씩 들어감(방어력 영향 절반) · 노력의 숲 23층 돌파 보상으로만 획득 (상점·합성 불가)'},
   hari:    {star:5,pet:true,name:'하리뭉',   icon:'🐲', role:'펫 · 아기 번개용', kit:'firepet',
@@ -1299,7 +1299,7 @@ const MYTH_SKILL={
   akira: {name:'혹한의 화살',desc:'4초마다 아키라의 공격력이 2배씩 증가 (최대 4배)'},
   babelord:{name:'운명의 지배자',desc:'주사위를 굴리는 주기 4초 → 3초'},
   elizabeth:{name:'최후의 여왕의 칙령',desc:'심판 한 번에 서로 다른 효과 2개를 동시에 검'},
-  hinoa:{name:'디저트 파티',desc:'7초마다 5초간 광란의 파티 — 주인공과 동료 전원에게 현재 체력만큼 보호막 (파티가 끝나면 사라짐)'},
+  hinoa:{name:'디저트 파티',desc:'전투 시작 7초 뒤 한 번, 5초간 광란의 파티 — 주인공과 동료 전원에게 현재 체력만큼 보호막 (파티가 끝나면 사라짐)'},
   atris:{name:'판도라의 상자',desc:'3초마다 아군에게 걸린 디버프를 모두 제거'},
   miner: {name:'바다의 여왕',desc:'물보라 보호막 2턴 → 3턴 · 미네르바의 치명타 피해 1.5배 → 2배'},
   vista5:{name:'특급 열차',desc:'열차 관통 피해가 기본 공격의 2배 → 3배 · 시야 차단 3턴'},
@@ -4928,14 +4928,14 @@ function synthAll(){
 }
 
 /* ===================== 전투 ===================== */
-function clearBattle(){forcedMv=null;if(B&&B.forest)forestRestore();if(B&&B.dgT)clearInterval(B.dgT);if(B&&B.enemyT)clearInterval(B.enemyT);if(B&&B.allyT)clearInterval(B.allyT);document.body.classList.remove('pfrozen');if(B&&B.freezeT)clearInterval(B.freezeT);if(B&&B.sakuraT)clearInterval(B.sakuraT);document.body.classList.remove('battle');applyBossTheme(null);if(B&&B.waveT)clearInterval(B.waveT);if(B&&B.soulT)clearInterval(B.soulT);if(B&&B.drainT)clearInterval(B.drainT);if(B&&B.tsT)clearInterval(B.tsT);if(B&&B.paraT)clearInterval(B.paraT);if(B&&B.zapT)clearInterval(B.zapT);if(B&&B.karmaT)clearInterval(B.karmaT);if(B&&B.trainT)clearInterval(B.trainT);if(B&&B.aoraT)clearInterval(B.aoraT);if(B&&B.heartT)clearInterval(B.heartT);if(B&&B.halfT)clearInterval(B.halfT);if(B&&B.fallT)clearInterval(B.fallT);if(B&&B.isaT)clearInterval(B.isaT);if(B&&B.nkT)clearInterval(B.nkT);if(B&&B.apT)clearInterval(B.apT);if(B&&B.remT)clearInterval(B.remT);if(B&&B.lvT)clearInterval(B.lvT);if(B)['diceT','judgeT','hariT','baemT','mihoT','totoT','coldT','pandoraT','hnT'].forEach(k=>{if(B[k])clearInterval(B[k]);});B=null;}
+function clearBattle(){forcedMv=null;if(B&&B.forest)forestRestore();if(B&&B.dgT)clearInterval(B.dgT);if(B&&B.enemyT)clearInterval(B.enemyT);if(B&&B.allyT)clearInterval(B.allyT);document.body.classList.remove('pfrozen');if(B&&B.freezeT)clearInterval(B.freezeT);if(B&&B.sakuraT)clearInterval(B.sakuraT);document.body.classList.remove('battle');applyBossTheme(null);if(B&&B.waveT)clearInterval(B.waveT);if(B&&B.soulT)clearInterval(B.soulT);if(B&&B.drainT)clearInterval(B.drainT);if(B&&B.tsT)clearInterval(B.tsT);if(B&&B.paraT)clearInterval(B.paraT);if(B&&B.zapT)clearInterval(B.zapT);if(B&&B.karmaT)clearInterval(B.karmaT);if(B&&B.trainT)clearInterval(B.trainT);if(B&&B.aoraT)clearInterval(B.aoraT);if(B&&B.heartT)clearInterval(B.heartT);if(B&&B.halfT)clearInterval(B.halfT);if(B&&B.fallT)clearInterval(B.fallT);if(B&&B.isaT)clearInterval(B.isaT);if(B&&B.nkT)clearInterval(B.nkT);if(B&&B.apT)clearInterval(B.apT);if(B&&B.remT)clearInterval(B.remT);if(B&&B.lvT)clearInterval(B.lvT);if(B)['diceT','judgeT','hariT','baemT','mihoT','totoT','coldT','pandoraT','hnT','hnThT'].forEach(k=>{if(B[k])clearInterval(B[k]);});B=null;}
 /* 반사·부적 등으로 적이 턴 밖에서 쓰러졌을 때 */
 function winNow(){
   if(!B||B.won)return;
   if(B.dungeon){dungeonNextBoss();return;}   // 던전: 승리 대신 다음 보스
   if((B.e.berserk&&!B.berserked)||(B.e.madness&&!B.maddened)||(B.e.awaken&&!B.awoke)||(B.e.twin&&!B.twinned)||(B.e.relay&&(B.relayStage||0)<2)||(B.e.lastStand&&!B.lastStood)||(B.e.rampage&&!B.rampaged)||(B.e.duckHide&&!B.remHid)){B.e.hp=Math.max(1,B.e.hp);renderBattle();return;}
   B.won=true;B.busy=true;if(B.enemyT)clearInterval(B.enemyT);if(B.allyT)clearInterval(B.allyT);if(B.freezeT)clearInterval(B.freezeT);document.body.classList.remove('pfrozen');if(B.sakuraT)clearInterval(B.sakuraT);if(B.paraT)clearInterval(B.paraT);if(B.waveT)clearInterval(B.waveT);if(B.soulT)clearInterval(B.soulT);if(B.drainT)clearInterval(B.drainT);if(B.tsT)clearInterval(B.tsT);
-  if(B.zapT)clearInterval(B.zapT);if(B.karmaT)clearInterval(B.karmaT);if(B.trainT)clearInterval(B.trainT);if(B.aoraT)clearInterval(B.aoraT);if(B.autoT)clearInterval(B.autoT);if(B.diceT)clearInterval(B.diceT);if(B.judgeT)clearInterval(B.judgeT);if(B.hariT)clearInterval(B.hariT);if(B.baemT)clearInterval(B.baemT);if(B.mihoT)clearInterval(B.mihoT);if(B.totoT)clearInterval(B.totoT);if(B.pandoraT)clearInterval(B.pandoraT);if(B.hnT)clearInterval(B.hnT);if(B.coldT)clearInterval(B.coldT);if(B.heartT)clearInterval(B.heartT);if(B.halfT)clearInterval(B.halfT);if(B.fallT)clearInterval(B.fallT);if(B.isaT)clearInterval(B.isaT);
+  if(B.zapT)clearInterval(B.zapT);if(B.karmaT)clearInterval(B.karmaT);if(B.trainT)clearInterval(B.trainT);if(B.aoraT)clearInterval(B.aoraT);if(B.autoT)clearInterval(B.autoT);if(B.diceT)clearInterval(B.diceT);if(B.judgeT)clearInterval(B.judgeT);if(B.hariT)clearInterval(B.hariT);if(B.baemT)clearInterval(B.baemT);if(B.mihoT)clearInterval(B.mihoT);if(B.totoT)clearInterval(B.totoT);if(B.pandoraT)clearInterval(B.pandoraT);if(B.hnT)clearInterval(B.hnT);if(B.hnThT)clearInterval(B.hnThT);if(B.coldT)clearInterval(B.coldT);if(B.heartT)clearInterval(B.heartT);if(B.halfT)clearInterval(B.halfT);if(B.fallT)clearInterval(B.fallT);if(B.isaT)clearInterval(B.isaT);
   renderBattle();setTimeout(victory,750);
 }
 /* 이사벨 부제: 5초마다 주인공 HP 40% 회복 */
@@ -5041,14 +5041,28 @@ function mihoTick(){
   if(e.hp<=0){winNow();return;}
   renderBattle();
 }
-/* 히노아: 디저트 보호막 · 신화 디저트 파티(7초 대기 → 5초 광란의 파티: 주인공·동료에게 현재 체력만큼 보호막, 끝나면 사라짐) */
-const HN_SHIELD=500, HN_HEAL=500, HN_WAIT=7000, HN_PARTY=5000;
+/* 히노아: 2초마다 달콤한 디저트 · 신화 디저트 파티(전투 시작 7초 뒤 한 번, 5초 광란의 파티: 주인공·동료에게 현재 체력만큼 보호막, 끝나면 사라짐) */
+const HN_SHIELD=500, HN_HEAL=500, HN_WAIT=7000, HN_PARTY=5000, HN_THROW_MS=2000;
 const hnPartyOn=()=>!!(B&&B.hnParty&&Date.now()<B.hnParty.until);
+function hnThrowTick(){ // 2초마다 달콤한 디저트를 무작위로 — 주인공 보호막 500(중첩) · 동료 HP 500 회복 · 적은 공격력 2배 폭발
+  if(!B||B.over||B.won||!$('#modal').classList.contains('hidden'))return;
+  const id='hinoa',h=B.ahp[id],e=B.e;
+  if(!inParty(id)||(h&&h.hp<=0)||(B.stun[id]>0)||aFrozen()||e.hp<=0||P.hp<=0)return;
+  const nm=ALLIES[id].name,lv=aData(id).lv;B.curAlly=id;B.am=allyMult(id);
+        const r=Math.floor(Math.random()*3);
+        if(r===0){B.hnShield=(B.hnShield||0)+HN_SHIELD;stat('heal','hinoa',0);addLog(`🍰 ${nm}의 디저트 — 주인공 명중! 보호막 +${HN_SHIELD} (총 ${fmt(B.hnShield)})`);queueFx('player','🍰🛡+'+HN_SHIELD,'heal');}
+        else if(r===1){const L=partyIds().filter(x=>B.ahp[x]&&B.ahp[x].hp>0&&B.ahp[x].hp<B.ahp[x].max);
+          if(L.length){const w=pick(L),ah=B.ahp[w],g=Math.min(ah.max-ah.hp,Math.round(HN_HEAL*healMul()));ah.hp+=g;stat('heal','hinoa',g);addLog(`🧁 ${nm}의 디저트 — ${ALLIES[w].name} 명중! HP +${g}`);}
+          else allyHit((14+lv*4.5)*2,`💥 ${nm}의 디저트 폭발 (공격력 2배)`,0.4);}
+        else allyHit((14+lv*4.5)*2,`💥 ${nm}의 디저트 폭발 (공격력 2배)`,0.4);
+  if(e.hp<=0){winNow();return;}
+  renderBattle();
+}
 function hnPartyTick(){
   if(!B||B.over||B.won||!$('#modal').classList.contains('hidden'))return;
   const id='hinoa',h=B.ahp[id],now=Date.now();
-  if(B.hnParty&&now>=B.hnParty.until){B.hnParty=null;B.hnSec=0;addLog('🎉 광란의 파티가 끝났다 — 파티 보호막이 사라졌다');renderBattle();return;}
-  if(B.hnParty)return;
+  if(B.hnParty&&now>=B.hnParty.until){B.hnParty=null;B.hnDone=true;addLog('🎉 광란의 파티가 끝났다 — 파티 보호막이 사라졌다');renderBattle();return;}
+  if(B.hnParty||B.hnDone)return; // 디저트 파티는 전투당 한 번
   if(!inParty(id)||!isMyth(id)||(h&&h.hp<=0)||P.hp<=0)return;
   B.hnSec=(B.hnSec||0)+500;if(B.hnSec<HN_WAIT)return;B.hnSec=0;
   const al={};partyIds().forEach(x=>{const a=B.ahp[x];if(a&&a.hp>0)al[x]=a.hp;});
@@ -5344,6 +5358,7 @@ function startBattle(spec){
     if(B&&inParty('aora'))B.aoraT=setInterval(aoraTick,AORA_MS);
     if(B&&inParty('babelord'))B.diceT=setInterval(diceTick,diceMs());
     if(B&&inParty('elizabeth'))B.judgeT=setInterval(judgeTick,JUDGE_MS);
+    if(B&&inParty('hinoa'))B.hnThT=setInterval(hnThrowTick,HN_THROW_MS);
     if(B&&inParty('hinoa')&&isMyth('hinoa'))B.hnT=setInterval(hnPartyTick,500);
     if(B&&inParty('atris')&&isMyth('atris'))B.pandoraT=setInterval(pandoraTick,PANDORA_MS);
     if(B&&inParty('hari'))B.hariT=setInterval(hariTick,HARI_MS);
@@ -6082,14 +6097,7 @@ function alliesAct(){
       case 'bloodpet': break; // 뱀뱀이: 흡혈 송곳니는 baemTick
       case 'zappet': break;   // 미호롱: 번개 발톱은 mihoTick
       case 'charmpet': break; // 토토롱: 매혹의 하트는 totoTick
-      case 'dessert':{ // 히노아: 달콤한 디저트를 무작위로 — 주인공 보호막 500(중첩) · 동료 HP 500 회복 · 적은 공격력 2배 폭발
-        const r=Math.floor(Math.random()*3);
-        if(r===0){B.hnShield=(B.hnShield||0)+HN_SHIELD;stat('heal',id,0);addLog(`🍰 ${nm}의 디저트 — 주인공 명중! 보호막 +${HN_SHIELD} (총 ${fmt(B.hnShield)})`);queueFx('player','🍰🛡+'+HN_SHIELD,'heal');}
-        else if(r===1){const L=partyIds().filter(x=>B.ahp[x]&&B.ahp[x].hp>0&&B.ahp[x].hp<B.ahp[x].max);
-          if(L.length){const w=pick(L),ah=B.ahp[w],g=Math.min(ah.max-ah.hp,Math.round(HN_HEAL*healMul()));ah.hp+=g;stat('heal',id,g);addLog(`🧁 ${nm}의 디저트 — ${ALLIES[w].name} 명중! HP +${g}`);}
-          else allyHit((14+lv*4.5)*2,`💥 ${nm}의 디저트 폭발 (공격력 2배)`,0.4);}
-        else allyHit((14+lv*4.5)*2,`💥 ${nm}의 디저트 폭발 (공격력 2배)`,0.4);
-        break;}
+      case 'dessert': allyHit(14+lv*4.5,`${nm}의 디저트 포크`,0.4);break; // 히노아: 디저트 던지기는 hnThrowTick (2초마다)
       case 'heatwave':{ // 아트리스: 열파(적 현재 체력 비례 공격력 감소) · 저주(회복 불가) · 공격력·마법력 절반씩
         const pct=ATR_DOWN_MAX*Math.max(0,Math.min(1,e.hp/e.maxHp)),now=Date.now();
         allyHit(10+lv*3,`${nm}의 열파 (물리·마법 절반씩)`,0.25);
