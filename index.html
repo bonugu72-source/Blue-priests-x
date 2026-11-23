@@ -984,6 +984,7 @@ body:has(.tabbar) .tabbar{background:color-mix(in srgb,var(--tc) 6%,rgba(8,12,26
 /* 돌아가기 · 가이드 목차 버튼: 화면을 내려도 왼쪽 위에 붙어서 따라옴 (아이폰 상태 표시줄 아래) */
 .backtop-row,.topback{position:sticky;top:calc(env(safe-area-inset-top) + 6px);z-index:25;align-self:flex-start}
 .backtop-row .backtop,.topback .btn{box-shadow:0 3px 12px rgba(3,6,15,.55)}
+body:has(.sortbar.sticky) .backtop-row{top:calc(env(safe-area-inset-top) + var(--sortbar-h,44px) + 6px)}   /* 동료 관리·도감처럼 등급 탭이 위에 붙는 화면: 탭 바로 아래에 */
 /* 업데이트 소식 */
 .patch .sum-title{margin-bottom:4px}
 .pchips{display:flex;flex-wrap:wrap;gap:5px;justify-content:center;margin:10px 0 4px}
