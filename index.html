@@ -1238,7 +1238,7 @@ const ALLIES={
   baem:    {star:5,pet:true,name:'뱀뱀이',   icon:'🐍', role:'펫 · 아기 황금뱀', kit:'bloodpet',
             desc:'흡혈 송곳니(3초마다 적에게 출혈 · 출혈로 입힌 피해만큼 주인공과 동료 전원 HP 회복) · 🐾 펫: 출전 펫으로 고르면 자동 출전 (출전 칸 차지 안 함 · 펫은 1마리만) · 상점 동료 소환에서만 획득'},
   miho:    {star:5,pet:true,name:'미호롱',   icon:'🐯', role:'펫 · 아기 백호', kit:'zappet',
-            desc:'번개 발톱(3초마다 적에게 마비 피해 · 1.5초간 마비(행동 불가) · 마비로 입힌 피해만큼 3초간 주인공과 동료 전원 공격력 증가) · 🐾 펫: 출전 펫으로 고르면 자동 출전 (출전 칸 차지 안 함 · 펫은 1마리만) · 상점 동료 소환에서만 획득'},
+            desc:'번개 발톱(3초마다 적에게 마비 피해 · 1.5초간 마비(행동 불가) · 마비로 입힌 피해의 절반만큼 3초간 주인공과 동료 전원 공격력 증가) · 🐾 펫: 출전 펫으로 고르면 자동 출전 (출전 칸 차지 안 함 · 펫은 1마리만) · 상점 동료 소환에서만 획득'},
   miner:   {star:5,name:'미네르',        icon:'🌊', role:'물의 여신', kit:'tide', hpMul:0.6,
             desc:'침몰(적을 물속으로 끌어내려 3턴간 적 공격력 감소) · 물보라(2턴간 동료가 받는 피해 절반) · 체력이 적어 쉽게 쓰러지지만, 쓰러지면 물의 여신 「미네르바」로 각성해 HP 60%로 부활(1회) — 이후 공격이 고정 피해 + 치명타'},
   vista5:  {star:5,name:'비스타',        icon:'🚂', role:'열차 소환', kit:'train',
@@ -3048,7 +3048,7 @@ function statusHTML(){
   </div>`;
 }
 const owned=id=>(P.roster[id]||0)>0;
-const SORTIE_RULES={noIsabelT1:{text:'이사벨 부제 출전 불가 · ★5 1티어 동료 출전 금지 (펫은 출전 가능)',ok:id=>!(ALLIES[id]&&ALLIES[id].star===5&&TIER5[id]===1),noFixed:true,keepPet:true},star5x2:{text:'★5 동료 최대 2명만 출전 가능 (이사벨 부제 출전 불가)',ok:id=>ALLIES[id].star===5,noFixed:true,max:2},noIsabel:{text:'이사벨 부제 출전 불가 — 출전 동료만으로 싸워야 함',ok:id=>true,noFixed:true},myth:{text:'신화 승급 동료만 출전 가능 (이사벨 부제는 고정 동행)',ok:id=>isMyth(id)},myth4:{text:'신화 승급 동료 또는 ★4 동료만 출전 가능 (이사벨 부제는 고정 동행)',ok:id=>isMyth(id)||ALLIES[id].star===4},one:{text:'동료 1명만 출전 가능 (이사벨 부제 출전 불가)',ok:id=>true,noFixed:true,max:1},myth2:{text:'신화 승급 동료 최대 2명만 출전 가능 (이사벨 부제 출전 불가)',ok:id=>isMyth(id),noFixed:true,max:2},noTier1:{text:'★5 1티어 동료 출전 금지 (이사벨 부제는 고정 동행)',ok:id=>!(ALLIES[id]&&ALLIES[id].star===5&&TIER5[id]===1)}};
+const SORTIE_RULES={noIsabelT1:{text:'이사벨 부제 출전 불가 · ★6 동료와 ★5 1티어 동료 출전 금지 (펫은 출전 가능)',ok:id=>!(ALLIES[id]&&(ALLIES[id].star===6||(ALLIES[id].star===5&&TIER5[id]===1))),noFixed:true,keepPet:true},star5x2:{text:'★5 동료 최대 2명만 출전 가능 (이사벨 부제 출전 불가)',ok:id=>ALLIES[id].star===5,noFixed:true,max:2},noIsabel:{text:'이사벨 부제 출전 불가 — 출전 동료만으로 싸워야 함',ok:id=>true,noFixed:true},myth:{text:'신화 승급 동료만 출전 가능 (이사벨 부제는 고정 동행)',ok:id=>isMyth(id)},myth4:{text:'신화 승급 동료 또는 ★4 동료만 출전 가능 (이사벨 부제는 고정 동행)',ok:id=>isMyth(id)||ALLIES[id].star===4},one:{text:'동료 1명만 출전 가능 (이사벨 부제 출전 불가)',ok:id=>true,noFixed:true,max:1},myth2:{text:'신화 승급 동료 최대 2명만 출전 가능 (이사벨 부제 출전 불가)',ok:id=>isMyth(id),noFixed:true,max:2},noTier1:{text:'★5 1티어 동료 출전 금지 (이사벨 부제는 고정 동행)',ok:id=>!(ALLIES[id]&&ALLIES[id].star===5&&TIER5[id]===1)}};
 const sortieRule=a=>AREAS[a]&&SORTIE_RULES[AREAS[a].sortie];
 const sortieOk=(a,id)=>{const r=sortieRule(a);return !r||r.ok(id);};
 const partyIds=()=>(B&&B.party)?B.party:[FIXED,...petParty(),...P.active];
@@ -4900,8 +4900,8 @@ function baemTick(){
   if(e.hp<=0){winNow();return;}
   renderBattle();
 }
-/* 펫 미호롱: 3초마다 번개 발톱 — 적에게 마비 피해(고정) + 1.5초 마비 · 그 피해만큼 3초간 주인공·동료 공격력 증가 */
-const MIHO_MS=3000, MIHO_PARA=1500, MIHO_BUFF=3000;
+/* 펫 미호롱: 3초마다 번개 발톱 — 적에게 마비 피해(고정) + 1.5초 마비 · 그 피해의 절반만큼 3초간 주인공·동료 공격력 증가 */
+const MIHO_MS=3000, MIHO_PARA=1500, MIHO_BUFF=3000, MIHO_ATK_RATE=0.5; // 공격력 증가 = 마비 피해의 절반
 const mihoParaOn=()=>!!(B&&B.mihoParaUntil&&Date.now()<B.mihoParaUntil);
 const mihoAtk=()=>(B&&B.mihoAtkUntil&&Date.now()<B.mihoAtkUntil)?(B.mihoAtk||0):0;
 function mihoTick(){
@@ -4910,8 +4910,8 @@ function mihoTick(){
   if(!inParty(id)||(h&&h.hp<=0)||(B.stun[id]>0)||aFrozen()||e.hp<=0||P.hp<=0)return;
   const d=Math.max(1,Math.round((12+aData(id).lv*4)*allyMult(id)));
   if(!B.immune){stat('dmg',id,Math.min(d,e.hp));e.hp=Math.max(0,e.hp-d);B.mihoParaUntil=now+MIHO_PARA;}
-  B.mihoAtk=d;B.mihoAtkUntil=now+MIHO_BUFF;
-  addLog(`⚡ 미호롱의 번개 발톱! ${e.name}에게 마비 ${d}${B.immune?' (무효)':` · ${MIHO_PARA/1000}초 마비`} · 주인공과 동료 전원 공격력 +${d} (${MIHO_BUFF/1000}초)`);queueFx('enemy','⚡'+d,'dmg');
+  const ab=Math.max(1,Math.round(d*MIHO_ATK_RATE));B.mihoAtk=ab;B.mihoAtkUntil=now+MIHO_BUFF;
+  addLog(`⚡ 미호롱의 번개 발톱! ${e.name}에게 마비 ${d}${B.immune?' (무효)':` · ${MIHO_PARA/1000}초 마비`} · 주인공과 동료 전원 공격력 +${ab} (${MIHO_BUFF/1000}초)`);queueFx('enemy','⚡'+d,'dmg');
   if(e.hp<=0){winNow();return;}
   renderBattle();
 }
