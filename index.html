@@ -980,7 +980,17 @@ body:has(.tabbar) .tabbar{background:color-mix(in srgb,var(--tc) 6%,rgba(8,12,26
 .srow{justify-content:space-between}.srow .stats{display:flex;gap:14px;flex-wrap:wrap}
 .pnbtn{flex:0 0 auto;cursor:pointer;font:inherit;font-size:12px;font-weight:700;color:#ffe7a3;background:rgba(232,199,106,.12);border:1px solid rgba(232,199,106,.45);border-radius:999px;padding:3px 10px}
 .fdname{display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap}.fdname .lvtag{font-family:inherit;font-size:13px}
-.fdetail .rwl{text-align:left}
+.fdetail .rwl{text-align:left;gap:2px;margin:4px 0 6px}
+.fdetail .rwi{padding:3px 9px;font-size:11.5px;line-height:1.35;border-radius:7px;gap:6px}   /* 친구 기록: 한 화면에 들어가게 작게 */
+.fdetail .rwi .rk{min-width:6.6em;font-size:11.5px}
+.fdetail .fdrec .rwl{margin:0 0 2px}
+.fdetail .fdrec .rwl.cols .rwi{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:flex-start;column-gap:5px;row-gap:0;padding:3px 7px}
+.fdetail .fdrec .rwl.cols .rwi .rk{min-width:0;font-size:11px}
+.fdetail .fdrec .rwl.cols .rwi .rv{flex:0 1 auto;text-align:left;white-space:normal;font-size:11px}
+.fdetail .rp-h{font-size:14px;margin:6px 0 3px}   /* 친구 정보: 한 화면에 들어가게 간격 줄임 */
+.fdetail .sum-title{margin-bottom:2px}.fdetail .teamcp{padding:0}
+.fdetail .fdrec .rwi{padding-top:2px;padding-bottom:2px}
+.fdetail .rwi .rv .small{font-size:10.5px}
 .rkfold>summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:6px;padding:6px 0;user-select:none}
 .rkfold>summary::-webkit-details-marker{display:none}
 .rkfold .fdarr{margin-left:auto;font-size:12px;color:#9fb0d8}.rkfold .fdarr::after{content:'▼ 펼치기'}
@@ -4183,8 +4193,9 @@ function friendRecHTML(x){   // 친구 자세히 보기: 스테이지·랭크전
   const rank=x.rankT==null&&x.rankLP==null?none:(!x.rankOn&&!(+x.rankT>0)&&!(+x.rankLP>0))?'🔒 아직 열리지 않음':`${R.icon} ${R.n} · ${fmt(n(x.rankLP,1e9))} LP`;
   const fl=(v,mx)=>rc?(n(v,mx)>=mx?`${mx}층 정복 ✔`:`${n(v,mx)}층 / ${mx}층`):none;
   const dg=x.dgDay===dgDay()&&+x.dgBest>0?`${fmt(n(x.dgBest,1e15))} 딜`:'오늘 기록 없음';
-  return rwList([['🗺 스테이지',`${progressText(x)}${x.ended?' · ✝ 엔딩':''}`],['🏅 랭크전',rank],['🗼 구원의 탑',fl(rc&&rc.tw,TOWER_MAX)],['☁️ 천상의 탑',fl(rc&&rc.hv,HEAVEN_MAX)],
-    ['🌳 노력의 숲',fl(rc&&rc.fo,FOREST_MAX)],['🏰 던전 (오늘)',dg],['🎯 캐릭터 맞추기',rc?`최고 ${n(rc.qz,999)}개`:none]]);
+  if(!rc)return rwList([['🗺 스테이지',`${progressText(x)}${x.ended?' · ✝ 엔딩':''}`],['🏅 랭크전',rank],['🏰 던전 (오늘)',dg],[null,none.replace('정보 없음 · ','탑·숲·맞추기 기록: ')]]);
+  return `<div class="fdrec">${rwList([['🗺 스테이지',`${progressText(x)}${x.ended?' · ✝ 엔딩':''}`]])}${rwList([['🏅 랭크전',rank],['🗼 구원의 탑',fl(rc.tw,TOWER_MAX)],['☁️ 천상의 탑',fl(rc.hv,HEAVEN_MAX)],
+    ['🌳 노력의 숲',fl(rc.fo,FOREST_MAX)],['🏰 던전 (오늘)',dg],['🎯 맞추기',`최고 ${n(rc.qz,999)}개`]],2)}</div>`;
 }
 function showFriendDetail(x,o){
   const t=x.team||{};
@@ -4196,10 +4207,10 @@ function showFriendDetail(x,o){
     <div class="rp-h">🤝 출전 동료</div>
     ${party.length?`<div class="pvpteam">${teamIconsHTML(party)}</div>`:'<div class="desc">팀 정보가 아직 없어요.</div>'}
     <div class="rp-h">📜 기록</div>${friendRecHTML(x)}
-    <div class="small" style="margin-top:8px">나와의 배틀 ${o.rec.w||0}승 ${o.rec.l||0}패${o.live?` · ${presenceHTML(x)}`:x.updatedAt?` · ${agoText(x.updatedAt)} 갱신`:''}</div>
-    <div class="grid" style="margin-top:12px">${o.duel?'<button class="btn danger" id="fdduel">⚔ 배틀</button>':'<button class="btn" disabled>⚔ 배틀<small>팀 정보 없음</small></button>'}
+    <div class="small" style="margin-top:4px">나와의 배틀 ${o.rec.w||0}승 ${o.rec.l||0}패${o.live?` · ${presenceHTML(x)}`:x.updatedAt?` · ${agoText(x.updatedAt)} 갱신`:''}</div>
+    <div class="grid" style="margin-top:8px">${o.duel?'<button class="btn danger" id="fdduel">⚔ 배틀</button>':'<button class="btn" disabled>⚔ 배틀<small>팀 정보 없음</small></button>'}
       <button class="btn" id="fddel">친구 삭제</button></div>
-    ${x.id&&!x.me&&x.id!==myId?`<div class="grid" style="margin-top:8px"><button class="btn full" id="fdgift" ${giftReady()?'':'disabled'}>💰 코인 보내기${giftReady()?'':'<small>클라우드 연결 필요</small>'}</button></div>`:''}</div>`,null,true);
+    ${x.id&&!x.me&&x.id!==myId?`<div class="grid" style="margin-top:6px"><button class="btn full" id="fdgift" ${giftReady()?'':'disabled'}>💰 코인 보내기${giftReady()?'':'<small>클라우드 연결 필요</small>'}</button></div>`:''}</div>`,null,true);
   $('#mbtn').textContent='← 뒤로';
   if($('#fdduel'))$('#fdduel').onclick=()=>{$('#modal').classList.add('hidden');o.duel();};
   if($('#fdgift'))$('#fdgift').onclick=()=>giftSendUI(x);
