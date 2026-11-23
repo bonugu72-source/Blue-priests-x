@@ -1497,8 +1497,9 @@ const cosOf=id=>{const c=P&&P.cos&&P.cos.eq&&P.cos.eq[id];return c?(COSTUMES[id]
 const allyImg=id=>{const c=cosOf(id);return c&&c.img?c.img:ALLY_IMG[id];};
 /* 신화 승급 동료 이름: 푸른빛으로 빛남 */
 const nameHTML=id=>isMyth(id)?`<span class="mythname">${ALLIES[id].name}</span>`:ALLIES[id].name;
-function allyFace(id,cls,tn){   // tn: 다른 사람(친구·상대)의 초월 여부 · 없으면 내 기준
-  const im=allyImg(id);if(tn===undefined?transOn(id):tn)cls=(cls||'')+' trans';
+const otherImg=(id,cs)=>{const c=cs&&(COSTUMES[id]||[]).find(x=>x.id===cs&&x.img);return c?c.img:ALLY_IMG[id];};   // 친구·상대가 낀 코스튬 (없으면 기본 모습)
+function allyFace(id,cls,tn,cs){   // tn: 다른 사람(친구·상대)의 초월 여부 · cs: 그 사람이 낀 코스튬 · 없으면 내 기준
+  const im=cs===undefined?allyImg(id):otherImg(id,cs);if(tn===undefined?transOn(id):tn)cls=(cls||'')+' trans';
   return im?`<span class="aface ${cls||''}" style="background-image:url(${im.src});background-position:${im.face}${im.size?';background-size:'+im.size+' auto':''}"></span>`:`<span class="aemo ${cls||''}">${ALLIES[id].icon}</span>`;
 }
 /* 천사의 날개 (★6 소환 연출) — 깃털을 부채꼴로 겹쳐 그린 오른쪽 날개, 왼쪽은 좌우 반전 */
@@ -3735,7 +3736,7 @@ function myPublic(){
   let area=0;for(let i=0;i<AREAS.length;i++)if(i<=P.unlocked)area=i;
   return {hero:String(P.name).slice(0,8),lv:P.lv,cp:teamCP(),area,stage:P.prog[area]||0,
     ended:!!P.ended,friends:(P.friends||[]).slice(0,100),
-    team:{atk:P.atk,def:P.def,maxHp:P.maxHp,maxMp:P.maxMp,lv:P.lv,party:partyIds().map(id=>({id,lv:aData(id).lv,aw:P.awaken[id]||0,my:isMyth(id)?1:0,tr:trustLv(id),tn:transOn(id)?1:0}))},
+    team:{atk:P.atk,def:P.def,maxHp:P.maxHp,maxMp:P.maxMp,lv:P.lv,party:partyIds().map(id=>({id,lv:aData(id).lv,aw:P.awaken[id]||0,my:isMyth(id)?1:0,tr:trustLv(id),tn:transOn(id)?1:0,...(cosOf(id)?{cs:cosOf(id).id}:{})}))},
     pvpW:(P.pvp&&P.pvp.w)||0,pvpL:(P.pvp&&P.pvp.l)||0,rankT:(P.rank&&P.rank.tier)||0,rankLP:(P.rank&&P.rank.lp)||0,rankOn:P.lv>=RANK_MIN_LV?1:0,
     ...(P.dg&&P.dg.best>0&&Array.isArray(P.dg.top)?{dgDay:P.dg.day,dgBest:P.dg.best,dgTop:P.dg.top.slice(0,20).map(r=>({v:r.v,p:(r.p||[]).slice(0,MAX_ACTIVE),at:r.at||0,...(r.d?{d:r.d}:{}),...(r.k!=null?{k:r.k}:{})}))}:{}),   // 던전 오늘의 기록 (상위 20개) — 기록이 없으면 넣지 않음 (프로필은 통째로 덮어써서 지난 기록도 함께 사라짐)
     ...(()=>{const v=myVsPublic();return Object.keys(v).length?{vs:v}:{};})(),   // 나와의 대결: 내가 친구에게 건 대결 결과 (친구 화면에서 합쳐 보여 줌)
@@ -4179,7 +4180,7 @@ function friendRecHTML(x){   // 친구 자세히 보기: 스테이지·랭크전
 }
 function showFriendDetail(x,o){
   const t=x.team||{};
-  const party=(Array.isArray(t.party)?t.party:[]).filter(a=>a&&ALLIES[a.id]).slice(0,4).map(a=>({id:a.id,lv:pvpCl(a.lv,1,60),tn:a.tn?1:0}));
+  const party=(Array.isArray(t.party)?t.party:[]).filter(a=>a&&ALLIES[a.id]).slice(0,4).map(a=>({id:a.id,lv:pvpCl(a.lv,1,60),tn:a.tn?1:0,cs:typeof a.cs==='string'?a.cs:''}));
   showStory(`<div class="sum fdetail"><div class="sum-title">👤 친구 정보</div>
     <div class="sum-name fdname">${esc(x.hero||'모험가')} <span class="lvtag">Lv ${x.lv||1}</span></div>
     <div class="teamcp">⚔ 전투력 <b>${fmt(x.cp||0)}</b></div>
@@ -4198,12 +4199,12 @@ function showFriendDetail(x,o){
     if(b.dataset.armed!=='1'){b.dataset.armed='1';b.textContent='한 번 더 누르면 삭제';return;}
     $('#modal').classList.add('hidden');o.del();};
 }
-function teamIconsHTML(party){return party.map(x=>`<span class="pvpa" title="${ALLIES[x.id].name}">${allyFace(x.id,'pv',x.tn?1:0)}<i>Lv${x.lv}</i></span>`).join('');}
+function teamIconsHTML(party){return party.map(x=>`<span class="pvpa" title="${ALLIES[x.id].name}">${allyFace(x.id,'pv',x.tn?1:0,typeof x.cs==='string'?x.cs:'')}<i>Lv${x.lv}</i></span>`).join('');}
 function startPvp(f){
   const t=f&&f.team;if(!t)return;
   const hero={atk:pvpCl(t.atk,1,9999),def:pvpCl(t.def,0,9999),maxHp:pvpCl(t.maxHp,1,99999),lv:pvpCl(t.lv,1,9999)};
   const party=(Array.isArray(t.party)?t.party:[]).filter(x=>x&&ALLIES[x.id]).slice(0,f.ranked?5:4) // 랭크전 AI(구원자)는 최대 5명 · 친구 대결은 4명
-    .map(x=>({id:x.id,lv:pvpCl(x.lv,1,60),aw:pvpCl(x.aw,0,AWAKEN_MAX),my:x.my?1:0,tr:pvpCl(x.tr||0,0,TRUST_MAX),tn:x.tn?1:0}));
+    .map(x=>({id:x.id,lv:pvpCl(x.lv,1,60),aw:pvpCl(x.aw,0,AWAKEN_MAX),my:x.my?1:0,tr:pvpCl(x.tr||0,0,TRUST_MAX),tn:x.tn?1:0,cs:typeof x.cs==='string'?x.cs:''}));
   const allyHp=party.reduce((s,x)=>s+Math.round((50+x.lv*10)*(0.7+0.15*ALLIES[x.id].star)*(x.my?2:1)*(ALLIES[x.id].hpMul||1)),0);
   const heroName=(String(f.hero||'').replace(/[<>&"'`]/g,'').slice(0,8))||'모험가';
   const e={name:`${heroName}의 팀`,heroName,hp:Math.round(hero.maxHp*PVP_HP+allyHp*0.35),atk:hero.atk,def:hero.def,xp:0,gold:0,
