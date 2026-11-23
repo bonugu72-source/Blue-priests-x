@@ -66,6 +66,27 @@ button:disabled{cursor:default}
 .rankbadge{text-align:center;padding:10px 0 4px}.rankbadge .ri{font-size:56px;line-height:1.1;filter:drop-shadow(0 0 14px var(--rc))}.rankbadge b{display:block;font-size:24px;color:var(--rc);margin-top:4px}
 .ranklad{display:flex;justify-content:space-between;gap:2px;margin:10px 0}.ranklad span{flex:1;min-width:0;text-align:center;font-size:10px;letter-spacing:-.5px;padding:5px 0;border-radius:8px;background:rgba(255,255,255,.05);opacity:.55}.ranklad span.on{opacity:1;background:rgba(255,210,110,.18);box-shadow:0 0 0 1px rgba(255,210,110,.5) inset}.ranklad span.done{opacity:.9}
 .btn.m-rest{background:#1f3b34}.btn.m-rest small{color:#a6cfbd}
+.btn.m-forest{background:linear-gradient(135deg,#1e4a22,#3a5a1a);border-color:rgba(150,230,120,.45)}.btn.m-forest small{color:#c8f0a8}
+.ftree{position:relative;padding:6px 0 10px;margin:8px 0}
+.ftree:before{content:'';position:absolute;left:50%;top:46px;bottom:34px;width:16px;margin-left:-8px;background:linear-gradient(90deg,#4a321c,#7a5530 45%,#4a321c);border-radius:8px;box-shadow:0 0 12px rgba(0,0,0,.5)}
+.fcrown{text-align:center;font-size:44px;line-height:1;position:relative;filter:drop-shadow(0 0 10px rgba(120,220,90,.5))}
+.froot{text-align:center;font-size:22px;position:relative;letter-spacing:6px}
+.trow{display:flex;align-items:center;min-height:50px;position:relative}
+.trow.l{justify-content:flex-start}.trow.r{justify-content:flex-end}
+.fnode{width:43%;box-sizing:border-box;padding:6px 8px;border-radius:12px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);font-size:11.5px;position:relative;opacity:.55;line-height:1.3}
+.fnode b{font-size:12.5px}.fnode .fn{font-size:10px;opacity:.8}
+.trow.l .fnode:after,.trow.r .fnode:after{content:'';position:absolute;top:50%;height:5px;margin-top:-2px;width:16%;background:#6b4a2a;border-radius:3px}
+.trow.l .fnode:after{left:100%}.trow.r .fnode:after{right:100%}
+.fnode.done{opacity:1;background:rgba(60,140,60,.28);border-color:rgba(140,230,120,.5)}
+.fnode.on{opacity:1;background:rgba(255,210,90,.18);border-color:#ffd25a;box-shadow:0 0 14px rgba(255,210,90,.55)}
+.fnode.realm{border-style:dashed}
+.fclimber{position:absolute;top:-14px;right:-6px;font-size:22px;filter:drop-shadow(0 0 6px rgba(255,220,120,.8))}
+.fnode.climb .fclimber{animation:fclimb 1.1s ease-out}
+@keyframes fclimb{0%{transform:translateY(54px);opacity:.2}60%{transform:translateY(-6px);opacity:1}100%{transform:none}}
+.fpick{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:8px 0}
+.fpick button{position:relative;padding:6px 2px;border-radius:12px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);color:inherit;font-size:10.5px;display:flex;flex-direction:column;align-items:center;gap:3px}
+.fpick button.sel{border-color:#ffd25a;background:rgba(255,210,90,.16);box-shadow:0 0 10px rgba(255,210,90,.4)}
+.fpick button .fno{position:absolute;top:2px;left:4px;font-weight:700;color:#ffd25a;font-size:12px}
 .btn.m-shop{background:#3e3322}.btn.m-shop small{color:#dcc493}
 .btn.m-coll{background:#322b4a}.btn.m-coll small{color:#c4b6e6}
 .btn.m-ally{background:#3d2a35}.btn.m-ally small{color:#e2b9c8}
@@ -3057,10 +3078,12 @@ const sortieRule=a=>AREAS[a]&&SORTIE_RULES[AREAS[a].sortie];
 const sortieOk=(a,id)=>{const r=sortieRule(a);return !r||r.ok(id);};
 const partyIds=()=>(B&&B.party)?B.party:[FIXED,...petParty(),...P.active];
 const inParty=id=>partyIds().includes(id);
-function aData(id){if(!P.alv[id])P.alv[id]={lv:1,xp:0};return P.alv[id];}
+let FOREST=null; // 노력의 숲 전투 중: 빌린 ★5 동료 id 집합 (최대 레벨 · 3각성 · 신화 · 신뢰도/초월 없음)
+const fBorrow=id=>!!(FOREST&&FOREST.has(id));
+function aData(id){if(fBorrow(id))return {lv:aCap(id),xp:0};if(!P.alv[id])P.alv[id]={lv:1,xp:0};return P.alv[id];}
 const aCap=id=>LV_CAP[ALLIES[id].star];
 const aCost=id=>Math.round(20*aData(id).lv*COST_F[ALLIES[id].star]);
-const isMyth=id=>!!(P.myth&&P.myth[id]);
+const isMyth=id=>fBorrow(id)||!!(P.myth&&P.myth[id]);
 /* 등급 배율: ★5는 티어별 (최대 레벨·각성 3 기준 전투력이 TIER5_CP가 되도록) */
 const STAR6_CP=7500;
 const baseMult=id=>{const al=ALLIES[id];if(al.star===6)return STAR6_CP/((80+LV_CAP[6]*30)*(1+0.2*AWAKEN_BASE));return al.star===5&&TIER5[id]?TIER5_CP[TIER5[id]]/((80+LV_CAP[5]*30)*(1+0.2*AWAKEN_BASE)):STAR_MULT[al.star];};
@@ -3075,7 +3098,7 @@ const TRUST_MAX=10, TRUST_REQ=[0,5,15,30,50,75,105,140,180,225,275], TRUST_GAIN=
 const TRUST_TOP={1:10000/8000,2:8000/6600,3:7000/5400}, TRUST_TOP6=17000/15000; // ★6: 신화 15,000 → 신뢰도 10 17,000
 const trustTop=id=>ALLIES[id].star===6?TRUST_TOP6:TRUST_TOP[TIER5[id]];
 const trustPts=id=>(P.trust&&P.trust[id])||0;
-const trustLv=id=>{const p=trustPts(id);let l=0;while(l<TRUST_MAX&&p>=TRUST_REQ[l+1])l++;return l;};
+const trustLv=id=>{if(fBorrow(id))return 0;const p=trustPts(id);let l=0;while(l<TRUST_MAX&&p>=TRUST_REQ[l+1])l++;return l;};
 const trustOn=id=>ALLIES[id]&&((ALLIES[id].star===5&&!!TIER5[id])||ALLIES[id].star===6);
 const trustMultT=(id,lv)=>trustOn(id)?1+(trustTop(id)-1)*Math.max(0,Math.min(TRUST_MAX,lv||0))/TRUST_MAX:1;
 const trustMult=id=>trustMultT(id,trustLv(id));
@@ -3094,9 +3117,9 @@ function trustHTML(id){
 }
 /* 초월: 5각성 + 신화 승급을 마친 ★5만 · 구원의 조각 1개 · 성공 20% · 초월하면 전투력 2배 */
 const TRANS_RATE=0.2, TRANS_DROP=0.05, TRANS_DROP_DANIAN=0.10, TRANS_MULT=2, SALV_ITEM={name:'구원의 조각',icon:'✴️'};
-const transOn=id=>!!(P&&P.trans&&P.trans[id]);
+const transOn=id=>!fBorrow(id)&&!!(P&&P.trans&&P.trans[id]);
 const transReady=id=>ALLIES[id]&&ALLIES[id].star===5&&isMyth(id)&&(P.awaken[id]||0)>=5&&!transOn(id);
-const allyMult=id=>multOf(id,P.awaken[id],isMyth(id))*trustMult(id)*(transOn(id)?TRANS_MULT:1);
+const allyMult=id=>multOf(id,fBorrow(id)?AWAKEN_BASE:P.awaken[id],isMyth(id))*trustMult(id)*(transOn(id)?TRANS_MULT:1);
 function allyGainXp(id,n){
   const d=aData(id);let c=0;
   if(d.lv>=aCap(id)){d.xp=0;return 0;}
@@ -3788,6 +3811,76 @@ function rankEnd(win,e,pst,pparty){
   showResult({title:`🏆 랭크전 — ${esc(e.heroName)}의 팀`,won:win,lines,st:pst,party:pparty},promo?()=>showStory(`<div class="sum s5"><div class="sum-title">승급</div><div class="rankbadge" style="--rc:${RANKS[r.tier].c}"><div class="ri">${RANKS[r.tier].icon}</div><b>${RANKS[r.tier].n}</b></div><p class="sum-desc">${RANKS[before].n}에서 ${RANKS[r.tier].n}(으)로 승급했다!${RANK_REWARD[r.tier]?`<br>🎁 승급 보상: ${rankRewardText(r.tier)}`:''}</p>${RANK_REWARD[r.tier]&&RANK_REWARD[r.tier].ally?`<div style="margin-top:8px">${allyPortrait(RANK_REWARD[r.tier].ally)}</div>`:''}</div>`,()=>renderRank(),true):null);
 }
 
+/* ===================== 노력의 숲 ===================== */
+/* 내 동료 대신 ★5 동료 전원(최대 레벨 · 3각성 · 신화)을 빌려 3명을 골라 도전 · 주인공 HP 4000 · 공격력 800 고정
+   층마다 지역 이동 → 마계 이동 순서대로 각 지역의 최종 보스 */
+const FOREST_HP=4000, FOREST_ATK=800, FOREST_DEF=500, FOREST_WATER=3, FOREST_PICK=3;
+const FOREST_UNLOCK_AREA=AREAS.findIndex(a=>a.name==='고대 원단수'); // 고대 원단수 클리어 시 개방
+const forestOpen=()=>{const i=FOREST_UNLOCK_AREA;return i<0||(P.prog[i]||0)>=STAGES||!!(P.cleared&&P.cleared[i]);};
+const forestAreas=()=>AREAS.map((a,i)=>i).filter(i=>AREAS[i].boss);
+const FOREST_MAX_FN=()=>forestAreas().length;
+const FOREST_MAX=FOREST_MAX_FN();
+const forestState=()=>{P.forest=P.forest||{best:0,sel:[],tries:0};P.forest.sel=(P.forest.sel||[]).filter(id=>forestPool().includes(id)).slice(0,FOREST_PICK);return P.forest;};
+const forestPool=()=>Object.keys(ALLIES).filter(id=>ALLIES[id].star===5&&!ALLIES[id].pet).sort((a,b)=>(TIER5[a]||9)-(TIER5[b]||9)||ALLIES[a].name.localeCompare(ALLIES[b].name));
+function forestRestore(){
+  const r=P._forestRestore;if(r){P.hp=r.hp;P.mp=r.mp;P.maxHp=r.maxHp;P.atk=r.atk;P.def=r.def;P.relics=r.relics||[];P.items.water=r.water||0;delete P._forestRestore;}
+  FOREST=null;
+}
+function forestStart(f){
+  if(!forestOpen())return renderHub('🔒 노력의 숲은 고대 원단수를 클리어하면 열린다');
+  const F=forestState();if(F.sel.length!==FOREST_PICK)return renderForest(`동료 ${FOREST_PICK}명을 먼저 골라 주세요`);
+  F.tries=(F.tries||0)+1;FOREST=new Set(F.sel);
+  P._forestRestore={hp:P.hp,mp:P.mp,maxHp:P.maxHp,atk:P.atk,def:P.def,relics:P.relics,water:P.items.water};
+  P.maxHp=FOREST_HP;P.hp=FOREST_HP;P.atk=FOREST_ATK;P.def=FOREST_DEF;P.relics=[];P.items.water=FOREST_WATER;P.mp=P.maxMp;
+  save();startBattle({area:forestAreas()[f-1],stage:15,forest:f,fparty:F.sel.slice(),replay:F.best>=FOREST_MAX});
+}
+function forestEnd(win){
+  const f=B.forest,rp=B.spec.replay,e=B.e,pst=B.st,pparty=partyIds().slice();clearBattle();forestRestore();
+  const F=forestState(),lines=[];let climb=0;
+  if(win){
+    if(rp){F.run=f+1;lines.push(`🔁 ${f}층 다시 오르기 승리${f>=FOREST_MAX?'':` — 다음은 ${f+1}층`}`);if(f>=FOREST_MAX){F.run=1;F.clears=(F.clears||0)+1;lines.push(`🌳 노력의 숲 재정복! (${F.clears}회) — 다시 1층부터`);}}
+    else{const first=f>F.best;if(first){F.best=f;climb=f+1;}lines.push(first?`🌳 ${f}층 돌파!${f>=FOREST_MAX?' — 노력의 숲 정상 도착!':` 나무를 타고 ${f+1}층으로`}`:`🌳 ${f}층 재도전 승리`);}
+    if(rp&&f<FOREST_MAX)climb=f+1;
+  }else lines.push(`${f}층에서 쓰러졌다… 동료 조합을 바꿔 다시 도전하자`);
+  lines.push(`최고 기록 ${F.best}/${FOREST_MAX}층`);
+  save();renderForest(null,climb);
+  showResult({title:`🌳 노력의 숲 ${f}층 — ${esc(e.name)}`,won:win,lines,st:pst,party:pparty});
+}
+function renderForest(msg,climb){
+  hubTab='adv';
+  if(!forestOpen()){renderHub('🔒 노력의 숲은 고대 원단수를 클리어하면 열린다');return;}
+  const F=forestState(),done=F.best>=FOREST_MAX,cur=done?Math.min(FOREST_MAX,F.run||1):F.best+1,L=forestAreas(),pool=forestPool();
+  const rows=[];
+  for(let n=FOREST_MAX;n>=1;n--){const a=L[n-1],A=AREAS[a],bs=A.boss,cl=n<=F.best,on=n===cur;
+    rows.push(`<div class="trow ${n%2?'l':'r'}"><div class="fnode ${cl?'done':''} ${on?'on':''} ${A.realm?'realm':''} ${on&&climb===n?'climb':''}" ${on?'id="fcur"':''}>
+      ${on?'<span class="fclimber">🧗</span>':''}<span class="fn">${n}층 · ${A.flag} ${esc(A.name)}${A.realm?' · 마계':''}</span><br><b>${cl?'✔ ':''}${esc(bs.name)}</b></div></div>`);}
+  const ce=id=>{const i=F.sel.indexOf(id);return `<button class="${i>=0?'sel':''}" data-fsel="${id}">${i>=0?`<span class="fno">${i+1}</span>`:''}${allyFace(id,'sm')}<span>${esc(ALLIES[id].name)}</span><span class="small">${TIER5[id]?TIER5[id]+'티어':'★5'}</span></button>`;};
+  const A=AREAS[L[cur-1]];
+  $('#app').innerHTML=`${statusHTML()}${topBack()}
+    ${msg?`<div class="notice">${msg}</div>`:''}
+    <div class="panel"><div class="ptitle">🌳 노력의 숲 <span class="small">최고 ${F.best}/${FOREST_MAX}층${F.clears?` · 재정복 ${F.clears}회`:''}</span></div>
+      <div class="desc">내 동료는 데려갈 수 없다. 대신 <b>모든 ★5 동료(최대 레벨 · 3각성 · 신화)</b> 중 <b>${FOREST_PICK}명</b>을 골라 도전한다.<br>
+        주인공은 <b>HP ${fmt(FOREST_HP)} · 공격력 ${FOREST_ATK} · 방어력 ${FOREST_DEF}</b> 고정 · 유물 효과 없음 · 성수 ${FOREST_WATER}개 · 펫·이사벨 부제 없음. 오직 실력으로!<br>
+        층마다 지역 이동 → 마계 이동 순서로 각 지역의 최종 보스가 기다린다. 끝나면 원래 능력치로 돌아온다.</div>
+      ${done?`<div class="notice">🌳 노력의 숲 정상까지 올랐다! 🔁 다시 오르기 — 1층부터 다시 도전할 수 있다</div>`:''}
+      <div class="ftree"><div class="fcrown">🌳</div>${rows.join('')}<div class="froot">🌱🪵🌱</div></div>
+      <div class="desc"><b>${cur}층</b> — ${A.flag} ${esc(A.name)}의 보스 <b>${esc(A.boss.name)}</b></div>
+      <div class="ptitle" style="margin-top:6px">🤝 함께 오를 동료 <span class="small">${F.sel.length}/${FOREST_PICK}명 선택</span></div>
+      <div class="fpick">${pool.map(ce).join('')}</div>
+      <div class="grid">
+        <button class="btn danger full" id="fgo" ${F.sel.length===FOREST_PICK?'':'disabled'}>⚔ ${cur}층 ${done?'다시 도전':'도전'}${F.sel.length===FOREST_PICK?'':`<small>동료 ${FOREST_PICK}명을 골라 주세요</small>`}</button>
+        ${done&&cur>1?`<button class="btn full" id="frst">🔁 1층부터 다시 오르기</button>`:''}
+        <button class="btn full" id="back">← 거점으로</button>
+      </div></div>${tabBar()}`;
+  document.querySelectorAll('[data-fsel]').forEach(b=>b.onclick=()=>{const id=b.dataset.fsel,F=forestState(),i=F.sel.indexOf(id);
+    if(i>=0)F.sel.splice(i,1);else if(F.sel.length<FOREST_PICK)F.sel.push(id);else{F.sel.shift();F.sel.push(id);}
+    save();const y=window.scrollY;renderForest();window.scrollTo(0,y);});
+  $('#fgo').onclick=()=>forestStart(cur);
+  if($('#frst'))$('#frst').onclick=()=>{forestState().run=1;save();renderForest('🔁 1층부터 다시 오른다');};
+  $('#back').onclick=()=>renderHub();
+  const c=$('#fcur');if(c&&!msg&&climb===undefined)c.scrollIntoView({block:'center'});else if(c&&climb)c.scrollIntoView({block:'center'});else window.scrollTo(0,0);
+}
+
 /* ===================== 구원의 탑 ===================== */
 /* 30층 · 동료 1명만 출전 (이사벨 부제 불가) · 5층마다 악마, 10층마다 보스 · 층이 오를수록 후반 지역의 적 */
 const TOWER_MAX=30, TOWER_MIN_LV=50;
@@ -4200,6 +4293,7 @@ function goldToast(n,why){
   document.body.appendChild(d);d.onclick=()=>d.remove();setTimeout(()=>d.classList.add('out'),4200);setTimeout(()=>d.remove(),4800);
 }
 function migrateSave(){
+  if(P._forestRestore&&!B)forestRestore(); // 노력의 숲 도중 나간 경우 원래 능력치로
   if(P._dgRestore&&!B){P.hp=P._dgRestore.hp;P.mp=P._dgRestore.mp;delete P._dgRestore;} // 던전 도중 나간 경우 HP 원래대로
   if(!P.uid)P.uid='u'+Date.now().toString(36)+Math.random().toString(36).slice(2,8);
   if(!P.noMp){P.noMp=1;if(P.relics&&P.relics.includes('seal_glasya'))P.atk+=5;if(P.items&&P.items.rosary){P.items.water+=P.items.rosary;P.items.rosary=0;}}
@@ -4259,8 +4353,9 @@ function renderHub(msg){
         <button class="btn m-adv main full" id="map">🗺 스테이지 지도<small>진행 ${prog}/${STAGES}</small></button>
         <div class="rankrow">        <button class="btn m-rank" id="rank" ${P.lv<RANK_MIN_LV?'disabled':''}>${P.lv<RANK_MIN_LV?`🔒 랭크전<small>Lv ${RANK_MIN_LV}부터 열림 (현재 Lv ${P.lv})</small></button>`:`${rankOf().icon} 랭크전<small>${rankOf().n}${rankNeed(rankState().tier)?` · ${rankState().lp}/${rankNeed(rankState().tier)} LP`:` · ${rankState().lp} LP`} · ${rankState().w}승 ${rankState().l}패</small></button>`}
         <button class="btn m-tower" id="tower" ${towerOpen()?'':'disabled'}>${towerOpen()?`🗼 구원의 탑<small>${towerState().best>=TOWER_MAX?`${TOWER_MAX}층 정복 ✔`:`${towerState().best}/${TOWER_MAX}층 · 동료 1명`}</small>`:`🔒 구원의 탑<small>Lv ${TOWER_MIN_LV} · 지역 ${realmStart()}곳 클리어 (${worldClearCount()}/${realmStart()})</small>`}</button></div>
-        <button class="btn m-adv" id="hunt">⚔ 자유 사냥 (자동)<small>경험치·골드 ×${huntMult(P.cur)} · 멈출 때까지 반복</small></button>${farmReady()?`<button class="btn m-adv" id="gfarm">🔁 천상의 성유물작<small>서울 최종 보스 자동 반복 · ${FARM_TARGET}번 잡으면 멈춤</small></button>`:''}
+        <button class="btn m-adv${farmReady()?'':' full'}" id="hunt">⚔ 자유 사냥 (자동)<small>경험치·골드 ×${huntMult(P.cur)} · 멈출 때까지 반복</small></button>${farmReady()?`<button class="btn m-adv" id="gfarm">🔁 천상의 성유물작<small>서울 최종 보스 자동 반복 · ${FARM_TARGET}번 잡으면 멈춤</small></button>`:''}
         <button class="btn m-rest" id="rest" ${restLeft()>0?'disabled':''}>${restLabel()}</button>
+        <button class="btn m-forest" id="forest" ${forestOpen()?'':'disabled'}>${forestOpen()?`🌳 노력의 숲<small>${forestState().best>=FOREST_MAX?`${FOREST_MAX}층 정상 ✔`:`${forestState().best}/${FOREST_MAX}층 · 빌린 동료로 도전`}</small>`:`🔒 노력의 숲<small>고대 원단수 클리어 시 개방</small>`}</button>
         <button class="btn m-adv full" id="guide">📖 게임 가이드<small>${P.tutReward?'시스템 설명 · 튜토리얼 다시 보기':`튜토리얼 완료 보상: 💰 ${fmt(TUT_REWARD.gold)} · 🎫 ${TUT_REWARD.tickets}장`}</small></button>
       </div>
     </div>
@@ -4280,6 +4375,7 @@ function renderHub(msg){
   $('#guide').onclick=()=>renderGuide();
   if($('#rank'))$('#rank').onclick=()=>firstTip('rank',()=>renderRank());
   if($('#tower'))$('#tower').onclick=()=>firstTip('tower',()=>renderTowerSelect());
+  if($('#forest'))$('#forest').onclick=()=>renderForest();
   $('#rest').onclick=()=>{
     if(restLeft()>0)return;
     P.hp=P.maxHp;P.mp=P.maxMp;P.restAt=Date.now();save();
@@ -4807,7 +4903,7 @@ function synthAll(){
 }
 
 /* ===================== 전투 ===================== */
-function clearBattle(){forcedMv=null;if(B&&B.dgT)clearInterval(B.dgT);if(B&&B.enemyT)clearInterval(B.enemyT);if(B&&B.allyT)clearInterval(B.allyT);document.body.classList.remove('pfrozen');if(B&&B.freezeT)clearInterval(B.freezeT);if(B&&B.sakuraT)clearInterval(B.sakuraT);document.body.classList.remove('battle');applyBossTheme(null);if(B&&B.waveT)clearInterval(B.waveT);if(B&&B.soulT)clearInterval(B.soulT);if(B&&B.drainT)clearInterval(B.drainT);if(B&&B.tsT)clearInterval(B.tsT);if(B&&B.paraT)clearInterval(B.paraT);if(B&&B.zapT)clearInterval(B.zapT);if(B&&B.karmaT)clearInterval(B.karmaT);if(B&&B.trainT)clearInterval(B.trainT);if(B&&B.aoraT)clearInterval(B.aoraT);if(B&&B.heartT)clearInterval(B.heartT);if(B&&B.halfT)clearInterval(B.halfT);if(B&&B.fallT)clearInterval(B.fallT);if(B&&B.isaT)clearInterval(B.isaT);if(B&&B.nkT)clearInterval(B.nkT);if(B&&B.apT)clearInterval(B.apT);if(B&&B.remT)clearInterval(B.remT);if(B&&B.lvT)clearInterval(B.lvT);if(B)['diceT','judgeT','hariT','baemT','mihoT','coldT','pandoraT'].forEach(k=>{if(B[k])clearInterval(B[k]);});B=null;}
+function clearBattle(){forcedMv=null;if(B&&B.forest)forestRestore();if(B&&B.dgT)clearInterval(B.dgT);if(B&&B.enemyT)clearInterval(B.enemyT);if(B&&B.allyT)clearInterval(B.allyT);document.body.classList.remove('pfrozen');if(B&&B.freezeT)clearInterval(B.freezeT);if(B&&B.sakuraT)clearInterval(B.sakuraT);document.body.classList.remove('battle');applyBossTheme(null);if(B&&B.waveT)clearInterval(B.waveT);if(B&&B.soulT)clearInterval(B.soulT);if(B&&B.drainT)clearInterval(B.drainT);if(B&&B.tsT)clearInterval(B.tsT);if(B&&B.paraT)clearInterval(B.paraT);if(B&&B.zapT)clearInterval(B.zapT);if(B&&B.karmaT)clearInterval(B.karmaT);if(B&&B.trainT)clearInterval(B.trainT);if(B&&B.aoraT)clearInterval(B.aoraT);if(B&&B.heartT)clearInterval(B.heartT);if(B&&B.halfT)clearInterval(B.halfT);if(B&&B.fallT)clearInterval(B.fallT);if(B&&B.isaT)clearInterval(B.isaT);if(B&&B.nkT)clearInterval(B.nkT);if(B&&B.apT)clearInterval(B.apT);if(B&&B.remT)clearInterval(B.remT);if(B&&B.lvT)clearInterval(B.lvT);if(B)['diceT','judgeT','hariT','baemT','mihoT','coldT','pandoraT'].forEach(k=>{if(B[k])clearInterval(B[k]);});B=null;}
 /* 반사·부적 등으로 적이 턴 밖에서 쓰러졌을 때 */
 function winNow(){
   if(!B||B.won)return;
@@ -5151,12 +5247,12 @@ function startBattle(spec){
   const isBoss=type==='boss'||type==='mid'||type==='pvp';
   clearBattle();
   const ahp={};
-  const noFixed=spec.tower?true:!spec.pvp&&!spec.dungeon&&sortieRule(a)&&sortieRule(a).noFixed;
-  const smax=spec.tower?1:!spec.pvp&&!spec.dungeon&&sortieRule(a)&&sortieRule(a).max;
-  const okList=(spec.dungeon?dgParty():P.active).filter(id=>spec.pvp||spec.tower||spec.dungeon||sortieOk(a,id)).slice(0,smax||9);
-  const keepPet=!spec.tower&&!spec.pvp&&!spec.dungeon&&sortieRule(a)&&sortieRule(a).keepPet;
+  const noFixed=(spec.tower||spec.forest)?true:!spec.pvp&&!spec.dungeon&&sortieRule(a)&&sortieRule(a).noFixed;
+  const smax=spec.forest?FOREST_PICK:spec.tower?1:!spec.pvp&&!spec.dungeon&&sortieRule(a)&&sortieRule(a).max;
+  const okList=(spec.dungeon?dgParty():spec.forest?spec.fparty:P.active).filter(id=>spec.pvp||spec.tower||spec.dungeon||spec.forest||sortieOk(a,id)).slice(0,smax||9);
+  const keepPet=!spec.forest&&!spec.tower&&!spec.pvp&&!spec.dungeon&&sortieRule(a)&&sortieRule(a).keepPet;
   const party=[...(noFixed?(keepPet?petParty():[]):[FIXED,...petParty()]),...okList];
-  const benched=spec.pvp||spec.tower||spec.dungeon?[]:P.active.filter(id=>!okList.includes(id));
+  const benched=spec.pvp||spec.tower||spec.dungeon||spec.forest?[]:P.active.filter(id=>!okList.includes(id));
   party.forEach(id=>{const al=ALLIES[id],mx=Math.round((50+aData(id).lv*10)*(0.7+0.15*al.star)*(isMyth(id)?2:1)*(al.hpMul||1));ahp[id]={hp:mx,max:mx};});
   B={e:{...t,maxHp:t.hp},spec,area:a,stage:spec.hunt?0:s,stype:type,baseName:t.name,isBoss,isFinal:!!t.final,
      charging:false,chargeName:'',chargeKind:null,phase:1,tornadoCD:0,
@@ -5164,7 +5260,8 @@ function startBattle(spec){
      party,healCut:0,mikaCD:0,mshield:0,st:{dmg:{},heal:{}},dot:null,evade:false,sealed:0,over:false,won:false,shield:0,ashield:0,prism:0,negate:0,blind:0,eburn:null,eliaCD:0,sirenT:0,danT:0,
      defending:false,busy:false,menu:'main',log:[],fxq:[]};
   if(spec.dungeon){B.dungeon=true;B.dgN=0;B.dgDone=0;B.dgKills=0;B.dgLeft=DG_MS;addLog(`🏰 던전 — ${DG_MS/1000}초 동안 최대한 많은 피해를 넣자!`);}
-  if(spec.tower){B.tower=spec.tower;B.heaven=!!spec.heaven;B.towerReplay=!!spec.replay;addLog(`${B.heaven?'☁️ 천상의 탑':'🗼 구원의 탑'} ${spec.tower}층 — 동료 1명만 함께 오른다`);}
+  if(spec.forest){B.forest=spec.forest;addLog(`🌳 노력의 숲 ${spec.forest}층 — 빌린 동료 ${spec.fparty.length}명과 함께 (주인공 HP ${fmt(FOREST_HP)} · 공격력 ${FOREST_ATK} 고정)`);}
+  else if(spec.tower){B.tower=spec.tower;B.heaven=!!spec.heaven;B.towerReplay=!!spec.replay;addLog(`${B.heaven?'☁️ 천상의 탑':'🗼 구원의 탑'} ${spec.tower}층 — 동료 1명만 함께 오른다`);}
   else if(noFixed)addLog('⚠ 출전 조건 — 이사벨 부제는 이 지역에 함께할 수 없다');
   if(benched.length)addLog(`⚠ 출전 조건 — ${benched.map(id=>ALLIES[id].name).join(', ')} 출전 불가 (${sortieRule(a).text})`);
   const begin=()=>{
@@ -5594,7 +5691,7 @@ function renderBattle(){
   }
   $('#app').innerHTML=`${statusHTML()}
     <div class="enemy ${B.isBoss?'boss':''} ${B.isFinal?'final':''}">
-      <div class="eflag">${B.dungeon?`🏰 던전 · ${B.dgN+1}번째 보스 · ${AREAS[B.area].flag} ${AREAS[B.area].name}${B.dgN>=dgSeq().main.length?' · 마계 반복':''}`:B.tower?(B.heaven?`☁️ 천상의 탑 ${B.tower}층 · ${AREAS[B.area].name}의 최종 보스`:`🗼 구원의 탑 ${B.tower}층 · ${AREAS[B.area].name}의 적`):`${AREAS[B.area].flag} ${AREAS[B.area].name}`}${B.tower||B.dungeon?'':B.pvp?' · 친구 대결':B.stage?` · 스테이지 ${B.stage}`:' · 자유 사냥'}</div>
+      <div class="eflag">${B.forest?`🌳 노력의 숲 ${B.forest}층 · ${AREAS[B.area].flag} ${AREAS[B.area].name}의 보스`:B.dungeon?`🏰 던전 · ${B.dgN+1}번째 보스 · ${AREAS[B.area].flag} ${AREAS[B.area].name}${B.dgN>=dgSeq().main.length?' · 마계 반복':''}`:B.tower?(B.heaven?`☁️ 천상의 탑 ${B.tower}층 · ${AREAS[B.area].name}의 최종 보스`:`🗼 구원의 탑 ${B.tower}층 · ${AREAS[B.area].name}의 적`):`${AREAS[B.area].flag} ${AREAS[B.area].name}`}${B.tower||B.dungeon?'':B.pvp?' · 친구 대결':B.stage?` · 스테이지 ${B.stage}`:' · 자유 사냥'}</div>
       ${B.dungeon?dgHudHTML():''}
       <div class="ename">${e.name}${tag}</div>
       ${e.title?`<div class="etitle">${e.title}</div>`:''}
@@ -6386,6 +6483,7 @@ function gainXp(n){
 function victory(){
   if(!B)return;
   if(B.pvp){pvpEnd(true);return;}
+  if(B.forest){forestEnd(true);return;}
   if(B.tower){if(B.heaven)heavenEnd(true);else towerEnd(true);return;}
   const e=B.e,area=B.area,stype=B.stype,stage=B.stage,wasFinal=B.isFinal,fromHunt=!!B.spec.hunt,fromFarm=!!B.spec.farm;
   const tName=B.baseName;
@@ -6553,6 +6651,7 @@ function autoNext(a,s,rep){
 function defeat(){
   if(B&&B.dungeon){dungeonEnd('down');return;}
   if(B&&B.pvp){pvpEnd(false);return;}
+  if(B&&B.forest){forestEnd(false);return;}
   if(B&&B.tower){if(B.heaven)heavenEnd(false);else towerEnd(false);return;}
   const autoWas=autoHunt.on&&B&&B.auto;autoHunt.on=false;
   const rep=B?{title:`${esc(B.baseName||B.e.name)}에게 패배`,won:false,st:B.st,party:partyIds().slice()}:null;
