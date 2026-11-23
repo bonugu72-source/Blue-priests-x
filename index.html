@@ -5034,7 +5034,7 @@ function sortieSlotsHTML(inMgmt){
       <b>${nameHTML(id)}</b><small>Lv ${aData(id).lv} · ⚔ ${fmt(allyCP(id))}</small></button>`;
   };
   return `<div class="slots">${[0,1,2].slice(0,MAX_ACTIVE).map(slot).join('')}</div>
-    ${inMgmt?'':`<div class="fixedrow">${allyFace(FIXED,'xs')} 고정 조력자 <b>${ALLIES[FIXED].name}</b> <span class="small">Lv ${aData(FIXED).lv} · 항상 함께 출전</span></div>${petParty().map(k=>`<div class="fixedrow">${allyFace(k,'xs')} 🐾 펫 <b>${ALLIES[k].name}</b> <span class="small">Lv ${aData(k).lv} · 자동 출전</span></div>`).join('')}`}`;
+    ${inMgmt?'':`<div class="fixedrow">${allyFace(FIXED,'xs')} 고정 조력자 <b>${ALLIES[FIXED].name}</b> <span class="small">Lv ${aData(FIXED).lv} · 항상 함께 출전</span></div>`}${petParty().map(k=>`<div class="fixedrow">${allyFace(k,'xs')} 🐾 펫 <b>${ALLIES[k].name}</b> <span class="small">Lv ${aData(k).lv} · ⚔ ${fmt(allyCP(k))} · 자동 출전</span></div>`).join('')}`;   // 펫은 동료 관리 출전 동료 칸에도 표시
 }
 document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('[data-slot]');if(b){e.preventDefault();renderAllies();window.scrollTo(0,0);}});
 /* 동료 탭 */
