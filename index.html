@@ -963,6 +963,17 @@ body:has(.tabbar) .tabbar{background:color-mix(in srgb,var(--tc) 6%,rgba(8,12,26
 .btn.pmore{width:100%;margin-top:6px;font-size:13px}
 .mbox:has(.patch) #mbtn{position:sticky;bottom:0;box-shadow:0 -10px 18px rgba(13,21,49,.95)}
 .pver{margin-top:14px;padding:8px;border-radius:10px;background:rgba(255,255,255,.05);text-align:center;font-size:13px;color:#b8c3e6}.pver b{color:#ffe7a3;letter-spacing:.5px}
+.srow{justify-content:space-between}.srow .stats{display:flex;gap:14px;flex-wrap:wrap}
+.pnbtn{flex:0 0 auto;cursor:pointer;font:inherit;font-size:12px;font-weight:700;color:#ffe7a3;background:rgba(232,199,106,.12);border:1px solid rgba(232,199,106,.45);border-radius:999px;padding:3px 10px}
+.pnbtn:active{transform:scale(.97)}
+.pnotes .pnnow{color:#ffe7a3}
+.pnnote{text-align:center;color:#f0c27a;margin:4px 0}
+.pnlist{text-align:left;margin-top:8px}
+.pnday{position:sticky;top:-24px;z-index:1;margin:12px 0 2px;padding:8px 2px 5px;font-weight:800;font-size:13px;color:var(--gold);background:#141c3a;border-bottom:1px solid rgba(232,199,106,.3)}
+.pnitem{padding:7px 0;border-bottom:1px dashed rgba(255,255,255,.08)}
+.pnv{display:flex;justify-content:space-between;gap:8px;align-items:baseline;font-size:11.5px;color:#8f9ac0}
+.pnv b{color:#ffe7a3;font-size:12.5px;letter-spacing:.4px}
+.pnm{font-size:13px;line-height:1.5;color:#dfe5f8;margin-top:2px}
 .cover .verline{color:#9aa6cc;padding-top:6px}
 .verline{text-align:center;font-size:12px;color:#7f8ab0;letter-spacing:.5px;padding:2px 0 4px}
 .rwl{display:grid;grid-template-columns:1fr;gap:4px;margin:6px 0 8px;text-align:left}
@@ -2979,6 +2990,66 @@ async function verFetch(){
 }
 const verText=()=>VER?`버전 ${VER.v}`:'';
 const verLineHTML=()=>`<div class="verline"${VER?'':' hidden'}>${verText()}</div>`;
+/* ===================== 패치노트: 처음부터 모든 수정 기록 (최신이 맨 위 · 수정마다 그때의 버전) =====================
+   한 번 받은 기록은 이 기기에 보관하고, 다음부터는 새로 생긴 수정만 받아 옴 */
+const PN_KEY='blue_priests_pnotes',PN_STEP=50;
+let pnCache=(()=>{try{const v=JSON.parse(localStorage.getItem(PN_KEY)||'null');return v&&Array.isArray(v.list)?v.list:null;}catch(e){return null;}})();
+let pnShown=PN_STEP,pnBusy=null;
+async function pnFetch(){
+  const have=pnCache||[],seen=new Set(have.map(x=>x.s)),since=have.length?Math.max(...have.map(x=>x.t)):0,add=[];
+  for(let page=1;page<=30;page++){
+    const r=await withTimeout(fetch(`https://api.github.com/repos/${PATCH_REPO}/commits?per_page=100&page=${page}${since?`&since=${new Date(since).toISOString()}`:''}`,{headers:{Accept:'application/vnd.github+json'}}),12000);
+    if(!r.ok)throw new Error('http '+r.status);
+    const a=await r.json();if(!Array.isArray(a))throw new Error('bad');
+    a.forEach(c=>{const m=String((c.commit&&c.commit.message)||'').split('\n')[0].trim(),t=Date.parse(c.commit&&c.commit.committer&&c.commit.committer.date)||0,sh=String(c.sha||'').slice(0,10);
+      if(m&&t&&sh&&!/^Merge /.test(m)&&!seen.has(sh)){seen.add(sh);add.push({s:sh,m,t,w:verWho(c)});}});
+    if(a.length<100)break;
+  }
+  pnCache=have.concat(add);
+  try{localStorage.setItem(PN_KEY,JSON.stringify({list:pnCache}));}catch(e){}
+  return pnCache;
+}
+function pnVersions(list){   // 오래된 것부터 하루 단위로 본우(0)·유준(1) 수정 횟수를 세어 버전을 붙이고, 최신이 맨 위로
+  const p2=n=>String(Math.min(99,n)).padStart(2,'0');let day='',f=0,m=0;
+  return list.slice().sort((a,b)=>a.t-b.t).map(x=>{const d=verDayKey(x.t);if(d!==day){day=d;f=0;m=0;}if(x.w)m++;else f++;
+    return Object.assign({},x,{v:`${d}.0${p2(f)}.1${p2(m)}`});}).reverse();
+}
+const PN_WD=['일','월','화','수','목','금','토'];
+const pnDay=t=>{const d=new Date(t+9*3600e3);return `${d.getUTCFullYear()}년 ${d.getUTCMonth()+1}월 ${d.getUTCDate()}일 (${PN_WD[d.getUTCDay()]})`;};
+const pnTime=t=>{const d=new Date(t+9*3600e3);return `${String(d.getUTCHours()).padStart(2,'0')}:${String(d.getUTCMinutes()).padStart(2,'0')}`;};
+function pnHTML(raw,note){
+  const L=pnVersions(raw),cnt={};L.forEach(x=>{const k=patchCat(x.m);cnt[k]=(cnt[k]||0)+1;});
+  let day='',body='';
+  L.slice(0,pnShown).forEach(x=>{const d=pnDay(x.t);if(d!==day){day=d;body+=`<div class="pnday">${d}</div>`;}
+    body+=`<div class="pnitem"><div class="pnv"><b>${x.v}</b><span>${pnTime(x.t)} · ${x.w?'유준':'본우'}</span></div><div class="pnm">${PATCH_LABEL[patchCat(x.m)].split(' ')[0]} ${esc(x.m)}</div></div>`;});
+  return `<div class="patch pnotes"><div class="sum-title">📜 패치노트</div>
+    <div class="small" style="text-align:center">처음부터 지금까지 수정 <b>${L.length}개</b> · 최신이 맨 위${L.length?` · 현재 버전 <b class="pnnow">${L[0].v}</b>`:''}</div>
+    <div class="pchips">${PATCH_ORDER.filter(k=>cnt[k]).map(k=>`<span class="pchip">${PATCH_LABEL[k].split(' ')[0]} ${cnt[k]}</span>`).join('')}</div>
+    ${note?`<div class="small pnnote">${note}</div>`:''}
+    <div class="pnlist">${body}</div>
+    ${L.length>pnShown?`<button class="btn pmore" data-pnmore>▼ 이전 기록 ${Math.min(PN_STEP,L.length-pnShown)}개 더 보기 <span class="small">(남은 ${L.length-pnShown}개)</span></button>`:''}</div>`;
+}
+function pnRender(note){   // 패치노트 창이 열려 있을 때만 다시 그림 (스크롤 위치 유지)
+  if($('#modal').classList.contains('hidden')||!$('.pnotes')||!pnCache)return;
+  const sc=[$('.mbox'),$('#mtext')].map(e=>e?e.scrollTop:0);
+  $('#mtext').innerHTML=pnHTML(pnCache,note);
+  [$('.mbox'),$('#mtext')].forEach((e,i)=>{if(e)e.scrollTop=sc[i];});
+}
+function showPatchNotes(){
+  pnShown=PN_STEP;
+  showStory(pnCache?pnHTML(pnCache,'새 기록 확인 중…'):'<div class="patch pnotes"><div class="sum-title">📜 패치노트</div><div class="desc" style="text-align:center">처음부터 모든 수정 기록을 불러오는 중…</div></div>',null,true);
+  $('#mbtn').textContent='닫기';
+  if(!pnBusy)pnBusy=pnFetch().finally(()=>{pnBusy=null;});
+  pnBusy.then(()=>pnRender('')).catch(()=>{
+    if(pnCache)pnRender('⚠ 새 기록을 불러오지 못해 이 기기에 저장된 기록을 보여 줘요.');
+    else{const d=$('.pnotes .desc');if(d)d.textContent='패치노트를 불러오지 못했어요. 인터넷 연결을 확인해 주세요.';}
+  });
+}
+document.addEventListener('click',e=>{
+  if(!e.target.closest)return;
+  if(e.target.closest('[data-pnotes]')&&!B){e.preventDefault();showPatchNotes();return;}
+  if(e.target.closest('[data-pnmore]')){e.preventDefault();pnShown+=PN_STEP;pnRender('');}
+});
 function verCheck(){   // 접속마다 한 번 새로 계산 · 실패하면 지난번 버전 그대로
   if(verP)return verP;
   verP=verFetch().then(v=>{VER=v;try{localStorage.setItem(VER_KEY,JSON.stringify(v));}catch(e){}
@@ -3471,7 +3542,8 @@ function statusHTML(){
     <div class="row ${B?'':'trow'}">${nameLvHTML()}${B?'':guideBtnHTML()}<span class="tright"><span class="gold">${P.gold} G</span><button class="bgmmini" data-bgm>${BGM.isOn()?'🔊':'🔇'}</button></span></div>
     ${bar(P.hp,P.maxHp,'hp','HP')}
     ${bar(P.xp,need(P.lv),'xp','EXP')}
-    <div class="row small"><span>공격 ${P.atk}</span><span>방어 ${P.def}</span><span>성수 ${P.items.water}</span></div>
+    ${B?`<div class="row small"><span>공격 ${P.atk}</span><span>방어 ${P.def}</span><span>성수 ${P.items.water}</span></div>`
+      :`<div class="row small srow"><span class="stats"><span>공격 ${P.atk}</span><span>방어 ${P.def}</span><span>성수 ${P.items.water}</span></span><button class="pnbtn" data-pnotes>📜 패치노트</button></div>`}
   </div>`;
 }
 const owned=id=>(P.roster[id]||0)>0;
