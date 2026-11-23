@@ -792,6 +792,23 @@ body.pfrozen #cmds .btn{filter:saturate(.2) brightness(1.2);background:linear-gr
 .dexcell.unown{opacity:.6}
 .dexcell.unown .dface{filter:grayscale(.8) brightness(.75)}
 .dexcell.mine{box-shadow:inset 0 0 0 1px #2f5fae}
+/* 도감 일러스트 칸: 각성 테두리는 항상 2px 자리를 잡아 두고 색만 바뀜 → 테두리가 생겨도 크기·줄 맞춤이 그대로 */
+.dexgrid .dexcell{border:2px solid transparent;padding:6px 6px 7px;box-sizing:border-box;gap:4px}
+.dexgrid .dexcell.aw4,.dexgrid .dexcell.aw5{background:#141d3b;animation:none;overflow:visible}
+.dexgrid .dexcell.aw4::before,.dexgrid .dexcell.aw4::after,.dexgrid .dexcell.aw5::before,.dexgrid .dexcell.aw5::after{display:none}
+.dexgrid .dexcell.aw4{border:2px solid rgba(190,140,255,.9);box-shadow:0 0 6px rgba(160,90,255,.45)}
+.dexgrid .dexcell.aw5{border:2px solid rgba(255,96,90,.95);box-shadow:0 0 6px rgba(255,60,50,.45)}
+.dexgrid .dexcell.mine.aw4{box-shadow:0 0 6px rgba(160,90,255,.45),inset 0 0 0 1px #2f5fae}
+.dexgrid .dexcell.mine.aw5{box-shadow:0 0 6px rgba(255,60,50,.45),inset 0 0 0 1px #2f5fae}
+.dpic{display:block;width:100%;aspect-ratio:17/23;border-radius:9px;overflow:hidden;background:#1a1424;position:relative}
+.dpic img{width:100%;height:100%;object-fit:cover;display:block}
+.dpic .demo{display:flex;width:100%;height:100%;align-items:center;justify-content:center;font-size:40px}
+.dexgrid .dexcell.trc{border:2px solid #ffd45a;box-shadow:0 0 7px rgba(255,200,60,.6)}   /* 초월: 노란 테두리 (각성 테두리보다 우선) */
+.dexgrid .dexcell.mine.trc{box-shadow:0 0 7px rgba(255,200,60,.6),inset 0 0 0 1px #2f5fae}
+/* 초월 + 각성 동시 표시: 테두리는 초월(노랑) · 칸 안은 각성 색으로 채움 */
+.dexgrid .dexcell.trc.aw5{background:linear-gradient(160deg,rgba(230,50,60,.48),rgba(80,16,24,.88) 50%,rgba(255,90,60,.38))}
+.dexgrid .dexcell.trc.aw4{background:linear-gradient(160deg,rgba(130,70,235,.48),rgba(40,22,80,.88) 50%,rgba(150,80,255,.38))}
+.dexcell.unown .dpic img,.dexcell.unown .dpic .demo{filter:grayscale(.8) brightness(.75)}
 .dexd{text-align:left;font-size:13px;line-height:1.55;color:#c9d5f5;margin-top:6px}
 .dexd .mysk{display:block;margin-top:6px}
 .sortbar.sticky{position:sticky;top:0;z-index:6;background:var(--panel);margin:0 -12px 6px;padding:8px 12px;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}
@@ -5171,13 +5188,17 @@ function showDexDetail(id){
     ${my?`<small class="mysk ${has&&isMyth(id)?'on':''}">🔱 신화 고유 능력 「${my.name}」 — ${my.desc}</small>`:''}</div></div>`,null,true);
   $('#mbtn').textContent='← 뒤로';
 }
+function dexPic(id){   // 도감 칸: 상세 화면과 같은 캐릭터 일러스트 (칸 너비에 맞춰 세로로 긴 카드)
+  const im=allyImg(id);
+  return `<span class="dpic">${im?`<img src="${im.src}" style="object-position:${im.pos||'center top'}" alt="" loading="lazy">`:`<span class="demo">${ALLIES[id].icon}</span>`}</span>`;
+}
 function renderDex(){
   const ids=Object.keys(ALLIES).sort((x,y)=>ALLIES[y].star-ALLIES[x].star||(TIER5[x]||0)-(TIER5[y]||0));
   const tabs=[['all','전체'],[6,'★6'],[5,'★5'],[4,'★4'],[3,'★3'],[2,'★2'],[1,'★1'],[0,'조력자'],['pet','🐾 펫']];
   const list=ids.filter(id=>dexStar==='all'||(dexStar==='pet'?!!ALLIES[id].pet:(ALLIES[id].star===+dexStar&&!ALLIES[id].pet)));
   const own=Object.keys(ALLIES).filter(id=>id!==FIXED&&owned(id)).length;
   const cell=id=>{const al=ALLIES[id],has=id===FIXED||owned(id);
-    return `<button class="dexcell ${has&&(P.awaken[id]||0)>=5?'aw5':has&&(P.awaken[id]||0)>=4?'aw4':''} ${has?'':'unown'} ${P.active.includes(id)?'mine':''}" data-dexid="${id}">${allyFace(id,'dface')}
+    return `<button class="dexcell ${has&&(P.awaken[id]||0)>=5?'aw5':has&&(P.awaken[id]||0)>=4?'aw4':''} ${has?'':'unown'} ${P.active.includes(id)?'mine':''} ${has&&transOn(id)?'trc':''}" data-dexid="${id}">${dexPic(id)}
       <span class="dstar">${al.star?starsOf(al):'조력자'}${isMyth(id)?' 🔱':''}</span><b>${nameHTML(id)}</b></button>`;};
   $('#app').innerHTML=`${statusHTML()}${topBack()}
     <div class="panel"><div class="ptitle">📖 동료 도감 <span class="small">보유 ${own}/${Object.keys(ALLIES).length-1} · 눌러서 상세 보기</span></div>
