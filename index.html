@@ -1021,6 +1021,7 @@ body:has(.tabbar) .tabbar{background:color-mix(in srgb,var(--tc) 6%,rgba(8,12,26
 .pnitem{padding:7px 0;border-bottom:1px dashed rgba(255,255,255,.08)}
 .pnv{display:flex;justify-content:space-between;gap:8px;align-items:baseline;font-size:11.5px;color:#8f9ac0}
 .pnv b{color:#ffe7a3;font-size:12.5px;letter-spacing:.4px}
+.vnew{color:#5ce1ff;text-shadow:0 0 6px rgba(92,225,255,.45)}   /* 버전에서 바로 전 버전과 달라진 숫자 (패치노트·업데이트 소식) */
 .pnm{font-size:13px;line-height:1.5;color:#dfe5f8;margin-top:2px}
 .cover .verline{color:#9aa6cc;padding-top:6px}
 .verline{text-align:center;font-size:12px;color:#7f8ab0;letter-spacing:.5px;padding:2px 0 4px}
@@ -2984,7 +2985,7 @@ function patchHTML(list,since,title){
     ${groups.map(g=>`<div class="pgrp"><div class="pgh">${g.c[1]} <span class="small">${g.items.length}개</span></div>
       ${g.items.map((x,i)=>`<div class="pitem ${i>=PATCH_SHOW?'more':''}"><span class="pd">${patchWhen(x.t).replace(/ \d\d:\d\d$/,'')}</span><span>${esc(x.m)}</span></div>`).join('')}
       ${g.items.length>PATCH_SHOW?`<button class="btn pmore" data-pmore>▼ ${g.items.length-PATCH_SHOW}개 더 보기</button>`:''}</div>`).join('')}
-    <div class="pver"${VER?'':' hidden'}>현재 버전 <b>${VER?esc(VER.v):''}</b></div></div>`;
+    <div class="pver" data-before="${list.length?Math.min(...list.map(x=>x.t)):0}"${VER?'':' hidden'}>${pverInner(list.length?Math.min(...list.map(x=>x.t)):0)}</div></div>`;
 }
 document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('[data-pmore]');if(b){e.preventDefault();b.parentElement.querySelectorAll('.pitem.more').forEach(x=>x.classList.remove('more'));b.remove();}});
 /* 거점에 들어왔을 때 한 번: 마지막 접속 뒤 업데이트가 있으면 처음에 띄움 */
@@ -3031,6 +3032,20 @@ async function verFetch(){   // 처음부터 모든 수정 기록이 필요해�
   const L=await pnLoad();if(!L.length)throw new Error('empty');
   const top=pnVersions(L)[0];return {v:top.v,t:top.t};
 }
+/* 바뀐 숫자 표시: 같은 자리(칸·자릿수)끼리 비교해 이전 버전과 다른 숫자만 .vnew로 감쌈 · 이전 버전이 없으면 그대로 */
+function verDiffHTML(v,prev){
+  v=String(v||'');if(!prev||prev===v)return esc(v);
+  const A=v.split('.'),Bp=String(prev).split('.');
+  return A.map((seg,i)=>{const q=Bp[i]||'';let out='',run='';
+    for(let k=0;k<seg.length;k++){const ch=seg[k];if(q[k]!==ch)run+=ch;else{if(run){out+=`<span class="vnew">${esc(run)}</span>`;run='';}out+=esc(ch);}}
+    if(run)out+=`<span class="vnew">${esc(run)}</span>`;return out;}).join('.');
+}
+/* 업데이트 소식의 현재 버전: 목록에서 가장 오래된 업데이트 바로 전 버전과 비교 */
+function pverInner(before){
+  if(!VER)return '';
+  const P0=pnCache&&before?pnVersions(pnCache).find(x=>x.t<before):null;
+  return `현재 버전 <b>${verDiffHTML(VER.v,P0&&P0.v)}</b>`;
+}
 const verText=()=>VER?`버전 ${VER.v}`:'';
 const verLineHTML=()=>`<div class="verline"${VER?'':' hidden'}>${verText()}</div>`;
 /* ===================== 패치노트: 처음부터 모든 수정 기록 (최신이 맨 위 · 수정마다 그때의 버전) =====================
@@ -3063,10 +3078,10 @@ const pnTime=t=>{const d=new Date(t+9*3600e3);return `${String(d.getUTCHours()).
 function pnHTML(raw,note){
   const L=pnVersions(raw),cnt={};L.forEach(x=>{const k=patchCat(x.m);cnt[k]=(cnt[k]||0)+1;});
   let day='',body='';
-  L.slice(0,pnShown).forEach(x=>{const d=pnDay(x.t);if(d!==day){day=d;body+=`<div class="pnday">${d}</div>`;}
-    body+=`<div class="pnitem"><div class="pnv"><b>${x.v}</b><span>${pnTime(x.t)} · ${x.w?'유준':'본우'}</span></div><div class="pnm">${PATCH_LABEL[patchCat(x.m)].split(' ')[0]} ${esc(x.m)}</div></div>`;});
+  L.slice(0,pnShown).forEach((x,i)=>{const d=pnDay(x.t);if(d!==day){day=d;body+=`<div class="pnday">${d}</div>`;}
+    body+=`<div class="pnitem"><div class="pnv"><b>${verDiffHTML(x.v,L[i+1]&&L[i+1].v)}</b><span>${pnTime(x.t)} · ${x.w?'유준':'본우'}</span></div><div class="pnm">${PATCH_LABEL[patchCat(x.m)].split(' ')[0]} ${esc(x.m)}</div></div>`;});
   return `<div class="patch pnotes"><div class="sum-title">📜 패치노트</div>
-    <div class="small" style="text-align:center">처음부터 지금까지 수정 <b>${L.length}개</b> · 최신이 맨 위${L.length?` · 현재 버전 <b class="pnnow">${L[0].v}</b>`:''}</div>
+    <div class="small" style="text-align:center">처음부터 지금까지 수정 <b>${L.length}개</b> · 최신이 맨 위${L.length?` · 현재 버전 <b class="pnnow">${verDiffHTML(L[0].v,L[1]&&L[1].v)}</b>`:''}</div>
     <div class="pchips">${PATCH_ORDER.filter(k=>cnt[k]).map(k=>`<span class="pchip">${PATCH_LABEL[k].split(' ')[0]} ${cnt[k]}</span>`).join('')}</div>
     ${note?`<div class="small pnnote">${note}</div>`:''}
     <div class="pnlist">${body}</div>
@@ -3096,7 +3111,7 @@ function verCheck(){   // 접속마다 한 번 새로 계산 · 실패하면 지
   if(verP)return verP;
   verP=verFetch().then(v=>{VER=v;try{localStorage.setItem(VER_KEY,JSON.stringify(v));}catch(e){}
     document.querySelectorAll('.verline').forEach(e=>{e.textContent=verText();e.hidden=false;});
-    document.querySelectorAll('.pver').forEach(e=>{e.innerHTML=`현재 버전 <b>${esc(VER.v)}</b>`;e.hidden=false;});return v;}).catch(()=>VER);
+    document.querySelectorAll('.pver').forEach(e=>{e.innerHTML=pverInner(+e.dataset.before||0);e.hidden=false;});return v;}).catch(()=>VER);
   return verP;
 }
 /* 기억의 퍼즐: 사진이 나타났다가 퍼즐 조각으로 갈라져 흩어지고, 희귀 아이템이 나온다 */
