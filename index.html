@@ -1416,9 +1416,9 @@ const ALLIES={
   baem:    {star:5,pet:true,name:'뱀뱀이',   icon:'🐍', role:'펫 · 아기 황금뱀', kit:'bloodpet',
             desc:'흡혈 송곳니(3초마다 적에게 출혈 · 출혈로 입힌 피해만큼 주인공과 동료 전원 HP 회복) · 🐾 펫: 출전 펫으로 고르면 자동 출전 (출전 칸 차지 안 함 · 펫은 1마리만) · 상점 동료 소환에서만 획득'},
   miho:    {star:5,pet:true,name:'미호롱',   icon:'🐯', role:'펫 · 아기 백호', kit:'zappet',
-            desc:'번개 발톱(3초마다 적에게 마비 피해 · 1.5초간 마비(행동 불가) · 마비로 입힌 피해의 절반만큼 3초간 주인공과 동료 전원 공격력 증가) · 🐾 펫: 출전 펫으로 고르면 자동 출전 (출전 칸 차지 안 함 · 펫은 1마리만) · 상점 동료 소환에서만 획득'},
+            desc:'번개 발톱(5초마다 적에게 마비 피해 · 2초간 마비(행동 불가) · 마비로 입힌 피해의 절반만큼 5초간 주인공과 동료 전원 공격력 증가) · 🐾 펫: 출전 펫으로 고르면 자동 출전 (출전 칸 차지 안 함 · 펫은 1마리만) · 상점 동료 소환에서만 획득'},
   toto:    {star:5,pet:true,name:'토토롱',   icon:'🐰', role:'펫 · 아기 토끼', kit:'charmpet',
-            desc:'매혹의 하트(3초마다 적에게 매혹 피해 · 1.5초간 매혹 — 적이 능력을 쓰지 못하고 기본 공격만 함 · 모으던 기술도 취소) · 🐾 펫: 로아가 출전해야만 함께 출전 가능 (출전 칸 차지 안 함 · 펫은 1마리만) · 상점 동료 소환에서만 획득'},
+            desc:'매혹의 하트(5초마다 적에게 매혹 피해 · 2초간 매혹 — 적이 능력을 쓰지 못하고 기본 공격만 함 · 모으던 기술도 취소) · 🐾 펫: 로아가 출전해야만 함께 출전 가능 (출전 칸 차지 안 함 · 펫은 1마리만) · 상점 동료 소환에서만 획득'},
   mang:    {star:5,pet:true,name:'망아찌',   icon:'🐴', role:'펫 · 아기 망아지', kit:'kickpet',
             desc:'뒷발차기(5초마다 적에게 피해 · 2초간 기절(행동 불가) · 뒷발차기 피해의 절반만큼 5초간 주인공 방어력 증가) · 🐾 펫: 출전 펫으로 고르면 자동 출전 (출전 칸 차지 안 함 · 펫은 1마리만) · 상점 동료 소환에서만 획득'},
   miner:   {star:5,name:'미네르',        icon:'🌊', role:'물의 여신', kit:'tide', hpMul:0.6,
@@ -5762,8 +5762,8 @@ function baemTick(){
   if(e.hp<=0){winNow();return;}
   renderBattle();
 }
-/* 펫 미호롱: 3초마다 번개 발톱 — 적에게 마비 피해(고정) + 1.5초 마비 · 그 피해의 절반만큼 3초간 주인공·동료 공격력 증가 */
-const MIHO_MS=3000, MIHO_PARA=1500, MIHO_BUFF=3000, MIHO_ATK_RATE=0.5; // 공격력 증가 = 마비 피해의 절반
+/* 펫 미호롱: 5초마다 번개 발톱 — 적에게 마비 피해(고정) + 2초 마비 · 그 피해의 절반만큼 5초간 주인공·동료 공격력 증가 */
+const MIHO_MS=5000, MIHO_PARA=2000, MIHO_BUFF=5000, MIHO_ATK_RATE=0.5; // 공격력 증가 = 마비 피해의 절반
 const mihoParaOn=()=>!!(B&&B.mihoParaUntil&&Date.now()<B.mihoParaUntil);
 const mihoAtk=()=>(B&&B.mihoAtkUntil&&Date.now()<B.mihoAtkUntil)?(B.mihoAtk||0):0;
 function mihoTick(){
@@ -5832,8 +5832,8 @@ function pandoraTick(){
   if(B.apAff&&Object.keys(B.apAff).some(k=>B.apAff[k]>Date.now())){B.apAff={};db.push('출혈·화상');}
   if(db.length){addLog(`📦 🔱 판도라의 상자 — ${db.join(', ')} 제거`);queueFx('player','📦 정화','mpf');renderBattle();}
 }
-/* 펫 토토롱: 3초마다 매혹의 하트 — 매혹 피해(고정) + 1.5초 매혹 (적은 기본 공격만 · 모으던 기술 취소) · 로아 출전 시에만 */
-const TOTO_MS=3000, TOTO_CHARM=1500;
+/* 펫 토토롱: 5초마다 매혹의 하트 — 매혹 피해(고정) + 2초 매혹 (적은 기본 공격만 · 모으던 기술 취소) · 로아 출전 시에만 */
+const TOTO_MS=5000, TOTO_CHARM=2000;
 const totoCharmOn=()=>!!(B&&B.totoUntil&&Date.now()<B.totoUntil);
 function totoTick(){
   if(!B||B.over||B.won||!$('#modal').classList.contains('hidden'))return;
