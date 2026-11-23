@@ -981,6 +981,10 @@ body:has(.tabbar) .tabbar{background:color-mix(in srgb,var(--tc) 6%,rgba(8,12,26
 .pnbtn{flex:0 0 auto;cursor:pointer;font:inherit;font-size:12px;font-weight:700;color:#ffe7a3;background:rgba(232,199,106,.12);border:1px solid rgba(232,199,106,.45);border-radius:999px;padding:3px 10px}
 .fdname{display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap}.fdname .lvtag{font-family:inherit;font-size:13px}
 .fdetail .rwl{text-align:left}
+.rkfold>summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:6px;padding:6px 0;user-select:none}
+.rkfold>summary::-webkit-details-marker{display:none}
+.rkfold .fdarr{margin-left:auto;font-size:12px;color:#9fb0d8}.rkfold .fdarr::after{content:'▼ 펼치기'}
+.rkfold[open] .fdarr::after{content:'▲ 접기'}
 .pnbtn:active{transform:scale(.97)}
 .pnotes .pnnow{color:#ffe7a3}
 .pnnote{text-align:center;color:#f0c27a;margin:4px 0}
@@ -4333,6 +4337,7 @@ function rankOpponent(){
     team:{atk:12+3*(L-1)+6*u,def:5+2*(L-1)+5*u,maxHp:100+15*(L-1)+18*u,maxMp:30,lv:L,
       party:party.map(id=>({id,lv:R.alv,aw:R.aw,my:R.my,tr:0}))}};
 }
+let rankRwOpen=false;   // 승급 보상 펼침 상태 (화면을 다시 그려도 유지)
 function renderRank(msg){
   hubTab='adv';
   if(P.lv<RANK_MIN_LV){renderHub(`🔒 랭크전은 Lv ${RANK_MIN_LV}부터 열린다 (현재 Lv ${P.lv})`);return;}
@@ -4343,7 +4348,8 @@ function renderRank(msg){
       <div class="rankbadge" style="--rc:${R.c}"><div class="ri">${R.icon}</div><b>${R.n}</b></div>
       ${top?`<div class="desc" style="text-align:center">${fmt(r.lp)} LP · 최고 티어 도달</div>`:bar(r.lp,rankNeed(r.tier),'xp','LP')}
       <div class="ranklad">${RANKS.map((x,i)=>`<span class="${i===r.tier?'on':i<r.tier?'done':''}">${x.icon}<br>${x.n}</span>`).join('')}</div>
-      <div class="desc"><b>승급 보상</b>${rwList([...RANKS.map((x,i)=>RANK_REWARD[i]?[`${x.icon} ${x.n}`,rankRewardText(i),(r.got||{})[i]]:null).filter(Boolean),[`🏆 챌린저 ${RANK_CH_BONUS_LP} LP`,`${fmt(RANK_CH_BONUS)} 코인`,P.rankChBonus]])}</div>
+      ${(()=>{const rows=[...RANKS.map((x,i)=>RANK_REWARD[i]?[`${x.icon} ${x.n}`,rankRewardText(i),(r.got||{})[i]]:null).filter(Boolean),[`🏆 챌린저 ${RANK_CH_BONUS_LP} LP`,`${fmt(RANK_CH_BONUS)} 코인`,P.rankChBonus]],got=rows.filter(x=>x[2]).length;
+        return `<details class="desc rkfold" id="rkfold" ${rankRwOpen?'open':''}><summary><b>승급 보상</b> <span class="small">받음 ${got}/${rows.length}</span><span class="fdarr"></span></summary>${rwList(rows)}</details>`;})()}
       <div class="desc">★5 동료 무작위 3명(구원자·필멸자는 5명)을 데려온 AI 상대와 대결한다. 승리 +${RANK_WIN} LP · 패배 −${RANK_LOSS} LP. <br><b>승급에 필요한 LP</b>${rwList([[`${RANKS[0].n} → ${RANKS[RANK_CH].n}`,`티어마다 ${RANK_LP} LP`],[`${RANKS[RANK_CH].n} → ${RANKS[RANK_CH+1].n}`,`${fmt(RANK_SAVIOR_LP)} LP`],[`${RANKS[RANK_CH+1].n} → ${RANKS[RANK_CH+2].n}`,`${fmt(RANK_MORTAL_LP)} LP`]])}⏳ 필멸자 티어에서는 ${RANK_SV_SALV_STEP} LP 달성할 때마다 ${SALV_ITEM.icon} ${SALV_ITEM.name} 1개 (받은 구간 ${rankState().mtGot||0}개)<br>이번 티어 상대: 주인공 Lv ${R.lv} · ★5 동료 ${R.cnt||3}명 Lv ${R.alv}${R.aw?` · 각성 ${R.aw}`:''}${R.my?' · 신화':''}</div>
       <div class="grid">
         <button class="btn danger full" id="rgo">⚔ 랭크전 시작</button>
@@ -4352,6 +4358,7 @@ function renderRank(msg){
   $('#rgo').onclick=()=>{if(P.lv<RANK_MIN_LV)return renderRank();startPvp(rankOpponent());};
   $('#back').onclick=()=>renderHub();
   window.scrollTo(0,0);
+  if($('#rkfold'))$('#rkfold').addEventListener('toggle',e=>{rankRwOpen=e.currentTarget.open;});
 }
 function rankEnd(win,e,pst,pparty){
   const r=rankState(),before=r.tier;const lines=[];
