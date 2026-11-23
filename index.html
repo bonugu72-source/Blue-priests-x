@@ -961,6 +961,8 @@ body:has(.tabbar) .tabbar{background:color-mix(in srgb,var(--tc) 6%,rgba(8,12,26
 .pitem.more{display:none}
 .btn.pmore{width:100%;margin-top:6px;font-size:13px}
 .mbox:has(.patch) #mbtn{position:sticky;bottom:0;box-shadow:0 -10px 18px rgba(13,21,49,.95)}
+.pver{margin-top:14px;padding:8px;border-radius:10px;background:rgba(255,255,255,.05);text-align:center;font-size:13px;color:#b8c3e6}.pver b{color:#ffe7a3;letter-spacing:.5px}
+.verline{text-align:center;font-size:12px;color:#7f8ab0;letter-spacing:.5px;padding:2px 0 4px}
 .btn.gpatch{width:100%;margin-bottom:10px;background:linear-gradient(135deg,#3a2a12,#22204a);border-color:rgba(232,199,106,.5)}
 /* 코인 보내기 슬라이더 */
 .gval{font-size:30px;font-weight:900;color:var(--gold);text-align:center;margin:12px 0 4px;font-variant-numeric:tabular-nums}.gval small{font-size:14px;color:#c9cbe0}
@@ -2908,7 +2910,8 @@ function patchHTML(list,since,title){
     <div class="pchips">${groups.map(g=>`<span class="pchip">${g.c[1].split(' ')[0]} ${g.items.length}</span>`).join('')}</div>
     ${groups.map(g=>`<div class="pgrp"><div class="pgh">${g.c[1]} <span class="small">${g.items.length}개</span></div>
       ${g.items.map((x,i)=>`<div class="pitem ${i>=PATCH_SHOW?'more':''}"><span class="pd">${patchWhen(x.t).replace(/ \d\d:\d\d$/,'')}</span><span>${esc(x.m)}</span></div>`).join('')}
-      ${g.items.length>PATCH_SHOW?`<button class="btn pmore" data-pmore>▼ ${g.items.length-PATCH_SHOW}개 더 보기</button>`:''}</div>`).join('')}</div>`;
+      ${g.items.length>PATCH_SHOW?`<button class="btn pmore" data-pmore>▼ ${g.items.length-PATCH_SHOW}개 더 보기</button>`:''}</div>`).join('')}
+    <div class="pver"${VER?'':' hidden'}>현재 버전 <b>${VER?esc(VER.v):''}</b></div></div>`;
 }
 document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('[data-pmore]');if(b){e.preventDefault();b.parentElement.querySelectorAll('.pitem.more').forEach(x=>x.classList.remove('more'));b.remove();}});
 /* 거점에 들어왔을 때 한 번: 마지막 접속 뒤 업데이트가 있으면 처음에 띄움 */
@@ -2917,7 +2920,7 @@ function patchCheck(){
   const since=P.patchAt||BOOT_SAVED_AT||0;
   if(!since){P.patchAt=Date.now();patchDone=true;save();return;}   // 새 캐릭터: 다음 접속부터
   patchBusy=true;const now=Date.now();
-  patchFetch(since,500).then(list=>{
+  Promise.all([patchFetch(since,500),verCheck()]).then(([list])=>{
     patchBusy=false;patchDone=true;
     if(!list.length){P.patchAt=now;save();return;}
     const show=()=>{
@@ -2932,10 +2935,44 @@ function patchCheck(){
 /* 가이드에서 언제든 다시 보기: 최근 업데이트 40개 */
 function showRecentPatch(){
   showStory('<div class="patch"><div class="sum-title">📢 최근 업데이트</div><div class="desc" style="text-align:center">불러오는 중…</div></div>',null,true);
-  patchFetch(0,40).then(list=>{if(!$('#modal').classList.contains('hidden')&&$('.patch'))$('#mtext').innerHTML=patchHTML(list,0,'📢 최근 업데이트 40개');})
+  Promise.all([patchFetch(0,40),verCheck()]).then(([list])=>{if(!$('#modal').classList.contains('hidden')&&$('.patch'))$('#mtext').innerHTML=patchHTML(list,0,'📢 최근 업데이트 40개');})
     .catch(()=>{const d=$('.patch .desc');if(d)d.textContent='업데이트 소식을 불러오지 못했어요. 인터넷 연결을 확인해 주세요.';});
 }
 document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('[data-guide]');if(b&&!B){e.preventDefault();renderGuide();}});
+/* ===================== 버전: GitHub 수정 기록으로 자동 계산 =====================
+   년.월.일.(친구 bonugu72-source가 올린 수정 0 · 그 밖의 편집자 1).그날 그쪽의 몇 번째 수정인지(1~999)
+   날짜는 한국 시간 기준 · 가장 최근 수정의 버전을 보여줌 */
+const VER_OWNER='bonugu72-source',VER_KEY='blue_priests_ver';
+let VER=(()=>{try{const v=JSON.parse(localStorage.getItem(VER_KEY)||'null');return v&&v.v?v:null;}catch(e){return null;}})();   // 지난번에 받아 둔 버전 (바로 표시)
+let verP=null;
+const verDayKey=t=>{const d=new Date(t+9*3600e3);return `${d.getUTCFullYear()%100}.${d.getUTCMonth()+1}.${d.getUTCDate()}`;};
+const verWho=c=>{const lg=c.author&&c.author.login,nm=c.commit&&c.commit.author&&c.commit.author.name;return (lg===VER_OWNER||nm===VER_OWNER)?0:1;};
+async function verFetch(){
+  const all=[];
+  for(let page=1;page<=5;page++){
+    const r=await withTimeout(fetch(`https://api.github.com/repos/${PATCH_REPO}/commits?per_page=100&page=${page}`,{headers:{Accept:'application/vnd.github+json'}}),12000);
+    if(!r.ok)throw new Error('http '+r.status);
+    const a=await r.json();if(!Array.isArray(a))throw new Error('bad');
+    a.forEach(c=>{const m=String((c.commit&&c.commit.message)||'').split('\n')[0].trim(),t=Date.parse(c.commit&&c.commit.committer&&c.commit.committer.date)||0;
+      if(m&&t&&!/^Merge /.test(m))all.push({t,w:verWho(c)});});
+    if(a.length<100||!all.length)break;
+    const top=verDayKey(Math.max(...all.map(x=>x.t)));
+    if(all.some(x=>verDayKey(x.t)!==top))break;   // 가장 최근 날의 수정을 모두 받았음
+  }
+  if(!all.length)throw new Error('empty');
+  const last=all.reduce((a,b)=>b.t>a.t?b:a),day=verDayKey(last.t);
+  const n=all.filter(x=>verDayKey(x.t)===day&&x.w===last.w&&x.t<=last.t).length;
+  return {v:`${day}.${last.w}.${Math.min(999,n)}`,t:last.t};
+}
+const verText=()=>VER?`버전 ${VER.v}`:'';
+const verLineHTML=()=>`<div class="verline"${VER?'':' hidden'}>${verText()}</div>`;
+function verCheck(){   // 접속마다 한 번 새로 계산 · 실패하면 지난번 버전 그대로
+  if(verP)return verP;
+  verP=verFetch().then(v=>{VER=v;try{localStorage.setItem(VER_KEY,JSON.stringify(v));}catch(e){}
+    document.querySelectorAll('.verline').forEach(e=>{e.textContent=verText();e.hidden=false;});
+    document.querySelectorAll('.pver').forEach(e=>{e.innerHTML=`현재 버전 <b>${esc(VER.v)}</b>`;e.hidden=false;});return v;}).catch(()=>VER);
+  return verP;
+}
 /* 기억의 퍼즐: 사진이 나타났다가 퍼즐 조각으로 갈라져 흩어지고, 희귀 아이템이 나온다 */
 function puzzleFx(rid,cb){
   const C=5,Rw=6,r=RELICS[rid];
@@ -4746,6 +4783,7 @@ function renderHub(msg){
   clearBattle();
   if(hubTab!=='dungeon')dgUnsubscribe();   // 던전 화면을 떠나면 랭킹 실시간 구독 해제
   patchCheck();                            // 마지막 접속 뒤 업데이트 소식 (접속마다 한 번)
+  verCheck();                              // 버전 (접속마다 한 번)
   const opened=migrateSave();
   if(opened!=null){save();showStory(AREAS[opened].intro,()=>renderHub(`🔓 새 지역 개방: ${AREAS[opened].flag} ${AREAS[opened].name}`));return;}
   if(!farmHashDone&&/glasya/i.test(location.hash)){farmHashDone=true;try{history.replaceState(null,'',location.pathname+location.search);}catch(e){}setTimeout(startGlasyaFarm,300);} // 북마크 …/#glasya 로 열면 바로 시작
@@ -4830,7 +4868,7 @@ function renderHub(msg){
 /* 하단 탭: 상점 · 동료 · 모험 · 던전 · 친구 */
 let hubTab='adv';
 const TABS=[['shop','🕯','상점'],['ally','🤝','동료'],['adv','🗺','모험'],['dungeon','🏰','던전'],['friend','👥','친구']];
-const tabBar=()=>{document.body.dataset.theme=hubTab;return `<nav class="tabbar">${TABS.map(([k,ic,l])=>`<button class="tab t-${k} ${hubTab===k?'on':''}" data-tab="${k}"><span class="ti">${ic}</span>${l}</button>`).join('')}</nav>`;};
+const tabBar=()=>{document.body.dataset.theme=hubTab;return `${verLineHTML()}<nav class="tabbar">${TABS.map(([k,ic,l])=>`<button class="tab t-${k} ${hubTab===k?'on':''}" data-tab="${k}"><span class="ti">${ic}</span>${l}</button>`).join('')}</nav>`;};
 document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('.tabbar [data-tab]');if(b){e.preventDefault();hubTab=b.dataset.tab;renderHub();window.scrollTo(0,0);}});
 const footHTML=()=>`<div class="foot">${FB?'<button class="link" id="devlink">📱 기기 연결</button> · ':''}<button class="link" id="savecode">💾 저장 코드 복사</button> · <button class="link" id="totitle">타이틀로</button>
   <div class="small" style="margin-top:2px">${cloudState==='on'?'☁ 클라우드 자동 저장 중':'이 브라우저에 자동 저장 중 · 저장 코드로 백업하세요'}</div></div>`;
