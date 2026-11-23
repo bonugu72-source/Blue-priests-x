@@ -1009,6 +1009,16 @@ body:has(.tabbar) .tabbar{background:color-mix(in srgb,var(--tc) 6%,rgba(8,12,26
 .rkfold>summary::-webkit-details-marker{display:none}
 .rkfold .fdarr{margin-left:auto;font-size:12px;color:#9fb0d8}.rkfold .fdarr::after{content:'▼ 펼치기'}
 .rkfold[open] .fdarr::after{content:'▲ 접기'}
+.shopfold>summary{padding:0}.shopfold .shopbody{display:flex;flex-direction:column;gap:8px;margin-top:8px}
+.synfold>summary{padding:2px 0 4px}
+.rateline{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:2px 0 8px}
+.rateline .ratebtn{width:auto;min-height:0;padding:6px 12px;font-size:13px}
+.rtfold{border-bottom:1px dashed rgba(255,255,255,.08)}.rtfold>summary{padding:10px 0}
+.rtfold .rtk{font-weight:800;color:#ffe7a3;min-width:3.4em}.rtfold summary .rtp{margin-left:auto;color:#ffe7a3}.rtfold summary .fdarr{margin-left:8px}
+.rtlist{display:grid;gap:4px;padding:0 0 10px}
+.rtrow{display:flex;align-items:center;gap:8px;padding:5px 8px;border-radius:9px;background:rgba(255,255,255,.05);font-size:13px}
+.rtnm{flex:1;min-width:0;line-height:1.3}.rtnm small{display:block;color:#8f9ac0;font-size:11px}
+.rtrow .rtp{color:#dfe5f8;font-size:12.5px;white-space:nowrap}
 .skrow{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:4px;flex-wrap:wrap}
 .skbtn{cursor:pointer;font:inherit;font-size:12.5px;font-weight:700;color:#dfe6ff;background:rgba(255,255,255,.08);border:1px solid rgba(160,180,255,.35);border-radius:999px;padding:4px 12px;white-space:nowrap}
 .skbtn:active{transform:scale(.97)}.skbtn .skmy{opacity:.45}.skbtn .skmy.on{opacity:1}
@@ -5413,6 +5423,7 @@ const BLOOD_ORB_COST=200000, BLOOD_ORB_PCT=0.10, MEMORY_KILLS=11;
 function showMemory(back){const r=RELICS.our_memory;showStory(`<div class="sum s5"><div class="sum-title">희귀한 유물</div><img class="memimg" src="${r.img}" alt="우리들의 추억"><div class="sum-name">📸 ${r.name}</div><p class="sum-desc">아무런 힘도 없다.<br>하지만 시간 속에 잠긴, 다시 오지 않을 그날의 추억.</p></div>`,()=>(typeof back==='function'?back:renderAllyTab)(),true);}
 const realmStart=()=>{const i=AREAS.findIndex(a=>a.realm);return i<0?AREAS.length:i;};
 const TRUSTXP_STONE=10; // 신뢰도 XP 1개 = 천상의 성유물 10개
+let shopOpen=false,synOpen=false;   // 상점: 교구 상점 · 합성 칸 펼침 상태 (구입·소환 뒤 다시 그려도 유지)
 function renderShop(msg){
   hubTab='shop';
   const rows=[
@@ -5423,15 +5434,15 @@ function renderShop(msg){
   ];
   $('#app').innerHTML=`${statusHTML()}
     ${msg?`<div class="notice">${msg}</div>`:''}
-    <div class="panel"><div class="ptitle">🕯 교구 상점</div>
+    <div class="panel"><details class="rkfold shopfold" id="shopfold" ${shopOpen?'open':''}><summary><span class="ptitle">🕯 교구 상점</span><span class="fdarr"></span></summary><div class="shopbody">
       ${rows.map(r=>`<div class="shopitem"><div class="info">${r.name}<small>${r.info}</small></div>
         ${r.owned?'<button class="btn" disabled>보유 중</button>':`<button class="btn ${P.gold>=r.cost?'primary':''}" data-id="${r.id}" ${P.gold<r.cost?'disabled':''}>${fmt(r.cost)} G</button>`}</div>`).join('')}
       <div class="shopitem"><div class="info">💗 신뢰도 XP<small>★5·★6 동료 신뢰도 +2 (동료 관리에서 사용) · 보유 ${P.items.trustxp||0}개 · ${AWAKEN_ITEM.icon} 보유 ${P.items.stone}개</small></div>
         <button class="btn ${P.items.stone>=TRUSTXP_STONE?'primary':''}" id="buytxp" ${P.items.stone<TRUSTXP_STONE?'disabled':''}>${AWAKEN_ITEM.icon} ${TRUSTXP_STONE}개</button></div>
-    </div>
+    </div></details></div>
     <div class="panel"><div class="ptitle">✝ 동료 소환</div>
-      <div class="desc"><b>나올 확률</b>${rwList(STAR_RATE.map(([st,r])=>[st==='pet'?'🐾 펫':'★'+st,(Math.round(r*10000)/100)+'%']),3)}
-      <b>합성</b> 같은 캐릭터 (무작위 · 원본 1장은 보존)${rwList([1,2,3,4].map(st=>[`★${st} ×${SYN_NEED[st]}`,`→ ★${st+1}`]),2)}</div>
+      <div class="desc"><div class="rateline"><b>나올 확률</b><button class="btn ratebtn" id="rates">등급·카드별 확률 ›</button></div>
+      <details class="rkfold synfold" id="synfold" ${synOpen?'open':''}><summary><b>합성</b><span class="fdarr"></span></summary>같은 캐릭터 (무작위 · 원본 1장은 보존)${rwList([1,2,3,4].map(st=>[`★${st} ×${SYN_NEED[st]}`,`→ ★${st+1}`]),2)}</details></div>
       <div class="grid">
         <button class="btn primary" id="sumT1" ${P.tickets<1?'disabled':''}>🎫 소환권 1회<small>보유 ${P.tickets}장</small></button>
         <button class="btn primary" id="sumT10" ${P.tickets<10?'disabled':''}>🎫 소환권 10회<small>10장 사용</small></button>
@@ -5445,6 +5456,9 @@ function renderShop(msg){
     ${tabBar()}`;
   $('#cos').onclick=()=>{cosSel=null;renderCostume();};
   $('#roul').onclick=()=>renderRoulette();
+  $('#rates').onclick=()=>renderRates();
+  $('#shopfold').ontoggle=e=>{shopOpen=e.target.open;};
+  $('#synfold').ontoggle=e=>{synOpen=e.target.open;};
   $('#sumT1').onclick=()=>summon(1,true);
   $('#sumT10').onclick=()=>summon(10,true);
   $('#sumG1').onclick=()=>summon(1,false);
@@ -5452,6 +5466,20 @@ function renderShop(msg){
   $('#sumG50').onclick=()=>summon(50,false);
   document.querySelectorAll('[data-id]').forEach(b=>b.onclick=()=>buy(b.dataset.id));
   $('#buytxp').onclick=()=>{if(P.items.stone<TRUSTXP_STONE)return;P.items.stone-=TRUSTXP_STONE;P.items.trustxp=(P.items.trustxp||0)+1;save();renderShop(`💗 신뢰도 XP를 구입했다 (${AWAKEN_ITEM.name} ${TRUSTXP_STONE}개 사용 · 신뢰도 XP 보유 ${P.items.trustxp}개)`);};
+}
+/* 동료 소환 확률: 등급 확률 높은 순 · 등급을 펼치면 그 등급 카드별 확률 (등급 안에서는 모두 같은 확률 → 등급 확률 ÷ 카드 수) */
+const ratePct=x=>{const v=x*100;return (v>=1?+v.toFixed(2):+v.toPrecision(3))+'%';};
+function renderRates(){
+  hubTab='shop';
+  const G=STAR_RATE.slice().sort((a,b)=>b[1]-a[1]).map(([st,r])=>{const ids=st==='pet'?PET_IDS():allyIds(st);return {st,r,ids,per:ids.length?r/ids.length:0};});
+  $('#app').innerHTML=`${statusHTML()}${topBack()}
+    <div class="panel"><div class="ptitle">✝ 동료 소환 확률</div>
+      <div class="desc">소환 1회마다 먼저 등급이 정해지고, 그 등급 안의 카드 중 하나가 똑같은 확률로 나온다.<br>카드별 확률 = 등급 확률 ÷ 그 등급 카드 수 · 등급을 누르면 펼쳐진다</div>
+      ${G.map(g=>`<details class="rkfold rtfold"><summary><span class="rtk">${g.st==='pet'?'🐾 펫':'★'+g.st}</span><span class="small">${g.ids.length}종 · 장당 ${ratePct(g.per)}</span><b class="rtp">${ratePct(g.r)}</b><span class="fdarr"></span></summary>
+        <div class="rtlist">${g.ids.map(id=>{const al=ALLIES[id];return `<div class="rtrow">${allyFace(id,'xs')}<div class="rtnm">${al.name}<small>${al.role||''}</small></div><b class="rtp">${ratePct(g.per)}</b></div>`;}).join('')}</div></details>`).join('')}
+      <button class="btn full" id="back" style="margin-top:10px">← 상점으로</button></div>${tabBar()}`;
+  $('#back').onclick=()=>renderShop();
+  window.scrollTo(0,0);
 }
 function buy(id){
   let m='';
