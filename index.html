@@ -652,6 +652,20 @@ body.pfrozen #cmds .btn{filter:saturate(.2) brightness(1.2);background:linear-gr
 .sfx-flash{position:absolute;inset:0;background:radial-gradient(circle,#fff,color-mix(in srgb,var(--c) 60%,#fff) 50%,transparent 80%);opacity:0;animation:sfxflash .9s .55s ease-out forwards}
 .sfx-label{position:absolute;top:calc(50% + 150px);left:0;right:0;text-align:center;font-size:34px;letter-spacing:6px;color:var(--c);
   text-shadow:0 0 12px var(--c),0 0 28px var(--c);opacity:0;animation:sfxlabel .7s 1s cubic-bezier(.2,1.6,.4,1) forwards}
+.pfx{position:fixed;inset:0;z-index:71;overflow:hidden;cursor:pointer;background:radial-gradient(ellipse at 50% 55%,#5fb6e6,#1d4f86 50%,#0a1428 100%);animation:pfxIn .35s ease-out}
+@keyframes pfxIn{from{opacity:0}to{opacity:1}}
+.pfx .paw{position:absolute;width:var(--w,40px);height:var(--w,40px);margin:calc(var(--w,40px)/-2) 0 0 calc(var(--w,40px)/-2);transform:rotate(var(--rot,0deg)) scale(1.8);opacity:0;filter:drop-shadow(0 0 8px rgba(160,230,255,.9));animation:pawStep .38s cubic-bezier(.2,1.6,.4,1) forwards;animation-delay:var(--d,0s)}
+.pfx .paw svg{width:100%;height:100%;fill:#eaf8ff}
+@keyframes pawStep{0%{opacity:0;transform:rotate(var(--rot,0deg)) scale(1.8)}60%{opacity:1;transform:rotate(var(--rot,0deg)) scale(.88)}100%{opacity:.85;transform:rotate(var(--rot,0deg)) scale(1)}}
+.pfx .paw.big{--w:150px;left:50%;top:50%;animation:pawBig .6s cubic-bezier(.2,1.5,.35,1) forwards;animation-delay:var(--d,1.6s);filter:drop-shadow(0 0 22px rgba(170,235,255,1)) drop-shadow(0 0 50px rgba(120,200,255,.8))}
+@keyframes pawBig{0%{opacity:0;transform:scale(3)}55%{opacity:1;transform:scale(.86)}100%{opacity:1;transform:scale(1)}}
+.pfx .pring{position:absolute;left:50%;top:50%;width:20px;height:20px;margin:-10px 0 0 -10px;border-radius:50%;border:4px solid rgba(190,240,255,.95);opacity:0;animation:pRing 1s ease-out forwards;animation-delay:var(--d,1.9s)}
+@keyframes pRing{0%{opacity:1;transform:scale(1)}100%{opacity:0;transform:scale(22)}}
+.pfx .pdust{position:absolute;left:50%;top:50%;width:var(--s);height:var(--s);border-radius:50%;background:#dff6ff;box-shadow:0 0 8px #9fe0ff;opacity:0;animation:pDust 1.1s ease-out forwards;animation-delay:var(--dl)}
+@keyframes pDust{0%{opacity:1;transform:rotate(var(--a)) translateX(0)}100%{opacity:0;transform:rotate(var(--a)) translateX(var(--r))}}
+.pfx .plabel{position:absolute;left:0;right:0;top:calc(50% - 165px);text-align:center;font-weight:800;font-size:22px;color:#fff;text-shadow:0 0 12px #7fd4ff,0 0 26px #4fb8ff;opacity:0;animation:pLab .5s ease-out forwards;animation-delay:2.05s;letter-spacing:2px}
+.pfx .plabel .petstar{display:block;font-size:18px;margin-top:4px}
+@keyframes pLab{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
 .sfx-skip{position:absolute;bottom:calc(24px + env(safe-area-inset-bottom));left:0;right:0;text-align:center;color:#8a96b8;font-size:12px}
 .sfx.s5{animation:sfxshake .5s .6s 2}
 .sfx.s5 .sfx-circle div{border-color:#fff3b0}
@@ -5468,6 +5482,19 @@ function summonFx(top,cb){
   const fin=()=>{if(done)return;done=true;ov.remove();cb();};
   ov.onclick=fin;setTimeout(fin,dur);
 }
+/* 펫 소환 연출: 하늘빛 배경 · 발자국이 콩콩 찍히며 가운데로 · 가운데 큰 발자국 쾅 + 물결 */
+const PAW_SVG='<svg viewBox="0 0 100 100"><ellipse cx="50" cy="66" rx="24" ry="20"/><ellipse cx="22" cy="40" rx="10" ry="13"/><ellipse cx="40" cy="24" rx="10" ry="13"/><ellipse cx="60" cy="24" rx="10" ry="13"/><ellipse cx="78" cy="40" rx="10" ry="13"/></svg>';
+function petFx(cb){
+  const steps=[[30,92,-18],[44,84,14],[33,76,-18],[47,68,14],[36,60,-18]],dl=0.25;
+  const paws=steps.map(([x,y,r],i)=>`<div class="paw" style="left:${x}%;top:${y}%;--rot:${r}deg;--w:38px;--d:${(0.15+i*dl).toFixed(2)}s">${PAW_SVG}</div>`).join('');
+  const dust=Array.from({length:34},()=>`<i class="pdust" style="--a:${Math.round(Math.random()*360)}deg;--r:${Math.round(80+Math.random()*160)}px;--s:${(3+Math.random()*4).toFixed(1)}px;--dl:${(1.85+Math.random()*0.25).toFixed(2)}s"></i>`).join('');
+  const ov=document.createElement('div');ov.className='pfx';
+  ov.innerHTML=`${paws}<div class="pring"></div><div class="pring" style="--d:2.1s"></div>${dust}<div class="paw big" style="--d:${(0.15+steps.length*dl+0.2).toFixed(2)}s">${PAW_SVG}</div>
+    <div class="plabel">🐾 펫 등장!<span class="petstar">★★★★★</span></div><div class="sfx-skip">탭하여 건너뛰기</div>`;
+  document.body.appendChild(ov);
+  let done=false;const fin=()=>{if(done)return;done=true;ov.remove();cb();};
+  ov.onclick=fin;setTimeout(fin,3300);
+}
 function summon(n,useTicket){
   if(useTicket){if(P.tickets<n)return;P.tickets-=n;}
   else{const c=n===11?SUMMON11_COST:n===50?SUMMON50_COST:SUMMON_COST*n;if(P.gold<c)return;P.gold-=c;}
@@ -5478,7 +5505,9 @@ function summon(n,useTicket){
   }
   save();
   const top=res.reduce((a,b)=>ALLIES[b.id].star>ALLIES[a.id].star?b:a);
-  summonFx(ALLIES[top.id].star,()=>showStory(revealHTML(res,n===1?'소환 결과':n+'회 소환 결과'+(res.some(r=>r.gift)?' + 🎁 ★4 확정':'')),()=>renderShop(`${n}회 소환 완료 · 최고 등급 ${'★'.repeat(ALLIES[top.id].star)} ${ALLIES[top.id].name}`),true));
+  const gotPet=res.some(r=>ALLIES[r.id].pet),topStar=ALLIES[top.id].star;
+  const fx=(c)=>topStar>=6?summonFx(6,gotPet?()=>petFx(c):c):gotPet?petFx(c):summonFx(topStar,c);
+  fx(()=>showStory(revealHTML(res,n===1?'소환 결과':n+'회 소환 결과'+(res.some(r=>r.gift)?' + 🎁 ★4 확정':'')),()=>renderShop(`${n}회 소환 완료 · 최고 등급 ${'★'.repeat(ALLIES[top.id].star)} ${ALLIES[top.id].name}`),true));
 }
 /* 합성 재료로 쓸 수 있는 장수: 보유 카드 중 1장은 항상 남김 */
 function synSpare(id){return Math.max(0,(P.roster[id]||0)-1);}
