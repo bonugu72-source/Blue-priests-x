@@ -2878,7 +2878,7 @@ const GUIDE_SECS=[
   ${gH('맨 아래')}
   ${gRow(gB('📖 게임 가이드'),'지금 보고 있는 이 가이드를 열어요. 맨 위 가운데 '+gB('📖 가이드')+'와 같아요.')}`},
  {id:'dungeon',ic:'🏰',t:'던전 탭',s:'60초 공격력 측정 · 랭킹',b:()=>`
-  ${gRow(gB('⚔ 던전 입장'),`보스 ${dgSeq().main.length}명이 순서대로 나오고, 다 쓰러뜨리면 마계 보스 ${dgSeq().realm.length}명이 계속 반복돼요. 보스는 공격하지 않는 샌드백이에요. ${DG_MS/1000}초 동안 넣은 총 딜이 기록이에요.`)}
+  ${gRow(gB('⚔ 던전 입장'),`지금까지 깬 지역의 보스 ${dgSeq().main.length}명이 순서대로 나오고, 다 쓰러뜨리면 ${dgLoopText(dgSeq())}. 보스는 공격하지 않는 샌드백이에요. ${DG_MS/1000}초 동안 넣은 총 딜이 기록이에요.`)}
   ${gRow('3 · 2 · 1','시작을 누르면 카운트다운 뒤에 시간이 흘러요.')}
   ${gRow('남는 딜','한 번 때린 공격이 보스 남은 HP보다 크면 넘친 만큼 다음 보스에게 들어가요. (출혈·불태움 같은 지속 피해는 제외)')}
   ${gRow(gB('⏹ 중지'),'전투 중 오른쪽 위. 지금까지 넣은 딜로 기록하고 끝내요.')}
@@ -4654,7 +4654,7 @@ function towerEnd(win){
 }
 
 /* ===================== 던전 (공격력 측정) ===================== */
-/* 지역 보스가 순서대로 연속 등장 → 모두 쓰러뜨리면 마계 보스 3명이 계속 반복
+/* 내가 깬 지역의 보스만 순서대로 연속 등장 → 모두 쓰러뜨리면 깬 마계 보스가 계속 반복 (깬 마계가 없으면 마지막으로 깬 지역 보스 반복)
    보스 HP는 원래대로(DG_HP_MULT) · 보스는 공격·반격·빙결 등 어떤 효과도 쓰지 않는 샌드백 · 제한 시간 60초
    기록은 한국 시간 기준 하루 단위(매일 0시 초기화)로 players/{id} 공개 프로필에 함께 올려 모두와 실시간 공유 */
 const DG_MS=60000, DG_HP_MULT=1;   // 보스 HP 배율 (1 = 원래 HP)
@@ -4668,11 +4668,15 @@ function dgState(){
   if(!Array.isArray(P.dg.top))P.dg.top=P.dg.best>0?[{v:P.dg.best,p:P.dg.bestParty||[],at:P.dg.bestAt||0}]:[];
   return P.dg;
 }
-function dgSeq(){
-  const RS=realmStart(),idx=AREAS.map((a,i)=>i).filter(i=>AREAS[i].boss);
-  return {main:idx.filter(i=>i<RS),realm:idx.filter(i=>i>=RS)};
+function dgSeq(){   // 최종 보스를 깬 지역만 (지도에서 '완료'인 지역과 같은 기준) · 아직 하나도 못 깼으면 첫 지역 보스
+  const RS=realmStart(),done=i=>(P.prog[i]||0)>=STAGES||!!(P.cleared&&P.cleared[i]);
+  const idx=AREAS.map((a,i)=>i).filter(i=>AREAS[i].boss&&done(i));
+  let main=idx.filter(i=>i<RS);const realm=idx.filter(i=>i>=RS);
+  if(!main.length&&!realm.length)main=[AREAS.findIndex(a=>a.boss)];
+  return {main,realm,loop:realm.length?realm:[main[main.length-1]]};
 }
-function dgAreaAt(n){const q=dgSeq();return n<q.main.length?q.main[n]:q.realm[(n-q.main.length)%q.realm.length];}
+function dgAreaAt(n){const q=dgSeq();return n<q.main.length?q.main[n]:q.loop[(n-q.main.length)%q.loop.length];}
+const dgLoopText=q=>q.realm.length?`😈 마계 보스 ${q.realm.length}명(${q.realm.map(i=>AREAS[i].boss.name).join(' → ')})이 계속 반복돼요`:`마지막으로 깬 보스 「${AREAS[q.loop[0]].boss.name}」만 계속 반복돼요`;
 /* 샌드백 보스: 이름·모습·방어력만 남기고 모든 특수 효과를 뺀다 */
 function dgEnemy(a){
   const b=AREAS[a].boss,em=a>=4?LATE_BOSS_MULT:ENEMY_MULT;
@@ -4740,7 +4744,7 @@ function dungeonNextBoss(){
   const t=B.e;
   addLog(`💀 ${killed.join(' · ')} 처치!${carried>0?` 💥 남은 피해 ${fmt(carried)} → 다음 보스로`:''}`);
   if(hadDot)addLog('🩸 출혈·불태움은 쓰러진 보스와 함께 끝났다');
-  addLog(`${n0<q.main.length&&B.dgN>=q.main.length?'😈 마계 보스 반복 시작 · ':''}다음 보스 「${t.name}」 (HP ${fmt(t.hp)} / ${fmt(t.maxHp)})`);
+  addLog(`${n0<q.main.length&&B.dgN>=q.main.length?(q.realm.length?'😈 마계 보스 반복 시작 · ':'🔁 마지막 보스 반복 시작 · '):''}다음 보스 「${t.name}」 (HP ${fmt(t.hp)} / ${fmt(t.maxHp)})`);
   if(carried>0)queueFx('enemy','💥'+fmt(carried),'crit');
   renderBattle();
 }
@@ -4844,7 +4848,7 @@ function renderDungeon(msg){
         <div><b>🕊️</b><span>보스는 공격 안 함</span></div>
         <div><b>⏱ ${DG_MS/1000}초</b><span>제한 시간</span></div>
       </div>
-      <div class="desc">지역 보스 ${q.main.length}명이 순서대로 쉬지 않고 나오고, 모두 쓰러뜨리면 😈 마계 보스 ${q.realm.length}명(${q.realm.map(i=>AREAS[i].boss.name).join(' → ')})이 계속 반복돼요.<br>
+      <div class="desc">지금까지 깬 지역의 보스 ${q.main.length}명이 순서대로 쉬지 않고 나오고, 모두 쓰러뜨리면 ${dgLoopText(q)}. 새 지역 보스를 깨면 던전에도 추가돼요.<br>
         보스는 반격·공격·빙결 같은 어떤 효과도 쓰지 않는 샌드백이에요. HP는 가득 찬 채로 시작하고, 끝나면 원래대로 돌아와요. 보상은 없고 기록만 남아요.</div>
       <button class="btn m-dg full" id="dggo">⚔ 던전 입장<small>던전 팀 전투력 ${fmt(dgTeamCP())} · 오늘 ${D.runs||0}회 도전</small></button>
     </div>
@@ -6516,7 +6520,7 @@ function renderBattle(){
   }
   $('#app').innerHTML=`${statusHTML()}
     <div class="enemy ${B.isBoss?'boss':''} ${B.isFinal?'final':''}">
-      <div class="eflag">${B.forest?`🌳 노력의 숲 ${B.forest}층 · ${AREAS[B.area].flag} ${AREAS[B.area].name}의 보스`:B.dungeon?`🏰 던전 · ${B.dgN+1}번째 보스 · ${AREAS[B.area].flag} ${AREAS[B.area].name}${B.dgN>=dgSeq().main.length?' · 마계 반복':''}`:B.tower?(B.heaven?`☁️ 천상의 탑 ${B.tower}층 · ${AREAS[B.area].name}의 최종 보스`:`🗼 구원의 탑 ${B.tower}층 · ${AREAS[B.area].name}의 적`):`${AREAS[B.area].flag} ${AREAS[B.area].name}`}${B.tower||B.dungeon?'':B.pvp?' · 친구 대결':B.stage?` · 스테이지 ${B.stage}`:' · 자유 사냥'}</div>
+      <div class="eflag">${B.forest?`🌳 노력의 숲 ${B.forest}층 · ${AREAS[B.area].flag} ${AREAS[B.area].name}의 보스`:B.dungeon?`🏰 던전 · ${B.dgN+1}번째 보스 · ${AREAS[B.area].flag} ${AREAS[B.area].name}${B.dgN>=dgSeq().main.length?(dgSeq().realm.length?' · 마계 반복':' · 반복'):''}`:B.tower?(B.heaven?`☁️ 천상의 탑 ${B.tower}층 · ${AREAS[B.area].name}의 최종 보스`:`🗼 구원의 탑 ${B.tower}층 · ${AREAS[B.area].name}의 적`):`${AREAS[B.area].flag} ${AREAS[B.area].name}`}${B.tower||B.dungeon?'':B.pvp?' · 친구 대결':B.stage?` · 스테이지 ${B.stage}`:' · 자유 사냥'}</div>
       ${B.dungeon?dgHudHTML():''}
       <div class="ename">${e.name}${tag}</div>
       ${e.title?`<div class="etitle">${e.title}</div>`:''}
