@@ -2136,7 +2136,7 @@ const AREAS=[
       pre:'불길 속에서 말의 머리를 한 거대한 그림자가 걸어 나온다. 콧김마다 불티가 튄다.\n\n"제55영 오로바스. 과거와 현재와 미래를 안다. …너희의 끝도."',
       moves:[{t:'atk',n:'말발굽 내려찍기'},{t:'strong',n:'군주의 돌진'},{t:'multi',n:'20군단의 질주',hits:3,m:0.5},{t:'curse',n:'예언된 파멸'},{t:'charge',n:'시간의 질주'}]},
     boss:{name:'케테케테', art:'kete', title:'지옥의 흑마를 탄 심판자', hp:80000, exactHp:true, atk:260, def:74, xp:60000, gold:50000, goldFirst:0, goldRepeat:50000, demon:true, itemFirst:'hardship_neck',
-      noAttack:true, storm:{every:2000,pct:0.5}, horse:{every:6000,dmg:400},
+      noAttack:true, storm:{every:2000,pct:0.5}, horse:{every:6000,dmg:500},
       pre:'불타는 하늘 아래, 눈에서 불꽃이 이는 흑마가 앞발을 든다. 그 위에 금 간 왕관을 쓴 여인이 박쥐 날개를 펼친다.\n\n"심판의 장에 온 것을 환영한다. 나는 칼을 들지 않는다 — 폭풍이 너희의 생명을 반으로, 또 반으로 나눌 테니."',
       moves:[{t:'atk',n:'폭풍'}]}
   }
@@ -6452,7 +6452,7 @@ function renderBattle(){
   if(e.fixedDmg)passive.push('🎯 방어력 무시 고정 피해');
   if(e.paralyze)passive.push('⚡ 3초마다 동료 마비');
   if(e.allyCritVoid)passive.push('🌿 동료 치명타 피해 무효');
-  if(e.storm)passive.push(`🌪 공격하지 않는 대신 ${e.storm.every/1000}초마다 폭풍 — 주인공·동료 현재 체력 ${Math.round(e.storm.pct*100)}% 감소 (보호막 무시)${e.horse?` · 🐎 ${e.horse.every/1000}초마다 지옥의 흑마 — 주인공·동료 고정 피해 ${e.horse.dmg}`:''}`);
+  if(e.storm)passive.push(`🌪 공격하지 않는 대신 ${e.storm.every/1000}초마다 폭풍 — 주인공·동료 현재 체력 ${Math.round(e.storm.pct*100)}% 감소 (보호막 무시)${e.horse?` · 🐎 ${e.horse.every/1000}초마다 지옥의 흑마 — 주인공·동료 고정 피해 ${e.horse.dmg} (보호막으로 막을 수 있음)`:''}`);
   if(e.shadow)passive.push(`🌑 ${e.shadow.every/1000}초마다 그림자 소환 (HP ${fmt(Math.round(e.maxHp*e.shadow.pct))} · 주인공 공격을 먼저 흡수)${e.ring?` · ⭕ ${e.ring.every/1000}초마다 파멸의 환 (동료 시야 ${e.ring.dur/1000}초 차단 · 공격 ${Math.round(e.ring.miss*100)}% 빗나감 · 체력 회복 불가)`:''}`);
   if(e.reflectAll)passive.push(`🪞 공격 ${Math.round(e.reflectAll*100)}% 확률로 반사 (피해 없음 · 공격한 쪽이 절반을 받음)`);
   if(e.allyCritCut)passive.push(`🛡 동료 치명타 피해 ${e.allyCritCut}배 감소`);
@@ -6526,7 +6526,7 @@ function awakenStrike(){
   document.body.classList.add('holyflash');setTimeout(()=>document.body.classList.remove('holyflash'),350);
   hitEnemy(AWAKEN_SKILL.mult,`✨ 「${AWAKEN_SKILL.name}」`);
 }
-/* 케테케테: 공격 대신 폭풍(2초마다 주인공·동료 현재 체력 절반 — 보호막 무시) · 지옥의 흑마(6초마다 주인공·동료 고정 피해) */
+/* 케테케테: 공격 대신 폭풍(2초마다 주인공·동료 현재 체력 절반 — 보호막 무시) · 지옥의 흑마(6초마다 주인공·동료 고정 피해 — 보호막에 막힘) */
 const NECK_SHIELD=444;
 function keteTick(){
   if(!B||B.over||B.won||P.hp<=0||!$('#modal').classList.contains('hidden'))return;
