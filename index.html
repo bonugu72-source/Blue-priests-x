@@ -935,6 +935,18 @@ body:has(.tabbar) .tabbar{background:color-mix(in srgb,var(--tc) 6%,rgba(8,12,26
 .gol{margin:4px 0;padding-left:20px;font-size:14px;line-height:1.7}
 .gnav{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:8px 0}.gnav .btn{font-size:13px}
 .topback{margin-bottom:8px}
+/* 업데이트 소식 */
+.patch .sum-title{margin-bottom:4px}
+.pchips{display:flex;flex-wrap:wrap;gap:5px;justify-content:center;margin:10px 0 4px}
+.pchip{font-size:12px;padding:2px 9px;border-radius:10px;background:#22305a;color:#e8eeff}
+.pgrp{margin-top:12px;text-align:left}
+.pgh{font-weight:800;color:var(--gold);margin-bottom:4px;font-size:14px}
+.pitem{display:grid;grid-template-columns:62px 1fr;gap:8px;padding:6px 0;border-bottom:1px dashed rgba(255,255,255,.08);font-size:13px;line-height:1.5;color:#dfe5f8}
+.pitem .pd{color:#8f9ac0;font-size:11px;padding-top:2px}
+.pitem.more{display:none}
+.btn.pmore{width:100%;margin-top:6px;font-size:13px}
+.mbox:has(.patch) #mbtn{position:sticky;bottom:0;box-shadow:0 -10px 18px rgba(13,21,49,.95)}
+.btn.gpatch{width:100%;margin-bottom:10px;background:linear-gradient(135deg,#3a2a12,#22204a);border-color:rgba(232,199,106,.5)}
 /* 코인 보내기 슬라이더 */
 .gval{font-size:30px;font-weight:900;color:var(--gold);text-align:center;margin:12px 0 4px;font-variant-numeric:tabular-nums}.gval small{font-size:14px;color:#c9cbe0}
 .gslide{-webkit-appearance:none;appearance:none;width:100%;height:14px;border-radius:8px;margin:10px 0 2px;background:linear-gradient(90deg,#c9a24a 0,#e8c76a var(--p,0%),#1c2440 var(--p,0%));outline:none;touch-action:pan-y}
@@ -2817,6 +2829,7 @@ function renderGuide(sec){
   if(!S){
     $('#app').innerHTML=`${statusHTML()}${topBack()}
       <div class="panel"><div class="ptitle">📖 게임 가이드 <span class="small">궁금한 주제를 눌러 보세요</span></div>
+        <button class="btn full gpatch" id="gpatch">📢 최근 업데이트 보기<small>새로 추가·변경된 내용 최근 40개</small></button>
         <div class="gidx">${GUIDE_SECS.map(x=>`<button class="gcard ${x.hot?'hot':''}" data-gsec="${x.id}"><span class="gic">${x.ic}</span><b>${x.t}</b><small>${x.s}</small></button>`).join('')}</div></div>
       ${tabBar()}`;
   }else{
@@ -2830,7 +2843,76 @@ function renderGuide(sec){
     if($('#gtut'))$('#gtut').onclick=()=>startTutorial(true);
   }
   document.querySelectorAll('[data-gsec]').forEach(b=>b.onclick=()=>renderGuide(b.dataset.gsec));
+  if($('#gpatch'))$('#gpatch').onclick=showRecentPatch;
   window.scrollTo(0,0);
+}
+/* ===================== 📢 업데이트 소식: 마지막으로 플레이한 뒤 바뀐 것 =====================
+   GitHub 저장소의 수정 기록(커밋)을 그대로 읽어 온다 → 손으로 적지 않아도 앞으로의 업데이트가 자동으로 나옴.
+   기준 시간: P.patchAt(마지막으로 소식을 본 때). 처음 한 번은 이 기기에 남아 있던 마지막 저장 시각을 씀.
+   시간 비교는 GitHub 서버가 기록한 커밋 시각으로 한다 (since=). */
+const PATCH_REPO='bonugu72-source/Blue-priests-x', PATCH_PAGES=5, PATCH_SHOW=12;
+const BOOT_SAVED_AT=(()=>{try{const j=JSON.parse(localStorage.getItem(SAVE_KEY)||'null');return (j&&j.savedAt)||0;}catch(e){return 0;}})();   // 이번 접속 전 마지막 저장 시각
+const PATCH_LABEL={char:'🧑‍🤝‍🧑 새 캐릭터 · 동료',pet:'🐾 새 펫 · 펫 변경',mode:'🗺 새 스테이지 · 모드',cos:'👗 코스튬',ui:'🎨 화면 · UI',bal:'⚖️ 밸런스 · 보상',fix:'🔧 수정 · 개선'};
+const PATCH_ORDER=['char','pet','mode','cos','ui','bal','fix'];
+const PATCH_RULES=[   // 위에서부터 먼저 맞는 규칙 하나로 분류
+  ['mode',/새 스테이지|모드 추가|미니게임|노력의 숲 추가|천상의 탑\(|새 모드/],
+  ['pet',/펫/],
+  ['ui',/아이콘|사진|연출|이펙트|알림/],
+  ['char',/★\s?\d\s?[^\s·()]+ 추가|동료 추가|캐릭터 추가|고유 능력|초월|각성|신화/],
+  ['cos',/코스튬|의상/],
+  ['ui',/UI|화면|디자인|버튼|가이드|표시|상단 바|색 테마|검색창|레이아웃/],
+  ['mode',/스테이지|던전|탑|숲|랭크|정원|보스|마계|지역|미션|룰렛|튜토리얼|대결|사냥/],
+  ['bal',/가격|확률|배율|LP|보상|코인|골드|경험치|HP|공격|방어|피해|전투력|체력|×|%/],
+  ['fix',/./]];
+const patchCat=m=>(PATCH_RULES.find(r=>r[1].test(m))||['fix'])[0];
+let patchDone=false,patchBusy=false;
+async function patchFetch(sinceMs,max){
+  const out=[];
+  for(let page=1;page<=PATCH_PAGES&&out.length<max;page++){
+    const url=`https://api.github.com/repos/${PATCH_REPO}/commits?per_page=100&page=${page}${sinceMs?`&since=${new Date(sinceMs).toISOString()}`:''}`;
+    const r=await withTimeout(fetch(url,{headers:{Accept:'application/vnd.github+json'}}),12000);
+    if(!r.ok)throw new Error('http '+r.status);
+    const a=await r.json();if(!Array.isArray(a))throw new Error('bad');
+    a.forEach(c=>{const m=String((c.commit&&c.commit.message)||'').split('\n')[0].trim(),t=Date.parse(c.commit&&c.commit.committer&&c.commit.committer.date)||0;
+      if(m&&!/^Merge /.test(m)&&(!sinceMs||t>sinceMs))out.push({m,t});});
+    if(a.length<100)break;
+  }
+  return out.slice(0,max);
+}
+const patchWhen=t=>{const d=new Date(t+9*3600e3);return `${d.getUTCMonth()+1}월 ${d.getUTCDate()}일 ${String(d.getUTCHours()).padStart(2,'0')}:${String(d.getUTCMinutes()).padStart(2,'0')}`;};
+function patchHTML(list,since,title){
+  const groups=PATCH_ORDER.map(k=>({c:[k,PATCH_LABEL[k]],items:list.filter(x=>patchCat(x.m)===k)})).filter(g=>g.items.length);
+  return `<div class="patch"><div class="sum-title">${title}</div>
+    <div class="small" style="text-align:center">${since?`마지막 접속 <b>${patchWhen(since)}</b> 이후 · `:''}업데이트 <b>${list.length}개</b></div>
+    <div class="pchips">${groups.map(g=>`<span class="pchip">${g.c[1].split(' ')[0]} ${g.items.length}</span>`).join('')}</div>
+    ${groups.map(g=>`<div class="pgrp"><div class="pgh">${g.c[1]} <span class="small">${g.items.length}개</span></div>
+      ${g.items.map((x,i)=>`<div class="pitem ${i>=PATCH_SHOW?'more':''}"><span class="pd">${patchWhen(x.t).replace(/ \d\d:\d\d$/,'')}</span><span>${esc(x.m)}</span></div>`).join('')}
+      ${g.items.length>PATCH_SHOW?`<button class="btn pmore" data-pmore>▼ ${g.items.length-PATCH_SHOW}개 더 보기</button>`:''}</div>`).join('')}</div>`;
+}
+document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('[data-pmore]');if(b){e.preventDefault();b.parentElement.querySelectorAll('.pitem.more').forEach(x=>x.classList.remove('more'));b.remove();}});
+/* 거점에 들어왔을 때 한 번: 마지막 접속 뒤 업데이트가 있으면 처음에 띄움 */
+function patchCheck(){
+  if(patchDone||patchBusy||!P)return;
+  const since=P.patchAt||BOOT_SAVED_AT||0;
+  if(!since){P.patchAt=Date.now();patchDone=true;save();return;}   // 새 캐릭터: 다음 접속부터
+  patchBusy=true;const now=Date.now();
+  patchFetch(since,500).then(list=>{
+    patchBusy=false;patchDone=true;
+    if(!list.length){P.patchAt=now;save();return;}
+    const show=()=>{
+      if(!P)return;
+      if(B||document.querySelector('.tut')||document.querySelector('.sfx')||!$('#modal').classList.contains('hidden')){setTimeout(show,1500);return;}   // 전투·다른 창이 끝난 뒤에
+      showStory(patchHTML(list,since,'📢 업데이트 소식'),()=>{P.patchAt=now;save();},true);
+      $('#mbtn').textContent='확인';
+    };
+    setTimeout(show,1200);
+  }).catch(()=>{patchBusy=false;});   // 연결 실패: 다음 접속 때 다시
+}
+/* 가이드에서 언제든 다시 보기: 최근 업데이트 40개 */
+function showRecentPatch(){
+  showStory('<div class="patch"><div class="sum-title">📢 최근 업데이트</div><div class="desc" style="text-align:center">불러오는 중…</div></div>',null,true);
+  patchFetch(0,40).then(list=>{if(!$('#modal').classList.contains('hidden')&&$('.patch'))$('#mtext').innerHTML=patchHTML(list,0,'📢 최근 업데이트 40개');})
+    .catch(()=>{const d=$('.patch .desc');if(d)d.textContent='업데이트 소식을 불러오지 못했어요. 인터넷 연결을 확인해 주세요.';});
 }
 document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('[data-guide]');if(b&&!B){e.preventDefault();renderGuide();}});
 /* 기억의 퍼즐: 사진이 나타났다가 퍼즐 조각으로 갈라져 흩어지고, 희귀 아이템이 나온다 */
@@ -4642,6 +4724,7 @@ function renderHub(msg){
   if(pendingFriend&&P){migrateSave();if(takePendingFriend())return;}
   clearBattle();
   if(hubTab!=='dungeon')dgUnsubscribe();   // 던전 화면을 떠나면 랭킹 실시간 구독 해제
+  patchCheck();                            // 마지막 접속 뒤 업데이트 소식 (접속마다 한 번)
   const opened=migrateSave();
   if(opened!=null){save();showStory(AREAS[opened].intro,()=>renderHub(`🔓 새 지역 개방: ${AREAS[opened].flag} ${AREAS[opened].name}`));return;}
   if(!farmHashDone&&/glasya/i.test(location.hash)){farmHashDone=true;try{history.replaceState(null,'',location.pathname+location.search);}catch(e){}setTimeout(startGlasyaFarm,300);} // 북마크 …/#glasya 로 열면 바로 시작
