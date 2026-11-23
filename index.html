@@ -1255,7 +1255,7 @@ const ALLIES={
   elizabeth:{star:6,name:'엘리자베스',   icon:'👑', role:'최후의 여왕', kit:'queen', exclusive:true,
             desc:'심판(3초마다 적에게 무작위로 출혈 · 속박 · 시야 차단 · 공격 반사 중 하나를 3초간 + 공격력의 절반만큼 주인공에게 보호막 · 보호막 중첩 가능) · 천상의 탑 30층 돌파 보상으로만 획득 (상점·합성 불가)'},
   atris:   {star:6,name:'아트리스',     icon:'📦', role:'판도라의 여주', kit:'heatwave', exclusive:true,
-            desc:'열파(적의 현재 체력에 비례해 적 공격력 감소 · 체력이 많을수록 최대 30%) · 저주(3초간 적 회복 불가) · 피해는 약하지만 공격력·마법력이 절반씩 들어감(방어력 영향 절반) · 아직 획득 불가 (상점·합성 불가 · 도감 전용)'},
+            desc:'열파(적의 현재 체력에 비례해 적 공격력 감소 · 체력이 많을수록 최대 30%) · 저주(3초간 적 회복 불가) · 피해는 약하지만 공격력·마법력이 절반씩 들어감(방어력 영향 절반) · 노력의 숲 23층 돌파 보상으로만 획득 (상점·합성 불가)'},
   hari:    {star:5,pet:true,name:'하리뭉',   icon:'🐲', role:'펫 · 아기 번개용', kit:'firepet',
             desc:'불꽃쇼(3초마다 적에게 화상 · 화상으로 입힌 피해만큼 동료 전원에게 보호막) · 🐾 펫: 출전 펫으로 고르면 자동 출전 (출전 칸 차지 안 함 · 펫은 1마리만) · 상점 동료 소환에서만 획득'},
   baem:    {star:5,pet:true,name:'뱀뱀이',   icon:'🐍', role:'펫 · 아기 황금뱀', kit:'bloodpet',
@@ -3817,6 +3817,8 @@ function rankEnd(win,e,pst,pparty){
 const FOREST_HP=4000, FOREST_ATK=800, FOREST_DEF=500, FOREST_WATER=3, FOREST_PICK=3;
 const FOREST_UNLOCK_AREA=AREAS.findIndex(a=>a.name==='고대 원단수'); // 고대 원단수 클리어 시 개방
 const forestOpen=()=>{const i=FOREST_UNLOCK_AREA;return i<0||(P.prog[i]||0)>=STAGES||!!(P.cleared&&P.cleared[i]);};
+const FOREST_REWARD={5:{salv:1},10:{salv:3},15:{salv:4},23:{ally:'atris'}}; // 첫 돌파 보상
+const forestRewardText=f=>{const w=FOREST_REWARD[f];if(!w)return '';return w.ally?`★6 ${ALLIES[w.ally].name}`:`${SALV_ITEM.icon} ${SALV_ITEM.name} ×${w.salv}`;};
 const forestAreas=()=>AREAS.map((a,i)=>i).filter(i=>AREAS[i].boss);
 const FOREST_MAX_FN=()=>forestAreas().length;
 const FOREST_MAX=FOREST_MAX_FN();
@@ -3836,15 +3838,21 @@ function forestStart(f){
 }
 function forestEnd(win){
   const f=B.forest,rp=B.spec.replay,e=B.e,pst=B.st,pparty=partyIds().slice();clearBattle();forestRestore();
-  const F=forestState(),lines=[];let climb=0;
+  const F=forestState(),lines=[];let climb=0,gotAlly=null;
   if(win){
     if(rp){F.run=f+1;lines.push(`🔁 ${f}층 다시 오르기 승리${f>=FOREST_MAX?'':` — 다음은 ${f+1}층`}`);if(f>=FOREST_MAX){F.run=1;F.clears=(F.clears||0)+1;lines.push(`🌳 노력의 숲 재정복! (${F.clears}회) — 다시 1층부터`);}}
-    else{const first=f>F.best;if(first){F.best=f;climb=f+1;}lines.push(first?`🌳 ${f}층 돌파!${f>=FOREST_MAX?' — 노력의 숲 정상 도착!':` 나무를 타고 ${f+1}층으로`}`:`🌳 ${f}층 재도전 승리`);}
+    else{const first=f>F.best;if(first){F.best=f;climb=f+1;}lines.push(first?`🌳 ${f}층 돌파!${f>=FOREST_MAX?' — 노력의 숲 정상 도착!':` 나무를 타고 ${f+1}층으로`}`:`🌳 ${f}층 재도전 승리`);
+      F.got=F.got||{};const w=FOREST_REWARD[f];
+      if(w&&!F.got[f]){F.got[f]=true;
+        if(w.salv){P.items.salv=(P.items.salv||0)+w.salv;salvToast(`노력의 숲 ${f}층 돌파`,w.salv);}
+        if(w.ally){const isNew=!owned(w.ally);addAlly(w.ally);aData(w.ally);if(isNew)gotAlly=w.ally;}
+        lines.push(`🎁 ${f}층 돌파 보상: ${forestRewardText(f)}`);}}
     if(rp&&f<FOREST_MAX)climb=f+1;
   }else lines.push(`${f}층에서 쓰러졌다… 동료 조합을 바꿔 다시 도전하자`);
   lines.push(`최고 기록 ${F.best}/${FOREST_MAX}층`);
   save();renderForest(null,climb);
-  showResult({title:`🌳 노력의 숲 ${f}층 — ${esc(e.name)}`,won:win,lines,st:pst,party:pparty});
+  const res=()=>showResult({title:`🌳 노력의 숲 ${f}층 — ${esc(e.name)}`,won:win,lines,st:pst,party:pparty});
+  if(gotAlly)summonFx(6,()=>showStory(revealHTML([{id:gotAlly,isNew:true}],'노력의 숲 정상 보상'),res,true));else res();
 }
 function renderForest(msg,climb){
   hubTab='adv';
@@ -3853,7 +3861,7 @@ function renderForest(msg,climb){
   const rows=[];
   for(let n=FOREST_MAX;n>=1;n--){const a=L[n-1],A=AREAS[a],bs=A.boss,cl=n<=F.best,on=n===cur;
     rows.push(`<div class="trow ${n%2?'l':'r'}"><div class="fnode ${cl?'done':''} ${on?'on':''} ${A.realm?'realm':''} ${on&&climb===n?'climb':''}" ${on?'id="fcur"':''}>
-      ${on?'<span class="fclimber">🧗</span>':''}<span class="fn">${n}층 · ${A.flag} ${esc(A.name)}${A.realm?' · 마계':''}</span><br><b>${cl?'✔ ':''}${esc(bs.name)}</b></div></div>`);}
+      ${on?'<span class="fclimber">🧗</span>':''}<span class="fn">${n}층 · ${A.flag} ${esc(A.name)}${A.realm?' · 마계':''}</span><br><b>${cl?'✔ ':''}${esc(bs.name)}</b>${FOREST_REWARD[n]?`<br><span class="fn">🎁 ${forestRewardText(n)}${(F.got||{})[n]?' ✔':''}</span>`:''}</div></div>`);}
   const ce=id=>{const i=F.sel.indexOf(id);return `<button class="${i>=0?'sel':''}" data-fsel="${id}">${i>=0?`<span class="fno">${i+1}</span>`:''}${allyFace(id,'sm')}<span>${esc(ALLIES[id].name)}</span><span class="small">${TIER5[id]?TIER5[id]+'티어':'★5'}</span></button>`;};
   const A=AREAS[L[cur-1]];
   $('#app').innerHTML=`${statusHTML()}${topBack()}
@@ -3862,6 +3870,7 @@ function renderForest(msg,climb){
       <div class="desc">내 동료는 데려갈 수 없다. 대신 <b>모든 ★5 동료(최대 레벨 · 3각성 · 신화)</b> 중 <b>${FOREST_PICK}명</b>을 골라 도전한다.<br>
         주인공은 <b>HP ${fmt(FOREST_HP)} · 공격력 ${FOREST_ATK} · 방어력 ${FOREST_DEF}</b> 고정 · 유물 효과 없음 · 성수 ${FOREST_WATER}개 · 펫·이사벨 부제 없음. 오직 실력으로!<br>
         층마다 지역 이동 → 마계 이동 순서로 각 지역의 최종 보스가 기다린다. 끝나면 원래 능력치로 돌아온다.</div>
+      <div class="desc"><b>돌파 보상</b> ${Object.keys(FOREST_REWARD).map(k=>`${k}층: ${forestRewardText(+k)}${(F.got||{})[k]?' ✔':''}`).join(' · ')}</div>
       ${done?`<div class="notice">🌳 노력의 숲 정상까지 올랐다! 🔁 다시 오르기 — 1층부터 다시 도전할 수 있다</div>`:''}
       <div class="ftree"><div class="fcrown">🌳</div>${rows.join('')}<div class="froot">🌱🪵🌱</div></div>
       <div class="desc"><b>${cur}층</b> — ${A.flag} ${esc(A.name)}의 보스 <b>${esc(A.boss.name)}</b></div>
