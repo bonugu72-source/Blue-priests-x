@@ -3008,6 +3008,19 @@ const PATCH_RULES=[   // 위에서부터 먼저 맞는 규칙 하나로 분류
   ['bal',/가격|확률|배율|LP|보상|코인|골드|경험치|HP|공격|방어|피해|전투력|체력|×|%/],
   ['fix',/./]];
 const patchCat=m=>(PATCH_RULES.find(r=>r[1].test(m))||['fix'])[0];
+/* 스포일러 가리기: 아직 안 열린 지역의 지역 이름 · 보스 · 중간 보스 · 정예 이름은 ???로 (지도에서 잠긴 지역과 같은 기준: 번호 > P.unlocked)
+   열린 지역에도 나오는 이름은 그대로 · 긴 이름부터 맞춰서 「각성한 나베리우스」처럼 겹치는 이름도 구분 */
+let spoilRe=null,spoilU=null,spoilHide=null;
+function spoilMask(m){
+  const u=P&&P.unlocked!=null?P.unlocked:0;
+  if(spoilU!==u){
+    const open=new Set(),all=new Set();
+    AREAS.forEach((a,i)=>[a.name,a.boss&&a.boss.name,a.mid&&a.mid.name,a.elite&&a.elite.name].forEach(n=>{if(!n)return;all.add(n);if(i<=u)open.add(n);}));
+    spoilHide=new Set([...all].filter(n=>!open.has(n)));spoilU=u;
+    spoilRe=spoilHide.size?new RegExp([...all].sort((a,b)=>b.length-a.length).map(n=>n.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')).join('|'),'g'):null;
+  }
+  return spoilRe?String(m).replace(spoilRe,n=>spoilHide.has(n)?'???':n):String(m);
+}
 let patchDone=false,patchBusy=false;
 async function patchFetch(sinceMs,max){
   const out=[];
@@ -3029,7 +3042,7 @@ function patchHTML(list,since,title){
     <div class="small" style="text-align:center">${since?`마지막 접속 <b>${patchWhen(since)}</b> 이후 · `:''}업데이트 <b>${list.length}개</b></div>
     <div class="pchips">${groups.map(g=>`<span class="pchip">${g.c[1].split(' ')[0]} ${g.items.length}</span>`).join('')}</div>
     ${groups.map(g=>`<div class="pgrp"><div class="pgh">${g.c[1]} <span class="small">${g.items.length}개</span></div>
-      ${g.items.map((x,i)=>`<div class="pitem ${i>=PATCH_SHOW?'more':''}"><span class="pd">${patchWhen(x.t).replace(/ \d\d:\d\d$/,'')}</span><span>${esc(x.m)}</span></div>`).join('')}
+      ${g.items.map((x,i)=>`<div class="pitem ${i>=PATCH_SHOW?'more':''}"><span class="pd">${patchWhen(x.t).replace(/ \d\d:\d\d$/,'')}</span><span>${esc(spoilMask(x.m))}</span></div>`).join('')}
       ${g.items.length>PATCH_SHOW?`<button class="btn pmore" data-pmore>▼ ${g.items.length-PATCH_SHOW}개 더 보기</button>`:''}</div>`).join('')}
     <div class="pver" data-before="${list.length?Math.min(...list.map(x=>x.t)):0}"${VER?'':' hidden'}>${pverInner(list.length?Math.min(...list.map(x=>x.t)):0)}</div></div>`;
 }
@@ -3125,7 +3138,7 @@ function pnHTML(raw,note){
   const L=pnVersions(raw),cnt={};L.forEach(x=>{const k=patchCat(x.m);cnt[k]=(cnt[k]||0)+1;});
   let day='',body='';
   L.slice(0,pnShown).forEach((x,i)=>{const d=pnDay(x.t);if(d!==day){day=d;body+=`<div class="pnday">${d}</div>`;}
-    body+=`<div class="pnitem"><div class="pnv"><b>${verDiffHTML(x.v,L[i+1]&&L[i+1].v)}</b><span>${pnTime(x.t)} · ${x.w?'유준':'본우'}</span></div><div class="pnm">${PATCH_LABEL[patchCat(x.m)].split(' ')[0]} ${esc(x.m)}</div></div>`;});
+    body+=`<div class="pnitem"><div class="pnv"><b>${verDiffHTML(x.v,L[i+1]&&L[i+1].v)}</b><span>${pnTime(x.t)} · ${x.w?'유준':'본우'}</span></div><div class="pnm">${PATCH_LABEL[patchCat(x.m)].split(' ')[0]} ${esc(spoilMask(x.m))}</div></div>`;});
   return `<div class="patch pnotes"><div class="sum-title">📜 패치노트</div>
     <div class="small" style="text-align:center">처음부터 지금까지 수정 <b>${L.length}개</b> · 최신이 맨 위${L.length?` · 현재 버전 <b class="pnnow">${verDiffHTML(L[0].v,L[1]&&L[1].v)}</b>`:''}</div>
     <div class="pchips">${PATCH_ORDER.filter(k=>cnt[k]).map(k=>`<span class="pchip">${PATCH_LABEL[k].split(' ')[0]} ${cnt[k]}</span>`).join('')}</div>
