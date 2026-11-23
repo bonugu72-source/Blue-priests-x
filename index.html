@@ -1233,6 +1233,8 @@ const ALLIES={
             desc:'얼어붙은 화살(적을 2초간 얼려 행동 불능 · 끝나면 4초 쉬었다가 다시 사용) · 40% 확률로 급소를 찾아 쏘면 치명타(피해 2배) + 들어간 피해의 절반만큼 주인공 HP 회복 · 🔱 신화: 혹한의 화살(4초마다 아키라의 공격력 2배씩 증가 · 최대 4배)'},
   elizabeth:{star:6,name:'엘리자베스',   icon:'👑', role:'최후의 여왕', kit:'queen', exclusive:true,
             desc:'심판(3초마다 적에게 무작위로 출혈 · 속박 · 시야 차단 · 공격 반사 중 하나를 3초간 + 공격력의 절반만큼 주인공에게 보호막 · 보호막 중첩 가능) · 천상의 탑 30층 돌파 보상으로만 획득 (상점·합성 불가)'},
+  atris:   {star:6,name:'아트리스',     icon:'📦', role:'판도라의 여주', kit:'heatwave', exclusive:true,
+            desc:'열파(적의 현재 체력에 비례해 적 공격력 감소 · 체력이 많을수록 최대 30%) · 저주(3초간 적 회복 불가) · 피해는 약하지만 공격력·마법력이 절반씩 들어감(방어력 영향 절반) · 아직 획득 불가 (상점·합성 불가 · 도감 전용)'},
   hari:    {star:5,pet:true,name:'하리뭉',   icon:'🐲', role:'펫 · 아기 번개용', kit:'firepet',
             desc:'불꽃쇼(3초마다 적에게 화상 · 화상으로 입힌 피해만큼 동료 전원에게 보호막) · 🐾 펫: 출전 펫으로 고르면 자동 출전 (출전 칸 차지 안 함 · 펫은 1마리만) · 상점 동료 소환에서만 획득'},
   baem:    {star:5,pet:true,name:'뱀뱀이',   icon:'🐍', role:'펫 · 아기 황금뱀', kit:'bloodpet',
@@ -1271,6 +1273,7 @@ const MYTH_SKILL={
   akira: {name:'혹한의 화살',desc:'4초마다 아키라의 공격력이 2배씩 증가 (최대 4배)'},
   babelord:{name:'운명의 지배자',desc:'주사위를 굴리는 주기 4초 → 3초'},
   elizabeth:{name:'최후의 여왕의 칙령',desc:'심판 한 번에 서로 다른 효과 2개를 동시에 검'},
+  atris:{name:'판도라의 상자',desc:'3초마다 아군에게 걸린 디버프를 모두 제거'},
   miner: {name:'바다의 여왕',desc:'물보라 보호막 2턴 → 3턴 · 미네르바의 치명타 피해 1.5배 → 2배'},
   vista5:{name:'특급 열차',desc:'열차 관통 피해가 기본 공격의 2배 → 3배 · 시야 차단 3턴'},
   elise: {name:'만추의 축복',desc:'정화할 때도 주인공·동료 HP 10% 회복 · 응원 주기 3턴 → 2턴'},
@@ -1300,6 +1303,7 @@ const ALLY_IMG={
   miho:{src:'pet_miho.jpg',pos:'47% 38%',face:'46% 39%',size:'250%'},
   hari:{src:'pet_hari.jpg',pos:'40% 26%',face:'38% 34%',size:'240%'},
   elizabeth:{src:'ally_elizabeth.jpg',pos:'50% 16%',face:'50% 17%',size:'560%'},
+  atris:{src:'ally_atris.jpg',pos:'50% 18%',face:'56% 15%',size:'320%'},
   akira:{src:'ally_akira.jpg',pos:'50% 18%',face:'50% 21%',size:'560%'},
   babelord:{src:'ally_babelord.jpg',pos:'50% 22%',face:'48% 28%',size:'420%'},
   miner:{src:'ally_miner.jpg',pos:'50% 15%',face:'50% 21%',size:'450%'},
@@ -3669,6 +3673,7 @@ function pvpEnemyActs(e){
       case 'firepet':  dmg(12+lv*4,0.4,`${nm}의 불꽃쇼`);break;
       case 'bloodpet': dmg(12+lv*4,0.4,`${nm}의 흡혈 송곳니`);if(e.hp<e.maxHp)heal(0.03);break;
       case 'queen':    dmg(16+lv*5,0.4,`${nm}의 여왕의 검`);break;
+      case 'heatwave': dmg(10+lv*3,0.25,`${nm}의 열파`);break;
       case 'frost':    if(Math.random()<0.4){const d=dmg((13+lv*4.2)*2,0.4,`${nm}의 급소 사격 (치명타)`);if(e.hp<e.maxHp)heal(0.05);}else dmg(13+lv*4.2,0.4,`${nm}의 서리 화살`);break;
       case 'dice':     {const n=1+Math.floor(Math.random()*6);if(n===1&&e.hp<e.maxHp)heal(0.15);else dmg((14+lv*4.5)*(n===3?2:1),0.4,`${nm}의 운명의 점 ${n} — 예언의 광선`);if(n===5)dmg(14+lv*4.5,0.4,`${nm}의 예언의 광선 — 연속`);}break;
       case 'tide':     dmg(12+lv*4,0.5,`${nm}의 물살`);break;
@@ -4802,14 +4807,14 @@ function synthAll(){
 }
 
 /* ===================== 전투 ===================== */
-function clearBattle(){forcedMv=null;if(B&&B.dgT)clearInterval(B.dgT);if(B&&B.enemyT)clearInterval(B.enemyT);if(B&&B.allyT)clearInterval(B.allyT);document.body.classList.remove('pfrozen');if(B&&B.freezeT)clearInterval(B.freezeT);if(B&&B.sakuraT)clearInterval(B.sakuraT);document.body.classList.remove('battle');applyBossTheme(null);if(B&&B.waveT)clearInterval(B.waveT);if(B&&B.soulT)clearInterval(B.soulT);if(B&&B.drainT)clearInterval(B.drainT);if(B&&B.tsT)clearInterval(B.tsT);if(B&&B.paraT)clearInterval(B.paraT);if(B&&B.zapT)clearInterval(B.zapT);if(B&&B.karmaT)clearInterval(B.karmaT);if(B&&B.trainT)clearInterval(B.trainT);if(B&&B.aoraT)clearInterval(B.aoraT);if(B&&B.heartT)clearInterval(B.heartT);if(B&&B.halfT)clearInterval(B.halfT);if(B&&B.fallT)clearInterval(B.fallT);if(B&&B.isaT)clearInterval(B.isaT);if(B&&B.nkT)clearInterval(B.nkT);if(B&&B.apT)clearInterval(B.apT);if(B&&B.remT)clearInterval(B.remT);if(B&&B.lvT)clearInterval(B.lvT);if(B)['diceT','judgeT','hariT','baemT','mihoT','coldT'].forEach(k=>{if(B[k])clearInterval(B[k]);});B=null;}
+function clearBattle(){forcedMv=null;if(B&&B.dgT)clearInterval(B.dgT);if(B&&B.enemyT)clearInterval(B.enemyT);if(B&&B.allyT)clearInterval(B.allyT);document.body.classList.remove('pfrozen');if(B&&B.freezeT)clearInterval(B.freezeT);if(B&&B.sakuraT)clearInterval(B.sakuraT);document.body.classList.remove('battle');applyBossTheme(null);if(B&&B.waveT)clearInterval(B.waveT);if(B&&B.soulT)clearInterval(B.soulT);if(B&&B.drainT)clearInterval(B.drainT);if(B&&B.tsT)clearInterval(B.tsT);if(B&&B.paraT)clearInterval(B.paraT);if(B&&B.zapT)clearInterval(B.zapT);if(B&&B.karmaT)clearInterval(B.karmaT);if(B&&B.trainT)clearInterval(B.trainT);if(B&&B.aoraT)clearInterval(B.aoraT);if(B&&B.heartT)clearInterval(B.heartT);if(B&&B.halfT)clearInterval(B.halfT);if(B&&B.fallT)clearInterval(B.fallT);if(B&&B.isaT)clearInterval(B.isaT);if(B&&B.nkT)clearInterval(B.nkT);if(B&&B.apT)clearInterval(B.apT);if(B&&B.remT)clearInterval(B.remT);if(B&&B.lvT)clearInterval(B.lvT);if(B)['diceT','judgeT','hariT','baemT','mihoT','coldT','pandoraT'].forEach(k=>{if(B[k])clearInterval(B[k]);});B=null;}
 /* 반사·부적 등으로 적이 턴 밖에서 쓰러졌을 때 */
 function winNow(){
   if(!B||B.won)return;
   if(B.dungeon){dungeonNextBoss();return;}   // 던전: 승리 대신 다음 보스
   if((B.e.berserk&&!B.berserked)||(B.e.madness&&!B.maddened)||(B.e.awaken&&!B.awoke)||(B.e.twin&&!B.twinned)||(B.e.relay&&(B.relayStage||0)<2)||(B.e.lastStand&&!B.lastStood)||(B.e.rampage&&!B.rampaged)||(B.e.duckHide&&!B.remHid)){B.e.hp=Math.max(1,B.e.hp);renderBattle();return;}
   B.won=true;B.busy=true;if(B.enemyT)clearInterval(B.enemyT);if(B.allyT)clearInterval(B.allyT);if(B.freezeT)clearInterval(B.freezeT);document.body.classList.remove('pfrozen');if(B.sakuraT)clearInterval(B.sakuraT);if(B.paraT)clearInterval(B.paraT);if(B.waveT)clearInterval(B.waveT);if(B.soulT)clearInterval(B.soulT);if(B.drainT)clearInterval(B.drainT);if(B.tsT)clearInterval(B.tsT);
-  if(B.zapT)clearInterval(B.zapT);if(B.karmaT)clearInterval(B.karmaT);if(B.trainT)clearInterval(B.trainT);if(B.aoraT)clearInterval(B.aoraT);if(B.autoT)clearInterval(B.autoT);if(B.diceT)clearInterval(B.diceT);if(B.judgeT)clearInterval(B.judgeT);if(B.hariT)clearInterval(B.hariT);if(B.baemT)clearInterval(B.baemT);if(B.mihoT)clearInterval(B.mihoT);if(B.coldT)clearInterval(B.coldT);if(B.heartT)clearInterval(B.heartT);if(B.halfT)clearInterval(B.halfT);if(B.fallT)clearInterval(B.fallT);if(B.isaT)clearInterval(B.isaT);
+  if(B.zapT)clearInterval(B.zapT);if(B.karmaT)clearInterval(B.karmaT);if(B.trainT)clearInterval(B.trainT);if(B.aoraT)clearInterval(B.aoraT);if(B.autoT)clearInterval(B.autoT);if(B.diceT)clearInterval(B.diceT);if(B.judgeT)clearInterval(B.judgeT);if(B.hariT)clearInterval(B.hariT);if(B.baemT)clearInterval(B.baemT);if(B.mihoT)clearInterval(B.mihoT);if(B.pandoraT)clearInterval(B.pandoraT);if(B.coldT)clearInterval(B.coldT);if(B.heartT)clearInterval(B.heartT);if(B.halfT)clearInterval(B.halfT);if(B.fallT)clearInterval(B.fallT);if(B.isaT)clearInterval(B.isaT);
   renderBattle();setTimeout(victory,750);
 }
 /* 이사벨 부제: 5초마다 주인공 HP 40% 회복 */
@@ -4914,6 +4919,32 @@ function mihoTick(){
   addLog(`⚡ 미호롱의 번개 발톱! ${e.name}에게 마비 ${d}${B.immune?' (무효)':` · ${MIHO_PARA/1000}초 마비`} · 주인공과 동료 전원 공격력 +${ab} (${MIHO_BUFF/1000}초)`);queueFx('enemy','⚡'+d,'dmg');
   if(e.hp<=0){winNow();return;}
   renderBattle();
+}
+/* 아트리스: 열파·저주 · 신화 판도라의 상자(3초마다 아군 디버프 전부 제거) */
+const ATR_DOWN_MAX=0.3, ATR_DUR=3000, PANDORA_MS=3000;
+const atrDownPct=()=>(B&&B.atrDown&&Date.now()<B.atrDown.until)?B.atrDown.pct:0;
+const atrPhaseKey=()=>{const e=B.e;return [e.name,e.title,e.maxHp,B.awoke,B.berserked,B.maddened,B.twinned,B.relayStage,B.lastStood,B.rampaged,B.remHid,B.fallAt?1:0].join('|');};
+function atrCurseSet(until){B.atrCurse={until,cap:B.e.hp,key:atrPhaseKey()};}
+function atrEnforce(){ // 저주 중 적 회복 차단 (보스 단계 전환으로 체력이 바뀌는 건 막지 않음)
+  if(!B||!B.atrCurse||!B.e)return;const c=B.atrCurse,e=B.e;
+  if(Date.now()>=c.until){B.atrCurse=null;return;}
+  const k=atrPhaseKey();if(k!==c.key){c.key=k;c.cap=e.hp;return;}
+  if(e.hp>c.cap){addLog(`🕯 저주 — ${e.name}의 회복이 막혔다 (${fmt(e.hp-c.cap)})`);e.hp=c.cap;}else c.cap=e.hp;
+}
+function pandoraTick(){
+  if(!B||B.over||B.won||!$('#modal').classList.contains('hidden'))return;
+  const id='atris',h=B.ahp[id];
+  if(!inParty(id)||!isMyth(id)||(h&&h.hp<=0)||(B.stun[id]>0)||P.hp<=0)return;
+  const db=[];
+  if(B.curse){db.push('방어력 감소');B.curse=0;}
+  if(B.dot){db.push(B.dot.name);B.dot=null;}
+  if(B.silence){db.push('봉인');B.silence=0;}
+  if(B.healCut){db.push('회복 감소');B.healCut=0;}
+  partyIds().forEach(x=>{if(B.stun[x]>0&&B.stunWhy[x]==='불화'){B.stun[x]=0;db.push(`${ALLIES[x].name} 불화`);}});
+  if((B.vslow&&Object.keys(B.vslow).length)||(B.vsil&&Object.keys(B.vsil).length)){B.vslow={};B.vsil={};db.push('동료 둔화·침묵');}
+  if(B.lvBlind&&Object.keys(B.lvBlind).length){B.lvBlind={};db.push('파멸의 환(시야 차단)');}
+  if(B.apAff&&Object.keys(B.apAff).some(k=>B.apAff[k]>Date.now())){B.apAff={};db.push('출혈·화상');}
+  if(db.length){addLog(`📦 🔱 판도라의 상자 — ${db.join(', ')} 제거`);queueFx('player','📦 정화','mpf');renderBattle();}
 }
 /* 엘리자베스: 심판 — 3초마다 적에게 출혈/속박/시야 차단/공격 반사 중 하나(3초) + 공격력 절반 보호막(중첩) */
 const JUDGE_MS=3000, JUDGE_DUR=3000;
@@ -5162,6 +5193,7 @@ function startBattle(spec){
     if(B&&inParty('aora'))B.aoraT=setInterval(aoraTick,AORA_MS);
     if(B&&inParty('babelord'))B.diceT=setInterval(diceTick,diceMs());
     if(B&&inParty('elizabeth'))B.judgeT=setInterval(judgeTick,JUDGE_MS);
+    if(B&&inParty('atris')&&isMyth('atris'))B.pandoraT=setInterval(pandoraTick,PANDORA_MS);
     if(B&&inParty('hari'))B.hariT=setInterval(hariTick,HARI_MS);
     if(B&&inParty('baem'))B.baemT=setInterval(baemTick,BAEM_MS);
     if(B&&inParty('miho'))B.mihoT=setInterval(mihoTick,MIHO_MS);
@@ -5444,7 +5476,7 @@ function cmdHTML(){
 }
 
 function renderBattle(){
-  lvEnforce();
+  lvEnforce();atrEnforce();
   document.body.classList.add('battle');
   const e=B.e;
   applyBossTheme(e);
@@ -5471,6 +5503,8 @@ function renderBattle(){
   if(remHideOn())st.push(`🦆 레미안 숨는 중 ${Math.ceil((B.remHideUntil-Date.now())/1000)}초`);
   if(apOn('hero'))st.push(`🩸🔥 주인공 출혈·화상 ${Math.ceil((B.apAff.hero-Date.now())/1000)}초 (피해 2배)`);
   if(B.apAff){const af=partyIds().filter(x=>apOn(x)).map(x=>ALLIES[x].name);if(af.length)st.push(`🩸🔥 ${af.join('·')} 출혈·화상`);}
+  if(atrDownPct())st.push(`🔥 적 공격↓ ${Math.round(atrDownPct()*100)}%`);
+  if(B.atrCurse&&Date.now()<B.atrCurse.until)st.push(`🕯 저주 (회복 불가)`);
   if(mihoParaOn())st.push(`⚡ 마비`);
   if(mihoAtk())st.push(`🐯 공격력 +${mihoAtk()}`);
   if(ezBindOn())st.push(`⛓ 심판의 속박 ${Math.ceil((B.ezBindUntil-Date.now())/1000)}초`);
@@ -5891,6 +5925,12 @@ function alliesAct(){
       case 'firepet': break; // 하리뭉: 불꽃쇼는 hariTick
       case 'bloodpet': break; // 뱀뱀이: 흡혈 송곳니는 baemTick
       case 'zappet': break;   // 미호롱: 번개 발톱은 mihoTick
+      case 'heatwave':{ // 아트리스: 열파(적 현재 체력 비례 공격력 감소) · 저주(회복 불가) · 공격력·마법력 절반씩
+        const pct=ATR_DOWN_MAX*Math.max(0,Math.min(1,e.hp/e.maxHp)),now=Date.now();
+        allyHit(10+lv*3,`${nm}의 열파 (물리·마법 절반씩)`,0.25);
+        if(!B.immune&&e.hp>0){B.atrDown={pct,until:now+ATR_DUR};atrCurseSet(now+ATR_DUR);
+          if(!B.atrLogAt||now-B.atrLogAt>6000){B.atrLogAt=now;addLog(`🔥 열파 — ${e.name}의 공격력 ${Math.round(pct*100)}% 감소 · 🕯 저주: ${ATR_DUR/1000}초간 회복 불가`);}}
+        break;}
       case 'queen':{ // 엘리자베스: 여왕의 검 (심판은 judgeTick)
         allyHit(16+lv*5,`${nm}의 여왕의 검`,0.4);break;}
       case 'frost':{ // 아키라: 얼어붙은 화살 · 급소 사격(치명타 + 피해 절반 회복) · 신화 혹한의 화살
@@ -5955,7 +5995,7 @@ function hitPlayer(mult,label){
   const critOn=e.critAll&&!(sakuraWind()&&Math.random()<(isMyth('sakura')?0.75:0.5));
   if(e.critAll&&!critOn)label+=' (🌸 벚꽃바람에 치명타가 빗나감)';
   const crit=critOn?e.critAll*(B.awoke&&e.awaken?e.awaken.critMult:1):1;
-  const raw=e.atk*(1+0.2*B.rage)*(B.hex?0.8:1)*(salvOn()?1/1.5:1)*magicMul()*(B.fallMul||1)*(e.apFreeze&&apOn('hero')?2:1)*mult*crit;
+  const raw=e.atk*(1+0.2*B.rage)*(B.hex?0.8:1)*(1-atrDownPct())*(salvOn()?1/1.5:1)*magicMul()*(B.fallMul||1)*(e.apFreeze&&apOn('hero')?2:1)*mult*crit;
   // fixedDmg: 방어력 무시 고정 피해 · 그 외에는 방어력으로 최대 70%까지만 줄어듦 (최소 30%는 들어감)
   let d=e.fixedDmg?raw:Math.max(raw*DEF_FLOOR,raw-def/2)*rnd(0.9,1.1);
   d=Math.max(1,Math.round(d));
