@@ -5051,8 +5051,8 @@ function hnThrowTick(){ // 2초마다 달콤한 디저트를 무작위로 — �
   const nm=ALLIES[id].name,lv=aData(id).lv;B.curAlly=id;B.am=allyMult(id);
         const r=Math.floor(Math.random()*3);
         if(r===0){B.hnShield=(B.hnShield||0)+HN_SHIELD;stat('heal','hinoa',0);addLog(`🍰 ${nm}의 디저트 — 주인공 명중! 보호막 +${HN_SHIELD} (총 ${fmt(B.hnShield)})`);queueFx('player','🍰🛡+'+HN_SHIELD,'heal');}
-        else if(r===1){const L=partyIds().filter(x=>B.ahp[x]&&B.ahp[x].hp>0&&B.ahp[x].hp<B.ahp[x].max);
-          if(L.length){const w=pick(L),ah=B.ahp[w],g=Math.min(ah.max-ah.hp,Math.round(HN_HEAL*healMul()));ah.hp+=g;stat('heal','hinoa',g);addLog(`🧁 ${nm}의 디저트 — ${ALLIES[w].name} 명중! HP +${g}`);}
+        else if(r===1){const L=partyIds().filter(x=>B.ahp[x]&&B.ahp[x].hp>0); // 체력이 가득 찬 동료에게도 던짐
+          if(L.length){const w=pick(L),ah=B.ahp[w],g=Math.min(ah.max-ah.hp,Math.round(HN_HEAL*healMul()));ah.hp+=g;stat('heal','hinoa',g);addLog(`🧁 ${nm}의 디저트 — ${ALLIES[w].name} 명중! HP +${g}${g<HN_HEAL&&ah.hp>=ah.max?' (가득 참)':''}`);queueFx('player','🧁+'+g,'heal');}
           else allyHit((14+lv*4.5)*2,`💥 ${nm}의 디저트 폭발 (공격력 2배)`,0.4);}
         else allyHit((14+lv*4.5)*2,`💥 ${nm}의 디저트 폭발 (공격력 2배)`,0.4);
   if(e.hp<=0){winNow();return;}
