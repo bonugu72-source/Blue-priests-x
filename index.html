@@ -965,6 +965,8 @@ body:has(.tabbar) .tabbar{background:color-mix(in srgb,var(--tc) 6%,rgba(8,12,26
 .pver{margin-top:14px;padding:8px;border-radius:10px;background:rgba(255,255,255,.05);text-align:center;font-size:13px;color:#b8c3e6}.pver b{color:#ffe7a3;letter-spacing:.5px}
 .srow{justify-content:space-between}.srow .stats{display:flex;gap:14px;flex-wrap:wrap}
 .pnbtn{flex:0 0 auto;cursor:pointer;font:inherit;font-size:12px;font-weight:700;color:#ffe7a3;background:rgba(232,199,106,.12);border:1px solid rgba(232,199,106,.45);border-radius:999px;padding:3px 10px}
+.fdname{display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap}.fdname .lvtag{font-family:inherit;font-size:13px}
+.fdetail .rwl{text-align:left}
 .pnbtn:active{transform:scale(.97)}
 .pnotes .pnnow{color:#ffe7a3}
 .pnnote{text-align:center;color:#f0c27a;margin:4px 0}
@@ -3722,6 +3724,7 @@ function myPublic(){
     team:{atk:P.atk,def:P.def,maxHp:P.maxHp,maxMp:P.maxMp,lv:P.lv,party:partyIds().map(id=>({id,lv:aData(id).lv,aw:P.awaken[id]||0,my:isMyth(id)?1:0,tr:trustLv(id),tn:transOn(id)?1:0}))},
     pvpW:(P.pvp&&P.pvp.w)||0,pvpL:(P.pvp&&P.pvp.l)||0,rankT:(P.rank&&P.rank.tier)||0,rankLP:(P.rank&&P.rank.lp)||0,rankOn:P.lv>=RANK_MIN_LV?1:0,
     ...(P.dg&&P.dg.best>0&&Array.isArray(P.dg.top)?{dgDay:P.dg.day,dgBest:P.dg.best,dgTop:P.dg.top.slice(0,20).map(r=>({v:r.v,p:(r.p||[]).slice(0,MAX_ACTIVE),at:r.at||0,...(r.d?{d:r.d}:{}),...(r.k!=null?{k:r.k}:{})}))}:{}),   // 던전 오늘의 기록 (상위 20개) — 기록이 없으면 넣지 않음 (프로필은 통째로 덮어써서 지난 기록도 함께 사라짐)
+    rec:{tw:(P.tower&&P.tower.best)||0,hv:(P.heaven&&P.heaven.best)||0,fo:(P.forest&&P.forest.best)||0,qz:P.quizBest||0},   // 친구 자세히 보기: 탑·숲·맞추기 최고 기록
     ...giftPublicFields(),   // 코인 선물 (보낸 선물·받은 선물 id)
     updatedAt:Date.now(),seenAt:Date.now(),off:false};
 }
@@ -3847,12 +3850,12 @@ async function renderFriends(msg,preList){
     const mutual=Array.isArray(x.friends)&&x.friends.includes(myId);
     const r=vsRec(x.id);
     const sub=x.missing?'아직 새 버전 게임에 접속하지 않았어요':x.old?'예전 친구 코드 정보 · 친구가 새 버전에 접속하면 실시간으로 바뀌어요'
-      :`나와의 대결 ${r.w}승 ${r.l}패${seen(x)}`;
+      :(lastSeenOf(x)?presenceHTML(x):'');
     return `<div class="frow rk"><div class="frank">${medal(i+1)}</div>
       <div style="flex:1;min-width:0"><b>${esc(x.hero||'모험가')}</b> ${mutual?'<span class="tag t-ally">맞친구</span>':x.missing||x.old?'':'<span class="tag">요청 보냄</span>'}
       <div class="small">${x.missing?'':`Lv ${x.lv||1} · ${progressText(x)}${x.ended?' · ✝':''}`}</div>
       ${x.missing?'':`<div class="small">${rankChip(x)||'<span class="rchip off">랭크 정보 없음 (친구가 새 버전에 접속하면 표시)</span>'}</div>`}
-      <div class="small">${sub}</div></div>
+      ${sub?`<div class="small">${sub}</div>`:''}</div>
       <div class="fcp">⚔ ${fmt(x.cp||0)}</div>
       <div class="fbtns">${x.team&&!x.missing?`<button class="btn danger fbtn" data-duel="${esc(x.id)}">⚔ 배틀</button>`:''}<button class="btn fbtn" data-finfo="${esc(x.id)}">🔍 자세히 보기</button></div></div>`;
   };
@@ -3972,7 +3975,7 @@ function renderFriendsCode(msg){
       <div style="flex:1;min-width:0"><b>${esc(x.hero||'모험가')}</b>${x.me?' <span class="tag t-ally">나</span>':''}
         <div class="small">Lv ${x.lv||1} · ${progressText(x)}${x.ended?' · ✝':''}</div>
         ${rankChip(x)?`<div class="small">${rankChip(x)}</div>`:''}
-        <div class="small">${x.me?`대결 전적 ${(P.pvp&&P.pvp.w)||0}승 ${(P.pvp&&P.pvp.l)||0}패`:`나와의 대결 ${x.w||0}승 ${x.l||0}패 · 정보 ${agoText(x.updatedAt||x.addedAt||Date.now())}`}</div></div>
+        <div class="small">${x.me?`대결 전적 ${(P.pvp&&P.pvp.w)||0}승 ${(P.pvp&&P.pvp.l)||0}패`:`정보 ${agoText(x.updatedAt||x.addedAt||Date.now())}`}</div></div>
       <div class="fcp">⚔ ${fmt(x.cp||0)}</div>
       ${x.me?'':`<div class="fbtns"><button class="btn danger fbtn" data-duel="${esc(x.id)}">⚔ 배틀</button><button class="btn fbtn" data-finfo="${esc(x.id)}">🔍 자세히 보기</button></div>`}
     </div>`;
@@ -4145,16 +4148,26 @@ function giftSendUI(x){
     }
   };
 }
+function friendRecHTML(x){   // 친구 자세히 보기: 스테이지·랭크전·탑·숲·던전·맞추기
+  const rc=x.rec&&typeof x.rec==='object'?x.rec:null,n=(v,mx)=>Math.max(0,Math.min(mx,Math.floor(+v||0)));
+  const none='<span class="small">정보 없음 · 친구가 새 버전에 접속하면 표시</span>';
+  const t=Math.max(0,Math.min(RANKS.length-1,Math.floor(+x.rankT||0))),R=RANKS[t];
+  const rank=x.rankT==null&&x.rankLP==null?none:(!x.rankOn&&!(+x.rankT>0)&&!(+x.rankLP>0))?'🔒 아직 열리지 않음':`${R.icon} ${R.n} · ${fmt(n(x.rankLP,1e9))} LP`;
+  const fl=(v,mx)=>rc?(n(v,mx)>=mx?`${mx}층 정복 ✔`:`${n(v,mx)}층 / ${mx}층`):none;
+  const dg=x.dgDay===dgDay()&&+x.dgBest>0?`${fmt(n(x.dgBest,1e15))} 딜`:'오늘 기록 없음';
+  return rwList([['🗺 스테이지',`${progressText(x)}${x.ended?' · ✝ 엔딩':''}`],['🏅 랭크전',rank],['🗼 구원의 탑',fl(rc&&rc.tw,TOWER_MAX)],['☁️ 천상의 탑',fl(rc&&rc.hv,HEAVEN_MAX)],
+    ['🌳 노력의 숲',fl(rc&&rc.fo,FOREST_MAX)],['🏰 던전 (오늘)',dg],['🎯 캐릭터 맞추기',rc?`최고 ${n(rc.qz,999)}개`:none]]);
+}
 function showFriendDetail(x,o){
   const t=x.team||{};
   const party=(Array.isArray(t.party)?t.party:[]).filter(a=>a&&ALLIES[a.id]).slice(0,4).map(a=>({id:a.id,lv:pvpCl(a.lv,1,60),tn:a.tn?1:0}));
   showStory(`<div class="sum fdetail"><div class="sum-title">👤 친구 정보</div>
-    <div class="sum-name">${esc(x.hero||'모험가')}</div>
-    <div class="small">Lv ${x.lv||1} · ${progressText(x)}${x.ended?' · ✝ 엔딩':''}</div>
+    <div class="sum-name fdname">${esc(x.hero||'모험가')} <span class="lvtag">Lv ${x.lv||1}</span></div>
     <div class="teamcp">⚔ 전투력 <b>${fmt(x.cp||0)}</b></div>
     ${t.atk?`<div class="small">주인공 · 공격 ${pvpCl(t.atk,1,9999)} · 방어 ${pvpCl(t.def,0,9999)} · HP ${fmt(pvpCl(t.maxHp,1,99999))}</div>`:''}
     <div class="rp-h">🤝 출전 동료</div>
     ${party.length?`<div class="pvpteam">${teamIconsHTML(party)}</div>`:'<div class="desc">팀 정보가 아직 없어요.</div>'}
+    <div class="rp-h">📜 기록</div>${friendRecHTML(x)}
     <div class="small" style="margin-top:8px">나와의 배틀 ${o.rec.w||0}승 ${o.rec.l||0}패${o.live?` · ${presenceHTML(x)}`:x.updatedAt?` · ${agoText(x.updatedAt)} 갱신`:''}</div>
     <div class="grid" style="margin-top:12px">${o.duel?'<button class="btn danger" id="fdduel">⚔ 배틀</button>':'<button class="btn" disabled>⚔ 배틀<small>팀 정보 없음</small></button>'}
       <button class="btn" id="fddel">친구 삭제</button></div>
