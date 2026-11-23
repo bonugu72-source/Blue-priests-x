@@ -905,6 +905,36 @@ body:has(.tabbar) .btn:not(.primary):not(.danger):not(.myth):not([class*=m-]){ba
 body:has(.tabbar) .notice{background:color-mix(in srgb,var(--tc) 16%,#101831)}
 body:has(.tabbar) .backtop{background:color-mix(in srgb,var(--tc) 18%,#141d3b)}
 body:has(.tabbar) .tabbar{background:color-mix(in srgb,var(--tc) 6%,rgba(8,12,26,.95))}
+/* 상단 바: 이름 옆 레벨 · 가운데 가이드 */
+.row.trow{display:flex;gap:6px}
+.trow .nmlv{flex:0 1 auto}.trow .guidebtn{flex:0 0 auto;margin:0 auto}.trow .tright{flex:0 0 auto;display:flex;align-items:center}
+@media (max-width:389px){.guidebtn .gl{display:none}.guidebtn{padding:4px 9px}}
+.nmlv{display:flex;align-items:center;gap:6px;min-width:0}.nmlv b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;flex:0 1 auto}.nmlv .lvtag{flex:none}
+.lvtag{font-size:12px;font-weight:700;padding:1px 7px;border-radius:9px;background:rgba(255,255,255,.09);color:#dfe6ff;white-space:nowrap}
+.guidebtn{border:1px solid color-mix(in srgb,var(--tc,#7fb0f0) 55%,transparent);background:color-mix(in srgb,var(--tc,#7fb0f0) 16%,#0d1530);color:#eef2ff;font:inherit;font-size:13px;font-weight:800;border-radius:12px;padding:4px 11px;cursor:pointer;white-space:nowrap}
+.guidebtn:active{transform:scale(.95)}
+/* 게임 가이드 */
+.gidx{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.gcard{display:flex;flex-direction:column;align-items:flex-start;gap:3px;text-align:left;padding:12px;border-radius:14px;border:1px solid rgba(140,170,255,.25);background:linear-gradient(150deg,#1b2650,#121a38);color:#eef2ff;font:inherit;cursor:pointer}
+.gcard .gic{font-size:24px}.gcard b{font-size:15px}.gcard small{font-size:11px;color:#a9b3d6;line-height:1.4}
+.gcard.hot{grid-column:1/-1;border-color:rgba(232,199,106,.6);background:linear-gradient(140deg,#3a2f1c,#22204a)}.gcard.hot small{color:#e8d6a8}
+.gcard:active{transform:scale(.98)}
+.gpage p{margin:6px 0;line-height:1.6;font-size:14px}
+.gh{margin:16px 0 8px;font-size:15px;color:var(--gold);border-left:3px solid var(--gold);padding-left:8px}
+.gh:first-child{margin-top:4px}
+.grow{display:grid;grid-template-columns:minmax(92px,38%) 1fr;gap:10px;padding:8px 0;border-bottom:1px dashed rgba(255,255,255,.08);font-size:13px;line-height:1.55}
+.grow .gk{font-weight:700;color:#eef2ff}.grow .gd{color:#c9d0ea}
+.gbtn{display:inline-block;padding:1px 7px;margin:1px 0;border-radius:7px;background:#24335f;border:1px solid rgba(140,170,255,.35);color:#fff;font-size:12px;font-weight:700;white-space:nowrap}
+.gtw{overflow-x:auto;margin:6px 0 4px}
+.gtbl{border-collapse:collapse;width:100%;font-size:11.5px;white-space:nowrap}.gtbl.wrap td{white-space:normal}
+.gtbl th{background:#1f2b55;color:#e8eeff;padding:6px 4px;text-align:center;font-weight:700;line-height:1.3}
+.gtbl td{padding:6px 4px;text-align:center;border-bottom:1px solid rgba(255,255,255,.07);color:#d8def4}
+.gtbl td:first-child{font-weight:700;color:#fff;text-align:left}
+.gstep{margin:12px 0 4px;padding:9px 11px;border-radius:10px;background:rgba(127,176,240,.08);font-size:13px;line-height:1.6;color:#d8def4}.gstep b{color:#fff}
+.gtip{margin:10px 0 2px;padding:9px 11px;border-radius:10px;background:rgba(232,199,106,.1);color:#f0e2b6;font-size:13px;line-height:1.55}
+.gol{margin:4px 0;padding-left:20px;font-size:14px;line-height:1.7}
+.gnav{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:8px 0}.gnav .btn{font-size:13px}
+.topback{margin-bottom:8px}
 /* 코인 보내기 슬라이더 */
 .gval{font-size:30px;font-weight:900;color:var(--gold);text-align:center;margin:12px 0 4px;font-variant-numeric:tabular-nums}.gval small{font-size:14px;color:#c9cbe0}
 .gslide{-webkit-appearance:none;appearance:none;width:100%;height:14px;border-radius:8px;margin:10px 0 2px;background:linear-gradient(90deg,#c9a24a 0,#e8c76a var(--p,0%),#1c2440 var(--p,0%));outline:none;touch-action:pan-y}
@@ -2558,7 +2588,7 @@ const TUT_PAGES=[
   {ic:'🤝',t:'동료 모으기',b:'<b>🕯 상점 › 동료 소환</b>에서 골드나 🎫 소환권으로 동료를 뽑아. 1성부터 6성까지 있고, 아주 드물게 🐾 펫도 나와.<br><br><b>🤝 동료 탭</b>에서 최대 <b>3명</b>을 출전시킬 수 있어. <b>이사벨 부제</b>(고정 조력자)와 <b>펫</b>은 자리를 차지하지 않고 항상 함께 출전해.<br><br>출전 프리셋 1·2에 파티를 저장해 두면 편해.'},
   {ic:'📈',t:'성장시키기',b:'<b>레벨업</b> 전투 경험치나 골드로 동료 레벨을 올린다<br><b>합성</b> 같은 동료 카드가 모이면 한 단계 위 등급의 무작위 동료로 바꾼다 (★1 6장 · ★2 5장 · ★3 4장 · ★4 3장)<br><b>장비</b> 상점에서 검·갑옷을 강화해 주인공을 강하게<br><b>유물</b> 보스와 미션에서 얻는 유물은 능력치를 영구히 올려 준다'},
   {ic:'💠',t:'5성 · 6성 동료 키우기',b:'<b>각성</b> 💠 천상의 성유물로 5성의 전투력을 올린다<br><b>신화 승급</b> 최대 레벨에 도달하면 골드(5성은 성유물도)로 승급 — 고유 능력이 생긴다<br><b>신뢰도</b> 💗 신뢰도 XP를 써서 전투력을 더 올린다<br><b>초월</b> 5각성 + 신화 5성을 ✴️ 구원의 조각으로 초월 (성공 20% · 전투력 2배)'},
-  {ic:'🏆',t:'더 즐길 거리',b:'<b>📜 미션</b> 지역 미션으로 소환권·유물 획득<br><b>⚔ 자유 사냥</b> 경험치·골드 3배 (마계 4배), 자동으로 계속<br><b>🏅 랭크전</b> Lv 20부터 — 티어를 올려 보상<br><b>🗼 구원의 탑</b> Lv 50 + 지역 15곳 클리어 후<br><b>😈 마계</b> 지역 이동을 모두 끝내면 열리는 강한 보스들<br><b>🎡 행운의 룰렛</b> 15분마다 무료<br><br>언제든 모험 탭의 <b>📖 게임 가이드</b>에서 다시 볼 수 있어!'}];
+  {ic:'🏆',t:'더 즐길 거리',b:'<b>📜 미션</b> 지역 미션으로 소환권·유물 획득<br><b>⚔ 자유 사냥</b> 경험치·골드 3배 (마계 4배), 자동으로 계속<br><b>🏅 랭크전</b> Lv 20부터 — 티어를 올려 보상<br><b>🗼 구원의 탑</b> Lv 50 + 지역 15곳 클리어 후<br><b>😈 마계</b> 지역 이동을 모두 끝내면 열리는 강한 보스들<br><b>🎡 행운의 룰렛</b> 15분마다 무료<br><br>언제든 맨 위 가운데 <b>📖 가이드</b>에서 다시 볼 수 있어!'}];
 function startTutorial(fromGuide){
   let i=0;const ov=document.createElement('div');ov.className='tut';document.body.appendChild(ov);
   const draw=()=>{const pg=TUT_PAGES[i],last=i===TUT_PAGES.length-1,got=P.tutReward;
@@ -2568,7 +2598,7 @@ function startTutorial(fromGuide){
       <div class="tutbtns">${i>0?'<button class="btn" id="tprev">← 이전</button>':'<button class="btn" id="tskip">건너뛰기</button>'}
         <button class="btn primary" id="tnext">${last?(got?'닫기':'완료하고 보상 받기'):'다음 →'}</button></div></div>`;
     if($('#tprev'))$('#tprev').onclick=()=>{i--;draw();};
-    if($('#tskip'))$('#tskip').onclick=()=>{ov.remove();P.tut=1;save();if(!fromGuide)renderHub('📖 튜토리얼은 모험 탭의 「게임 가이드」에서 언제든 다시 볼 수 있다 (완료 보상도 그때 받을 수 있다)');};
+    if($('#tskip'))$('#tskip').onclick=()=>{ov.remove();P.tut=1;save();if(!fromGuide)renderHub('📖 튜토리얼은 맨 위 가운데 「📖 가이드」에서 언제든 다시 볼 수 있다 (완료 보상도 그때 받을 수 있다)');};
     $('#tnext').onclick=()=>{if(!last){i++;draw();return;}ov.remove();P.tut=1;
       if(!P.tutReward){P.tutReward=1;P.gold+=TUT_REWARD.gold;P.tickets+=TUT_REWARD.tickets;save();goldToast(TUT_REWARD.gold,'튜토리얼 완료 보상');renderHub(`🎁 튜토리얼 완료! 💰 ${fmt(TUT_REWARD.gold)} 코인 · 🎫 소환권 ${TUT_REWARD.tickets}장을 받았다 — 상점에서 동료를 소환해 보자`);}
       else{save();fromGuide?renderGuide():renderHub();}};};
@@ -2584,25 +2614,225 @@ const TIPS={
   realm:['😈 마계','지역 이동을 모두 끝내면 열리는 강한 보스들의 영역이야. 마계 최종 보스를 쓰러뜨리면 ✴️ 구원의 조각이 낮은 확률로 나와.']};
 function firstTip(k,cb){
   P.tips=P.tips||{};if(P.tips[k]||!TIPS[k]){cb&&cb();return;}P.tips[k]=1;save();
-  const [t,b]=TIPS[k];showStory(`<div class="tuttip"><div class="tutt">${t}</div><div class="tutb">${b}</div><div class="small">📖 모험 탭 「게임 가이드」에서 다시 볼 수 있다</div></div>`,cb,true);
+  const [t,b]=TIPS[k];showStory(`<div class="tuttip"><div class="tutt">${t}</div><div class="tutb">${b}</div><div class="small">📖 맨 위 가운데 「📖 가이드」에서 다시 볼 수 있다</div></div>`,cb,true);
 }
-const GUIDE=()=>[
-  ['⚔️ 전투',TUT_PAGES[1].b.split('<br><br>')[1]],
-  ['🤝 동료 · 소환',`${TUT_PAGES[2].b}<br><br>소환 가격: 골드 1회 ${fmt(SUMMON_COST)} G · 11회 ${fmt(SUMMON11_COST)} G · 50회 ${fmt(SUMMON50_COST)} G`],
-  ['📈 성장',TUT_PAGES[3].b],
-  ['💠 5성 · 6성',TUT_PAGES[4].b],
-  ['🎒 아이템',`<b>💠 천상의 성유물</b> 각성 · 신뢰도 XP 구매 · 일부 코스튬 — 보스 첫 클리어, 탑, 랭크전, 미션 등에서 획득<br><b>✴️ 구원의 조각</b> 초월 — 마계 최종 보스(5%, 다니안 출전 시 +10%p), 천상의 탑, 캐릭터 맞추기<br><b>💗 신뢰도 XP</b> 신뢰도 +2 — 상점(성유물 10개), 행운의 룰렛, 일부 보스<br><b>🧩 기억의 퍼즐 조각</b> 기억 보관소에서 희귀 아이템으로 — 공구방 특별 미션<br><b>🎫 소환권</b> 동료 소환 — 미션, 첫 클리어 보상`],
-  ['🏆 콘텐츠',TUT_PAGES[5].b.split('<br><br>')[0]+'<br><b>☁️ 천상의 탑</b> 구원의 탑 정복 후<br><b>🏰 던전</b> 60초 공격력 측정 · 매일 랭킹<br><b>🎯 캐릭터 맞추기 · 🏡 우리의 정원</b> 동료 탭의 미니 콘텐츠'],
-  ...Object.values(TIPS).filter((_,i)=>i===0||i===1||i===3||i===5)];
-function renderGuide(){
-  hubTab='adv';
-  $('#app').innerHTML=`${statusHTML()}${topBack()}
-    <div class="panel"><div class="ptitle">📖 게임 가이드</div>
-      <button class="btn primary full" id="gtut">▶ 튜토리얼 다시 보기<small>${P.tutReward?'완료 보상 받음 ✔':`완료 보상: 💰 ${fmt(TUT_REWARD.gold)} 코인 · 🎫 소환권 ${TUT_REWARD.tickets}장`}</small></button>
-      ${GUIDE().map(([t,b])=>`<details class="gsec"><summary>${t}</summary><div class="tutb">${b}</div></details>`).join('')}
-      <button class="btn full" id="back">← 거점으로</button></div>${tabBar()}`;
-  $('#gtut').onclick=()=>startTutorial(true);$('#back').onclick=()=>renderHub();window.scrollTo(0,0);
+/* ===================== 📖 게임 가이드 (상단 바 가운데 버튼 → 목차 → 주제별 화면) ===================== */
+const gB=t=>`<span class="gbtn">${t}</span>`;                       // 버튼 이름 표시
+const gRow=(b,d)=>`<div class="grow"><div class="gk">${b}</div><div class="gd">${d}</div></div>`;
+const gH=t=>`<h4 class="gh">${t}</h4>`;
+const gTbl=(head,rows,wrap)=>`<div class="gtw"><table class="gtbl${wrap?' wrap':''}"><tr>${head.map(h=>`<th>${h}</th>`).join('')}</tr>${rows.map(r=>`<tr>${r.map(c=>`<td>${c}</td>`).join('')}</tr>`).join('')}</table></div>`;
+const gTip=t=>`<div class="gtip">💡 ${t}</div>`;
+/* 가정한 상태의 동료 전투력 (게임 공식 그대로, 내 데이터는 건드리지 않음) */
+const gCP=(id,lv,aw,myth,tl,tr)=>Math.round((80+lv*30)*multOf(id,aw,myth)*trustMultT(id,tl||0)*(tr?TRANS_MULT:1));
+const gRep=()=>{const t=n=>Object.keys(TIER5).find(k=>TIER5[k]===n&&ALLIES[k]&&!ALLIES[k].pet);
+  return [['★1',allyIds(1)[0]],['★2',allyIds(2)[0]],['★3',allyIds(3)[0]],['★4',allyIds(4)[0]],['★5 1티어',t(1)],['★5 2티어',t(2)],['★5 3티어',t(3)],['★6',allyIds(6)[0]]].filter(x=>x[1]&&ALLIES[x[1]]);};
+const gLvTotal=st=>{let s=0;for(let l=1;l<LV_CAP[st];l++)s+=Math.round(20*l*COST_F[st]);return s;};
+const GUIDE_SECS=[
+ {id:'start',ic:'🕊️',t:'처음이라면',s:'게임 한눈에 보기 · 튜토리얼',b:()=>`
+  ${gH('어떤 게임이야?')}
+  <p>너는 악마를 쫓는 견습 사제야. 세계 곳곳의 <b>솔로몬 72악마</b>를 쓰러뜨리며 동료를 모으고 키우는 게임이에요.</p>
+  ${gH('이렇게 하면 돼요')}
+  <ol class="gol"><li><b>🗺 모험</b> 탭에서 스테이지를 깨며 경험치와 코인을 모아요.</li>
+   <li><b>🕯 상점</b>에서 코인·소환권으로 <b>동료를 소환</b>해요.</li>
+   <li><b>🤝 동료</b> 탭에서 동료를 <b>출전</b>시키고 <b>키워요</b>. (키우는 법은 「📈 캐릭터 성장」에 자세히)</li>
+   <li>더 강해지면 랭크전·탑·던전·마계에 도전해요.</li></ol>
+  <button class="btn primary full" id="gtut">▶ 튜토리얼 다시 보기<small>${P.tutReward?'완료 보상 받음 ✔':`완료 보상: 💰 ${fmt(TUT_REWARD.gold)} 코인 · 🎫 소환권 ${TUT_REWARD.tickets}장`}</small></button>`},
+ {id:'screen',ic:'📱',t:'화면 보는 법',s:'상단 바 · 하단 탭 · 저장',b:()=>`
+  ${gH('맨 위 상단 바')}
+  ${gRow('✝ 이름 '+gB('Lv'),'내 주인공 이름과 레벨이에요.')}
+  ${gRow(gB('📖 가이드'),'지금 보고 있는 이 게임 가이드를 열어요. (전투 중에는 숨겨져요)')}
+  ${gRow('<b class="gold">0000 G</b>','가지고 있는 코인(골드)이에요.')}
+  ${gRow(gB('🔊 / 🔇'),'배경음악 켜기 · 끄기')}
+  ${gRow('HP · EXP 바','🗺 모험 탭과 전투에서 보여요. EXP 바가 가득 차면 레벨업하고 HP가 모두 회복돼요.')}
+  ${gRow('공격 · 방어 · 성수','주인공의 공격력 · 방어력 · 가진 성수 개수예요.')}
+  ${gH('맨 아래 탭 5개')}
+  ${gRow(gB('🕯 상점'),'동료 소환 · 장비 강화 · 룰렛 · 코스튬')}
+  ${gRow(gB('🤝 동료'),'출전 편성 · 동료 성장 · 도감 · 유물 · 미니 게임')}
+  ${gRow(gB('🗺 모험'),'스테이지 · 랭크전 · 탑 · 자유 사냥 · 지역 이동 · 미션')}
+  ${gRow(gB('🏰 던전'),'60초 공격력 측정 · 오늘의 랭킹')}
+  ${gRow(gB('👥 친구'),'친구 · 친구 대결 · 코인 보내기')}
+  ${gH('저장 (👥 친구 탭 맨 아래 작은 글씨)')}
+  ${gRow(gB('📱 기기 연결'),'다른 폰·컴퓨터에서 같은 캐릭터로 이어서 해요.')}
+  ${gRow(gB('💾 저장 코드 복사'),'내 진행 상황을 글자 코드로 복사해요. 백업해 두면 안전해요.')}
+  ${gRow(gB('타이틀로'),'처음 화면으로 가요. (저장하고 나가요)')}
+  ${gTip('여러 화면 위쪽의 '+gB('← 돌아가기')+'를 누르면 이전 화면으로 돌아가요.')}`},
+ {id:'shop',ic:'🕯',t:'상점 탭',s:'장비 · 소환 · 룰렛 · 코스튬',b:()=>`
+  ${gH('🕯 교구 상점')}
+  ${gRow(gB('성수 25 G'),'전투 중 HP를 40% 회복해요(최소 60). 전투에서 🧪 아이템으로 써요.')}
+  ${gRow(gB('축성된 검 +N'),'주인공 공격력 <b>+4</b> (영구). 가격은 60 + 70×강화 횟수 G라서 갈수록 비싸져요.')}
+  ${gRow(gB('축성된 사제복 +N'),'주인공 방어력 <b>+3</b>, 최대 HP <b>+10</b> (영구). 가격 방식은 검과 같아요.')}
+  ${gRow(gB('🩸 피로 얼룩진 구슬'),`${fmt(BLOOD_ORB_COST)} G · 한 번만 살 수 있어요. 주인공이 준 피해의 10%만큼 HP를 회복해요.`)}
+  ${gRow(gB('💗 신뢰도 XP'),`💠 천상의 성유물 ${TRUSTXP_STONE}개로 1개 사요. ★5·★6 동료의 신뢰도를 +2 올려요.`)}
+  ${gH('✝ 동료 소환')}
+  <p>나올 확률: ${STAR_RATE.map(([st,r])=>(st==='pet'?'🐾 펫':'★'+st)+' '+(Math.round(r*10000)/100)+'%').join(' · ')}</p>
+  ${gRow(gB('🎫 소환권 1회')+' '+gB('🎫 소환권 10회'),'소환권으로 뽑아요. 소환권은 스테이지 첫 클리어 · 미션 · 튜토리얼 보상으로 받아요.')}
+  ${gRow(gB('💰 골드 1회'),`${fmt(SUMMON_COST)} G`)}
+  ${gRow(gB('💰 골드 11회 연속'),`${fmt(SUMMON11_COST)} G (${fmt(SUMMON_COST*11-SUMMON11_COST)} G 할인)`)}
+  ${gRow(gB('💰 골드 50회 연속'),`${fmt(SUMMON50_COST)} G (${fmt(SUMMON_COST*50-SUMMON50_COST)} G 할인)`)}
+  ${gTip('이미 있는 동료가 또 나오면 카드가 1장 늘어요. 남는 카드는 <b>합성</b>과 <b>각성</b> 재료가 돼요.')}
+  ${gH('그 밖의 버튼')}
+  ${gRow(gB('🎡 행운의 룰렛'),'15분마다 무료로 1번 돌려요. 1,000/5,000/10,000 코인 · 꽝 · 💗 신뢰도 XP · ✨ 경험치 10,000 · ★4/★5 무작위 동료 중 하나가 나와요.')}
+  ${gRow(gB('👗 동료 코스튬'),'캐릭터를 고르고 → 의상을 보고 → '+gB('🔓 해금')+'(코인 또는 💠) → '+gB('착용')+'. 모습만 바뀌고 능력치는 그대로예요.')}`},
+ {id:'ally',ic:'🤝',t:'동료 탭',s:'출전 · 동료 관리 · 도감 · 미니 게임',b:()=>`
+  ${gH('동료 탭 첫 화면')}
+  ${gRow(gB('✨ 유물 · 희귀 아이템'),'유물로 오른 공격·방어·최대 HP 합계를 보여줘요. 누르면 가진 유물 전체 목록으로 들어가요.')}
+  ${gRow('⚔ 출전 동료 3칸','지금 싸우러 나가는 동료예요. 칸을 누르면 동료 관리로 가요.')}
+  ${gRow('🕊️ 고정 조력자','<b>이사벨 부제</b>는 자리를 차지하지 않고 항상 함께 나가요. (일부 스테이지는 출전 금지)')}
+  ${gRow('⚔ 팀 전투력','주인공 + 이사벨 + 펫 + 출전 동료 전투력을 더한 값이에요.')}
+  ${gRow(gB('🤝 동료 관리'),'출전 · 레벨업 · 합성 · 각성 · 신화 · 신뢰도 · 초월을 하는 곳 (아래 설명)')}
+  ${gRow(gB('📖 동료 도감'),'모든 동료의 이름과 능력을 봐요. 누르면 능력과 신화 고유 능력까지 자세히 나와요.')}
+  ${gRow(gB('🧩 기억 보관소'),'🧩 기억의 퍼즐 조각을 쓰면 잠긴 기억이 희귀 아이템(주인공 방어력 +20)으로 돌아와요.')}
+  ${gRow(gB('🏡 우리의 정원'),`빈방 꾸미기. 🛋 생활용품을 사고, 🎲 친구 뽑기(${fmt(GARDEN_DRAW)} 코인)로 친구들을 방에 초대해요.`)}
+  ${gRow(gB('🎯 캐릭터 맞추기'),`50초 동안 ★5·★6 사진을 보고 이름을 맞혀요. 한 판 정답 보상: ${QUIZ_REWARD.map(r=>`${r.n}개 ${quizRwText(r)}`).join(' · ')} (구간마다 처음 한 번)`)}
+  ${gH('🤝 동료 관리 화면')}
+  ${gRow('출전 3칸 · 🕊️ · 🐾 펫','지금 편성이에요. 펫은 1마리만 함께 나가고 자리를 차지하지 않아요.')}
+  ${gRow(gB('현재 파티 저장')+' '+gB('불러오기'),`파티 1·2에 지금 편성을 저장해 두고, 버튼 한 번으로 다시 불러와요.`)}
+  ${gRow('🔍 이름 검색 '+gB('✕'),'이름을 쳐서 내 동료를 바로 찾아요. ✕는 검색 지우기.')}
+  ${gRow(gB('🔮 일괄 합성'),'재료가 다 모인 캐릭터를 한 번에 모두 합성해요.')}
+  ${gRow(gB('전체')+' '+gB('★6')+' … '+gB('★1'),'등급별로 보기')}
+  ${gRow(gB('🏅 티어')+' '+gB('⚔ 전투력')+' '+gB('레벨')+' '+gB('카드 개수'),'같은 등급 안에서 정렬하는 순서')}
+  ${gH('동료 카드의 버튼')}
+  ${gRow(gB('대기')+' / '+gB('출전 중'),`눌러서 출전에 넣고 빼요. 최대 ${MAX_ACTIVE}명.`)}
+  ${gRow(gB('레벨업 N G'),'코인으로 레벨 1 올리기')}
+  ${gRow(gB('합성 n/필요'),'같은 카드를 모아 한 단계 위 등급의 무작위 동료로 바꿔요.')}
+  ${gRow(gB('각성 n/5'),'★5·★6 전용. 💠 천상의 성유물로 강해져요.')}
+  ${gRow(gB('🔱 신화 승급'),'최대 레벨이 되면 열려요. 전투력 2배.')}
+  ${gRow(gB('💗 신뢰도 XP 사용 (+2)'),'신뢰도를 2단계 바로 올려요.')}
+  ${gRow(gB('✴️ 초월'),'5각성 + 신화 ★5 전용 마지막 단계. 전투력 2배.')}
+  ${gRow(gB('🐾 이 펫으로 출전'),`출전할 펫을 골라요. ${Object.keys(PET_NEED).map(k=>`${ALLIES[k].name}는 ${ALLIES[PET_NEED[k]].name}가 출전할 때만 함께 나가요.`).join(' ')}`)}
+  ${gTip('버튼 하나하나가 정확히 얼마나 강해지는지는 「📈 캐릭터 성장」에 표로 정리했어요.')}`},
+ {id:'adv',ic:'🗺',t:'모험 탭',s:'스테이지 · 랭크전 · 탑 · 사냥 · 미션',b:()=>`
+  ${gH('지금 지역 칸')}
+  ${gRow(gB('🗺 스테이지 지도'),`지역마다 ${STAGES}스테이지가 있어요. 스테이지를 고르고 ${gB('⚔ 출전')}. 5번은 <b>정예</b>, 10번은 <b>중간 보스</b>(솔로몬 72악마), 15번은 <b>최종 보스</b>예요. 깬 스테이지는 다시 할 수 있어요.`)}
+  ${gRow(gB('🏅 랭크전'),`Lv ${RANK_MIN_LV}부터. ★5 무작위 3명(구원자·필멸자는 5명)을 데려온 AI와 싸워요. 승리 +${RANK_WIN} LP · 패배 −${RANK_LOSS} LP. ${RANK_LP} LP마다 승급: ${RANKS.map(r=>r.icon+r.n).join(' → ')} (챌린저 → 구원자 · 구원자 → 필멸자는 ${fmt(RANK_SAVIOR_LP)} LP)`)}
+  ${gRow(gB('🗼 탑'),`Lv ${TOWER_MIN_LV} + 지역 ${realmStart()}곳 클리어 후. 탑을 골라 들어가요.<br>· <b>구원의 탑</b> ${TOWER_MAX}층 · 동료 <b>1명</b>만 데려가요. 층을 처음 돌파하면 보상(5층 💠3 · 10층 💠5 · 15층 💠10 · 20층 150,000 코인 · 25층 ★5 루메온 · 30층 💠10+유물, 나머지 층 💠1)<br>· <b>천상의 탑</b> 구원의 탑 ${TOWER_MAX}층을 정복하면 열려요. 돌파 보상 ${Object.keys(HEAVEN_REWARD).map(k=>`${k}층 ${heavenRewardText(+k)}`).join(' · ')}<br>탑 안의 ${gB('⚔ N층 도전')} ${gB('🔁 1층부터 다시 오르기')} ${gB('🤝 출전 동료 바꾸기')}`)}
+  ${gRow(gB('⚔ 자유 사냥 (자동)'),'지금 지역 몬스터와 멈출 때까지 자동으로 싸워요. 경험치·코인 <b>×3</b> (마계 <b>×4</b>). 전투 화면의 '+gB('⏹ 자동 사냥 멈추기')+'로 멈춰요.')}
+  ${gRow(gB('🔁 천상의 성유물작'),`서울 최종 보스까지 가면 생겨요. 서울 최종 보스를 자동으로 반복하고 ${FARM_TARGET}번 잡으면 멈춰요.`)}
+  ${gRow(gB('⛪ 성당 휴식'),'HP를 모두 회복해요. 쓰고 나면 3분 뒤에 다시 쓸 수 있어요.')}
+  ${gRow(gB('🌳 노력의 숲'),`고대 원단수를 깨면 열려요. 빌린 ★5 동료 3명과 고정 능력치 주인공(HP 4,000 · 공격 800 · 방어 500)으로 ${FOREST_MAX}층까지. 5층 ✴️1 · 10층 ✴️3 · 15층 ✴️4 · 23층 ★6 아트리스.`)}
+  ${gH('아래 칸들')}
+  ${gRow('🧭 지역 이동','지역 버튼을 누르면 그 지역으로 가요. 최종 보스를 깨면 다음 지역이 열려요.')}
+  ${gRow('😈 마계 이동',`${AREAS[realmStart()-1].name}까지 깨면 열리는 강한 보스들의 영역이에요. 마계 최종 보스는 ✴️ 구원의 조각을 ${Math.round(TRANS_DROP*100)}% 확률로 줘요.`)}
+  ${gRow('📜 미션 '+gB('보상 받기')+' '+gB('전달하기'),'지역마다 있는 미션. 조건을 채우면 버튼이 생겨요. 소환권·유물을 줘요.')}
+  ${gRow(gB('👥 공구방 특별 미션'),'눌러서 들어가면 미션 목록이 있어요. '+gB('보상 받기')+'로 🧩 기억의 퍼즐 조각을 받아요.')}`},
+ {id:'dungeon',ic:'🏰',t:'던전 탭',s:'60초 공격력 측정 · 랭킹',b:()=>`
+  ${gRow(gB('⚔ 던전 입장'),`보스 ${dgSeq().main.length}명이 순서대로 나오고, 다 쓰러뜨리면 마계 보스 ${dgSeq().realm.length}명이 계속 반복돼요. 보스는 공격하지 않는 샌드백이에요. ${DG_MS/1000}초 동안 넣은 총 딜이 기록이에요.`)}
+  ${gRow('3 · 2 · 1','시작을 누르면 카운트다운 뒤에 시간이 흘러요.')}
+  ${gRow('남는 딜','한 번 때린 공격이 보스 남은 HP보다 크면 넘친 만큼 다음 보스에게 들어가요. (출혈·불태움 같은 지속 피해는 제외)')}
+  ${gRow(gB('⏹ 중지'),'전투 중 오른쪽 위. 지금까지 넣은 딜로 기록하고 끝내요.')}
+  ${gRow('🏆 오늘의 랭킹','모든 사람의 오늘 기록 1~3위. '+gB('🏆 전체 랭킹 보기')+'로 20위까지. 기록을 누르면 딜 그래프가 나와요. 매일 0시에 초기화.')}
+  ${gRow(gB('🤝 던전 출전 동료 편성'),'던전에서만 쓰는 조합이에요. 출전/대기와 📖 상세만 할 수 있어요.')}
+  ${gRow(gB('📜 기록 상세 보기'),'최근 20회 기록과 개인 최고 기록(매일 초기화되지 않음)을 봐요.')}`},
+ {id:'friend',ic:'👥',t:'친구 탭',s:'친구 · 대결 · 코인 보내기',b:()=>`
+  ${gRow('📨 친구 요청 '+gB('수락'),'나를 친구로 추가한 사람이에요. 수락하면 서로 친구가 돼요.')}
+  ${gRow('🏆 친구 랭킹','친구들의 레벨·전투력·진행도가 실시간으로 바뀌어요.')}
+  ${gRow(gB('⚔ 배틀'),`친구의 지금 팀과 대결해요. 승리 보상은 하루 ${PVP_DAILY}번 (30 + 친구 Lv×5 코인).`)}
+  ${gRow(gB('🔍 자세히 보기'),'친구의 팀·전적을 보고 '+gB('⚔ 배틀')+' '+gB('친구 삭제')+' '+gB('💰 코인 보내기')+'를 할 수 있어요.')}
+  ${gRow(gB('💰 코인 보내기'),`슬라이더를 밀어 1,000 코인 단위로 최대 ${fmt(GIFT_MAX)} 코인을 보내요. 내 코인에서 빠지고, 친구가 접속하면 자동으로 받아요.`)}
+  ${gRow(gB('🔗 친구 링크 보내기')+' '+gB('📋 코드 복사'),'내 친구 코드를 친구에게 보내요.')}
+  ${gRow('➕ 친구 추가 '+gB('🤝 친구 추가'),'친구에게 받은 코드를 붙여 넣고 눌러요.')}
+  ${gRow('🌐 다른 모험가 '+gB('친구 추가'),'게임을 하는 다른 사람을 바로 친구로 추가해요.')}`},
+ {id:'battle',ic:'⚔️',t:'전투 화면',s:'버튼 · 상태 · 보스 패턴',b:()=>`
+  ${gRow(gB('⚔ 공격'),`적을 때려요. 한 번 누르면 잠깐 쿨타임(파란 바)이 있어요. <b>${AWAKEN_SKILL.every}번</b> 공격할 때마다 각성 스킬 「${AWAKEN_SKILL.name}」(피해 ${AWAKEN_SKILL.mult}배)이 자동으로 나가요. ✨ 각성 ●○○○○가 그 횟수예요.`)}
+  ${gRow(gB('🛡 방어'),'받는 피해 40% 감소. 대신 동료도 공격을 멈춰요. 다시 공격하면 풀려요. 적이 <b>기를 모을 때</b> 쓰면 좋아요.')}
+  ${gRow(gB('🧪 아이템'),'성수를 써서 HP 40%(최소 60) 회복. '+gB('← 뒤로')+'로 닫아요.')}
+  ${gRow(gB('🏃 도망 (60%)'),'60% 확률로 전투에서 빠져요. 보스전·탑·대결에서는 못 해요.')}
+  ${gRow(gB('⏹ 자동 사냥 멈추기'),'자유 사냥 중에만 보여요.')}
+  ${gRow('🧊 얼음을 깨는 중','적에게 얼면 몇 초 동안 행동할 수 없어요.')}
+  ${gRow('동료 칩','출전한 동료와 HP. 동료는 알아서 싸우고, 회색이면 쓰러진 상태예요.')}
+  ${gRow('적 아래 빨간 글씨','보스의 특수 능력(반사·빙결·각성 등)이에요. 미리 읽어 두면 대비할 수 있어요.')}
+  ${gRow('끝나면','결과 창에서 경험치·코인·드랍과 동료별 준 피해·받은 피해·회복 그래프를 보여줘요.')}`},
+ {id:'grow',ic:'📈',t:'캐릭터 성장',s:'주인공 · 동료 키우는 법 (자세히)',hot:1,b:()=>{
+  const R=gRep(),sid=(st)=>R.find(x=>x[0]===st);
+  const s5=R.filter(x=>x[0].startsWith('★5')),s6=sid('★6');
+  return `
+  ${gH('⚔ 전투력이란?')}
+  <p>강함을 숫자로 나타낸 거예요. <b>팀 전투력 = 주인공 + 이사벨 + 펫 + 출전 동료 3명</b>. 주인공 전투력은 공격×4 + 방어×3 + 최대 HP×0.6 + 최대 MP×0.8 + 레벨×10이에요. (지금 주인공 ${fmt(heroCP())} · 팀 ${fmt(teamCP())})</p>
+
+  ${gH('① 주인공 키우기')}
+  ${gRow('레벨업','전투에서 이기면 경험치를 받아요. 레벨이 오를 때마다 <b>최대 HP +15 · MP +5 · 공격 +3 · 방어 +2</b>, HP 모두 회복.<br>다음 레벨까지 필요한 경험치 = 15 × 레벨<sup>1.5</sup> (Lv 10 → 474 · Lv 100 → 15,000 · Lv 300 → 77,942)')}
+  ${gRow('빨리 올리려면',gB('⚔ 자유 사냥')+' 경험치 ×3 (마계 ×4). 🎡 룰렛 ✨ 경험치 10,000도 있어요.')}
+  ${gRow('장비 강화','상점 '+gB('축성된 검')+' 공격 +4 · '+gB('축성된 사제복')+' 방어 +3 · HP +10. 횟수 제한 없음. 가격 60 + 70×강화 횟수 G.')}
+  ${gRow('유물 · 희귀 아이템','보스·미션·탑에서 얻어요. 얻는 순간 능력치가 영구히 올라요. 동료 탭 '+gB('✨ 유물')+'에서 합계 확인.')}
+  ${gRow('🩸 흡혈 구슬',`상점 ${fmt(BLOOD_ORB_COST)} G. 준 피해의 10% 회복.`)}
+
+  ${gH('② 동료 키우기 — 순서대로')}
+  <div class="gstep"><b>1. 레벨업</b> — 출전한 동료와 이사벨·펫은 전투 경험치를 주인공과 <b>똑같이</b> 받아요. ${gB('레벨업 N G')}로 바로 올릴 수도 있어요. 비용 = 20 × 현재 레벨 × 등급 배율.</div>
+  ${gTbl(['등급','최대 레벨','첫 레벨업','최대까지 총'],[1,2,3,4,5,6].map(st=>['★'+st,'Lv '+LV_CAP[st],fmt(Math.round(20*COST_F[st]))+' G',fmt(gLvTotal(st))+' G']))}
+  <div class="gstep"><b>2. 합성</b> — 같은 카드를 모으면 한 단계 위 등급의 <b>무작위</b> 동료로 바꿔요. 원본 1장은 항상 남아요. ★6은 합성으로 안 나와요(소환에서만).</div>
+  ${gTbl(['재료','결과'],[1,2,3,4].map(st=>[`★${st} 같은 카드 ${SYN_NEED[st]}장`,`★${st+1} 무작위 1명`]))}
+  <div class="gstep"><b>3. 각성</b> (★5·★6) — 💠 천상의 성유물과 같은 카드를 써요.</div>
+  ${gTbl(['단계','재료','성공률'],[[`1~3각성`,`💠1 + 같은 카드 1장<br><span class="small">(전용 캐릭터는 💠${AWAKEN_EXCL_STONE})</span>`,'100%<br><span class="small">단계마다 +20%</span>'],[`4각성`,`💠${AWAKEN_STAGE[4].stone} + 같은 카드 1장`,`${Math.round(AWAKEN_STAGE[4].rate*100)}%`],[`5각성`,`💠${AWAKEN_STAGE[5].stone} + 같은 카드 1장`,`${Math.round(AWAKEN_STAGE[5].rate*100)}%`]],1)}
+  <p class="small">4·5각성은 <b>지역 이동 ${realmStart()}곳을 모두 클리어</b>해야 열려요. 실패하면 💠만 사라지고 카드는 남아요.</p>
+  <div class="gstep"><b>4. 🔱 신화 승급</b> — <b>최대 레벨</b>이 되면 열려요. <b>모든 능력치 2배</b>, 일부 동료는 신화 고유 능력이 생겨요.</div>
+  ${gTbl(['등급','비용'],[1,2,3,4,5,6].map(st=>['★'+st,`${fmt(MYTH_COST[st])} G${st>=5?` + 💠${MYTH_STONE5}`:''}`]))}
+  <div class="gstep"><b>5. 💗 신뢰도</b> (티어가 있는 ★5 · ★6) — 함께 이길수록 올라요. 일반·정예 +${TRUST_GAIN.normal} · 중간 보스 +${TRUST_GAIN.mid} · 최종 보스 +${TRUST_GAIN.boss}점. 최대 10단계.</div>
+  ${gTbl(['신뢰도',1,2,3,4,5],[['필요 점수',...TRUST_REQ.slice(1,6)]])}${gTbl(['신뢰도',6,7,8,9,10],[['필요 점수',...TRUST_REQ.slice(6,11)]])}
+  <p class="small">💗 신뢰도 XP 1개를 쓰면 바로 +2단계. 신뢰도 10이면 전투력 ★5 1티어 +25% · 2티어 +21% · 3티어 +30% · ★6 +13%.</p>
+  <div class="gstep"><b>6. ✴️ 초월</b> (★5 · 펫) — <b>5각성 + 신화</b>를 마치면 ✴️ 구원의 조각 1개로 도전. 성공 ${Math.round(TRANS_RATE*100)}% · 성공하면 <b>전투력 ${TRANS_MULT}배</b>. 실패하면 조각만 사라져요.</div>
+
+  ${gH('③ 단계별 전투력 (최대 레벨 기준)')}
+  ${gTbl(['등급','Lv 1','최대 Lv','신화'],R.filter(x=>!x[0].startsWith('★5')&&x[0]!=='★6').map(([k,id])=>[k,fmt(gCP(id,1,0,0)),fmt(gCP(id,aCap(id),0,0)),fmt(gCP(id,aCap(id),0,1))]))}
+  ${gTbl(['등급','3각성','5각성','3각성<br>+신화','5각성<br>+신화','+신뢰도<br>10','+초월'],[...s5,...(s6?[s6]:[])].map(([k,id])=>{const c=aCap(id),s=ALLIES[id].star===5;
+    return [k,fmt(gCP(id,c,3,0)),fmt(gCP(id,c,5,0)),fmt(gCP(id,c,3,1)),fmt(gCP(id,c,5,1)),fmt(gCP(id,c,5,1,10)),s?fmt(gCP(id,c,5,1,10,1)):'—'];}))}
+  <p class="small">★5는 <b>티어</b>(1티어가 가장 셈)마다 같은 단계라도 전투력이 달라요. 1티어: ${Object.keys(TIER5).filter(k=>TIER5[k]===1&&!ALLIES[k].pet).map(k=>ALLIES[k].name).join(', ')} · 2티어: ${Object.keys(TIER5).filter(k=>TIER5[k]===2&&!ALLIES[k].pet).map(k=>ALLIES[k].name).join(', ')} · 3티어: ${Object.keys(TIER5).filter(k=>TIER5[k]===3&&!ALLIES[k].pet).map(k=>ALLIES[k].name).join(', ')}</p>
+  <p class="small">🐾 펫: 최대 레벨 + 5각성 + 신화 = ${fmt(PET_CP_MAX/TRANS_MULT)}, 초월하면 ${fmt(PET_CP_MAX)}.</p>
+
+  ${gH('④ 재료는 어디서?')}
+  ${gRow('💠 천상의 성유물','최종 보스 25% · 중간 보스 15% · 일반 1% 확률, 스테이지·탑 첫 돌파 보상, 캐릭터 맞추기 15개, 🔁 천상의 성유물작')}
+  ${gRow('✴️ 구원의 조각',`마계 최종 보스 ${Math.round(TRANS_DROP*100)}% (다니안 출전 시 +${Math.round(TRANS_DROP_DANIAN*100)}%p) · 천상의 탑 · 노력의 숲 · 캐릭터 맞추기 · 랭크전 필멸자 티어 100 LP마다`)}
+  ${gRow('💗 신뢰도 XP',`상점(💠${TRUSTXP_STONE}개) · 🎡 룰렛 · 일부 보스 첫 클리어`)}
+  ${gRow('같은 카드','동료 소환에서 또 나오면 +1장')}
+
+  ${gH('⑤ 추천 순서')}
+  <ol class="gol"><li>모험을 진행하며 주인공 레벨을 올리고, 남는 코인으로 <b>검·사제복</b>을 강화해요.</li>
+   <li>소환으로 동료를 모으고, 남는 카드는 <b>🔮 일괄 합성</b>으로 ★5를 노려요.</li>
+   <li>★5가 생기면 <b>출전</b>시켜 레벨을 최대로 → <b>3각성</b> → <b>🔱 신화</b> (전투력 2배라서 가장 효과가 커요).</li>
+   <li>함께 싸워 <b>신뢰도</b>를 올리고, 지역 ${realmStart()}곳을 다 깨면 <b>4·5각성</b>.</li>
+   <li>마지막으로 ✴️ 구원의 조각을 모아 <b>초월</b>.</li></ol>
+  ${gTip('같은 ★5라도 1티어가 가장 강해요. 성유물은 1티어·★6에 먼저 쓰는 게 효율이 좋아요.')}`;}},
+ {id:'items',ic:'🎒',t:'재화 · 아이템',s:'코인 · 소환권 · 성유물 · 조각',b:()=>`
+  ${gRow('💰 코인 (G)','전투 승리 · 미션 · 룰렛 · 친구 대결. 소환·장비·레벨업·신화에 써요.')}
+  ${gRow('🎫 소환권','스테이지 첫 클리어(정예 1 · 중간 보스 2 · 최종 보스 3) · 미션 · 튜토리얼')}
+  ${gRow('🧪 성수','상점 25 G. 전투에서 HP 회복')}
+  ${gRow('💠 천상의 성유물','각성 · 신화(★5·★6) · 신뢰도 XP 구매 · 일부 코스튬')}
+  ${gRow('✴️ 구원의 조각','초월')}
+  ${gRow('💗 신뢰도 XP','★5·★6 신뢰도 +2')}
+  ${gRow('🧩 기억의 퍼즐 조각','기억 보관소에서 희귀 아이템으로 — 공구방 특별 미션 보상')}
+  ${gRow('✨ 유물','얻으면 능력치가 영구히 올라요 — 보스 · 미션 · 탑')}`},
+ {id:'unlock',ic:'🔓',t:'열리는 조건',s:'언제 무엇이 열릴까?',b:()=>gTbl(['콘텐츠','열리는 조건'],[
+   ['다음 지역','지금 지역 15스테이지 최종 보스 처치'],
+   ['🏅 랭크전',`Lv ${RANK_MIN_LV}`],
+   ['🔁 천상의 성유물작','서울 최종 보스(15스테이지)까지 진행'],
+   ['😈 마계',`${AREAS[realmStart()-1].name}까지 클리어`],
+   ['💠 4·5각성',`지역 이동 ${realmStart()}곳 모두 클리어`],
+   ['🗼 구원의 탑',`Lv ${TOWER_MIN_LV} + 지역 ${realmStart()}곳 클리어`],
+   ['☁️ 천상의 탑',`구원의 탑 ${TOWER_MAX}층 정복`],
+   ['🌳 노력의 숲','고대 원단수 클리어'],
+   ['🔱 신화 승급','동료 최대 레벨'],
+   ['✴️ 초월','★5 · 5각성 + 신화'],
+   ['🏰 던전 · 🎡 룰렛 · 🎯 캐릭터 맞추기','처음부터']])}];
+function renderGuide(sec){
+  const S=GUIDE_SECS.find(x=>x.id===sec);
+  if(!S){
+    $('#app').innerHTML=`${statusHTML()}${topBack()}
+      <div class="panel"><div class="ptitle">📖 게임 가이드 <span class="small">궁금한 주제를 눌러 보세요</span></div>
+        <div class="gidx">${GUIDE_SECS.map(x=>`<button class="gcard ${x.hot?'hot':''}" data-gsec="${x.id}"><span class="gic">${x.ic}</span><b>${x.t}</b><small>${x.s}</small></button>`).join('')}</div></div>
+      ${tabBar()}`;
+  }else{
+    const i=GUIDE_SECS.indexOf(S),pv=GUIDE_SECS[i-1],nx=GUIDE_SECS[i+1];
+    $('#app').innerHTML=`${statusHTML()}
+      <div class="topback"><button class="btn" id="gidx">← 가이드 목차</button></div>
+      <div class="panel gpage"><div class="ptitle">${S.ic} ${S.t} <span class="small">${S.s}</span></div>${S.b()}</div>
+      <div class="gnav">${pv?`<button class="btn" data-gsec="${pv.id}">← ${pv.ic} ${pv.t}</button>`:'<span></span>'}${nx?`<button class="btn" data-gsec="${nx.id}">${nx.ic} ${nx.t} →</button>`:'<span></span>'}</div>
+      ${tabBar()}`;
+    $('#gidx').onclick=()=>renderGuide();
+    if($('#gtut'))$('#gtut').onclick=()=>startTutorial(true);
+  }
+  document.querySelectorAll('[data-gsec]').forEach(b=>b.onclick=()=>renderGuide(b.dataset.gsec));
+  window.scrollTo(0,0);
 }
+document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('[data-guide]');if(b&&!B){e.preventDefault();renderGuide();}});
 /* 기억의 퍼즐: 사진이 나타났다가 퍼즐 조각으로 갈라져 흩어지고, 희귀 아이템이 나온다 */
 function puzzleFx(rid,cb){
   const C=5,Rw=6,r=RELICS[rid];
@@ -3071,19 +3301,21 @@ function bar(cur,max,cls,label){
   const p=Math.max(0,Math.min(100,cur/max*100));
   return `<div class="bar ${cls}"><i style="width:${p}%"></i><span>${label?label+' ':''}${Math.ceil(cur)} / ${max}</span></div>`;
 }
+const nameLvHTML=()=>`<span class="nmlv"><b>✝ ${esc(P.name)}</b><span class="lvtag">Lv ${P.lv}</span></span>`;
+const guideBtnHTML=()=>`<button class="guidebtn" data-guide aria-label="게임 가이드">📖<span class="gl"> 가이드</span></button>`;   // 상단 바 가운데: 게임 가이드
 function statusHTML(){
   // 상점·동료·친구 탭(전투 밖)에서는 이름·레벨·골드만 간단히
   if(!B&&hubTab!=='adv')return `<div class="status mini" id="pstatus">
-    <div class="row"><b>✝ ${esc(P.name)}</b><span>Lv ${P.lv}</span><span><span class="gold">${P.gold} G</span><button class="bgmmini" data-bgm>${BGM.isOn()?'🔊':'🔇'}</button></span></div>
+    <div class="row trow">${nameLvHTML()}${guideBtnHTML()}<span class="tright"><span class="gold">${P.gold} G</span><button class="bgmmini" data-bgm>${BGM.isOn()?'🔊':'🔇'}</button></span></div>
   </div>`;
   if(B&&B.dungeon){const pc=Math.max(0,Math.min(100,B.dgLeft/DG_MS*100));   // 던전: 보스가 공격하지 않아 HP 대신 남은 시간을 보여 줌
     return `<div class="status dgstatus" id="pstatus">
-    <div class="row"><b>✝ ${esc(P.name)}</b><span>Lv ${P.lv}</span><span><button class="dgstop" data-act="dgquit">⏹ 중지</button><button class="bgmmini" data-bgm>${BGM.isOn()?'🔊':'🔇'}</button></span></div>
+    <div class="row">${nameLvHTML()}<span><button class="dgstop" data-act="dgquit">⏹ 중지</button><button class="bgmmini" data-bgm>${BGM.isOn()?'🔊':'🔇'}</button></span></div>
     <div class="bar dgtbar ${B.dgLeft<10000?'low':''}" id="dgtbar"><i id="dgtfill" style="width:${pc}%"></i><span id="dgtime">⏱ ${dgSec(B.dgLeft)}초</span></div>
     <div class="row small"><span>공격 ${P.atk}</span><span>방어 ${P.def}</span><span>성수 ${P.items.water}</span></div>
   </div>`;}
   return `<div class="status" id="pstatus">
-    <div class="row"><b>✝ ${esc(P.name)}</b><span>Lv ${P.lv}</span><span><span class="gold">${P.gold} G</span><button class="bgmmini" data-bgm>${BGM.isOn()?'🔊':'🔇'}</button></span></div>
+    <div class="row ${B?'':'trow'}">${nameLvHTML()}${B?'':guideBtnHTML()}<span class="tright"><span class="gold">${P.gold} G</span><button class="bgmmini" data-bgm>${BGM.isOn()?'🔊':'🔇'}</button></span></div>
     ${bar(P.hp,P.maxHp,'hp','HP')}
     ${bar(P.xp,need(P.lv),'xp','EXP')}
     <div class="row small"><span>공격 ${P.atk}</span><span>방어 ${P.def}</span><span>성수 ${P.items.water}</span></div>
@@ -4451,7 +4683,6 @@ function renderHub(msg){
         <button class="btn m-adv${farmReady()?'':' full'}" id="hunt">⚔ 자유 사냥 (자동)<small>경험치·골드 ×${huntMult(P.cur)} · 멈출 때까지 반복</small></button>${farmReady()?`<button class="btn m-adv" id="gfarm">🔁 천상의 성유물작<small>서울 최종 보스 자동 반복 · ${FARM_TARGET}번 잡으면 멈춤</small></button>`:''}
         <button class="btn m-rest" id="rest" ${restLeft()>0?'disabled':''}>${restLabel()}</button>
         <button class="btn m-forest" id="forest" ${forestOpen()?'':'disabled'}>${forestOpen()?`🌳 노력의 숲<small>${forestState().best>=FOREST_MAX?`${FOREST_MAX}층 정상 ✔`:`${forestState().best}/${FOREST_MAX}층 · 빌린 동료로 도전`}</small>`:`🔒 노력의 숲<small>고대 원단수 클리어 시 개방</small>`}</button>
-        <button class="btn m-adv full" id="guide">📖 게임 가이드<small>${P.tutReward?'시스템 설명 · 튜토리얼 다시 보기':`튜토리얼 완료 보상: 💰 ${fmt(TUT_REWARD.gold)} · 🎫 ${TUT_REWARD.tickets}장`}</small></button>
       </div>
     </div>
     <div class="panel"><div class="ptitle">🧭 지역 이동 <span class="small">개방 ${Math.min(P.unlocked+1,RS)}/${RS}</span></div><div class="areas">${areas}</div></div>
@@ -4467,7 +4698,6 @@ function renderHub(msg){
   if($('#gfarm'))$('#gfarm').onclick=()=>startGlasyaFarm();
   $('#hunt').onclick=()=>{autoHunt={on:true,area:P.cur,n:0,xp:0,gold:0};startBattle({area:P.cur,hunt:true});};
   $('#map').onclick=()=>renderMap(P.cur);
-  $('#guide').onclick=()=>renderGuide();
   if($('#rank'))$('#rank').onclick=()=>firstTip('rank',()=>renderRank());
   if($('#tower'))$('#tower').onclick=()=>firstTip('tower',()=>renderTowerSelect());
   if($('#forest'))$('#forest').onclick=()=>renderForest();
