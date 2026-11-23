@@ -1418,6 +1418,8 @@ const ALLIES={
             desc:'번개 발톱(3초마다 적에게 마비 피해 · 1.5초간 마비(행동 불가) · 마비로 입힌 피해의 절반만큼 3초간 주인공과 동료 전원 공격력 증가) · 🐾 펫: 출전 펫으로 고르면 자동 출전 (출전 칸 차지 안 함 · 펫은 1마리만) · 상점 동료 소환에서만 획득'},
   toto:    {star:5,pet:true,name:'토토롱',   icon:'🐰', role:'펫 · 아기 토끼', kit:'charmpet',
             desc:'매혹의 하트(3초마다 적에게 매혹 피해 · 1.5초간 매혹 — 적이 능력을 쓰지 못하고 기본 공격만 함 · 모으던 기술도 취소) · 🐾 펫: 로아가 출전해야만 함께 출전 가능 (출전 칸 차지 안 함 · 펫은 1마리만) · 상점 동료 소환에서만 획득'},
+  mang:    {star:5,pet:true,name:'망아찌',   icon:'🐴', role:'펫 · 아기 망아지', kit:'kickpet',
+            desc:'뒷발차기(3초마다 적에게 피해 · 2초간 기절(행동 불가) · 뒷발차기 피해의 절반만큼 3초간 주인공 방어력 증가) · 🐾 펫: 출전 펫으로 고르면 자동 출전 (출전 칸 차지 안 함 · 펫은 1마리만) · 상점 동료 소환에서만 획득'},
   miner:   {star:5,name:'미네르',        icon:'🌊', role:'물의 여신', kit:'tide', hpMul:0.6,
             desc:'침몰(적을 물속으로 끌어내려 3턴간 적 공격력 감소) · 물보라(2턴간 동료가 받는 피해 절반) · 체력이 적어 쉽게 쓰러지지만, 쓰러지면 물의 여신 「미네르바」로 각성해 HP 60%로 부활(1회) — 이후 공격이 고정 피해 + 치명타'},
   vista5:  {star:5,name:'비스타',        icon:'🚂', role:'열차 소환', kit:'train',
@@ -1478,6 +1480,7 @@ const ALLY_IMG={
   muhee:{src:'ally_muhee.jpg',pos:'50% 20%',face:'50% 24%',size:'420%'},
   aora:{src:'ally_aora.jpg',pos:'50% 18%',face:'52% 18%',size:'400%'},
   baem:{src:'pet_baem.jpg',pos:'40% 40%',face:'38% 39%',size:'260%'},
+  mang:{src:'pet_mang.jpg',pos:'75% 25%',face:'90% 19%',size:'240%'},
   toto:{src:'pet_toto.jpg',pos:'50% 34%',face:'44% 48%',size:'280%'},
   miho:{src:'pet_miho.jpg',pos:'47% 38%',face:'46% 39%',size:'250%'},
   hari:{src:'pet_hari.jpg',pos:'40% 26%',face:'38% 34%',size:'240%'},
@@ -5653,14 +5656,14 @@ function synthAll(){
 }
 
 /* ===================== 전투 ===================== */
-function clearBattle(){forcedMv=null;if(B&&B.forest)forestRestore();if(B&&B.dgT)clearInterval(B.dgT);if(B&&B.enemyT)clearInterval(B.enemyT);if(B&&B.allyT)clearInterval(B.allyT);document.body.classList.remove('pfrozen');if(B&&B.freezeT)clearInterval(B.freezeT);if(B&&B.sakuraT)clearInterval(B.sakuraT);document.body.classList.remove('battle');applyBossTheme(null);if(B&&B.waveT)clearInterval(B.waveT);if(B&&B.soulT)clearInterval(B.soulT);if(B&&B.drainT)clearInterval(B.drainT);if(B&&B.tsT)clearInterval(B.tsT);if(B&&B.paraT)clearInterval(B.paraT);if(B&&B.zapT)clearInterval(B.zapT);if(B&&B.karmaT)clearInterval(B.karmaT);if(B&&B.trainT)clearInterval(B.trainT);if(B&&B.aoraT)clearInterval(B.aoraT);if(B&&B.heartT)clearInterval(B.heartT);if(B&&B.halfT)clearInterval(B.halfT);if(B&&B.fallT)clearInterval(B.fallT);if(B&&B.isaT)clearInterval(B.isaT);if(B&&B.nkT)clearInterval(B.nkT);if(B&&B.apT)clearInterval(B.apT);if(B&&B.remT)clearInterval(B.remT);if(B&&B.lvT)clearInterval(B.lvT);if(B&&B.ktT)clearInterval(B.ktT);if(B)['diceT','judgeT','hariT','baemT','mihoT','totoT','coldT','pandoraT','hnT','hnThT'].forEach(k=>{if(B[k])clearInterval(B[k]);});B=null;}
+function clearBattle(){forcedMv=null;if(B&&B.forest)forestRestore();if(B&&B.dgT)clearInterval(B.dgT);if(B&&B.enemyT)clearInterval(B.enemyT);if(B&&B.allyT)clearInterval(B.allyT);document.body.classList.remove('pfrozen');if(B&&B.freezeT)clearInterval(B.freezeT);if(B&&B.sakuraT)clearInterval(B.sakuraT);document.body.classList.remove('battle');applyBossTheme(null);if(B&&B.waveT)clearInterval(B.waveT);if(B&&B.soulT)clearInterval(B.soulT);if(B&&B.drainT)clearInterval(B.drainT);if(B&&B.tsT)clearInterval(B.tsT);if(B&&B.paraT)clearInterval(B.paraT);if(B&&B.zapT)clearInterval(B.zapT);if(B&&B.karmaT)clearInterval(B.karmaT);if(B&&B.trainT)clearInterval(B.trainT);if(B&&B.aoraT)clearInterval(B.aoraT);if(B&&B.heartT)clearInterval(B.heartT);if(B&&B.halfT)clearInterval(B.halfT);if(B&&B.fallT)clearInterval(B.fallT);if(B&&B.isaT)clearInterval(B.isaT);if(B&&B.nkT)clearInterval(B.nkT);if(B&&B.apT)clearInterval(B.apT);if(B&&B.remT)clearInterval(B.remT);if(B&&B.lvT)clearInterval(B.lvT);if(B&&B.ktT)clearInterval(B.ktT);if(B)['diceT','judgeT','hariT','baemT','mihoT','totoT','mangT','coldT','pandoraT','hnT','hnThT'].forEach(k=>{if(B[k])clearInterval(B[k]);});B=null;}
 /* 반사·부적 등으로 적이 턴 밖에서 쓰러졌을 때 */
 function winNow(){
   if(!B||B.won)return;
   if(B.dungeon){dungeonNextBoss();return;}   // 던전: 승리 대신 다음 보스
   if((B.e.berserk&&!B.berserked)||(B.e.madness&&!B.maddened)||(B.e.awaken&&!B.awoke)||(B.e.twin&&!B.twinned)||(B.e.relay&&(B.relayStage||0)<2)||(B.e.lastStand&&!B.lastStood)||(B.e.rampage&&!B.rampaged)||(B.e.duckHide&&!B.remHid)){B.e.hp=Math.max(1,B.e.hp);renderBattle();return;}
   B.won=true;B.busy=true;if(B.enemyT)clearInterval(B.enemyT);if(B.allyT)clearInterval(B.allyT);if(B.freezeT)clearInterval(B.freezeT);document.body.classList.remove('pfrozen');if(B.sakuraT)clearInterval(B.sakuraT);if(B.paraT)clearInterval(B.paraT);if(B.waveT)clearInterval(B.waveT);if(B.soulT)clearInterval(B.soulT);if(B.drainT)clearInterval(B.drainT);if(B.tsT)clearInterval(B.tsT);
-  if(B.zapT)clearInterval(B.zapT);if(B.karmaT)clearInterval(B.karmaT);if(B.trainT)clearInterval(B.trainT);if(B.aoraT)clearInterval(B.aoraT);if(B.autoT)clearInterval(B.autoT);if(B.diceT)clearInterval(B.diceT);if(B.judgeT)clearInterval(B.judgeT);if(B.hariT)clearInterval(B.hariT);if(B.baemT)clearInterval(B.baemT);if(B.mihoT)clearInterval(B.mihoT);if(B.totoT)clearInterval(B.totoT);if(B.pandoraT)clearInterval(B.pandoraT);if(B.hnT)clearInterval(B.hnT);if(B.hnThT)clearInterval(B.hnThT);if(B.coldT)clearInterval(B.coldT);if(B.heartT)clearInterval(B.heartT);if(B.halfT)clearInterval(B.halfT);if(B.fallT)clearInterval(B.fallT);if(B.isaT)clearInterval(B.isaT);
+  if(B.zapT)clearInterval(B.zapT);if(B.karmaT)clearInterval(B.karmaT);if(B.trainT)clearInterval(B.trainT);if(B.aoraT)clearInterval(B.aoraT);if(B.autoT)clearInterval(B.autoT);if(B.diceT)clearInterval(B.diceT);if(B.judgeT)clearInterval(B.judgeT);if(B.hariT)clearInterval(B.hariT);if(B.baemT)clearInterval(B.baemT);if(B.mihoT)clearInterval(B.mihoT);if(B.totoT)clearInterval(B.totoT);if(B.mangT)clearInterval(B.mangT);if(B.pandoraT)clearInterval(B.pandoraT);if(B.hnT)clearInterval(B.hnT);if(B.hnThT)clearInterval(B.hnThT);if(B.coldT)clearInterval(B.coldT);if(B.heartT)clearInterval(B.heartT);if(B.halfT)clearInterval(B.halfT);if(B.fallT)clearInterval(B.fallT);if(B.isaT)clearInterval(B.isaT);
   renderBattle();setTimeout(victory,750);
 }
 /* 이사벨 부제: 5초마다 주인공 HP 40% 회복 */
@@ -5831,6 +5834,21 @@ function totoTick(){
   const d=Math.max(1,Math.round((12+aData(id).lv*4)*allyMult(id)));
   if(!B.immune){stat('dmg',id,Math.min(d,e.hp));e.hp=Math.max(0,e.hp-d);B.totoUntil=now+TOTO_CHARM;}
   addLog(`💗 토토롱의 매혹의 하트! ${e.name}에게 ${d} 피해${B.immune?' (무효)':` · ${TOTO_CHARM/1000}초간 매혹 (능력 사용 불가)`}`);queueFx('enemy','💗'+d,'dmg');
+  if(e.hp<=0){winNow();return;}
+  renderBattle();
+}
+/* 펫 망아찌: 3초마다 뒷발차기 — 피해(고정) + 2초 기절 · 그 피해의 절반만큼 3초간 주인공 방어력 증가 */
+const MANG_MS=3000, MANG_STUN=2000, MANG_BUFF=3000;
+const mangStunOn=()=>!!(B&&B.mangUntil&&Date.now()<B.mangUntil);
+const mangDef=()=>(B&&B.mangDefUntil&&Date.now()<B.mangDefUntil)?(B.mangDef||0):0;
+function mangTick(){
+  if(!B||B.over||B.won||!$('#modal').classList.contains('hidden'))return;
+  const id='mang',h=B.ahp[id],e=B.e,now=Date.now();
+  if(!inParty(id)||(h&&h.hp<=0)||(B.stun[id]>0)||aFrozen()||e.hp<=0||P.hp<=0)return;
+  const d=Math.max(1,Math.round((12+aData(id).lv*4)*allyMult(id))),df=Math.max(1,Math.round(d/2));
+  if(!B.immune){stat('dmg',id,Math.min(d,e.hp));e.hp=Math.max(0,e.hp-d);B.mangUntil=now+MANG_STUN;}
+  B.mangDef=df;B.mangDefUntil=now+MANG_BUFF;
+  addLog(`🐴 망아찌의 뒷발차기! ${e.name}에게 ${d} 피해${B.immune?' (무효)':` · ${MANG_STUN/1000}초 기절`} · 주인공 방어력 +${df} (${MANG_BUFF/1000}초)`);queueFx('enemy','🐴'+d,'dmg');
   if(e.hp<=0){winNow();return;}
   renderBattle();
 }
@@ -6092,6 +6110,7 @@ function startBattle(spec){
     if(B&&inParty('baem'))B.baemT=setInterval(baemTick,BAEM_MS);
     if(B&&inParty('miho'))B.mihoT=setInterval(mihoTick,MIHO_MS);
     if(B&&inParty('toto'))B.totoT=setInterval(totoTick,TOTO_MS);
+    if(B&&inParty('mang'))B.mangT=setInterval(mangTick,MANG_MS);
     if(B&&inParty('akira')&&isMyth('akira'))B.coldT=setInterval(akiraColdTick,AKIRA_COLD_MS);
     if(B&&inParty('roa'))B.heartT=setInterval(heartTick,HEART_MS);
     if(B&&t.halfTick&&!t.pvp){B.halfAt=Date.now()+t.halfTick;B.halfT=setInterval(halfTick,t.halfTick);}
@@ -6400,6 +6419,8 @@ function renderBattle(){
   if(B.apAff){const af=partyIds().filter(x=>apOn(x)).map(x=>ALLIES[x].name);if(af.length)st.push(`🩸🔥 ${af.join('·')} 출혈·화상`);}
   if(atrDownPct())st.push(`🔥 적 공격↓ ${Math.round(atrDownPct()*100)}%`);
   if(B.atrCurse&&Date.now()<B.atrCurse.until)st.push(`🕯 저주 (회복 불가)`);
+  if(mangStunOn())st.push(`🐴 기절`);
+  if(mangDef())st.push(`🐴 방어력 +${mangDef()}`);
   if(totoCharmOn())st.push(`💗 매혹`);
   if(mihoParaOn())st.push(`⚡ 마비`);
   if(mihoAtk())st.push(`🐯 공격력 +${mihoAtk()}`);
@@ -6843,6 +6864,7 @@ function alliesAct(){
       case 'bloodpet': break; // 뱀뱀이: 흡혈 송곳니는 baemTick
       case 'zappet': break;   // 미호롱: 번개 발톱은 mihoTick
       case 'charmpet': break; // 토토롱: 매혹의 하트는 totoTick
+      case 'kickpet': break;  // 망아찌: 뒷발차기는 mangTick
       case 'dessert': allyHit(14+lv*4.5,`${nm}의 디저트 포크`,0.4);break; // 히노아: 디저트 던지기는 hnThrowTick (2초마다)
       case 'heatwave':{ // 아트리스: 열파(적 현재 체력 비례 공격력 감소) · 저주(회복 불가) · 공격력·마법력 절반씩
         const pct=ATR_DOWN_MAX*Math.max(0,Math.min(1,e.hp/e.maxHp)),now=Date.now();
@@ -6910,7 +6932,7 @@ function hitPlayer(mult,label){
   if(B.evadeNext){B.evadeNext=false;addLog(`${label} — 🔦 눈이 부신 적의 공격이 빗나갔다!`);queueFx('player','MISS','mpf');return 0;}
   if(B.blind&&Math.random()<0.35){addLog(`${label} — 📜 시야가 가려진 적의 공격이 빗나갔다!`);queueFx('player','MISS','mpf');return 0;}
   if(B.negate){addLog(`${label} — 🗡 갈라진 대지에 막혀 무력화됐다!`);queueFx('player','무력화','mpf');return 0;}
-  const def=P.def*(B.curse?0.6:1)*(e.magic?0.5:1); // 마법 피해: 방어력 절반
+  const def=(P.def+mangDef())*(B.curse?0.6:1)*(e.magic?0.5:1); // 마법 피해: 방어력 절반 · 망아찌 뒷발차기 방어력 증가
   const critOn=e.critAll&&!(sakuraWind()&&Math.random()<(isMyth('sakura')?0.75:0.5));
   if(e.critAll&&!critOn)label+=' (🌸 벚꽃바람에 치명타가 빗나감)';
   const crit=critOn?e.critAll*(B.awoke&&e.awaken?e.awaken.critMult:1):1;
@@ -7147,6 +7169,7 @@ function enemyTurn(){
   else if(ezBindOn())mv={t:'bound'};
   else if(e.noAttack)mv={t:'kidle'};
   else if(mihoParaOn())mv={t:'mpara'};
+  else if(mangStunOn())mv={t:'mkick'};
   else if(totoCharmOn()&&!e.pvp){const was=B.charging?B.chargeName:'';if(B.charging){B.charging=false;B.chargeKind=null;}mv={t:'atk',n:`💗 매혹된 공격${was?` (「${was}」 취소)`:''}`};}
   else if(B.sealed>0){mv={t:'sealed'};B.sealed--;}
   else if(B.charging){mv={t:'release',n:B.chargeName,kind:B.chargeKind};B.charging=false;B.chargeKind=null;}
@@ -7162,6 +7185,7 @@ function enemyTurn(){
     case 'frozen':  addLog(`🧊 ${e.name} — 얼어붙어 움직일 수 없다!`);break;
     case 'bound':   addLog(`⛓ ${e.name} — 심판의 속박에 묶여 움직일 수 없다!`);break;
     case 'kidle':   break; // 케테케테: 직접 공격하지 않음 (폭풍·흑마는 keteTick)
+    case 'mkick':   addLog(`🐴 ${e.name} — 망아찌의 뒷발차기에 기절해 움직일 수 없다!`);break;
     case 'mpara':   addLog(`⚡ ${e.name} — 미호롱의 번개에 마비되어 움직일 수 없다!`);break;
     case 'pvp':     pvpEnemyActs(e);break;
     case 'nullify': B.immune=2;addLog(`${label} — ⏸ 잠시 동안 모든 피해가 무효화된다!`);break;
@@ -7250,7 +7274,7 @@ function enemyTurn(){
       break;
   }
   // 나베리우스: 숨 쉴 틈 없는 추격 참격
-  const _held=mv.t==='sealed'||mv.t==='frozen'||mv.t==='bound'||mv.t==='mpara'||mv.t==='kidle'; // 봉인·빙결·속박 중엔 추가 공격도 없음
+  const _held=mv.t==='sealed'||mv.t==='frozen'||mv.t==='bound'||mv.t==='mpara'||mv.t==='kidle'||mv.t==='mkick'; // 봉인·빙결·속박 중엔 추가 공격도 없음
   if(e.burnHit&&!_held&&P.hp>0&&Math.random()<0.4&&!(B.dot&&B.dot.name==='화상')){B.dot={name:'화상',dmg:Math.max(5,Math.round(e.atk*0.12)),turns:3};addLog('🔥 라이아의 불길 — 화상');}
   if(e.slashes&&!_held&&P.hp>0){
     for(let i=0;i<e.slashes;i++)hitPlayer(0.35,`🗡 추격 참격 ${i+1}`);
