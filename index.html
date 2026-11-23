@@ -981,6 +981,9 @@ body:has(.tabbar) .tabbar{background:color-mix(in srgb,var(--tc) 6%,rgba(8,12,26
 .gol{margin:4px 0;padding-left:20px;font-size:14px;line-height:1.7}
 .gnav{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:8px 0}.gnav .btn{font-size:13px}
 .topback{margin-bottom:8px}
+/* 돌아가기 · 가이드 목차 버튼: 화면을 내려도 왼쪽 위에 붙어서 따라옴 (아이폰 상태 표시줄 아래) */
+.backtop-row,.topback{position:sticky;top:calc(env(safe-area-inset-top) + 6px);z-index:25;align-self:flex-start}
+.backtop-row .backtop,.topback .btn{box-shadow:0 3px 12px rgba(3,6,15,.55)}
 /* 업데이트 소식 */
 .patch .sum-title{margin-bottom:4px}
 .pchips{display:flex;flex-wrap:wrap;gap:5px;justify-content:center;margin:10px 0 4px}
