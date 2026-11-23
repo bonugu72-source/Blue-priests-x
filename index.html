@@ -3045,7 +3045,7 @@ function statusHTML(){
   </div>`;
 }
 const owned=id=>(P.roster[id]||0)>0;
-const SORTIE_RULES={noIsabelT1:{text:'이사벨 부제 출전 불가 · ★5 1티어 동료 출전 금지',ok:id=>!(ALLIES[id]&&ALLIES[id].star===5&&TIER5[id]===1),noFixed:true},star5x2:{text:'★5 동료 최대 2명만 출전 가능 (이사벨 부제 출전 불가)',ok:id=>ALLIES[id].star===5,noFixed:true,max:2},noIsabel:{text:'이사벨 부제 출전 불가 — 출전 동료만으로 싸워야 함',ok:id=>true,noFixed:true},myth:{text:'신화 승급 동료만 출전 가능 (이사벨 부제는 고정 동행)',ok:id=>isMyth(id)},myth4:{text:'신화 승급 동료 또는 ★4 동료만 출전 가능 (이사벨 부제는 고정 동행)',ok:id=>isMyth(id)||ALLIES[id].star===4},one:{text:'동료 1명만 출전 가능 (이사벨 부제 출전 불가)',ok:id=>true,noFixed:true,max:1},myth2:{text:'신화 승급 동료 최대 2명만 출전 가능 (이사벨 부제 출전 불가)',ok:id=>isMyth(id),noFixed:true,max:2},noTier1:{text:'★5 1티어 동료 출전 금지 (이사벨 부제는 고정 동행)',ok:id=>!(ALLIES[id]&&ALLIES[id].star===5&&TIER5[id]===1)}};
+const SORTIE_RULES={noIsabelT1:{text:'이사벨 부제 출전 불가 · ★5 1티어 동료 출전 금지 (펫은 출전 가능)',ok:id=>!(ALLIES[id]&&ALLIES[id].star===5&&TIER5[id]===1),noFixed:true,keepPet:true},star5x2:{text:'★5 동료 최대 2명만 출전 가능 (이사벨 부제 출전 불가)',ok:id=>ALLIES[id].star===5,noFixed:true,max:2},noIsabel:{text:'이사벨 부제 출전 불가 — 출전 동료만으로 싸워야 함',ok:id=>true,noFixed:true},myth:{text:'신화 승급 동료만 출전 가능 (이사벨 부제는 고정 동행)',ok:id=>isMyth(id)},myth4:{text:'신화 승급 동료 또는 ★4 동료만 출전 가능 (이사벨 부제는 고정 동행)',ok:id=>isMyth(id)||ALLIES[id].star===4},one:{text:'동료 1명만 출전 가능 (이사벨 부제 출전 불가)',ok:id=>true,noFixed:true,max:1},myth2:{text:'신화 승급 동료 최대 2명만 출전 가능 (이사벨 부제 출전 불가)',ok:id=>isMyth(id),noFixed:true,max:2},noTier1:{text:'★5 1티어 동료 출전 금지 (이사벨 부제는 고정 동행)',ok:id=>!(ALLIES[id]&&ALLIES[id].star===5&&TIER5[id]===1)}};
 const sortieRule=a=>AREAS[a]&&SORTIE_RULES[AREAS[a].sortie];
 const sortieOk=(a,id)=>{const r=sortieRule(a);return !r||r.ok(id);};
 const partyIds=()=>(B&&B.party)?B.party:[FIXED,...petParty(),...P.active];
@@ -5105,7 +5105,8 @@ function startBattle(spec){
   const noFixed=spec.tower?true:!spec.pvp&&!spec.dungeon&&sortieRule(a)&&sortieRule(a).noFixed;
   const smax=spec.tower?1:!spec.pvp&&!spec.dungeon&&sortieRule(a)&&sortieRule(a).max;
   const okList=(spec.dungeon?dgParty():P.active).filter(id=>spec.pvp||spec.tower||spec.dungeon||sortieOk(a,id)).slice(0,smax||9);
-  const party=[...(noFixed?[]:[FIXED,...petParty()]),...okList];
+  const keepPet=!spec.tower&&!spec.pvp&&!spec.dungeon&&sortieRule(a)&&sortieRule(a).keepPet;
+  const party=[...(noFixed?(keepPet?petParty():[]):[FIXED,...petParty()]),...okList];
   const benched=spec.pvp||spec.tower||spec.dungeon?[]:P.active.filter(id=>!okList.includes(id));
   party.forEach(id=>{const al=ALLIES[id],mx=Math.round((50+aData(id).lv*10)*(0.7+0.15*al.star)*(isMyth(id)?2:1)*(al.hpMul||1));ahp[id]={hp:mx,max:mx};});
   B={e:{...t,maxHp:t.hp},spec,area:a,stage:spec.hunt?0:s,stype:type,baseName:t.name,isBoss,isFinal:!!t.final,
