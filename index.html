@@ -390,6 +390,10 @@ body.pfrozen #cmds .btn{filter:saturate(.2) brightness(1.2);background:linear-gr
 .node .kc{position:absolute;left:100%;top:50%;transform:translate(6px,-50%);font-size:10px;font-weight:400;white-space:nowrap;color:#ffd38a;background:rgba(0,0,0,.5);padding:1px 6px;border-radius:8px;pointer-events:none;line-height:1.5}
 .realmp{border-color:rgba(199,139,255,.45);background:linear-gradient(160deg,rgba(60,20,80,.55),rgba(20,10,35,.6))}
 .realmp.lockp{opacity:.75}
+.advsub{display:flex;flex-direction:column;gap:6px;margin-top:4px}
+.ptitle.advsh{font-size:15px}
+.advsub.realmsub{padding:10px;border-radius:12px;border:1px solid rgba(199,139,255,.45);background:linear-gradient(160deg,rgba(60,20,80,.55),rgba(20,10,35,.6))}
+.advsub.realmsub.lockp{opacity:.75}
 .area.realm{border-color:rgba(199,139,255,.5)}.area.realm.on{box-shadow:0 0 0 2px #c78bff inset}
 .memrow{width:100%;text-align:left;background:linear-gradient(135deg,rgba(255,230,240,.08),rgba(200,220,255,.06));border:1px solid rgba(255,210,230,.35);border-radius:12px;color:inherit;font:inherit;cursor:pointer;padding:6px}
 .memthumb{width:40px;height:40px;border-radius:8px;background-size:cover;background-position:center;box-shadow:0 0 10px rgba(255,200,220,.4)}
@@ -764,6 +768,17 @@ body.pfrozen #cmds .btn{filter:saturate(.2) brightness(1.2);background:linear-gr
 .relicbtn{width:100%;text-align:left;cursor:pointer;color:inherit;font:inherit;border:1px solid rgba(232,199,106,.4);border-radius:16px;padding:16px 14px;background:linear-gradient(140deg,#3a2f1c,#2a2140 70%);box-shadow:0 0 18px rgba(232,199,106,.12);display:flex;flex-direction:column;gap:10px}
 .relicbtn .rtop{display:flex;align-items:center;justify-content:space-between;font-weight:800;font-size:18px}
 .relicbtn .rtop .go{color:var(--gold);font-size:20px}
+.navcard{width:100%;text-align:left;cursor:pointer;color:inherit;font:inherit;border:1px solid var(--nb);border-radius:14px;padding:14px;background:var(--nbg);display:flex;align-items:center;gap:12px}
+.navcard .ni{font-size:28px;line-height:1}
+.navcard .nt{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}
+.navcard .nt b{font-size:16px;font-weight:800}
+.navcard .nt small{font-size:12.5px;color:var(--nc)}
+.navcard .go{font-size:20px;color:var(--nc)}
+.navcard:active{transform:scale(.99)}
+.nc-dex{--nb:rgba(170,150,240,.4);--nbg:linear-gradient(140deg,#322b4a,#22203c);--nc:#c4b6e6}
+.nc-mem{--nb:rgba(240,190,120,.4);--nbg:linear-gradient(140deg,#3e2e1e,#2a2238);--nc:#f0d0a0}
+.nc-garden{--nb:rgba(140,220,150,.4);--nbg:linear-gradient(140deg,#1f3d2a,#1e2a3a);--nc:#b6e6c0}
+.nc-quiz{--nb:rgba(255,150,170,.4);--nbg:linear-gradient(140deg,#43233a,#262040);--nc:#f4bccb}
 .relicsum{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
 .relicsum div{background:rgba(0,0,0,.25);border-radius:10px;padding:8px 4px;text-align:center;font-size:12px;color:#d9cfb0}
 .relicsum b{display:block;font-size:18px;color:var(--gold);margin-top:2px}
@@ -2692,6 +2707,7 @@ const GUIDE_SECS=[
   ${gRow('🕊️ 고정 조력자','<b>이사벨 부제</b>는 자리를 차지하지 않고 항상 함께 나가요. (일부 스테이지는 출전 금지)')}
   ${gRow('⚔ 팀 전투력','주인공 + 이사벨 + 펫 + 출전 동료 전투력을 더한 값이에요.')}
   ${gRow(gB('🤝 동료 관리'),'출전 · 레벨업 · 합성 · 각성 · 신화 · 신뢰도 · 초월을 하는 곳 (아래 설명)')}
+  ${gH('출전 동료 칸 아래 (따로따로)')}
   ${gRow(gB('📖 동료 도감'),'모든 동료의 이름과 능력을 봐요. 누르면 능력과 신화 고유 능력까지 자세히 나와요.')}
   ${gRow(gB('🧩 기억 보관소'),'🧩 기억의 퍼즐 조각을 쓰면 잠긴 기억이 희귀 아이템(주인공 방어력 +20)으로 돌아와요.')}
   ${gRow(gB('🏡 우리의 정원'),`빈방 꾸미기. 🛋 생활용품을 사고, 🎲 친구 뽑기(${fmt(GARDEN_DRAW)} 코인)로 친구들을 방에 초대해요.`)}
@@ -2714,19 +2730,24 @@ const GUIDE_SECS=[
   ${gRow(gB('🐾 이 펫으로 출전'),`출전할 펫을 골라요. ${Object.keys(PET_NEED).map(k=>`${ALLIES[k].name}는 ${ALLIES[PET_NEED[k]].name}가 출전할 때만 함께 나가요.`).join(' ')}`)}
   ${gTip('버튼 하나하나가 정확히 얼마나 강해지는지는 「📈 캐릭터 성장」에 표로 정리했어요.')}`},
  {id:'adv',ic:'🗺',t:'모험 탭',s:'스테이지 · 랭크전 · 탑 · 사냥 · 미션',b:()=>`
-  ${gH('지금 지역 칸')}
+  ${gH('지금 지역 칸 (맨 위)')}
   ${gRow(gB('🗺 스테이지 지도'),`지역마다 ${STAGES}스테이지가 있어요. 스테이지를 고르고 ${gB('⚔ 출전')}. 5번은 <b>정예</b>, 10번은 <b>중간 보스</b>(솔로몬 72악마), 15번은 <b>최종 보스</b>예요. 깬 스테이지는 다시 할 수 있어요.`)}
-  ${gRow(gB('🏅 랭크전'),`Lv ${RANK_MIN_LV}부터. ★5 무작위 3명(구원자·필멸자는 5명)을 데려온 AI와 싸워요. 승리 +${RANK_WIN} LP · 패배 −${RANK_LOSS} LP. ${RANK_LP} LP마다 승급: ${RANKS.map(r=>r.icon+r.n).join(' → ')} (챌린저 → 구원자 · 구원자 → 필멸자는 ${fmt(RANK_SAVIOR_LP)} LP)`)}
-  ${gRow(gB('🗼 탑'),`Lv ${TOWER_MIN_LV} + 지역 ${realmStart()}곳 클리어 후. 탑을 골라 들어가요.<br>· <b>구원의 탑</b> ${TOWER_MAX}층 · 동료 <b>1명</b>만 데려가요. 층을 처음 돌파하면 보상(5층 💠3 · 10층 💠5 · 15층 💠10 · 20층 150,000 코인 · 25층 ★5 루메온 · 30층 💠10+유물, 나머지 층 💠1)<br>· <b>천상의 탑</b> 구원의 탑 ${TOWER_MAX}층을 정복하면 열려요. 돌파 보상 ${Object.keys(HEAVEN_REWARD).map(k=>`${k}층 ${heavenRewardText(+k)}`).join(' · ')}<br>탑 안의 ${gB('⚔ N층 도전')} ${gB('🔁 1층부터 다시 오르기')} ${gB('🤝 출전 동료 바꾸기')}`)}
+  ${gRow('🧭 지역 이동','지역 버튼을 누르면 그 지역으로 가요. 최종 보스를 깨면 다음 지역이 열려요.')}
+  ${gRow('😈 마계 이동',`${AREAS[realmStart()-1].name}까지 깨면 열리는 강한 보스들의 영역이에요. 마계 최종 보스는 ✴️ 구원의 조각을 ${Math.round(TRANS_DROP*100)}% 확률로 줘요.`)}
+  ${gH('⚔ 사냥 · 휴식')}
   ${gRow(gB('⚔ 자유 사냥 (자동)'),'지금 지역 몬스터와 멈출 때까지 자동으로 싸워요. 경험치·코인 <b>×3</b> (마계 <b>×4</b>). 전투 화면의 '+gB('⏹ 자동 사냥 멈추기')+'로 멈춰요.')}
   ${gRow(gB('🔁 천상의 성유물작'),`서울 최종 보스까지 가면 생겨요. 서울 최종 보스를 자동으로 반복하고 ${FARM_TARGET}번 잡으면 멈춰요.`)}
   ${gRow(gB('⛪ 성당 휴식'),'HP를 모두 회복해요. 쓰고 나면 3분 뒤에 다시 쓸 수 있어요.')}
+  ${gH('🏅 랭크전')}
+  ${gRow(gB('🏅 랭크전'),`Lv ${RANK_MIN_LV}부터. ★5 무작위 3명(구원자·필멸자는 5명)을 데려온 AI와 싸워요. 승리 +${RANK_WIN} LP · 패배 −${RANK_LOSS} LP. ${RANK_LP} LP마다 승급: ${RANKS.map(r=>r.icon+r.n).join(' → ')} (챌린저 → 구원자 · 구원자 → 필멸자는 ${fmt(RANK_SAVIOR_LP)} LP)`)}
+  ${gH('🗼 탑 · 숲 도전')}
+  ${gRow(gB('🗼 탑'),`Lv ${TOWER_MIN_LV} + 지역 ${realmStart()}곳 클리어 후. 탑을 골라 들어가요.<br>· <b>구원의 탑</b> ${TOWER_MAX}층 · 동료 <b>1명</b>만 데려가요. 층을 처음 돌파하면 보상(5층 💠3 · 10층 💠5 · 15층 💠10 · 20층 150,000 코인 · 25층 ★5 루메온 · 30층 💠10+유물, 나머지 층 💠1)<br>· <b>천상의 탑</b> 구원의 탑 ${TOWER_MAX}층을 정복하면 열려요. 돌파 보상 ${Object.keys(HEAVEN_REWARD).map(k=>`${k}층 ${heavenRewardText(+k)}`).join(' · ')}<br>탑 안의 ${gB('⚔ N층 도전')} ${gB('🔁 1층부터 다시 오르기')} ${gB('🤝 출전 동료 바꾸기')}`)}
   ${gRow(gB('🌳 노력의 숲'),`고대 원단수를 깨면 열려요. 빌린 ★5 동료 3명과 고정 능력치 주인공(HP 4,000 · 공격 800 · 방어 500)으로 ${FOREST_MAX}층까지. 5층 ✴️1 · 10층 ✴️3 · 15층 ✴️4 · 23층 ★6 아트리스.`)}
-  ${gH('아래 칸들')}
-  ${gRow('🧭 지역 이동','지역 버튼을 누르면 그 지역으로 가요. 최종 보스를 깨면 다음 지역이 열려요.')}
-  ${gRow('😈 마계 이동',`${AREAS[realmStart()-1].name}까지 깨면 열리는 강한 보스들의 영역이에요. 마계 최종 보스는 ✴️ 구원의 조각을 ${Math.round(TRANS_DROP*100)}% 확률로 줘요.`)}
+  ${gH('📜 미션')}
   ${gRow('📜 미션 '+gB('보상 받기')+' '+gB('전달하기'),'지역마다 있는 미션. 조건을 채우면 버튼이 생겨요. 소환권·유물을 줘요.')}
-  ${gRow(gB('👥 공구방 특별 미션'),'눌러서 들어가면 미션 목록이 있어요. '+gB('보상 받기')+'로 🧩 기억의 퍼즐 조각을 받아요.')}`},
+  ${gRow(gB('👥 공구방 특별 미션'),'눌러서 들어가면 미션 목록이 있어요. '+gB('보상 받기')+'로 🧩 기억의 퍼즐 조각을 받아요.')}
+  ${gH('맨 아래')}
+  ${gRow(gB('📖 게임 가이드'),'지금 보고 있는 이 가이드를 열어요. 맨 위 가운데 '+gB('📖 가이드')+'와 같아요.')}`},
  {id:'dungeon',ic:'🏰',t:'던전 탭',s:'60초 공격력 측정 · 랭킹',b:()=>`
   ${gRow(gB('⚔ 던전 입장'),`보스 ${dgSeq().main.length}명이 순서대로 나오고, 다 쓰러뜨리면 마계 보스 ${dgSeq().realm.length}명이 계속 반복돼요. 보스는 공격하지 않는 샌드백이에요. ${DG_MS/1000}초 동안 넣은 총 딜이 기록이에요.`)}
   ${gRow('3 · 2 · 1','시작을 누르면 카운트다운 뒤에 시간이 흘러요.')}
@@ -4759,21 +4780,31 @@ function renderHub(msg){
     <div class="panel"><div class="ptitle">${a.flag} ${a.name} <span class="small">${a.country}</span></div>
       <div class="stagecur"><span class="small">${cleared?'모든 스테이지 완료':'다음 스테이지 · '+nxt+'/'+STAGES}</span>
         <b>${cleared?'✔ '+a.name+' 정화 완료':stageName(P.cur,nxt)}</b></div>
+      <button class="btn m-adv main full" id="map">🗺 스테이지 지도<small>진행 ${prog}/${STAGES}</small></button>
+      <div class="advsub"><div class="ptitle advsh">🧭 지역 이동 <span class="small">개방 ${Math.min(P.unlocked+1,RS)}/${RS}</span></div><div class="areas">${areas}</div></div>
+      <div class="advsub realmsub ${realmOpen?'':'lockp'}"><div class="ptitle advsh">😈 마계 이동 <span class="small">${realmOpen?`개방 ${Math.min(P.unlocked+1,AREAS.length)-RS}/${AREAS.length-RS}`:'🔒 잠김'}</span></div>
+        ${realmOpen?`<div class="areas">${realms}</div>`:`<div class="desc">🔒 ${AREAS[RS-1].name}까지 클리어하면 마계로 가는 문이 열린다.</div>`}</div>
+    </div>
+    <div class="panel"><div class="ptitle">⚔ 사냥 · 휴식</div>
       <div class="grid">
-        <button class="btn m-adv main full" id="map">🗺 스테이지 지도<small>진행 ${prog}/${STAGES}</small></button>
-        <div class="rankrow">        <button class="btn m-rank" id="rank" ${P.lv<RANK_MIN_LV?'disabled':''}>${P.lv<RANK_MIN_LV?`🔒 랭크전<small>Lv ${RANK_MIN_LV}부터 열림 (현재 Lv ${P.lv})</small></button>`:`${rankOf().icon} 랭크전<small>${rankOf().n}${rankNeed(rankState().tier)?` · ${rankState().lp}/${rankNeed(rankState().tier)} LP`:` · ${rankState().lp} LP`} · ${rankState().w}승 ${rankState().l}패</small></button>`}
-        <button class="btn m-tower" id="tower" ${towerOpen()?'':'disabled'}>${towerOpen()?`🗼 구원의 탑<small>${towerState().best>=TOWER_MAX?`${TOWER_MAX}층 정복 ✔`:`${towerState().best}/${TOWER_MAX}층 · 동료 1명`}</small>`:`🔒 구원의 탑<small>Lv ${TOWER_MIN_LV} · 지역 ${realmStart()}곳 클리어 (${worldClearCount()}/${realmStart()})</small>`}</button></div>
-        <button class="btn m-adv${farmReady()?'':' full'}" id="hunt">⚔ 자유 사냥 (자동)<small>경험치·골드 ×${huntMult(P.cur)} · 멈출 때까지 반복</small></button>${farmReady()?`<button class="btn m-adv" id="gfarm">🔁 천상의 성유물작<small>서울 최종 보스 자동 반복 · ${FARM_TARGET}번 잡으면 멈춤</small></button>`:''}
-        <button class="btn m-rest" id="rest" ${restLeft()>0?'disabled':''}>${restLabel()}</button>
+        <button class="btn m-adv" id="hunt">⚔ 자유 사냥 (자동)<small>경험치·골드 ×${huntMult(P.cur)} · 멈출 때까지 반복</small></button>${farmReady()?`<button class="btn m-adv" id="gfarm">🔁 천상의 성유물작<small>서울 최종 보스 자동 반복 · ${FARM_TARGET}번 잡으면 멈춤</small></button>`:''}
+        <button class="btn m-rest${farmReady()?' full':''}" id="rest" ${restLeft()>0?'disabled':''}>${restLabel()}</button>
+      </div>
+    </div>
+    <div class="panel"><div class="ptitle">🏅 랭크전</div>
+      <button class="btn m-rank full" id="rank" ${P.lv<RANK_MIN_LV?'disabled':''}>${P.lv<RANK_MIN_LV?`🔒 랭크전<small>Lv ${RANK_MIN_LV}부터 열림 (현재 Lv ${P.lv})</small>`:`${rankOf().icon} 랭크전<small>${rankOf().n}${rankNeed(rankState().tier)?` · ${rankState().lp}/${rankNeed(rankState().tier)} LP`:` · ${rankState().lp} LP`} · ${rankState().w}승 ${rankState().l}패</small>`}</button>
+    </div>
+    <div class="panel"><div class="ptitle">🗼 탑 · 숲 도전</div>
+      <div class="grid">
+        <button class="btn m-tower" id="tower" ${towerOpen()?'':'disabled'}>${towerOpen()?`🗼 구원의 탑<small>${towerState().best>=TOWER_MAX?`${TOWER_MAX}층 정복 ✔`:`${towerState().best}/${TOWER_MAX}층 · 동료 1명`}</small>`:`🔒 구원의 탑<small>Lv ${TOWER_MIN_LV} · 지역 ${realmStart()}곳 클리어 (${worldClearCount()}/${realmStart()})</small>`}</button>
         <button class="btn m-forest" id="forest" ${forestOpen()?'':'disabled'}>${forestOpen()?`🌳 노력의 숲<small>${forestState().best>=FOREST_MAX?`${FOREST_MAX}층 정상 ✔`:`${forestState().best}/${FOREST_MAX}층 · 빌린 동료로 도전`}</small>`:`🔒 노력의 숲<small>고대 원단수 클리어 시 개방</small>`}</button>
       </div>
     </div>
-    <div class="panel"><div class="ptitle">🧭 지역 이동 <span class="small">개방 ${Math.min(P.unlocked+1,RS)}/${RS}</span></div><div class="areas">${areas}</div></div>
-    <div class="panel realmp ${realmOpen?'':'lockp'}"><div class="ptitle">😈 마계 이동 <span class="small">${realmOpen?`개방 ${Math.min(P.unlocked+1,AREAS.length)-RS}/${AREAS.length-RS}`:'🔒 잠김'}</span></div>
-      ${realmOpen?`<div class="areas">${realms}</div>`:`<div class="desc">🔒 ${AREAS[RS-1].name}까지 클리어하면 마계로 가는 문이 열린다.</div>`}</div>
-    <div class="panel"><div class="ptitle">📜 미션</div>${missionHTML}</div>
+    <div class="panel"><div class="ptitle">📜 미션</div>${missionHTML}
     ${(()=>{const dn=GG_MISSIONS.filter(ggDone).length,rd=GG_MISSIONS.filter(m=>!ggDone(m)&&ggProg(m)>=ggNeed(m)).length;
       return `<button class="btn m-gg full" id="ggbtn">👥 공구방 특별 미션${rd?` <span class="ggnew">보상 ${rd}개</span>`:''}<small>완료 ${dn}/${GG_MISSIONS.length} · 보상: 🧩 기억의 퍼즐 조각</small></button>`;})()}
+    </div>
+    <button class="btn m-adv full" data-guide>📖 게임 가이드<small>모든 버튼 설명 · 캐릭터 성장 방법 · 튜토리얼 다시 보기</small></button>
     ${tabBar()}`;
   document.querySelectorAll('.area').forEach(b=>b.onclick=()=>{P.cur=+b.dataset.i;save();renderHub();});
   document.querySelectorAll('[data-claim]').forEach(b=>b.onclick=()=>claim(b.dataset.claim));
@@ -4880,14 +4911,12 @@ function renderAllyTab(msg){
     <div class="panel"><div class="ptitle">⚔ 출전 동료 <span class="small">${P.active.length}/${MAX_ACTIVE}</span></div>
       ${sortieSlotsHTML()}
       <div class="teamcp">⚔ 팀 전투력 <b>${fmt(teamCP())}</b> <span class="small">주인공 ${fmt(heroCP())} + 동료 ${fmt(teamCP()-heroCP())}</span></div>
-      <div class="grid">
-        <button class="btn m-ally" id="allies">🤝 동료 관리<small>출전·레벨업·합성·각성</small></button>
-        <button class="btn m-coll" id="dex">📖 동료 도감<small>모든 동료의 이름·능력</small></button>
-        <button class="btn m-coll full" id="memvault">🧩 기억 보관소<small>기억의 퍼즐 조각 ${P.items.puzzle||0}개 · 희귀 아이템 ${MEMORY_ITEMS.filter(k=>P.relics.includes(k)).length}/${MEMORY_ITEMS.length}</small></button>
-        <button class="btn m-coll full" id="garden">🏡 우리의 정원<small>빈방 꾸미기 · 친구 ${(P.garden&&P.garden.friends.length)||0}/11명</small></button>
-        <button class="btn m-coll full" id="quiz">🎯 캐릭터 맞추기<small>50초 동안 ★5·★6 동료 이름 맞히기 · 최고 기록 ${P.quizBest||0}개</small></button>
-      </div>
+      <button class="btn m-ally full" id="allies">🤝 동료 관리<small>출전·레벨업·합성·각성</small></button>
     </div>
+    <button class="navcard nc-dex" id="dex"><span class="ni">📖</span><span class="nt"><b>동료 도감</b><small>모든 동료의 이름·능력</small></span><span class="go">›</span></button>
+    <button class="navcard nc-mem" id="memvault"><span class="ni">🧩</span><span class="nt"><b>기억 보관소</b><small>기억의 퍼즐 조각 ${P.items.puzzle||0}개 · 희귀 아이템 ${MEMORY_ITEMS.filter(k=>P.relics.includes(k)).length}/${MEMORY_ITEMS.length}</small></span><span class="go">›</span></button>
+    <button class="navcard nc-garden" id="garden"><span class="ni">🏡</span><span class="nt"><b>우리의 정원</b><small>빈방 꾸미기 · 친구 ${(P.garden&&P.garden.friends.length)||0}/11명</small></span><span class="go">›</span></button>
+    <button class="navcard nc-quiz" id="quiz"><span class="ni">🎯</span><span class="nt"><b>캐릭터 맞추기</b><small>50초 동안 ★5·★6 동료 이름 맞히기 · 최고 기록 ${P.quizBest||0}개</small></span><span class="go">›</span></button>
     ${tabBar()}`;
   $('#relics').onclick=()=>renderRelics();
   $('#allies').onclick=()=>{renderAllies();window.scrollTo(0,0);};
