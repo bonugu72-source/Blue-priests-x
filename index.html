@@ -256,6 +256,8 @@ body.title-mode{overflow:hidden}
 .pf-chahuia{box-shadow:0 0 30px rgba(140,180,255,.75),0 0 90px rgba(200,170,255,.35)}
 .pf-chahuia .pglow{background:radial-gradient(ellipse at 50% 100%,rgba(140,170,255,.5),transparent 65%);animation:breathe 2.4s ease-in-out infinite}
 .pf-marteria{box-shadow:0 0 30px rgba(124,255,90,.75),0 0 90px rgba(60,200,60,.4)}
+.pf-levia{box-shadow:0 0 30px rgba(255,51,85,.7),0 0 90px rgba(120,0,40,.5)}
+.pf-levia .pglow{background:radial-gradient(ellipse at 50% 100%,rgba(255,51,85,.45),transparent 65%);box-shadow:inset 0 0 60px rgba(10,0,6,.85);animation:breathe 2.6s ease-in-out infinite}
 .pf-marteria .pglow{background:radial-gradient(ellipse at 50% 100%,rgba(124,255,90,.5),transparent 65%);box-shadow:inset 0 0 50px rgba(0,30,0,.7);animation:breathe 2.2s ease-in-out infinite}
 .pf-remian{box-shadow:0 0 30px rgba(255,90,140,.8),0 0 90px rgba(170,90,255,.4)}
 .pf-remian .pglow{background:radial-gradient(ellipse at 50% 100%,rgba(255,90,140,.5),transparent 65%);box-shadow:inset 0 0 50px rgba(40,0,20,.7);animation:breathe 2s ease-in-out infinite}
@@ -1904,6 +1906,27 @@ const AREAS=[
       magic:true, allyCritVoid:true, reflectAll:0.5,
       pre:'초록 불꽃을 두른 타락천사가 고목 위에 앉아 다리를 꼰다. 가시 왕관 아래, 붉은 눈이 즐겁다는 듯 가늘어진다.\n\n"숲속의 관리인, 마르테리아. 이 낙원에서는 내 규칙만 통해 — 너희 칼날은 나에게 닿지 않아."',
       moves:[{t:'atk',n:'초록 저주탄'},{t:'strong',n:'타락의 불꽃'},{t:'multi',n:'가시 덩굴 폭풍',hits:4,m:0.35},{t:'curse',n:'숲의 저주'},{t:'sweep',n:'낙원의 업화',m:0.18},{t:'charge',n:'관리인의 심판'}]}
+  },
+  { name:'끝없는 그림자', realm:'demon', country:'마계 · 끝없이 이어지는 그림자의 회랑', flag:'🌑', rec:86, recEnd:90, glow:'#ff3355', sortie:'noIsabelT1',
+    desc:'금빛 액자와 무너진 아치가 끝없이 이어지는 회랑. 빛이 닿지 않는 곳마다 그림자가 일어나 길을 막는다. 그림자 여단의 지휘관이 이곳을 다스린다.',
+    intro:'낙원의 호수를 건너자 빛이 사라졌다. 금빛 액자가 걸린 회랑이 끝도 없이 이어지고, 발밑의 그림자가 제멋대로 꿈틀거린다.\n\n이사벨 부제가 걸음을 멈췄다. "…여기서부터는 저도 함께 갈 수 없어요. 그림자가 저를 삼키려 해요."\n\n어둠 속에서 붉은 눈들이 하나둘 떠올랐다.',
+    outro:'마지막 그림자가 연기처럼 흩어졌다.\n\n레비아가 찢어진 날개를 접고 무릎을 꿇었다. "…그림자는 빛이 있어야 생기는 법이지. 너희가 그 빛이었나."\n\n회랑 끝에서 처음으로 희미한 빛이 새어 들어온다.\n\n— 끝없는 그림자 해방 —',
+    enemies:[
+      {name:'그림자 여단 병사',     icon:'🗡️', hp:1160, atk:172, def:76, xp:480, gold:240, demon:true, moves:[{t:'atk',n:'그림자 베기'},{t:'strong',n:'검은 찌르기'},{t:'atk',n:'그림자 베기'}]},
+      {name:'액자 속 망령',         icon:'🖼️', hp:1080, atk:178, def:64, xp:481, gold:241, demon:true, moves:[{t:'atk',n:'액자 밖으로 뻗는 손'},{t:'curse',n:'초상화의 저주'},{t:'silence',n:'속삭이는 그림'}]},
+      {name:'검은 연기 박쥐',       icon:'🦇', hp:1040, atk:180, def:62, xp:482, gold:241, demon:true, moves:[{t:'multi',n:'박쥐 떼 습격',hits:3,m:0.45},{t:'drain',n:'피 빨기'},{t:'atk',n:'날개 할퀴기'}]},
+      {name:'붉은 눈의 그림자',     icon:'👁️', hp:1120, atk:176, def:70, xp:483, gold:242, demon:true, moves:[{t:'atk',n:'그림자 손톱'},{t:'sweep',n:'번지는 어둠',m:0.15},{t:'dot',n:'검은 상처',dn:'출혈'}]},
+      {name:'뿔 달린 그림자 기사',  icon:'🐂', hp:1200, atk:174, def:82, xp:484, gold:242, demon:true, moves:[{t:'strong',n:'뿔 돌진'},{t:'atk',n:'그림자 창'},{t:'curse',n:'여단의 낙인'}]}
+    ],
+    elite:{name:'그림자 여단 기수', icon:'🚩', hp:20000, atk:216, def:76, xp:2600, gold:2000, demon:true,
+      moves:[{t:'strong',n:'군기 내려찍기'},{t:'multi',n:'여단의 돌격',hits:3,m:0.55},{t:'curse',n:'검은 군기의 저주'},{t:'charge',n:'총공격 신호'}]},
+    mid:{name:'사브낙', art:'sabnock', title:'솔로몬 72악마 · 제43영 · 후작 · 50군단', hp:43000, atk:222, def:72, xp:10200, gold:7700, demon:true,
+      pre:'사자 머리를 한 갑옷 차림의 무사가 창을 고쳐 쥔다. 회랑의 벽이 그의 발소리에 맞춰 무너져 내린다.\n\n"제43영 사브낙이다. 성벽도, 상처도 — 내가 정한다."',
+      moves:[{t:'atk',n:'사자 창 찌르기'},{t:'strong',n:'성벽 붕괴'},{t:'multi',n:'50군단의 진군',hits:3,m:0.5},{t:'dot',n:'썩어 가는 상처',dn:'출혈'},{t:'charge',n:'후작의 돌격'}]},
+    boss:{name:'레비아', art:'levia', title:'그림자 여단의 지휘관', hp:170000, exactHp:true, atk:230, def:72, xp:55000, gold:50000, goldFirst:0, goldRepeat:50000, salvFirst:3, demon:true,
+      shadow:{every:8000,pct:0.05}, ring:{every:7000,dur:3000,miss:0.35},
+      pre:'검은 연기 속에서 박쥐 날개가 펼쳐진다. 붉은 보석을 두른 뿔, 핏빛 눈동자가 천천히 너희를 내려다본다.\n\n"그림자 여단의 지휘관, 레비아. 빛을 들고 왔구나 — 그럼 그림자도 그만큼 짙어지겠지."',
+      moves:[{t:'atk',n:'그림자 손톱'},{t:'strong',n:'박쥐 날개 강타'},{t:'multi',n:'그림자 여단의 일제 공격',hits:4,m:0.35},{t:'curse',n:'지휘관의 낙인'},{t:'sweep',n:'끝없는 어둠',m:0.18},{t:'charge',n:'여단 총공격'}]}
   }
 
 ];
@@ -1916,7 +1939,7 @@ const stageRec=(a,s)=>Math.round(AREAS[a].rec+(s-1)*(AREAS[a].recEnd-AREAS[a].re
 const RT={atkCd:1500,defCd:400,itemCd:1500,fleeCd:1000,allyMs:1500,bossMs:1500,midMs:1600,normalMs:1800};
 const DEF_FLOOR=0.3; // 방어력이 아무리 높아도 적 공격의 30%는 들어감
 const ENEMY_MULT=1.3, LATE_BOSS_MULT=1.1; // 적 공격력·체력 1.3배 (나베리우스·보티스는 1.1배)
-const NORMAL_HP=[2.4,4,4.5,5,5.5,6,6.5,7,7.5,8,8.5,9,9.5,10,10.5,11,11.5,12,12.5,13,13.5,14], NORMAL_REWARD=1.5; // 일반 적이 몇 턴은 버티며 공격하도록
+const NORMAL_HP=[2.4,4,4.5,5,5.5,6,6.5,7,7.5,8,8.5,9,9.5,10,10.5,11,11.5,12,12.5,13,13.5,14,14.5], NORMAL_REWARD=1.5; // 일반 적이 몇 턴은 버티며 공격하도록
 function scaleBase(base,a,s){
   const f=1+0.06*(s-1);
   return {...base,hp:Math.round(base.hp*f*NORMAL_HP[a]),atk:Math.round(base.atk*f),def:Math.round(base.def*(1+0.04*(s-1))),
@@ -2142,6 +2165,13 @@ const ART={
       <path d="M84,76 L80,58 L90,68 L95,54 L100,66 L105,54 L110,68 L120,58 L116,76 Z"/>
       <path d="M84,82 L74,70 L90,78 Z M116,82 L126,70 L110,78 Z"/>`,
     eyes:`<circle cx="92" cy="90" r="4.2"/><circle cx="108" cy="90" r="4.2"/>`},
+  sabnock:{c:'#b48cff',eye:'#ff3355',latin:'SABNOCK · SPIRITVS XLIII · MARCHIO · L LEGIONES · ',
+    body:`<path d="M70,190 C66,160 70,132 84,116 L116,116 C130,132 134,160 130,190 L116,196 L110,186 L90,186 L84,196 Z"/>
+      <path d="M100,62 L80,66 L70,78 L66,94 L72,108 L86,118 L114,118 L128,108 L134,94 L130,78 L120,66 Z"/>
+      <path d="M100,52 L92,64 L82,56 L80,70 L68,66 L72,80 L60,84 L70,92 L60,102 L74,104 L70,116 L84,112 L100,124 L116,112 L130,116 L126,104 L140,102 L130,92 L140,84 L128,80 L132,66 L120,70 L118,56 L108,64 Z" opacity=".55"/>
+      <path d="M146,40 L150,40 L150,192 L146,192 Z"/><path d="M148,22 L156,44 L140,44 Z"/>
+      <path d="M118,128 L146,120 L146,128 L120,138 Z"/>`,
+    eyes:`<path d="M86,86 L96,90 L86,93 Z"/><path d="M114,86 L104,90 L114,93 Z"/>`},
   gamigin:{c:'#ff5a5a',eye:'#ffe0a0',latin:'GAMIGIN · SPIRITVS IV · MARCHIO · XXX LEGIONES · ',
     body:`<path d="M46,128 C46,112 56,102 72,100 L118,100 C126,86 132,72 140,62 C146,54 156,52 162,58 L170,70 C172,76 168,80 162,80 L156,80 C152,92 148,108 146,124 C146,140 138,148 128,150 L124,190 L114,190 L114,152 L80,152 L80,190 L70,190 L68,150 C56,146 46,140 46,128 Z"/>
       <path d="M140,62 L134,44 L146,56 Z M150,56 L150,38 L158,54 Z"/>
@@ -2197,6 +2227,7 @@ const PORTRAIT={
   aprabaidon:{img:'aprabaidon.jpg',cls:'pf-aprabaidon',pos:'38% 22%'},
   remian:{img:'remian.jpg',cls:'pf-remian',pos:'50% 22%'},
   marteria:{img:'marteria.jpg',cls:'pf-marteria',pos:'50% 20%'},
+  levia:{img:'levia.jpg',cls:'pf-levia',pos:'50% 18%'},
   merem:{img:'merem.jpg',cls:'pf-merem',pos:'40% 18%'},
   perta:{img:'perta.jpg',cls:'pf-perta',pos:'50% 24%'},
   mumyeong:{img:'mumyeong.jpg',cls:'pf-mumyeong',pos:'55% 16%'},
@@ -2246,7 +2277,8 @@ const BOSS_THEME={
   nakiroa:['#b070ff','#2a1448','#0a0614'],         // 보랏빛 소용돌이 · 타락한 여명의 기사
   aprabaidon:['#5aa8ff','#0a1a40','#040814'],      // 푸른 번개 · 저승의 소환수
   remian:['#ff5a8a','#3a0c1e','#12040a'],          // 붉은 폐허 · 지옥의 공주
-  marteria:['#7cff5a','#123a14','#040c06']         // 초록 불꽃 · 숲속의 관리인
+  marteria:['#7cff5a','#123a14','#040c06'],        // 초록 불꽃 · 숲속의 관리인
+  levia:['#ff3355','#2a0a14','#08030a']            // 붉은 눈 · 그림자 여단의 지휘관
 };
 function bossTheme(e){
   if(!e||!B||B.pvp||B.stype!=='boss'||!e.art)return null;
@@ -3013,7 +3045,7 @@ function statusHTML(){
   </div>`;
 }
 const owned=id=>(P.roster[id]||0)>0;
-const SORTIE_RULES={star5x2:{text:'★5 동료 최대 2명만 출전 가능 (이사벨 부제 출전 불가)',ok:id=>ALLIES[id].star===5,noFixed:true,max:2},noIsabel:{text:'이사벨 부제 출전 불가 — 출전 동료만으로 싸워야 함',ok:id=>true,noFixed:true},myth:{text:'신화 승급 동료만 출전 가능 (이사벨 부제는 고정 동행)',ok:id=>isMyth(id)},myth4:{text:'신화 승급 동료 또는 ★4 동료만 출전 가능 (이사벨 부제는 고정 동행)',ok:id=>isMyth(id)||ALLIES[id].star===4},one:{text:'동료 1명만 출전 가능 (이사벨 부제 출전 불가)',ok:id=>true,noFixed:true,max:1},myth2:{text:'신화 승급 동료 최대 2명만 출전 가능 (이사벨 부제 출전 불가)',ok:id=>isMyth(id),noFixed:true,max:2},noTier1:{text:'★5 1티어 동료 출전 금지 (이사벨 부제는 고정 동행)',ok:id=>!(ALLIES[id]&&ALLIES[id].star===5&&TIER5[id]===1)}};
+const SORTIE_RULES={noIsabelT1:{text:'이사벨 부제 출전 불가 · ★5 1티어 동료 출전 금지',ok:id=>!(ALLIES[id]&&ALLIES[id].star===5&&TIER5[id]===1),noFixed:true},star5x2:{text:'★5 동료 최대 2명만 출전 가능 (이사벨 부제 출전 불가)',ok:id=>ALLIES[id].star===5,noFixed:true,max:2},noIsabel:{text:'이사벨 부제 출전 불가 — 출전 동료만으로 싸워야 함',ok:id=>true,noFixed:true},myth:{text:'신화 승급 동료만 출전 가능 (이사벨 부제는 고정 동행)',ok:id=>isMyth(id)},myth4:{text:'신화 승급 동료 또는 ★4 동료만 출전 가능 (이사벨 부제는 고정 동행)',ok:id=>isMyth(id)||ALLIES[id].star===4},one:{text:'동료 1명만 출전 가능 (이사벨 부제 출전 불가)',ok:id=>true,noFixed:true,max:1},myth2:{text:'신화 승급 동료 최대 2명만 출전 가능 (이사벨 부제 출전 불가)',ok:id=>isMyth(id),noFixed:true,max:2},noTier1:{text:'★5 1티어 동료 출전 금지 (이사벨 부제는 고정 동행)',ok:id=>!(ALLIES[id]&&ALLIES[id].star===5&&TIER5[id]===1)}};
 const sortieRule=a=>AREAS[a]&&SORTIE_RULES[AREAS[a].sortie];
 const sortieOk=(a,id)=>{const r=sortieRule(a);return !r||r.ok(id);};
 const partyIds=()=>(B&&B.party)?B.party:[FIXED,...petParty(),...P.active];
@@ -4767,7 +4799,7 @@ function synthAll(){
 }
 
 /* ===================== 전투 ===================== */
-function clearBattle(){forcedMv=null;if(B&&B.dgT)clearInterval(B.dgT);if(B&&B.enemyT)clearInterval(B.enemyT);if(B&&B.allyT)clearInterval(B.allyT);document.body.classList.remove('pfrozen');if(B&&B.freezeT)clearInterval(B.freezeT);if(B&&B.sakuraT)clearInterval(B.sakuraT);document.body.classList.remove('battle');applyBossTheme(null);if(B&&B.waveT)clearInterval(B.waveT);if(B&&B.soulT)clearInterval(B.soulT);if(B&&B.drainT)clearInterval(B.drainT);if(B&&B.tsT)clearInterval(B.tsT);if(B&&B.paraT)clearInterval(B.paraT);if(B&&B.zapT)clearInterval(B.zapT);if(B&&B.karmaT)clearInterval(B.karmaT);if(B&&B.trainT)clearInterval(B.trainT);if(B&&B.aoraT)clearInterval(B.aoraT);if(B&&B.heartT)clearInterval(B.heartT);if(B&&B.halfT)clearInterval(B.halfT);if(B&&B.fallT)clearInterval(B.fallT);if(B&&B.isaT)clearInterval(B.isaT);if(B&&B.nkT)clearInterval(B.nkT);if(B&&B.apT)clearInterval(B.apT);if(B&&B.remT)clearInterval(B.remT);B=null;}
+function clearBattle(){forcedMv=null;if(B&&B.dgT)clearInterval(B.dgT);if(B&&B.enemyT)clearInterval(B.enemyT);if(B&&B.allyT)clearInterval(B.allyT);document.body.classList.remove('pfrozen');if(B&&B.freezeT)clearInterval(B.freezeT);if(B&&B.sakuraT)clearInterval(B.sakuraT);document.body.classList.remove('battle');applyBossTheme(null);if(B&&B.waveT)clearInterval(B.waveT);if(B&&B.soulT)clearInterval(B.soulT);if(B&&B.drainT)clearInterval(B.drainT);if(B&&B.tsT)clearInterval(B.tsT);if(B&&B.paraT)clearInterval(B.paraT);if(B&&B.zapT)clearInterval(B.zapT);if(B&&B.karmaT)clearInterval(B.karmaT);if(B&&B.trainT)clearInterval(B.trainT);if(B&&B.aoraT)clearInterval(B.aoraT);if(B&&B.heartT)clearInterval(B.heartT);if(B&&B.halfT)clearInterval(B.halfT);if(B&&B.fallT)clearInterval(B.fallT);if(B&&B.isaT)clearInterval(B.isaT);if(B&&B.nkT)clearInterval(B.nkT);if(B&&B.apT)clearInterval(B.apT);if(B&&B.remT)clearInterval(B.remT);if(B&&B.lvT)clearInterval(B.lvT);B=null;}
 /* 반사·부적 등으로 적이 턴 밖에서 쓰러졌을 때 */
 function winNow(){
   if(!B||B.won)return;
@@ -4892,7 +4924,8 @@ const HEAVEN_REWARD={5:{salv:1},10:{salv:1},15:{salv:1},20:{salv:1},25:{salv:1},
 const heavenRewardText=f=>{const w=HEAVEN_REWARD[f];if(!w)return '';return w.salv?`${SALV_ITEM.icon} ${SALV_ITEM.name} ×${w.salv}`:`★6 ${ALLIES[w.ally].name} (천상의 탑 전용)`;};
 const heavenOpen=()=>towerOpen()&&towerState().best>=TOWER_MAX; // 구원의 탑 30층 정복 시 개방
 const heavenState=()=>{P.heaven=P.heaven||{best:0,tries:0};return P.heaven;};
-const heavenBosses=()=>AREAS.map((a,i)=>i).filter(i=>AREAS[i].realm&&AREAS[i].boss); // 마계 이동의 최종 보스들
+const HEAVEN_LAST_AREA=21; // 천상의 탑 보스 목록은 저승의 낙원(마르테리아)까지 — 이후 지역 추가로 층 배치가 바뀌지 않게
+const heavenBosses=()=>AREAS.map((a,i)=>i).filter(i=>i<=HEAVEN_LAST_AREA&&AREAS[i].realm&&AREAS[i].boss); // 마계 이동의 최종 보스들
 const heavenArea=f=>{const L=heavenBosses();return L[(f-1)%L.length];};
 const heavenMul=f=>({hp:(0.85+0.02*(f-1))*0.9,atk:(0.8+0.01*(f-1))*0.9}); // 구원의 탑 보스층 배율에서 체력·공격 10%씩 낮춤
 function heavenEnemy(f){
@@ -5089,6 +5122,7 @@ function startBattle(spec){
     if(B&&t.sealEvery&&!t.pvp)B.nkT=setInterval(sealTick,t.sealEvery);
     if(B&&t.apFreeze&&!t.pvp)B.apT=setInterval(apTick,1000);
     if(B&&t.ducks&&!t.pvp)B.remT=setInterval(remTick,1000);
+    if(B&&t.shadow&&!t.pvp)B.lvT=setInterval(lvTick,250);
     if(B&&t.wave){B.waveAt=Date.now()+t.wave;B.waveT=setInterval(waveTick,t.wave);}
     if(B&&t.slowSil){
       const c=party.slice().sort(()=>Math.random()-0.5).slice(0,t.slowSil);
@@ -5390,6 +5424,7 @@ function cmdHTML(){
 }
 
 function renderBattle(){
+  lvEnforce();
   document.body.classList.add('battle');
   const e=B.e;
   applyBossTheme(e);
@@ -5410,6 +5445,8 @@ function renderBattle(){
   if(B.negate)st.push('🗡 무력화');
   if(B.evadeNext)st.push('🔦 눈부심');
   if(B.blind)st.push(`📜 시야 차단 ${B.blind}`);
+  if(B.lvShadow>0)st.push(`🌑 그림자 ${fmt(B.lvShadow)}`);
+  if(B.lvBlind&&Object.keys(B.lvBlind).some(lvBlindOn))st.push(`⭕ 동료 시야 차단 · 회복 불가`);
   if(B.sealed>0)st.push(`⛓ 적 속박 ${B.sealed}`);
   if(remHideOn())st.push(`🦆 레미안 숨는 중 ${Math.ceil((B.remHideUntil-Date.now())/1000)}초`);
   if(apOn('hero'))st.push(`🩸🔥 주인공 출혈·화상 ${Math.ceil((B.apAff.hero-Date.now())/1000)}초 (피해 2배)`);
@@ -5476,6 +5513,7 @@ function renderBattle(){
   if(e.fixedDmg)passive.push('🎯 방어력 무시 고정 피해');
   if(e.paralyze)passive.push('⚡ 3초마다 동료 마비');
   if(e.allyCritVoid)passive.push('🌿 동료 치명타 피해 무효');
+  if(e.shadow)passive.push(`🌑 ${e.shadow.every/1000}초마다 그림자 소환 (HP ${fmt(Math.round(e.maxHp*e.shadow.pct))} · 주인공 공격을 먼저 흡수)${e.ring?` · ⭕ ${e.ring.every/1000}초마다 파멸의 환 (동료 시야 ${e.ring.dur/1000}초 차단 · 공격 ${Math.round(e.ring.miss*100)}% 빗나감 · 체력 회복 불가)`:''}`);
   if(e.reflectAll)passive.push(`🪞 공격 ${Math.round(e.reflectAll*100)}% 확률로 반사 (피해 없음 · 공격한 쪽이 절반을 받음)`);
   if(e.allyCritCut)passive.push(`🛡 동료 치명타 피해 ${e.allyCritCut}배 감소`);
   if(e.ducks)passive.push(`🦆 ${e.ducks.every/1000}초마다 푸른 오리 (1명 ${e.ducks.stun/1000}초 행동 불능 · 현재 체력 절반) · 💥 ${e.ducks.bigEvery/1000}초마다 큰 오리 (주인공 현재 체력 ${Math.round(e.ducks.bigPct*100)}%)`);
@@ -5548,6 +5586,26 @@ function awakenStrike(){
   document.body.classList.add('holyflash');setTimeout(()=>document.body.classList.remove('holyflash'),350);
   hitEnemy(AWAKEN_SKILL.mult,`✨ 「${AWAKEN_SKILL.name}」`);
 }
+/* 레비아: 그림자 소환(주인공 공격 흡수) · 파멸의 환(동료 시야 3초 차단 — 공격 빗나감 · 체력 회복 불가) */
+const lvBlindOn=id=>!!(B&&B.lvBlind&&B.lvBlind[id]&&B.lvBlind[id].until>Date.now());
+function lvEnforce(){
+  if(!B||!B.lvBlind)return;const now=Date.now();
+  for(const id in B.lvBlind){const b=B.lvBlind[id],h=B.ahp[id];
+    if(!h||b.until<=now){delete B.lvBlind[id];if(h&&h.hp>0)addLog(`👁 ${ALLIES[id].name}의 시야가 돌아왔다`);continue;}
+    if(h.hp>b.cap)h.hp=b.cap;else b.cap=h.hp;}
+}
+function lvTick(){
+  if(!B||B.over||B.won||P.hp<=0||!$('#modal').classList.contains('hidden'))return;
+  const e=B.e,sd=e.shadow,rg=e.ring;if(!sd||e.hp<=0)return;
+  lvEnforce();
+  B.lvSd=(B.lvSd||0)+250;B.lvRg=(B.lvRg||0)+250;let ch=false;
+  if(B.lvSd>=sd.every){B.lvSd=0;const v=Math.max(1,Math.round(e.maxHp*sd.pct));B.lvShadow=v;ch=true;
+    addLog(`🌑 ${e.name}의 그림자 소환 — 그림자(HP ${fmt(v)})가 주인공의 공격을 막아선다`);queueFx('enemy','🌑 그림자','mpf');}
+  if(rg&&B.lvRg>=rg.every){B.lvRg=0;const L=partyIds().filter(x=>B.ahp[x]&&B.ahp[x].hp>0);
+    if(L.length){const now=Date.now();B.lvBlind=B.lvBlind||{};L.forEach(x=>{B.lvBlind[x]={until:now+rg.dur,cap:B.ahp[x].hp};});ch=true;
+      addLog(`⭕ ${e.name}의 파멸의 환 — 동료 전원 ${rg.dur/1000}초간 시야 차단 (공격 ${Math.round(rg.miss*100)}% 빗나감 · 체력 회복 불가)`);queueFx('enemy','⭕ 파멸의 환','mpf');}}
+  if(ch)renderBattle();
+}
 function hitEnemy(mult,label){
   const e=B.e;
   if(B.evade){B.evade=false;addLog(`${label}! — 적이 모습을 감춰 빗나갔다`);queueFx('enemy','MISS','mpf');return;}
@@ -5564,6 +5622,8 @@ function hitEnemy(mult,label){
   d=Math.max(1,Math.round(d));
   const crit=charmOn()||Math.random()<0.1*(stormOn()?2:1);
   if(crit)d=Math.round(d*(charmOn()?Math.max(charmCrit(),stormOn()&&isMyth('kirie')?2:1.5):(stormOn()&&isMyth('kirie')?2:1.5)));
+  if(B.lvShadow>0){const ab=Math.min(B.lvShadow,d);B.lvShadow-=ab;d-=ab;
+    addLog(`${label}! — 🌑 그림자가 ${ab} 피해를 막았다${B.lvShadow>0?` (남은 그림자 ${fmt(B.lvShadow)})`:' · 그림자 소멸'}`);queueFx('enemy','🌑-'+ab,'mpf');if(d<=0)return;}
   dgOver('hero',d,e);
   stat('dmg','hero',Math.min(d,e.hp));
   e.hp=Math.max(0,e.hp-d);
@@ -5579,6 +5639,7 @@ function allyHit(base,label,defFactor,fixed){
   if(e.voidAlly&&Math.random()<e.voidAlly){addLog(`🌀 ${label} — ${e.name}이(가) 다른 차원으로 흘려보냈다 (무효)`);queueFx('enemy','차원 무효','mpf');return 0;}
   if(remHideOn()){addLog(`${label}! — 🦆 오리 떼가 막아섰다 (레미안에게 닿지 않음)`);queueFx('enemy','🦆','mpf');return 0;}
   if(B.immune){addLog(`${label}! — ⏸ 피해 무효`);queueFx('enemy','무효','mpf');return 0;}
+  if(B.curAlly&&lvBlindOn(B.curAlly)&&Math.random()<(e.ring?e.ring.miss:0.35)){addLog(`${label}! — ⭕ 파멸의 환에 시야가 가려 빗나갔다`);queueFx('enemy','MISS','mpf');return 0;}
   if(B.vsil&&B.vsil[B.curAlly]&&Math.random()<0.3){addLog(`${label}! — 🔇 침묵에 막혀 무효`);queueFx('enemy','침묵','mpf');return 0;}
   let d=fixed?Math.max(1,Math.round(base*(B.am||1))):Math.max(1,Math.round((base*(B.am||1)-enemyDef()*defFactor)*rnd(0.9,1.1)));
   if(B.vslow&&B.vslow[B.curAlly])d=Math.max(1,Math.round(d*0.6));
