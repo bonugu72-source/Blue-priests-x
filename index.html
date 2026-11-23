@@ -3820,7 +3820,7 @@ const FOREST_UNLOCK_AREA=AREAS.findIndex(a=>a.name==='고대 원단수'); // 고
 const forestOpen=()=>{const i=FOREST_UNLOCK_AREA;return i<0||(P.prog[i]||0)>=STAGES||!!(P.cleared&&P.cleared[i]);};
 const FOREST_REWARD={5:{salv:1},10:{salv:3},15:{salv:4},23:{ally:'atris'}}; // 첫 돌파 보상
 const forestRewardText=f=>{const w=FOREST_REWARD[f];if(!w)return '';return w.ally?`★6 ${ALLIES[w.ally].name}`:`${SALV_ITEM.icon} ${SALV_ITEM.name} ×${w.salv}`;};
-const FOREST_BAN={akira:15}; // 해당 층부터 출전 금지
+const FOREST_BAN={akira:15,roa:20}; // 해당 층부터 출전 금지
 const forestBanned=(id,f)=>!!(FOREST_BAN[id]&&f>=FOREST_BAN[id]);
 const forestAreas=()=>AREAS.map((a,i)=>i).filter(i=>AREAS[i].boss);
 const FOREST_MAX_FN=()=>forestAreas().length;
@@ -3834,7 +3834,7 @@ function forestRestore(){
 function forestStart(f){
   if(!forestOpen())return renderHub('🔒 노력의 숲은 고대 원단수를 클리어하면 열린다');
   const F=forestState();if(F.sel.length!==FOREST_PICK)return renderForest(`동료 ${FOREST_PICK}명을 먼저 골라 주세요`);
-  const bn=F.sel.filter(id=>forestBanned(id,f));if(bn.length)return renderForest(`⚠ ${bn.map(id=>ALLIES[id].name).join(', ')}은(는) ${FOREST_BAN[bn[0]]}층부터 출전할 수 없어요. 다른 동료를 골라 주세요`);
+  const bn=F.sel.filter(id=>forestBanned(id,f));if(bn.length)return renderForest(`⚠ ${bn.map(id=>`${ALLIES[id].name}(${FOREST_BAN[id]}층부터)`).join(', ')} 출전 금지 — 다른 동료를 골라 주세요`);
   F.tries=(F.tries||0)+1;FOREST=new Set(F.sel);
   P._forestRestore={hp:P.hp,mp:P.mp,maxHp:P.maxHp,atk:P.atk,def:P.def,relics:P.relics,water:P.items.water};
   P.maxHp=FOREST_HP;P.hp=FOREST_HP;P.atk=FOREST_ATK;P.def=FOREST_DEF;P.relics=[];P.items.water=FOREST_WATER;P.mp=P.maxMp;
