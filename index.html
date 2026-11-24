@@ -424,6 +424,12 @@ body.pfrozen #cmds .btn{filter:saturate(.2) brightness(1.2);background:linear-gr
 .chdot{display:inline-block;width:9px;height:9px;border-radius:50%;background:#ff4f6a;box-shadow:0 0 6px #ff4f6a}
 .tab .chdot{position:absolute;top:4px;right:calc(50% - 20px)}
 .chatwrap{display:flex;flex-direction:column;gap:8px}
+body.chatmode{overflow:hidden}
+body.chatmode .chatwrap{position:fixed;left:0;right:0;top:0;margin:0 auto;max-width:480px;box-sizing:border-box;z-index:25;border-radius:0 0 16px 16px;padding-top:calc(10px + env(safe-area-inset-top))}
+body.chatmode .chatlog{flex:1;height:auto;min-height:0}
+body.chatmode .chathead{padding-right:46px}   /* 오른쪽 위 소리 버튼에 단체 채팅 메뉴가 가려지지 않게 */
+body.chatkb .tabbar{display:none}
+body.chatkb .chatwrap{border-radius:0;padding-bottom:6px}
 .chathead{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:8px}.chathead b{text-align:center;font-size:16px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .chbtn{padding:6px 10px;font-size:13px;min-height:0;width:auto}
 .chatlog{height:calc(100dvh - 260px);min-height:260px;overflow-y:auto;background:#080d1e;border:1px solid var(--line);border-radius:12px;padding:10px;display:flex;flex-direction:column;gap:6px;overscroll-behavior:contain}
@@ -4466,11 +4472,12 @@ function renderChat(rid,msg){
   if(friendsUnsub){try{friendsUnsub();}catch(e){}friendsUnsub=null;}
   chatMsgStop();clearBattle();hubTab='friend';chatOpen=rid;
   const r=chatRooms[rid];
-  $('#app').innerHTML=`${msg?`<div class="notice">${msg}</div>`:''}<div class="panel chatwrap">
+  $('#app').innerHTML=`<div class="panel chatwrap">
       <div class="chathead"><button class="btn chbtn" id="chback">← 친구</button><b id="chtitle">${esc(chatTitle(r))}</b>${r&&r.type==='group'?'<button class="btn chbtn" id="chmenu">👥 ⋯</button>':'<span></span>'}</div>
-      <div class="chatlog" id="chatlog"><div class="desc">메시지를 불러오는 중…</div></div>
+      ${msg?`<div class="notice" style="margin:0">${msg}</div>`:''}<div class="chatlog" id="chatlog"><div class="desc">메시지를 불러오는 중…</div></div>
       <form class="chatin" id="chform"><input id="chtext" maxlength="${CHAT_TEXT}" autocomplete="off" enterkeyhint="send" placeholder="메시지 입력"><button class="btn primary" id="chsend">보내기</button></form>
     </div>${tabBar()}`;
+  document.body.classList.add('chatmode');chatFit();
   $('#chback').onclick=()=>{chatMsgStop();renderFriends();};
   if($('#chmenu'))$('#chmenu').onclick=()=>chatMenu(rid);
   $('#chform').onsubmit=async e=>{
@@ -4499,8 +4506,22 @@ function renderChat(rid,msg){
     P.chatRead=P.chatRead||{};if(mx>(P.chatRead[rid]||0)){P.chatRead[rid]=mx;try{localStorage.setItem(SAVE_KEY,JSON.stringify(P));}catch(e){}}
     chatChanged();
   },()=>{const lg=$('#chatlog');if(lg)lg.innerHTML='<div class="chsys">⚠ 이 채팅방을 열 수 없어요. (방에서 나갔거나 연결이 끊겼어요)</div>';});}catch(e){}
-  window.scrollTo(0,document.body.scrollHeight);
 }
+/* 채팅 화면 크기를 지금 보이는 영역에 맞춤 (휴대폰 키보드가 올라오면 그만큼 줄이고, 아래 탭은 잠깐 숨김) */
+function chatFit(){
+  const w=$('.chatwrap'),lg=$('#chatlog');
+  if(!w||!document.body.classList.contains('chatmode')){document.body.classList.remove('chatmode','chatkb');return;}
+  const vv=window.visualViewport,h=vv?vv.height:window.innerHeight,top=vv?vv.offsetTop:0;
+  const kb=!!(vv&&window.innerHeight-vv.height>120);
+  document.body.classList.toggle('chatkb',kb);
+  const tb=kb?0:(($('.tabbar')||{}).offsetHeight||0);
+  const near=lg?lg.scrollHeight-lg.scrollTop-lg.clientHeight<80:true;
+  w.style.top=top+'px';w.style.height=Math.max(200,h-tb)+'px';
+  if(window.scrollY)window.scrollTo(0,0);
+  if(lg&&near)lg.scrollTop=lg.scrollHeight;
+}
+if(window.visualViewport){visualViewport.addEventListener('resize',chatFit);visualViewport.addEventListener('scroll',chatFit);}
+window.addEventListener('resize',chatFit);
 function friendRecHTML(x){   // 친구 자세히 보기: 스테이지·랭크전·탑·숲·던전·맞추기
   const rc=x.rec&&typeof x.rec==='object'?x.rec:null,n=(v,mx)=>Math.max(0,Math.min(mx,Math.floor(+v||0)));
   const none='<span class="small">정보 없음 · 친구가 새 버전에 접속하면 표시</span>';
@@ -5324,7 +5345,7 @@ function renderHub(msg){
 /* 하단 탭: 상점 · 동료 · 모험 · 던전 · 친구 */
 let hubTab='adv';
 const TABS=[['shop','🕯','상점'],['ally','🤝','동료'],['adv','🗺','모험'],['dungeon','🏰','던전'],['friend','👥','친구']];
-const tabBar=()=>{document.body.dataset.theme=hubTab;return `${verLineHTML()}<nav class="tabbar">${TABS.map(([k,ic,l])=>`<button class="tab t-${k} ${hubTab===k?'on':''}" data-tab="${k}"><span class="ti">${ic}</span>${l}${k==='friend'&&typeof chatOn==='function'&&chatOn()&&chatUnreadN()?'<i class="chdot"></i>':''}</button>`).join('')}</nav>`;};
+const tabBar=()=>{document.body.dataset.theme=hubTab;document.body.classList.remove('chatmode','chatkb');return `${verLineHTML()}<nav class="tabbar">${TABS.map(([k,ic,l])=>`<button class="tab t-${k} ${hubTab===k?'on':''}" data-tab="${k}"><span class="ti">${ic}</span>${l}${k==='friend'&&typeof chatOn==='function'&&chatOn()&&chatUnreadN()?'<i class="chdot"></i>':''}</button>`).join('')}</nav>`;};
 document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('.tabbar [data-tab]');if(b){e.preventDefault();hubTab=b.dataset.tab;renderHub();window.scrollTo(0,0);}});
 const footHTML=()=>`<div class="foot">${FB?'<button class="link" id="devlink">📱 기기 연결</button> · ':''}<button class="link" id="savecode">💾 저장 코드 복사</button> · <button class="link" id="totitle">타이틀로</button>
   <div class="small" style="margin-top:2px">${cloudState==='on'?'☁ 클라우드 자동 저장 중':'이 브라우저에 자동 저장 중 · 저장 코드로 백업하세요'}</div></div>`;
