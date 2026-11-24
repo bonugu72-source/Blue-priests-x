@@ -1411,7 +1411,7 @@ const ALLIES={
   elia:    {star:5,name:'엘리아',        icon:'🌹', role:'꽃의 수호', kit:'flower',
             desc:'색이 다른 꽃의 보호막(주인공 피해 흡수 · 동료 피해 절반, 2턴) · 꽃의 속박(적 1턴 행동 불가, 4턴마다) · 꽃잎 공격'},
   pasri:   {star:5,name:'파스리',        icon:'🏮', role:'고정 피해', kit:'fixed',
-            desc:'전투 시작 후 9초 동안 공격하지 못함 · 9초가 지나면 모든 공격이 적의 방어력을 무시하는 고정 피해'},
+            desc:'전투 시작 후 7초 동안 공격하지 못함 · 7초가 지나면 모든 공격이 적의 방어력을 무시하는 고정 피해'},
   gaia:    {star:5,name:'가이아 수도사',  icon:'🔷', role:'약점 간파', kit:'weakspot',
             desc:'약점: 15% 확률로 적의 약점을 찾아 공격력 3배의 고정 피해(방어력 무시) · 평소엔 창 찌르기 · 눈썰미: 출전 중 나라 보스 처치 시 💠 천상의 성유물 획득 확률 +10%'},
   sakura:  {star:5,name:'사쿠라',        icon:'🌸', role:'벚꽃바람', kit:'sakura',
@@ -1473,7 +1473,7 @@ const MYTH_SKILL={
   sakura:{name:'만개',desc:'부활 대기 7초 → 4초 · 벚꽃바람이 적의 치명타 확률을 100% 낮춤 (치명타 완전 차단)'},
   kirie: {name:'폭풍의 수호천사',desc:'부활을 두 번까지 · 폭풍 중 치명타 피해 2배'},
   mikael:{name:'대천사의 가호',desc:'방어막이 현재 HP 전부만큼 · 정화 주기 2턴'},
-  lumeon:{name:'초신성',desc:'은하 충돌 속박 3초 → 5초 · 둔화 6초 → 9초'},
+  lumeon:{name:'은하 파동',desc:'은하 충돌 때 은하 파동 — 다른 동료들이 4초간 행동 불능이 되지만, 그 4초 동안 루메온의 마법이 적 방어력을 100% 무시하고 피해 2배'},
   roa:   {name:'매혹의 여왕',desc:'하트 회복량 2배 · 유혹 중 치명타 피해 1.5배 → 2배'},
   muhee: {name:'심판의 춤',desc:'정의 발동까지 5초 → 3초'},
   aora:  {name:'대천사의 강림',desc:'천사의 구원 지속 3초 → 5초 · 생명력 흡수량 2배'},
@@ -6270,7 +6270,8 @@ function diceTick(){
   renderBattle();
 }
 const TRAIN_MS=3000;
-const PASRI_WAIT=9000; // 파스리 충전 시간 (10초 → 9초)
+const LM_WAVE=4000; // 루메온 신화 은하 파동 지속
+const PASRI_WAIT=7000; // 파스리 충전 시간 (10초 → 9초 → 7초)
 const KARMA_TAL=1.25; // 카르마 부적 피해 +25%
 const vistaBase=lv=>13.3+lv*4.2; // 14+lv*4.4 → 12.6+lv*4.0(하향) → 소폭 재상향
 function trainTick(){
@@ -7094,11 +7095,16 @@ function alliesAct(){
       case 'galaxy':{ // 루메온: 은하 충돌 (속박 + 둔화) · 마법 피해 (방어력 50% 무시)
         const base=14+lv*4.3;
         if(Date.now()>=(B.galaxyCD||0)){
-          const bind=isMyth(id)?5000:3000,slow=isMyth(id)?9000:6000;
-          B.sealed=Math.max(B.sealed||0,Math.ceil(bind/1500));B.eslowUntil=Date.now()+slow;B.galaxyCD=Date.now()+slow+GALAXY_REST;
+          const bind=3000,slow=6000,now=Date.now();
+          B.sealed=Math.max(B.sealed||0,Math.ceil(bind/1500));B.eslowUntil=now+slow;B.galaxyCD=now+slow+GALAXY_REST;
           addLog(`🌌 ${nm}의 은하 충돌! ${e.name}을(를) ${bind/1000}초간 속박하고 ${slow/1000}초간 둔화 (공격 속도 절반)`);queueFx('enemy','🌌 은하 충돌','mpf');
-          allyHit(base*1.5,`${nm}의 은하 충돌`,0.25);
-        }else allyHit(base,`${nm}의 성운 마탄`,0.25);
+          if(isMyth(id)){ // 🔱 은하 파동: 다른 동료 4초 행동 불능 · 루메온 4초간 방어력 100% 무시 · 피해 2배
+            B.lmWaveUntil=now+LM_WAVE;B.nkSeal=B.nkSeal||{};const hit=[];
+            partyIds().forEach(x=>{if(x===id||ALLIES[x].pet)return;const h=B.ahp[x];if(h&&h.hp>0){B.nkSeal[x]=Math.max(B.nkSeal[x]||0,now+LM_WAVE);B.stun[x]=99999;B.stunWhy[x]='은하 파동 — 행동 불능';hit.push(ALLIES[x].name);}});
+            addLog(`🔱 🌌 은하 파동! ${hit.length?hit.join(', ')+' '+LM_WAVE/1000+'초간 행동 불능 · ':''}${nm}의 마법이 ${LM_WAVE/1000}초간 적 방어력 100% 무시 · 피해 2배`);queueFx('player','🌌 은하 파동','mpf');}
+          const wv=B.lmWaveUntil&&now<B.lmWaveUntil;
+          allyHit(base*1.5*(wv?2:1),`${nm}의 은하 충돌${wv?' (은하 파동 ×2 · 방어 무시)':''}`,wv?0:0.25);
+        }else{const wv=B.lmWaveUntil&&Date.now()<B.lmWaveUntil;allyHit(base*(wv?2:1),`${nm}의 성운 마탄${wv?' (은하 파동 ×2 · 방어 무시)':''}`,wv?0:0.25);}
         break;}
       case 'charm':{ // 로아: 유혹 (5초간 모든 공격 치명타) · 평소엔 하트 화살
         if(!charmOn()&&Date.now()>=(B.charmCD||0)){B.charmUntil=Date.now()+CHARM_MS;B.charmCD=B.charmUntil+CHARM_REST;addLog(`💗 ${nm}의 유혹 — ${e.name}이(가) 빈틈을 드러냈다! 5초간 모든 공격이 치명타`);queueFx('enemy','💗 유혹','mpf');}
