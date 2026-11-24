@@ -1415,7 +1415,7 @@ const ALLIES={
   gaia:    {star:5,name:'가이아 수도사',  icon:'🔷', role:'약점 간파', kit:'weakspot',
             desc:'약점: 15% 확률로 적의 약점을 찾아 공격력 3배의 고정 피해(방어력 무시) · 평소엔 창 찌르기 · 눈썰미: 출전 중 나라 보스 처치 시 💠 천상의 성유물 획득 확률 +10%'},
   sakura:  {star:5,name:'사쿠라',        icon:'🌸', role:'벚꽃바람', kit:'sakura',
-            desc:'3초마다 벚꽃바람(적의 치명타 확률 50% 감소) · 전투 중 쓰러져도 9초 후 HP 50%로 부활(전투가 끝날 때까지 계속) · 벚꽃 칼날 공격'},
+            desc:'3초마다 벚꽃바람(적의 치명타 확률 50% 감소) · 전투 중 쓰러져도 7초 후 HP 50%로 부활(전투가 끝날 때까지 계속) · 벚꽃 칼날 공격'},
   kirie:   {star:5,name:'키리에',        icon:'🪶', role:'폭풍의 날개', kit:'storm',
             desc:'날갯짓으로 폭풍을 일으켜 5초 동안 주인공 치명타 확률 2배 · 전투에서 처음 쓰러진 동료를 HP 50%로 부활(1회) · 폭풍 중엔 깃털 칼날 공격'},
   mikael:  {star:5,name:'미카엘',        icon:'🛡️', role:'정화의 날개', kit:'purify',
@@ -1458,7 +1458,7 @@ const ALLIES={
             desc:'보석처럼 반짝이는 광선 공격 · 적이 힘을 모으거나 3턴마다 프리즘 굴절(다음 적 공격 피해 절반, 절반은 적에게 반사)'}
 };
 /* ★5 티어 — 신화 제외 최대 전투력: 1티어 4000 · 2티어 3300 · 3티어 2700 */
-const TIER5={akira:1,guseju:1,asiris:1,karma:1,pasri:1,vista5:1,roa:1,lumeon:1,danian:2,elia:2,kirie:2,gaia:2,elise:2,miner:1,muhee:3,siren:3,mikael:3,sakura:3};
+const TIER5={akira:1,guseju:1,asiris:1,karma:1,pasri:1,vista5:1,roa:1,lumeon:1,danian:2,elia:2,kirie:2,gaia:2,elise:2,miner:1,muhee:3,siren:3,mikael:3,sakura:2};
 const TIER5_CP={1:4000,2:3300,3:2700};
 /* 신화: 최대 레벨에서 열림 · 능력치 2배 */
 const MYTH_COST={1:3000,2:5000,3:5000,4:10000,5:30000,6:50000}, MYTH_STONE5=2;
@@ -1470,7 +1470,7 @@ const MYTH_SKILL={
   elia:  {name:'사계의 화원',desc:'보호막을 펼칠 때 주인공·동료 HP 회복 · 속박 2턴'},
   pasri: {name:'피의 등불',desc:'고정 피해를 줄 때마다 적에게 출혈(3턴간 매 턴 피해의 30%)'},
   gaia:  {name:'꿰뚫는 눈',desc:'약점을 찾을 확률이 15% → 30%로 강화'},
-  sakura:{name:'만개',desc:'부활 대기 9초 → 4초 · 벚꽃바람이 적의 치명타 확률을 75% 낮춤'},
+  sakura:{name:'만개',desc:'부활 대기 7초 → 4초 · 벚꽃바람이 적의 치명타 확률을 75% 낮춤'},
   kirie: {name:'폭풍의 수호천사',desc:'부활을 두 번까지 · 폭풍 중 치명타 피해 2배'},
   mikael:{name:'대천사의 가호',desc:'방어막이 현재 HP 전부만큼 · 정화 주기 2턴'},
   lumeon:{name:'초신성',desc:'은하 충돌 속박 3초 → 5초 · 둔화 6초 → 9초'},
@@ -5942,7 +5942,7 @@ function isabelTick(){
   renderBattle();
 }
 /* 사쿠라: 3초마다 벚꽃바람 · 쓰러지면 9초 후 HP 50% 부활 (전투 끝까지 반복) */
-const SAKURA_REVIVE=9000;
+const SAKURA_REVIVE=7000;
 const sakuraWind=()=>!!(B&&B.windUntil&&Date.now()<B.windUntil);
 function sakuraTick(){
   if(!B||B.over||B.won||!$('#modal').classList.contains('hidden'))return;
