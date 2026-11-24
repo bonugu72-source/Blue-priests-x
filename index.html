@@ -1470,7 +1470,7 @@ const MYTH_SKILL={
   elia:  {name:'사계의 화원',desc:'보호막을 펼칠 때 주인공·동료 HP 회복 · 속박 2턴'},
   pasri: {name:'피의 등불',desc:'고정 피해를 줄 때마다 적에게 출혈(3턴간 매 턴 피해의 30%)'},
   gaia:  {name:'꿰뚫는 눈',desc:'약점을 찾을 확률이 15% → 30%로 강화'},
-  sakura:{name:'만개',desc:'부활 대기 7초 → 4초 · 벚꽃바람이 적의 치명타 확률을 75% 낮춤'},
+  sakura:{name:'만개',desc:'부활 대기 7초 → 4초 · 벚꽃바람이 적의 치명타 확률을 100% 낮춤 (치명타 완전 차단)'},
   kirie: {name:'폭풍의 수호천사',desc:'부활을 두 번까지 · 폭풍 중 치명타 피해 2배'},
   mikael:{name:'대천사의 가호',desc:'방어막이 현재 HP 전부만큼 · 정화 주기 2턴'},
   lumeon:{name:'초신성',desc:'은하 충돌 속박 3초 → 5초 · 둔화 6초 → 9초'},
@@ -5960,7 +5960,7 @@ function sakuraTick(){
   B.windTick=(B.windTick||0)+1;
   if(B.windTick%3===1){
     const was=sakuraWind();B.windUntil=now+3600;
-    if(!was)addLog(`🌸 사쿠라의 벚꽃바람 — 적의 치명타 확률 ${isMyth('sakura')?75:50}% 감소`);
+    if(!was)addLog(`🌸 사쿠라의 벚꽃바람 — 적의 치명타 확률 ${isMyth('sakura')?100:50}% 감소`);
     renderBattle();
   }
 }
@@ -7198,7 +7198,7 @@ function hitPlayer(mult,label){
   if(B.blind&&Math.random()<0.35){addLog(`${label} — 📜 시야가 가려진 적의 공격이 빗나갔다!`);queueFx('player','MISS','mpf');return 0;}
   if(B.negate){addLog(`${label} — 🗡 갈라진 대지에 막혀 무력화됐다!`);queueFx('player','무력화','mpf');return 0;}
   const def=(P.def+mangDef())*(B.curse?0.6:1)*(e.magic?0.5:1); // 마법 피해: 방어력 절반 · 망아찌 뒷발차기 방어력 증가
-  const critOn=e.critAll&&!(sakuraWind()&&Math.random()<(isMyth('sakura')?0.75:0.5));
+  const critOn=e.critAll&&!(sakuraWind()&&Math.random()<(isMyth('sakura')?1:0.5)); // 신화 만개: 적 치명타 확률 100% 감소
   if(e.critAll&&!critOn)label+=' (🌸 벚꽃바람에 치명타가 빗나감)';
   const crit=critOn?e.critAll*(B.awoke&&e.awaken?e.awaken.critMult:1):1;
   const raw=e.atk*(1+0.2*B.rage)*(B.hex?0.8:1)*(1-atrDownPct())*(salvOn()?1/1.5:1)*magicMul()*(B.fallMul||1)*(e.apFreeze&&apOn('hero')?2:1)*mult*crit;
