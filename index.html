@@ -2828,6 +2828,7 @@ const GUIDE_SECS=[
   ${gRow(gB('💰 골드 1회'),`${fmt(SUMMON_COST)} G`)}
   ${gRow(gB('💰 골드 11회 연속'),`${fmt(SUMMON11_COST)} G (${fmt(SUMMON_COST*11-SUMMON11_COST)} G 할인)`)}
   ${gRow(gB('💰 골드 50회 연속'),`${fmt(SUMMON50_COST)} G (${fmt(SUMMON_COST*50-SUMMON50_COST)} G 할인)`)}
+  ${SUMMON_BULK.map(([k,c])=>gRow(gB(`💰 골드 ${fmt(k)}회 연속`),`${fmt(c)} G (${fmt(SUMMON_COST*k-c)} G 할인)`)).join('')}
   ${gTip('이미 있는 동료가 또 나오면 카드가 1장 늘어요. 남는 카드는 <b>합성</b>과 <b>각성</b> 재료가 돼요.')}
   ${gH('그 밖의 버튼')}
   ${gRow(gB('🎡 행운의 룰렛'),'15분마다 무료로 1번 돌려요. 1,000/5,000/10,000 코인 · 꽝 · 💗 신뢰도 XP · ✨ 경험치 10,000 · ★4/★5 무작위 동료 중 하나가 나와요.')}
@@ -3301,6 +3302,7 @@ const MISSIONS=[
 
 /* 동료 소환 · 합성 */
 const SUMMON_COST=100, SUMMON11_COST=1000, SUMMON50_COST=4500; // 11회 연속: 1회 가격×11보다 100 G 할인 · 50회 연속: 4,500 G
+const SUMMON_BULK=[[100,9000],[500,45000],[1000,90000]]; // 골드 100·500·1000회 연속 (50회처럼 10% 할인)
 const BOSS_GOLD_MULT=1.25;
 const DROP={seal:0.30,stoneBoss:0.25,stoneMid:0.15,stoneNormal:0.01}; // 희귀 유물 확률 // 보스(솔로몬 72악마) 처치 골드 배율
 const STAR_RATE=[[6,0.0008],['pet',0.0005],[5,0.003],[4,0.03],[3,0.14],[2,0.30],[1,0.5257]]; // ★6은 상점 소환에서만 (합성 불가)
@@ -5514,6 +5516,7 @@ function renderShop(msg){
         <button class="btn primary full" id="sumG1" ${P.gold<SUMMON_COST?'disabled':''}>💰 골드 1회<small>${SUMMON_COST} G</small></button>
         <button class="btn danger full" id="sumG11" ${P.gold<SUMMON11_COST?'disabled':''}>💰 골드 11회 연속<small>${fmt(SUMMON11_COST)} G (${SUMMON_COST*11-SUMMON11_COST} G 할인)</small></button>
         <button class="btn danger full" id="sumG50" ${P.gold<SUMMON50_COST?'disabled':''}>💰 골드 50회 연속<small>${fmt(SUMMON50_COST)} G (${fmt(SUMMON_COST*50-SUMMON50_COST)} G 할인)</small></button>
+        ${SUMMON_BULK.map(([k,c])=>`<button class="btn danger full" data-sumg="${k}" ${P.gold<c?'disabled':''}>💰 골드 ${fmt(k)}회 연속<small>${fmt(c)} G (${fmt(SUMMON_COST*k-c)} G 할인)</small></button>`).join('')}
       </div>
     </div>
     <button class="btn m-coll" id="roul">🎡 행운의 룰렛<small>${rlFreeLeft()<=0?'🎁 무료 뽑기 가능!':`다음 무료 뽑기까지 ${rlTime(rlFreeLeft())}`}</small></button>
@@ -5529,6 +5532,7 @@ function renderShop(msg){
   $('#sumG1').onclick=()=>summon(1,false);
   $('#sumG11').onclick=()=>summon(11,false);
   $('#sumG50').onclick=()=>summon(50,false);
+  document.querySelectorAll('[data-sumg]').forEach(b=>b.onclick=()=>summon(+b.dataset.sumg,false));
   document.querySelectorAll('[data-id]').forEach(b=>b.onclick=()=>buy(b.dataset.id));
   $('#buytxp').onclick=()=>{if(P.items.stone<TRUSTXP_STONE)return;P.items.stone-=TRUSTXP_STONE;P.items.trustxp=(P.items.trustxp||0)+1;save();renderShop(`💗 신뢰도 XP를 구입했다 (${AWAKEN_ITEM.name} ${TRUSTXP_STONE}개 사용 · 신뢰도 XP 보유 ${P.items.trustxp}개)`);};
 }
@@ -5572,6 +5576,14 @@ function revealHTML(list,title){
   return `<div class="sum s${best}"><div class="sum-title">${title}</div><div class="sumgrid">${list.map((x,i)=>{const {id,isNew}=x,al=ALLIES[id];
     return `<div class="sumcell s${al.star}" style="animation-delay:${(i*(list.length>20?0.035:0.09)).toFixed(2)}s">${al.star>=6?wingPair('mwing'):''}<div class="ic">${allyFace(id,'sm')}</div><div class="st">${starsOf(al)}</div><div class="nm">${al.name}</div>${isNew?'<div class="new">NEW</div>':''}${x.gift?'<div class="gift">🎁 확정</div>':''}</div>`;}).join('')}</div></div>`;
 }
+/* 100회 이상 소환 결과: 같은 캐릭터는 한 칸에 ×개수로 묶고 높은 등급부터 */
+function revealGroupHTML(list,title){
+  const g={};list.forEach(x=>{const c=g[x.id]||(g[x.id]={id:x.id,n:0,isNew:false});c.n++;if(x.isNew)c.isNew=true;});
+  const rows=Object.values(g).sort((a,b)=>ALLIES[b.id].star-ALLIES[a.id].star||b.n-a.n);
+  const best=ALLIES[rows[0].id].star;
+  return `<div class="sum s${best}"><div class="sum-title">${title}</div><div class="small">같은 캐릭터는 묶어서 보여 줘요 · ${rows.length}종류</div><div class="sumgrid">${rows.map((x,i)=>{const al=ALLIES[x.id];
+    return `<div class="sumcell s${al.star}" style="animation-delay:${Math.min(i*0.035,1.5).toFixed(2)}s">${al.star>=6?wingPair('mwing'):''}<div class="ic">${allyFace(x.id,'sm')}</div><div class="st">${starsOf(al)}</div><div class="nm">${al.name}</div><div class="nm"><b>×${fmt(x.n)}</b></div>${x.isNew?'<div class="new">NEW</div>':''}</div>`;}).join('')}</div></div>`;
+}
 /* 소환 연출: 최고 등급에 따라 화려해짐 */
 function summonFx(top,cb){
   const n=top>=6?72:top>=5?46:top>=4?30:top>=3?18:10;
@@ -5605,7 +5617,7 @@ function petFx(cb){
 }
 function summon(n,useTicket){
   if(useTicket){if(P.tickets<n)return;P.tickets-=n;}
-  else{const c=n===11?SUMMON11_COST:n===50?SUMMON50_COST:SUMMON_COST*n;if(P.gold<c)return;P.gold-=c;}
+  else{const bk=SUMMON_BULK.find(([k])=>k===n),c=n===11?SUMMON11_COST:n===50?SUMMON50_COST:bk?bk[1]:SUMMON_COST*n;if(P.gold<c)return;P.gold-=c;}
   const res=[];
   for(let i=0;i<n;i++){
     const st=rollStar(),id=st==='pet'?pick(PET_IDS()):pick(allyIds(st));
@@ -5615,7 +5627,11 @@ function summon(n,useTicket){
   const top=res.reduce((a,b)=>ALLIES[b.id].star>ALLIES[a.id].star?b:a);
   const gotPet=res.some(r=>ALLIES[r.id].pet),topStar=ALLIES[top.id].star;
   const fx=(c)=>topStar>=6?summonFx(6,gotPet?()=>petFx(c):c):gotPet?petFx(c):summonFx(topStar,c);
-  fx(()=>showStory(revealHTML(res,n===1?'소환 결과':n+'회 소환 결과'+(res.some(r=>r.gift)?' + 🎁 ★4 확정':'')),()=>renderShop(`${n}회 소환 완료 · 최고 등급 ${'★'.repeat(ALLIES[top.id].star)} ${ALLIES[top.id].name}`),true));
+  const title=n===1?'소환 결과':n+'회 소환 결과'+(res.some(r=>r.gift)?' + 🎁 ★4 확정':'');
+  fx(()=>{
+    showStory(`<button class="btn primary" id="mtopbtn" style="margin-bottom:10px">계속</button>${n>=100?revealGroupHTML(res,title):revealHTML(res,title)}`,()=>renderShop(`${n}회 소환 완료 · 최고 등급 ${'★'.repeat(ALLIES[top.id].star)} ${ALLIES[top.id].name}`),true);
+    $('#mtopbtn').onclick=()=>$('#mbtn').click();   // 맨 위 계속 = 맨 아래 계속과 같음
+  });
 }
 /* 합성 재료로 쓸 수 있는 장수: 보유 카드 중 1장은 항상 남김 */
 function synSpare(id){return Math.max(0,(P.roster[id]||0)-1);}
