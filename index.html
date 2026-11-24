@@ -416,6 +416,27 @@ body.pfrozen #cmds .btn{filter:saturate(.2) brightness(1.2);background:linear-gr
 .fbtn{min-height:34px !important;font-size:12px !important;padding:4px 10px !important;white-space:nowrap}
 
 .fbtns{display:flex;flex-direction:column;gap:4px}
+/* 친구 채팅 */
+.chrow{display:flex;align-items:center;gap:10px;width:100%;text-align:left;background:#0c1329;border:1px solid var(--line);border-radius:12px;padding:9px 10px;margin-top:6px;color:inherit;font:inherit;cursor:pointer}
+.chrow.un{border-color:#5ab8ff;box-shadow:0 0 10px rgba(90,184,255,.25)}
+.chrow .chic{font-size:22px}.chrow .chmid{flex:1;min-width:0}.chrow .chmid small{display:block;color:#9fb0d8;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.chrow .chtm{font-size:11px;color:#8f9ac0;display:flex;flex-direction:column;align-items:flex-end;gap:4px}
+.chdot{display:inline-block;width:9px;height:9px;border-radius:50%;background:#ff4f6a;box-shadow:0 0 6px #ff4f6a}
+.tab .chdot{position:absolute;top:4px;right:calc(50% - 20px)}
+.chatwrap{display:flex;flex-direction:column;gap:8px}
+.chathead{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:8px}.chathead b{text-align:center;font-size:16px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.chbtn{padding:6px 10px;font-size:13px;min-height:0;width:auto}
+.chatlog{height:calc(100dvh - 260px);min-height:260px;overflow-y:auto;background:#080d1e;border:1px solid var(--line);border-radius:12px;padding:10px;display:flex;flex-direction:column;gap:6px;overscroll-behavior:contain}
+.chmsg{max-width:78%;align-self:flex-start;display:flex;flex-direction:column;align-items:flex-start}
+.chmsg.me{align-self:flex-end;align-items:flex-end}
+.chname{font-size:11px;color:#9fb0d8;margin:0 4px 2px}
+.chbub{background:#1b2850;border-radius:14px 14px 14px 4px;padding:7px 11px;font-size:15px;line-height:1.4;white-space:pre-wrap;word-break:break-word}
+.chmsg.me .chbub{background:linear-gradient(135deg,#3d6fd8,#5a8cf0);border-radius:14px 14px 4px 14px;color:#fff}
+.chat-t{font-size:10px;color:#7d8bb3;margin:1px 4px 0}
+.chsys{align-self:center;font-size:11px;color:#8f9ac0;background:rgba(255,255,255,.05);border-radius:10px;padding:2px 10px}
+.chatin{display:flex;gap:6px}.chatin input,#chgname{flex:1;min-width:0;box-sizing:border-box;background:#080d1e;color:#e6eeff;border:1px solid var(--line);border-radius:10px;padding:9px 10px;font-size:16px}.chatin .btn{width:auto;padding:8px 14px}
+.chpick{display:grid;grid-template-columns:1fr 1fr;gap:4px;margin:6px 0;max-height:240px;overflow-y:auto}
+.chpk{display:flex;align-items:center;gap:6px;background:#0c1329;border-radius:8px;padding:7px 8px;font-size:14px}
 .pvpvis{font-size:0;line-height:1;display:flex;flex-direction:column;align-items:center;gap:10px;padding:10px 0;animation:none}
 .pvphero{font-size:64px;color:#ff8a8a;text-shadow:0 0 20px #ff3040}
 .pvpteam{display:flex;gap:8px;justify-content:center;font-size:14px;margin:4px 0}
@@ -3560,7 +3581,7 @@ function fbBind(p){
         try{await cloudRef.set({json:JSON.stringify(mine),savedAt:mine.savedAt||Date.now(),key:SAVE_KEY});}catch(e){}
       }
       if(P&&P.uid===pid){fbMergeFriends();publishProfile();if(pendingFriend)takePendingFriend();}
-      giftListen();
+      giftListen();chatInit();
     }catch(e){if(!fbPid)cloudState='denied';}
     fbBinding=null;updateCloudNote();
   })();
@@ -3970,7 +3991,8 @@ async function renderFriends(msg,preList){
     if(!$('#frload'))return;
   }
   P.friends=P.friends||[];
-  const byId={};list.forEach(x=>byId[x.id]=x);
+  const byId={};list.forEach(x=>{byId[x.id]=x;if(x.hero)chatPeople[x.id]=x.hero;});
+  chatInit();
   const mine=new Set(P.friends);
   const me={...myPublic(),id:myId,me:true,hero:P.name};          // 내 정보는 항상 지금 값으로
   const friends=P.friends.filter(id=>id!==myId).map(id=>byId[id]||(P.fbook&&P.fbook[id]?{...P.fbook[id],id,old:true}:{id,hero:'모험가',missing:true}));
@@ -3995,7 +4017,7 @@ async function renderFriends(msg,preList){
       ${x.missing?'':`<div class="small">${rankChip(x)||'<span class="rchip off">랭크 정보 없음 (친구가 새 버전에 접속하면 표시)</span>'}</div>`}
       ${sub?`<div class="small">${sub}</div>`:''}</div>
       <div class="fcp">⚔ ${fmt(x.cp||0)}</div>
-      <div class="fbtns">${x.team&&!x.missing?`<button class="btn danger fbtn" data-duel="${esc(x.id)}">⚔ 배틀</button>`:''}<button class="btn fbtn" data-finfo="${esc(x.id)}">🔍 자세히 보기</button></div></div>`;
+      <div class="fbtns">${FB&&DBX===FB&&!x.missing&&!x.old?`<button class="btn primary fbtn" data-chatdm="${esc(x.id)}">💬 채팅</button>`:''}${x.team&&!x.missing?`<button class="btn danger fbtn" data-duel="${esc(x.id)}">⚔ 배틀</button>`:''}<button class="btn fbtn" data-finfo="${esc(x.id)}">🔍 자세히 보기</button></div></div>`;
   };
   const simpleRow=(x,label)=>`<div class="frow"><div class="fcp">⚔ ${fmt(x.cp||0)}</div>
       <div style="flex:1;min-width:0"><b>${esc(x.hero||'모험가')}</b><div class="small">Lv ${x.lv||1} · ${progressText(x)}${seen(x)}</div></div>
@@ -4006,6 +4028,7 @@ async function renderFriends(msg,preList){
     ${requests.length?`<div class="panel"><div class="ptitle">📨 친구 요청 <span class="small">${requests.length}명</span></div>
       <div class="desc">나를 친구로 추가한 모험가예요. 수락하면 서로 친구가 돼요.</div>
       ${requests.map(x=>simpleRow(x,'수락')).join('')}</div>`:''}
+    ${FB&&DBX===FB?`<div class="panel" id="chatpanel">${chatListHTML()}</div>`:''}
     <div class="panel"><div class="ptitle">🏆 친구 랭킹 <span class="small">전투력 순 · 친구 ${nf}명 · 내 순위 ${myRank}/${ranking.length}</span></div>
       <div class="desc">🔴 실시간 — 친구가 레벨업·강화하면 코드 없이 자동으로 바뀌어요.</div>
       ${ranking.map(rankRow).join('')}
@@ -4046,6 +4069,8 @@ async function renderFriends(msg,preList){
       save();renderFriends(`${esc(x.hero||'모험가')}님을 친구 목록에서 삭제했어요.`,list);}});
   });
   document.querySelectorAll('[data-duel]').forEach(b=>b.onclick=()=>duelF(b.dataset.duel));
+  document.querySelectorAll('[data-chatdm]').forEach(b=>b.onclick=()=>{b.disabled=true;b.textContent='여는 중…';chatOpenDM(b.dataset.chatdm);});
+  chatBindList();
   if(!preList)window.scrollTo(0,0);
   // 친구 화면이 열려 있는 동안 다른 모험가의 레벨·전투력이 바뀌면 바로 다시 그림
   if(FB&&DBX===FB){
@@ -4285,6 +4310,196 @@ function giftSendUI(x){
       }
     }
   };
+}
+/* ===================== 친구 채팅 (1:1 · 단체 · 실시간) =====================
+   uids/{기기uid}               : 이 기기가 지금 쓰는 캐릭터 id (서버 규칙에서 "나"를 알아내는 데 씀)
+   rooms/{방id}                 : 방 정보 (members·names·마지막 메시지) — 1:1은 d_아이디1_아이디2, 단체는 g_무작위
+   rooms/{방id}/msgs/{메시지id} : 메시지 (방 멤버만 읽고 쓰기)
+   chatbox/{내id}/rooms/{방id}  : 내가 들어가 있는 방 목록 */
+const CHAT_MAX=10,CHAT_TEXT=300,CHAT_LOAD=80;
+let chatReady=null,chatFor=null,chatBoxUnsub=null,chatRoomUnsubs={},chatRooms={},chatMsgUnsub=null,chatOpen=null;const chatPeople={};
+const chatOn=()=>!!(FB&&fbAuthUid&&fbPid&&myId===fbPid&&P&&P.uid===fbPid);
+const chatDmId=(a,b)=>'d_'+[a,b].sort().join('_');
+const chatMyName=()=>String(P.name||'모험가').replace(/[<>&"'`]/g,'').slice(0,8)||'모험가';
+const chatNm=s=>String(s||'').replace(/[<>&"'`]/g,'').slice(0,12)||'친구';
+function chatStop(){
+  if(chatBoxUnsub){try{chatBoxUnsub();}catch(e){}}chatBoxUnsub=null;
+  Object.values(chatRoomUnsubs).forEach(u=>{try{u();}catch(e){}});chatRoomUnsubs={};chatRooms={};
+  chatMsgStop();chatReady=null;chatFor=null;chatChanged();
+}
+function chatMsgStop(){if(chatMsgUnsub){try{chatMsgUnsub();}catch(e){}}chatMsgUnsub=null;chatOpen=null;}
+function chatInit(){
+  if(!chatOn()){if(chatFor)chatStop();return Promise.resolve(false);}
+  if(chatFor===fbPid&&chatReady)return chatReady;
+  chatStop();const pid=fbPid;chatFor=pid;
+  chatReady=(async()=>{
+    try{await withTimeout(FB.doc('uids/'+fbAuthUid).set({pid}));}catch(e){if(chatFor===pid){chatReady=null;chatFor=null;}return false;}
+    if(chatFor!==pid)return false;
+    try{chatBoxUnsub=FB.collection(`chatbox/${pid}/rooms`).onSnapshot(q=>{
+      const want=new Set(q.docs.map(d=>d.id));
+      Object.keys(chatRoomUnsubs).forEach(r=>{if(!want.has(r)){try{chatRoomUnsubs[r]();}catch(e){}delete chatRoomUnsubs[r];delete chatRooms[r];}});
+      want.forEach(r=>{
+        if(chatRoomUnsubs[r])return;
+        chatRoomUnsubs[r]=FB.doc('rooms/'+r).onSnapshot(sn=>{
+          if(!sn.exists){delete chatRooms[r];chatChanged();return;}
+          const prev=chatRooms[r],x={id:r,...sn.data()};chatRooms[r]=x;
+          if(prev&&(x.lastAt||0)>(prev.lastAt||0)&&x.lastFrom!==pid&&!(chatOpen===r&&$('#chatlog')))chatToast(x);
+          chatChanged();
+        },()=>{delete chatRooms[r];chatChanged();});
+      });
+      chatChanged();
+    },()=>{});}catch(e){}
+    return true;
+  })();
+  return chatReady;
+}
+function chatOther(r){return r&&Array.isArray(r.members)?r.members.find(m=>m!==fbPid):null;}
+function chatWho(r,id){return chatNm((r&&r.names&&r.names[id])||chatPeople[id]);}
+function chatTitle(r){
+  if(!r)return '채팅';
+  if(r.type==='dm')return chatWho(r,chatOther(r));
+  return r.name?chatNm(r.name):(r.members||[]).filter(m=>m!==fbPid).map(m=>chatWho(r,m)).join(', ').slice(0,30)||'단체 채팅';
+}
+function chatUnread(r){return !!(r&&r.lastAt&&r.lastFrom!==fbPid&&r.lastAt>((P&&P.chatRead&&P.chatRead[r.id])||0));}
+const chatUnreadN=()=>Object.values(chatRooms).filter(chatUnread).length;
+function chatTime(t){if(!t)return '';const d=new Date(t),n=new Date(),hm=`${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+  return d.toDateString()===n.toDateString()?hm:`${d.getMonth()+1}/${d.getDate()} ${hm}`;}
+function chatListHTML(){
+  const rs=Object.values(chatRooms).sort((a,b)=>(b.lastAt||b.at||0)-(a.lastAt||a.at||0));
+  return `<div class="ptitle">💬 채팅 <span class="small">${rs.length?`대화방 ${rs.length}개`:''}${chatUnreadN()?` · 안 읽음 ${chatUnreadN()}`:''}</span></div>
+    ${rs.length?rs.map(r=>`<button class="chrow ${chatUnread(r)?'un':''}" data-chat="${esc(r.id)}"><span class="chic">${r.type==='group'?'👥':'💬'}</span>
+      <span class="chmid"><b>${esc(chatTitle(r))}</b>${r.type==='group'?` <span class="small">${(r.members||[]).length}명</span>`:''}
+      <small>${r.lastAt?esc((r.type==='group'&&r.lastFrom!==fbPid?chatNm(r.lastName)+': ':r.lastFrom===fbPid?'나: ':'')+r.lastText):'아직 메시지가 없어요'}</small></span>
+      <span class="chtm">${chatTime(r.lastAt)}${chatUnread(r)?'<i class="chdot"></i>':''}</span></button>`).join('')
+      :'<div class="desc">친구 랭킹의 <b>💬 채팅</b>을 눌러 1:1 채팅을 시작해 보세요.</div>'}
+    <button class="btn" id="chnewg" style="width:100%;margin-top:6px">👥 단체 채팅 만들기</button>`;
+}
+function chatBindList(){
+  document.querySelectorAll('[data-chat]').forEach(b=>b.onclick=()=>renderChat(b.dataset.chat));
+  if($('#chnewg'))$('#chnewg').onclick=()=>chatGroupUI();
+}
+function chatChanged(){
+  const t=document.querySelector('.tab.t-friend');
+  if(t){const n=chatOn()?chatUnreadN():0;let d=t.querySelector('.chdot');if(n&&!d){d=document.createElement('i');d.className='chdot';t.appendChild(d);}else if(!n&&d)d.remove();}
+  const pn=$('#chatpanel');if(pn){pn.innerHTML=chatListHTML();chatBindList();}
+  const tt=$('#chtitle');if(tt&&chatOpen)tt.textContent=chatTitle(chatRooms[chatOpen]);
+}
+function chatToast(r){
+  const d=document.createElement('div');d.className='stoast';d.style.background='linear-gradient(135deg,rgba(30,60,130,.97),rgba(60,110,200,.97))';d.style.borderColor='#a8c8ff';
+  d.innerHTML=`<div class="st-ic">💬</div><div><b>${esc(r.type==='group'?chatTitle(r):chatNm(r.lastName))}</b><small>${esc((r.type==='group'?chatNm(r.lastName)+': ':'')+r.lastText)}</small></div>`;
+  const prev=document.querySelectorAll('.stoast').length;d.style.top=`${14+prev*70}px`;
+  document.body.appendChild(d);d.onclick=()=>{d.remove();if(!B&&$('#modal').classList.contains('hidden'))renderChat(r.id);};
+  setTimeout(()=>d.classList.add('out'),4200);setTimeout(()=>d.remove(),4800);
+}
+function chatFail(m){renderFriends(m||'💬 채팅 서버에 연결하지 못했어요. 잠시 뒤 다시 시도해 주세요.');}
+async function chatOpenDM(fid){
+  if(!(await chatInit()))return chatFail();
+  const rid=chatDmId(fbPid,fid),ref=FB.doc('rooms/'+rid);
+  try{
+    const sn=await withTimeout(ref.get()),b=FB.batch(),now=Date.now();
+    if(!sn.exists)b.set(ref,{type:'dm',name:'',owner:fbPid,members:[fbPid,fid].sort(),names:{[fbPid]:chatMyName(),[fid]:chatNm(chatPeople[fid])},at:now,lastAt:0,lastText:'',lastFrom:'',lastName:''});
+    if(!chatRooms[rid]){b.set(FB.doc(`chatbox/${fbPid}/rooms/${rid}`),{at:now});b.set(FB.doc(`chatbox/${fid}/rooms/${rid}`),{at:now});}
+    await withTimeout(b.commit());
+    if(!chatRooms[rid])chatRooms[rid]={id:rid,...(sn.exists?sn.data():{type:'dm',members:[fbPid,fid].sort(),names:{[fbPid]:chatMyName(),[fid]:chatNm(chatPeople[fid])},lastAt:0})};
+  }catch(e){return chatFail('💬 채팅방을 열지 못했어요. 친구가 새 버전 게임에 한 번 접속했는지 확인하고 다시 시도해 주세요.');}
+  renderChat(rid);
+}
+function chatPickHTML(ids,note){
+  return ids.length?`<div class="chpick">${ids.map(id=>`<label class="chpk"><input type="checkbox" value="${esc(id)}"> ${esc(chatNm(chatPeople[id]))}</label>`).join('')}</div><div class="small" id="chpkmsg">${note||''}</div>`
+    :'<div class="desc">고를 수 있는 친구가 없어요. (친구가 새 버전 게임에 한 번 접속해야 해요)</div>';
+}
+const chatPicked=()=>[...document.querySelectorAll('.chpick input:checked')].map(e=>e.value);
+function chatFriendIds(excl){return (P.friends||[]).filter(id=>id!==fbPid&&chatPeople[id]&&!(excl||[]).includes(id));}
+function chatGroupUI(){
+  const ids=chatFriendIds();
+  showStory(`<div class="sum"><div class="sum-title">👥 단체 채팅 만들기</div>
+    <input id="chgname" maxlength="20" autocomplete="off" placeholder="방 이름 (비워 두면 참여자 이름)" style="width:100%;font-size:16px;margin:8px 0">
+    <div class="small">함께할 친구 (나 포함 최대 ${CHAT_MAX}명)</div>${chatPickHTML(ids)}
+    <button class="btn" id="chgcancel" style="width:100%;margin-top:8px">취소</button></div>`,null,true);
+  $('#mbtn').textContent='👥 만들기';
+  $('#chgcancel').onclick=()=>$('#modal').classList.add('hidden');
+  $('#mbtn').onclick=async()=>{
+    const pick=chatPicked(),m=$('#chpkmsg');
+    if(pick.length<2){if(m)m.textContent='친구를 2명 이상 골라 주세요. (1명이면 1:1 채팅을 써 주세요)';return;}
+    if(pick.length>CHAT_MAX-1){if(m)m.textContent=`나 포함 ${CHAT_MAX}명까지 만들 수 있어요.`;return;}
+    const name=String($('#chgname').value||'').replace(/[<>&"'`]/g,'').trim().slice(0,20);
+    $('#mbtn').disabled=true;$('#mbtn').textContent='만드는 중…';
+    const done=()=>{$('#mbtn').disabled=false;$('#modal').classList.add('hidden');};
+    if(!(await chatInit())){done();return chatFail();}
+    const rid='g_'+fbPid.slice(-6)+Date.now().toString(36)+Math.random().toString(36).slice(2,8),members=[fbPid,...pick],now=Date.now();
+    const names={};members.forEach(id=>names[id]=id===fbPid?chatMyName():chatNm(chatPeople[id]));
+    const room={type:'group',name,owner:fbPid,members,names,at:now,lastAt:0,lastText:'',lastFrom:'',lastName:''};
+    try{const b=FB.batch();b.set(FB.doc('rooms/'+rid),room);members.forEach(id=>b.set(FB.doc(`chatbox/${id}/rooms/${rid}`),{at:now}));await withTimeout(b.commit());}
+    catch(e){done();return chatFail('👥 단체 채팅을 만들지 못했어요. 잠시 뒤 다시 시도해 주세요.');}
+    chatRooms[rid]={id:rid,...room};done();renderChat(rid);
+  };
+}
+function chatMenu(rid){
+  const r=chatRooms[rid];if(!r)return;
+  const can=chatFriendIds(r.members).slice(0,50),room=CHAT_MAX-(r.members||[]).length;
+  showStory(`<div class="sum"><div class="sum-title">👥 ${esc(chatTitle(r))}</div>
+    <div class="small">참여자 ${(r.members||[]).length}명</div><div class="desc">${(r.members||[]).map(m=>esc(chatWho(r,m))+(m===fbPid?' (나)':'')).join(' · ')}</div>
+    ${room>0?`<div class="small" style="margin-top:8px">➕ 초대할 친구 (최대 ${room}명 더)</div>${chatPickHTML(can)}<button class="btn primary" id="chinv" style="width:100%;margin-top:6px" ${can.length?'':'disabled'}>➕ 초대하기</button>`:'<div class="small">방이 가득 찼어요.</div>'}
+    <button class="btn danger" id="chleave" style="width:100%;margin-top:8px">🚪 단체 채팅 나가기</button></div>`,null,true);
+  $('#mbtn').textContent='닫기';
+  if($('#chinv'))$('#chinv').onclick=async()=>{
+    const pick=chatPicked(),m=$('#chpkmsg');
+    if(!pick.length){if(m)m.textContent='초대할 친구를 골라 주세요.';return;}
+    if(pick.length>room){if(m)m.textContent=`${room}명까지 더 초대할 수 있어요.`;return;}
+    $('#chinv').disabled=true;const now=Date.now(),upd={members:firebase.firestore.FieldValue.arrayUnion(...pick)};
+    pick.forEach(id=>upd['names.'+id]=chatNm(chatPeople[id]));
+    try{const b=FB.batch();b.update(FB.doc('rooms/'+rid),upd);pick.forEach(id=>b.set(FB.doc(`chatbox/${id}/rooms/${rid}`),{at:now}));await withTimeout(b.commit());
+      $('#modal').classList.add('hidden');renderChat(rid,`➕ ${pick.map(id=>esc(chatNm(chatPeople[id]))).join(', ')}님을 초대했어요.`);}
+    catch(e){if(m)m.textContent='초대하지 못했어요. 잠시 뒤 다시 시도해 주세요.';if($('#chinv'))$('#chinv').disabled=false;}
+  };
+  $('#chleave').onclick=async()=>{
+    const b0=$('#chleave');
+    if(b0.dataset.armed!=='1'){b0.dataset.armed='1';b0.textContent='한 번 더 누르면 나가요';return;}
+    b0.disabled=true;
+    try{const b=FB.batch();b.update(FB.doc('rooms/'+rid),{members:(r.members||[]).filter(x=>x!==fbPid)});b.delete(FB.doc(`chatbox/${fbPid}/rooms/${rid}`));await withTimeout(b.commit());}
+    catch(e){b0.disabled=false;b0.textContent='나가지 못했어요. 다시 눌러 주세요';b0.dataset.armed='';return;}
+    $('#modal').classList.add('hidden');chatMsgStop();delete chatRooms[rid];if(P.chatRead)delete P.chatRead[rid];save();renderFriends('🚪 단체 채팅에서 나왔어요.');
+  };
+}
+function renderChat(rid,msg){
+  if(!chatOn())return chatFail();
+  if(friendsUnsub){try{friendsUnsub();}catch(e){}friendsUnsub=null;}
+  chatMsgStop();clearBattle();hubTab='friend';chatOpen=rid;
+  const r=chatRooms[rid];
+  $('#app').innerHTML=`${msg?`<div class="notice">${msg}</div>`:''}<div class="panel chatwrap">
+      <div class="chathead"><button class="btn chbtn" id="chback">← 친구</button><b id="chtitle">${esc(chatTitle(r))}</b>${r&&r.type==='group'?'<button class="btn chbtn" id="chmenu">👥 ⋯</button>':'<span></span>'}</div>
+      <div class="chatlog" id="chatlog"><div class="desc">메시지를 불러오는 중…</div></div>
+      <form class="chatin" id="chform"><input id="chtext" maxlength="${CHAT_TEXT}" autocomplete="off" enterkeyhint="send" placeholder="메시지 입력"><button class="btn primary" id="chsend">보내기</button></form>
+    </div>${tabBar()}`;
+  $('#chback').onclick=()=>{chatMsgStop();renderFriends();};
+  if($('#chmenu'))$('#chmenu').onclick=()=>chatMenu(rid);
+  $('#chform').onsubmit=async e=>{
+    e.preventDefault();
+    const inp=$('#chtext'),text=String(inp.value||'').trim().slice(0,CHAT_TEXT);if(!text)return;
+    inp.value='';inp.focus();
+    const now=Date.now(),nm=chatMyName();
+    try{const b=FB.batch();
+      b.set(FB.collection(`rooms/${rid}/msgs`).doc(),{from:fbPid,name:nm,text,at:now});
+      b.update(FB.doc('rooms/'+rid),{lastAt:now,lastText:text.slice(0,60),lastFrom:fbPid,lastName:nm,['names.'+fbPid]:nm});
+      await withTimeout(b.commit());
+    }catch(err){const lg=$('#chatlog');if(lg&&chatOpen===rid){lg.insertAdjacentHTML('beforeend','<div class="chsys">⚠ 메시지를 보내지 못했어요. 인터넷 연결을 확인해 주세요.</div>');lg.scrollTop=lg.scrollHeight;}if(inp&&!inp.value)inp.value=text;}
+  };
+  try{chatMsgUnsub=FB.collection(`rooms/${rid}/msgs`).orderBy('at','desc').limit(CHAT_LOAD).onSnapshot(q=>{
+    const lg=$('#chatlog');
+    if(!lg||chatOpen!==rid){chatMsgStop();return;}
+    const ms=q.docs.map(d=>d.data()).filter(x=>x&&typeof x.text==='string').reverse();
+    const near=lg.scrollHeight-lg.scrollTop-lg.clientHeight<80;
+    const rr=chatRooms[rid];let lastDay='';
+    lg.innerHTML=ms.length?ms.map(x=>{const mine=x.from===fbPid,d=new Date(x.at||0),day=`${d.getMonth()+1}월 ${d.getDate()}일`;
+      const sep=day!==lastDay?`<div class="chsys">${day}</div>`:'';lastDay=day;
+      return `${sep}<div class="chmsg ${mine?'me':''}">${!mine&&rr&&rr.type==='group'?`<div class="chname">${esc(chatNm(x.name))}</div>`:''}<div class="chbub">${esc(x.text)}</div><div class="chat-t">${chatTime(x.at).split(' ').pop()}</div></div>`;}).join('')
+      :'<div class="chsys">아직 메시지가 없어요. 먼저 인사해 보세요! 👋</div>';
+    if(near||!lg.dataset.init){lg.scrollTop=lg.scrollHeight;lg.dataset.init='1';}
+    const mx=Math.max(0,...ms.map(x=>x.at||0));
+    P.chatRead=P.chatRead||{};if(mx>(P.chatRead[rid]||0)){P.chatRead[rid]=mx;try{localStorage.setItem(SAVE_KEY,JSON.stringify(P));}catch(e){}}
+    chatChanged();
+  },()=>{const lg=$('#chatlog');if(lg)lg.innerHTML='<div class="chsys">⚠ 이 채팅방을 열 수 없어요. (방에서 나갔거나 연결이 끊겼어요)</div>';});}catch(e){}
+  window.scrollTo(0,document.body.scrollHeight);
 }
 function friendRecHTML(x){   // 친구 자세히 보기: 스테이지·랭크전·탑·숲·던전·맞추기
   const rc=x.rec&&typeof x.rec==='object'?x.rec:null,n=(v,mx)=>Math.max(0,Math.min(mx,Math.floor(+v||0)));
@@ -5109,7 +5324,7 @@ function renderHub(msg){
 /* 하단 탭: 상점 · 동료 · 모험 · 던전 · 친구 */
 let hubTab='adv';
 const TABS=[['shop','🕯','상점'],['ally','🤝','동료'],['adv','🗺','모험'],['dungeon','🏰','던전'],['friend','👥','친구']];
-const tabBar=()=>{document.body.dataset.theme=hubTab;return `${verLineHTML()}<nav class="tabbar">${TABS.map(([k,ic,l])=>`<button class="tab t-${k} ${hubTab===k?'on':''}" data-tab="${k}"><span class="ti">${ic}</span>${l}</button>`).join('')}</nav>`;};
+const tabBar=()=>{document.body.dataset.theme=hubTab;return `${verLineHTML()}<nav class="tabbar">${TABS.map(([k,ic,l])=>`<button class="tab t-${k} ${hubTab===k?'on':''}" data-tab="${k}"><span class="ti">${ic}</span>${l}${k==='friend'&&typeof chatOn==='function'&&chatOn()&&chatUnreadN()?'<i class="chdot"></i>':''}</button>`).join('')}</nav>`;};
 document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('.tabbar [data-tab]');if(b){e.preventDefault();hubTab=b.dataset.tab;renderHub();window.scrollTo(0,0);}});
 const footHTML=()=>`<div class="foot">${FB?'<button class="link" id="devlink">📱 기기 연결</button> · ':''}<button class="link" id="savecode">💾 저장 코드 복사</button> · <button class="link" id="totitle">타이틀로</button>
   <div class="small" style="margin-top:2px">${cloudState==='on'?'☁ 클라우드 자동 저장 중':'이 브라우저에 자동 저장 중 · 저장 코드로 백업하세요'}</div></div>`;
