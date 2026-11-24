@@ -66,6 +66,12 @@ button:disabled{cursor:default}
 .rankbadge{text-align:center;padding:10px 0 4px}.rankbadge .ri{font-size:56px;line-height:1.1;filter:drop-shadow(0 0 14px var(--rc))}.rankbadge b{display:block;font-size:24px;color:var(--rc);margin-top:4px}
 .ranklad{display:flex;justify-content:space-between;gap:2px;margin:10px 0}.ranklad span{flex:1;min-width:0;text-align:center;font-size:10px;letter-spacing:-.5px;padding:5px 0;border-radius:8px;background:rgba(255,255,255,.05);opacity:.55}.ranklad span.on{opacity:1;background:rgba(255,210,110,.18);box-shadow:0 0 0 1px rgba(255,210,110,.5) inset}.ranklad span.done{opacity:.9}
 .btn.m-rest{background:#1f3b34}.btn.m-rest small{color:#a6cfbd}
+.fbgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:8px}
+.fbtile{display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 3px;border-radius:12px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);color:inherit;font-size:11px;line-height:1.25}
+.fbtile b{font-size:11.5px}.fbtile[disabled]{opacity:.35}
+.fbtile.sel{border-color:#ffd25a;background:rgba(255,210,90,.16);box-shadow:0 0 10px rgba(255,210,90,.45)}
+.fbthumb{width:56px;height:56px;border-radius:50%;background-size:cover;border:2px solid rgba(255,255,255,.25);display:flex;align-items:center;justify-content:center}
+.fbthumb.fbemo{font-size:28px;background:rgba(255,255,255,.06)}
 .btn.m-forest{background:linear-gradient(135deg,#1e4a22,#3a5a1a);border-color:rgba(150,230,120,.45)}.btn.m-forest small{color:#c8f0a8}
 .ftree{position:relative;padding:6px 0 10px;margin:8px 0}
 .ftree:before{content:'';position:absolute;left:50%;top:46px;bottom:34px;width:16px;margin-left:-8px;background:linear-gradient(90deg,#4a321c,#7a5530 45%,#4a321c);border-radius:8px;box-shadow:0 0 12px rgba(0,0,0,.5)}
@@ -2896,7 +2902,7 @@ const GUIDE_SECS=[
   ${gRow('😈 마계 이동',`${AREAS[realmStart()-1].name}까지 깨면 열리는 강한 보스들의 영역이에요. 마계 최종 보스는 ✴️ 구원의 조각을 ${Math.round(TRANS_DROP*100)}% 확률로 줘요.`)}
   ${gH('⚔ 사냥 · 휴식')}
   ${gRow(gB('⚔ 자유 사냥 (자동)'),'지금 지역 몬스터와 멈출 때까지 자동으로 싸워요. 경험치·코인 <b>×3</b> (마계 <b>×4</b>). 전투 화면의 '+gB('⏹ 자동 사냥 멈추기')+'로 멈춰요.')}
-  ${gRow(gB('🔁 천상의 성유물작'),`서울 최종 보스까지 가면 생겨요. 서울 최종 보스를 자동으로 반복하고 ${FARM_TARGET}번 잡으면 멈춰요.`)}
+  ${gRow(gB('🔁 천상의 성유물작'),`서울 최종 보스까지 가면 생겨요. 최종 보스까지 열린 지역 이동 보스를 골라 ${FARM_COUNTS.join('/')}번 중 하나를 고르면 자동으로 반복하고, 다 잡으면 멈춰요.`)}
   ${gRow(gB('⛪ 성당 휴식'),'HP를 모두 회복해요. 쓰고 나면 3분 뒤에 다시 쓸 수 있어요.')}
   ${gH('🏅 랭크전')}
   ${gFull(`Lv ${RANK_MIN_LV}부터. ★5 무작위 3명(구원자·필멸자는 5명)을 데려온 AI와 싸워요. 승리 +${RANK_WIN} LP · 패배 −${RANK_LOSS} LP. <br>승급 단계 · 필요한 LP · 승급 보상${rwList(RANKS.map((x,i)=>[`${x.icon} ${x.n}`,i?`${RANKS[i-1].n}에서 ${fmt(rankNeed(i-1))} LP${RANK_REWARD[i]?`<br>🎁 ${rankRewardText(i)}`:''}`:'시작 티어']))}그 밖의 보상${rwList([[`🏆 챌린저 ${RANK_CH_BONUS_LP} LP`,`${fmt(RANK_CH_BONUS)} 코인 (1회)`],[`⏳ 필멸자`,`${RANK_SV_SALV_STEP} LP마다 ${SALV_ITEM.icon} ${SALV_ITEM.name} 1개`]])}`)}
@@ -5304,7 +5310,7 @@ function renderHub(msg){
     </div>
     <div class="panel"><div class="ptitle">⚔ 사냥 · 휴식</div>
       <div class="grid">
-        <button class="btn m-adv" id="hunt">⚔ 자유 사냥 (자동)<small>경험치·골드 ×${huntMult(P.cur)} · 멈출 때까지 반복</small></button>${farmReady()?`<button class="btn m-adv" id="gfarm">🔁 천상의 성유물작<small>서울 최종 보스 자동 반복 · ${FARM_TARGET}번 잡으면 멈춤</small></button>`:''}
+        <button class="btn m-adv" id="hunt">⚔ 자유 사냥 (자동)<small>경험치·골드 ×${huntMult(P.cur)} · 멈출 때까지 반복</small></button>${farmReady()?`<button class="btn m-adv" id="gfarm">🔁 천상의 성유물작<small>지역 이동 보스 골라 자동 반복 · ${FARM_COUNTS.join('/')}번</small></button>`:''}
         <button class="btn m-rest${farmReady()?' full':''}" id="rest" ${restLeft()>0?'disabled':''}>${restLabel()}</button>
       </div>
     </div>
@@ -5326,7 +5332,7 @@ function renderHub(msg){
   document.querySelectorAll('.area').forEach(b=>b.onclick=()=>{P.cur=+b.dataset.i;save();renderHub();});
   document.querySelectorAll('[data-claim]').forEach(b=>b.onclick=()=>claim(b.dataset.claim));
   $('#ggbtn').onclick=()=>renderGG();
-  if($('#gfarm'))$('#gfarm').onclick=()=>startGlasyaFarm();
+  if($('#gfarm'))$('#gfarm').onclick=()=>renderFarmSelect();
   $('#hunt').onclick=()=>{autoHunt={on:true,area:P.cur,n:0,xp:0,gold:0};startBattle({area:P.cur,hunt:true});};
   $('#map').onclick=()=>renderMap(P.cur);
   if($('#rank'))$('#rank').onclick=()=>firstTip('rank',()=>renderRank());
@@ -7245,10 +7251,31 @@ const autoSum=()=>`${autoHunt.farm?`${autoHunt.n}/${autoHunt.farm.target}회`:`$
 /* 천상의 성유물작: 서울 최종 보스를 자동 전투로 반복 · 100번 잡으면 멈춤 (북마크 주소 …/#glasya 로 바로 시작) */
 const FARM_AREA=0, FARM_TARGET=100;
 const farmReady=()=>(P.prog[FARM_AREA]||0)>=STAGES-1;
-function startGlasyaFarm(){
+const FARM_COUNTS=[100,300,500];
+const farmAreaOk=a=>!!(AREAS[a]&&!AREAS[a].realm&&AREAS[a].boss&&(P.prog[a]||0)>=STAGES-1); // 지역 이동 · 최종 보스까지 열린 곳
+function startGlasyaFarm(){startFarm(FARM_AREA,FARM_TARGET);} // 북마크 …/#glasya: 서울 최종 보스 100번
+function startFarm(a,target){
+  if(!farmAreaOk(a)){renderHub('🔒 천상의 성유물작은 그 지역 15스테이지(최종 보스)까지 열려 있어야 할 수 있다');return;}
+  autoHunt={on:true,area:a,n:0,xp:0,gold:0,farm:{stage:STAGES,target}};
+  startBattle({area:a,stage:STAGES,farm:true});
+}
+function farmBossThumb(a){const bs=AREAS[a].boss,pt=bs.art&&PORTRAIT[bs.art];
+  return pt?`<span class="fbthumb" style="background-image:url(${pt.img});background-position:${pt.pos||'50% 20%'}"></span>`:`<span class="fbthumb fbemo">${AREAS[a].flag}</span>`;}
+function renderFarmSelect(sel){
   if(!farmReady()){renderHub('🔒 천상의 성유물작은 서울 15스테이지(최종 보스)까지 열려 있어야 할 수 있다');return;}
-  autoHunt={on:true,area:FARM_AREA,n:0,xp:0,gold:0,farm:{stage:STAGES,target:FARM_TARGET}};
-  startBattle({area:FARM_AREA,stage:STAGES,farm:true});
+  hubTab='adv';
+  const L=AREAS.map((A,i)=>i).filter(i=>!AREAS[i].realm&&AREAS[i].boss);
+  const tile=a=>{const ok=farmAreaOk(a),A=AREAS[a];return `<button class="fbtile ${sel===a?'sel':''}" data-fa="${a}" ${ok?'':'disabled'}>${farmBossThumb(a)}<b>${ok?esc(A.boss.name):'🔒'}</b><span class="small">${A.flag} ${esc(A.name)}</span></button>`;};
+  $('#app').innerHTML=`${statusHTML()}${topBack()}
+    <div class="panel"><div class="ptitle">🔁 천상의 성유물작</div>
+      <div class="desc">자동으로 반복할 <b>지역 이동 보스</b>를 고르세요. 최종 보스(15스테이지)까지 열린 지역만 고를 수 있어요.</div>
+      <div class="fbgrid">${L.map(tile).join('')}</div>
+      ${sel!=null&&farmAreaOk(sel)?`<div class="desc" style="margin-top:8px">${AREAS[sel].flag} <b>${esc(AREAS[sel].boss.name)}</b> — 몇 번 반복할까요?</div>
+        <div class="grid" style="grid-template-columns:repeat(3,1fr)">${FARM_COUNTS.map(n=>`<button class="btn danger" data-fn="${n}">🔁 ${n}번</button>`).join('')}</div>`:''}
+      <div class="grid" style="margin-top:8px"><button class="btn full" id="back">← 거점으로</button></div></div>${tabBar()}`;
+  document.querySelectorAll('[data-fa]').forEach(b=>b.onclick=()=>{const y=window.scrollY;renderFarmSelect(+b.dataset.fa);window.scrollTo(0,y);const c=document.querySelector('[data-fn]');if(c)c.scrollIntoView({block:'center',behavior:'smooth'});});
+  document.querySelectorAll('[data-fn]').forEach(b=>b.onclick=()=>startFarm(sel,+b.dataset.fn));
+  $('#back').onclick=()=>renderHub();
 }
 let farmHashDone=false;
 function autoTick(){
@@ -7689,7 +7716,7 @@ function victoryFlow(area,stype,first,wasFinal,fromHunt,msg,stage,rep){
     if(autoHunt.n>=autoHunt.farm.target){autoHunt.on=false;save();renderHub(`🏁 천상의 성유물작 완료 — ${autoSum()}<br>${autoHunt.farm.target}번을 모두 잡아 자동으로 멈췄다`);return;}
     $('#app').innerHTML=`${statusHTML()}<div class="panel"><div class="ptitle">🔁 천상의 성유물작</div><div class="notice">${rep?rep.lines.map(esc).join('<br>'):''}</div><div class="desc">${autoSum()}<br>다음 전투 준비 중…</div><div class="grid"><button class="btn danger full" id="autostop2">⏹ 멈추기</button></div></div>`;
     $('#autostop2').onclick=()=>autoHuntStop('⏹ 천상의 성유물작을 멈췄다');
-    setTimeout(()=>{if(autoHunt.on&&autoHunt.farm&&!B)startBattle({area:FARM_AREA,stage:STAGES,farm:true});},900);return;}
+    setTimeout(()=>{if(autoHunt.on&&autoHunt.farm&&!B)startBattle({area:autoHunt.area,stage:STAGES,farm:true});},900);return;}
   if(!fromHunt&&first&&stage<STAGES){mapSel={a:area,s:stage+1};autoNext(area,stage+1,rep);return;}
   if(fromHunt&&autoHunt.on){const a=autoHunt.area;
     $('#app').innerHTML=`${statusHTML()}<div class="panel"><div class="ptitle">🔁 자동 사냥 중</div><div class="notice">${rep?rep.lines.map(esc).join('<br>'):''}</div><div class="desc">${autoSum()}<br>다음 적을 찾는 중…</div><div class="grid"><button class="btn danger full" id="autostop2">⏹ 자동 사냥 멈추기</button></div></div>`;
