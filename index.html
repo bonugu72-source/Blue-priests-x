@@ -4505,6 +4505,7 @@ const FOREST_UNLOCK_AREA=AREAS.findIndex(a=>a.name==='고대 원단수'); // 고
 const forestOpen=()=>{const i=FOREST_UNLOCK_AREA;return i<0||(P.prog[i]||0)>=STAGES||!!(P.cleared&&P.cleared[i]);};
 const FOREST_REWARD={5:{salv:1},10:{salv:3},15:{salv:4},23:{ally:'atris'}}; // 첫 돌파 보상
 const forestRewardText=f=>{const w=FOREST_REWARD[f];if(!w)return '';return w.ally?`★6 ${ALLIES[w.ally].name}`:`${SALV_ITEM.icon} ${SALV_ITEM.name} ×${w.salv}`;};
+const FOREST_FLOOR_MUL={22:0.85,23:0.85}; // 노력의 숲 전용 보스 배율 (체력·공격력) — 22층 마르테리아 · 23층 레비아 15% 하향
 const FOREST_BAN={akira:15,roa:20}; // 해당 층부터 출전 금지
 const forestBanned=(id,f)=>!!(FOREST_BAN[id]&&f>=FOREST_BAN[id]);
 const FOREST_LAST_AREA=22; // 노력의 숲은 끝없는 그림자(레비아)까지 23층 — 이후 지역 추가로 층 수가 바뀌지 않게
@@ -6080,6 +6081,7 @@ function startBattle(spec){
      defending:false,busy:false,menu:'main',log:[],fxq:[]};
   if(spec.dungeon){B.dungeon=true;B.dgN=0;B.dgDone=0;B.dgKills=0;B.dgLeft=DG_MS;addLog(`🏰 던전 — ${DG_MS/1000}초 동안 최대한 많은 피해를 넣자!`);}
   if(P.relics.includes('hardship_neck')&&!spec.forest){B.neckSh=NECK_SHIELD;addLog(`📿 혹사의 목걸이 — 주인공 보호막 ${NECK_SHIELD}`);}
+  if(spec.forest&&FOREST_FLOOR_MUL[spec.forest]){const fm=FOREST_FLOOR_MUL[spec.forest],e=B.e;e.maxHp=Math.round(e.maxHp*fm);e.hp=e.maxHp;e.atk=Math.round(e.atk*fm);}
   if(spec.forest){B.forest=spec.forest;addLog(`🌳 노력의 숲 ${spec.forest}층 — 빌린 동료 ${spec.fparty.length}명과 함께 (주인공 HP ${fmt(FOREST_HP)} · 공격력 ${FOREST_ATK} 고정)`);}
   else if(spec.tower){B.tower=spec.tower;B.heaven=!!spec.heaven;B.towerReplay=!!spec.replay;addLog(`${B.heaven?'☁️ 천상의 탑':'🗼 구원의 탑'} ${spec.tower}층 — 동료 1명만 함께 오른다`);}
   else if(noFixed)addLog('⚠ 출전 조건 — 이사벨 부제는 이 지역에 함께할 수 없다');
