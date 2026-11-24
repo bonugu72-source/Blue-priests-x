@@ -335,6 +335,9 @@ body:has(.status) #bgmbtn{display:none}
 .stoast.salv{background:linear-gradient(135deg,rgba(120,70,8,.97),rgba(210,150,30,.97) 55%,rgba(150,80,10,.97));border:1px solid #fff0b0;overflow:hidden;
   box-shadow:0 0 0 2px rgba(255,230,140,.5),0 0 30px rgba(255,200,60,.9),0 0 60px rgba(255,160,30,.5),0 6px 20px rgba(0,0,0,.5);animation:stin .45s cubic-bezier(.2,1.4,.4,1) both,salvpulse 1.2s .45s ease-in-out infinite}
 .stoast.salv small{color:#fff3c8}
+.stoast.salv.etern{background:linear-gradient(135deg,rgba(10,90,40,.97),rgba(40,190,90,.97) 55%,rgba(10,110,50,.97));border-color:#c8ffd8;box-shadow:0 0 0 2px rgba(150,255,180,.5),0 0 30px rgba(60,230,120,.9),0 0 60px rgba(30,180,80,.5),0 6px 20px rgba(0,0,0,.5)}
+.stoast.salv.etern small{color:#dcffe6}.stoast.salv.etern b{color:#f0fff4;text-shadow:0 0 8px #4dff8f}
+.stoast.salv.etern .st-ic{filter:drop-shadow(0 0 10px #8dffb0) drop-shadow(0 0 20px #2ee07a)}
 .stoast.salv b{color:#fffbe8;text-shadow:0 0 8px #ffcc33}
 .stoast.salv .st-ic{filter:drop-shadow(0 0 10px #ffe08a) drop-shadow(0 0 20px #ffb52e);animation:salvspin 1.4s ease-in-out infinite}
 .stoast.salv::before{content:'';position:absolute;inset:0;background:linear-gradient(110deg,transparent 35%,rgba(255,255,255,.8) 48%,rgba(255,240,180,.5) 52%,transparent 65%);background-size:250% 100%;animation:salvsweep 1.3s ease-in-out infinite;pointer-events:none}
@@ -546,6 +549,7 @@ body.chatkb .chatwrap{border-radius:0;padding-bottom:6px}
 .acard.transc{border-color:#ffd76a;box-shadow:0 0 0 1px rgba(255,215,106,.6),0 0 18px rgba(255,190,60,.35)}
 .transtag{display:inline-block;font-size:10px;font-weight:900;padding:1px 6px;border-radius:8px;background:linear-gradient(135deg,#fff1b0,#ffb52e);color:#4a2a00;box-shadow:0 0 8px rgba(255,190,60,.8)}
 .btn.transbtn{background:linear-gradient(135deg,#6a4a10,#c89420);border-color:#ffd76a;color:#fff6d8}
+.btn.transbtn.etern{background:linear-gradient(135deg,#0f5a2a,#2fbf68);border-color:#8dffb0;color:#eafff0}
 /* 초월 연출 */
 .tfx{position:fixed;inset:0;z-index:72;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at 50% 45%,#2a2110,#050408 72%);animation:sfxfade .35s ease-out;overflow:hidden;cursor:pointer}
 .tfx .tstage{position:relative;width:220px;height:300px}
@@ -1357,6 +1361,13 @@ function stoneToast(n,why){
 function salvToast(why,n){
   const d=document.createElement('div');d.className='stoast salv';
   d.innerHTML=`<div class="st-ic">✴️</div><div><b>구원의 조각 ×${n||1} 획득!</b><small>${why||''} · 보유 ${P.items.salv||0}개</small></div>${Array.from({length:9},(_,i)=>`<i class="sp" style="left:${8+Math.round(Math.random()*84)}%;top:${10+Math.round(Math.random()*75)}%;--d:${(i*0.16).toFixed(2)}s"></i>`).join('')}`;
+  const prev=document.querySelectorAll('.stoast').length;d.style.top=`${14+prev*70}px`;
+  document.body.appendChild(d);d.onclick=()=>d.remove();
+  setTimeout(()=>d.classList.add('out'),4200);setTimeout(()=>d.remove(),4800);
+}
+function eternToast(why,n){
+  const d=document.createElement('div');d.className='stoast salv etern';
+  d.innerHTML=`<div class="st-ic">${ETERNAL_ITEM.icon}</div><div><b>${ETERNAL_ITEM.name} ×${n||1} 획득!</b><small>${why||''} · 보유 ${P.items.etern||0}개</small></div>${Array.from({length:9},(_,i)=>`<i class="sp" style="left:${8+Math.round(Math.random()*84)}%;top:${10+Math.round(Math.random()*75)}%;--d:${(i*0.16).toFixed(2)}s"></i>`).join('')}`;
   const prev=document.querySelectorAll('.stoast').length;d.style.top=`${14+prev*70}px`;
   document.body.appendChild(d);d.onclick=()=>d.remove();
   setTimeout(()=>d.classList.add('out'),4200);setTimeout(()=>d.remove(),4800);
@@ -3000,7 +3011,7 @@ const GUIDE_SECS=[
   <div class="gstep"><b>5. 💗 신뢰도</b> (티어가 있는 ★5 · ★6) — 함께 이길수록 올라요. 최대 10단계.${rwList([['일반 · 정예',`+${TRUST_GAIN.normal}점`],['중간 보스',`+${TRUST_GAIN.mid}점`],['최종 보스',`+${TRUST_GAIN.boss}점`]])}</div>
   ${gTbl(['신뢰도',1,2,3,4,5],[['필요 점수',...TRUST_REQ.slice(1,6)]])}${gTbl(['신뢰도',6,7,8,9,10],[['필요 점수',...TRUST_REQ.slice(6,11)]])}
   <p class="small">💗 신뢰도 XP 1개를 쓰면 바로 +2단계. 신뢰도 10이면 전투력</p>${rwList([['★5 1티어','+25%'],['★5 2티어','+21%'],['★5 3티어','+30%'],['★6','+13%']],2)}
-  <div class="gstep"><b>6. ✴️ 초월</b> (★5 · 펫 · ★6) — <b>5각성 + 신화</b>를 마치면 ✴️ 구원의 조각(★6은 💠 영원의 조각) 1개로 도전. 성공 ${Math.round(TRANS_RATE*100)}% · 성공하면 <b>전투력 ${TRANS_MULT}배</b>. 실패하면 조각만 사라져요.</div>
+  <div class="gstep"><b>6. ✴️ 초월</b> (★5 · 펫 · ★6) — <b>5각성 + 신화</b>를 마치면 ✴️ 구원의 조각(★6은 ❇️ 영원의 조각) 1개로 도전. 성공 ${Math.round(TRANS_RATE*100)}% · 성공하면 <b>전투력 ${TRANS_MULT}배</b>. 실패하면 조각만 사라져요.</div>
 
   ${gH('③ 단계별 전투력 (최대 레벨 기준)')}
   ${gTbl(['등급','Lv 1','최대 Lv','신화'],R.filter(x=>!x[0].startsWith('★5')&&x[0]!=='★6').map(([k,id])=>[k,fmt(gCP(id,1,0,0)),fmt(gCP(id,aCap(id),0,0)),fmt(gCP(id,aCap(id),0,1))]))}
@@ -5516,7 +5527,7 @@ function allyCard(id){
     btns.push(`<button class="btn myth ${ok?'':'off'}" data-myth="${id}" ${ok?'':'disabled'}>🔱 신화 승급 ${fmt(mc)} G${st?` · ${AWAKEN_ITEM.icon}${st}`:''}</button>`);
   }
   if((al.star===5||al.star===6)&&!transOn(id)){const ti=transItemInfo(id),sv=P.items[transItem(id)]||0;
-    btns.push(transReady(id)?`<button class="btn transbtn" data-trans="${id}" ${sv>0?'':'disabled'}>${ti.icon} 초월 · 성공 ${Math.round(TRANS_RATE*100)}%<small>${ti.name} 1개 (보유 ${sv})</small></button>`
+    btns.push(transReady(id)?`<button class="btn transbtn${transItem(id)==='etern'?' etern':''}" data-trans="${id}" ${sv>0?'':'disabled'}>${ti.icon} 초월 · 성공 ${Math.round(TRANS_RATE*100)}%<small>${ti.name} 1개 (보유 ${sv})</small></button>`
       :`<button class="btn" disabled>🔒 초월<small>5각성 + 신화 승급 필요 (각성 ${aw}/5${my?' · 신화 ✔':' · 신화 ✖'})</small></button>`);}
   if(al.star>=5)btns.push(aw>=awakenMax(id)?`<button class="btn" disabled>각성 완료</button>`
     :aw>=AWAKEN_BASE&&!worldCleared()?`<button class="btn" disabled>🔒 ${aw+1}각성<small>지역 이동의 모든 지역 클리어 필요 (${worldClearCount()}/${realmStart()})</small></button>`
@@ -6871,7 +6882,7 @@ function awakenStrike(){
   hitEnemy(AWAKEN_SKILL.mult,`✨ 「${AWAKEN_SKILL.name}」`);
 }
 /* 부활한 타천사 아가레스: 4초마다 영혼을 가르는 참격(방어하지 않으면 동료 현재 체력 절반) · 광기 후 3초마다 공격력 2배 · 4초마다 죽음의 일격(방어하지 않으면 동료 1명 즉사) */
-const ETERNAL_ITEM={name:'영원의 조각',icon:'💠'};
+const ETERNAL_ITEM={name:'영원의 조각',icon:'❇️'};
 function revTick(){
   if(!B||B.over||B.won||P.hp<=0||!$('#modal').classList.contains('hidden'))return;
   const e=B.e,r=e.rev;if(!r||e.hp<=0)return;
@@ -6891,11 +6902,6 @@ function revTick(){
           document.body.classList.add('flash');setTimeout(()=>document.body.classList.remove('flash'),300);}}}
   }
   if(ch)renderBattle();
-}
-function eternToast(why,n){
-  const d=document.createElement('div');d.className='stoast salv';d.style.filter='hue-rotate(200deg)';
-  d.innerHTML=`<div class="st-ic">${ETERNAL_ITEM.icon}</div><div><b>${ETERNAL_ITEM.name} ×${n||1} 획득!</b><small>${why||''} · 보유 ${P.items.etern||0}개</small></div>`;
-  document.body.appendChild(d);setTimeout(()=>d.remove(),3600);
 }
 /* 케테케테: 공격 대신 폭풍(2초마다 주인공·동료 현재 체력 절반 — 보호막 무시) · 지옥의 흑마(6초마다 주인공·동료 고정 피해 — 보호막에 막힘) */
 const NECK_SHIELD=444;
