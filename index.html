@@ -4512,7 +4512,7 @@ function chatFit(){
   const w=$('.chatwrap'),lg=$('#chatlog');
   if(!w||!document.body.classList.contains('chatmode')){document.body.classList.remove('chatmode','chatkb');return;}
   const vv=window.visualViewport,h=vv?vv.height:window.innerHeight,top=vv?vv.offsetTop:0;
-  const kb=!!(vv&&window.innerHeight-vv.height>120);
+  const kb=document.activeElement===$('#chtext')||!!(vv&&window.innerHeight-vv.height>120);
   document.body.classList.toggle('chatkb',kb);
   const tb=kb?0:(($('.tabbar')||{}).offsetHeight||0);
   const near=lg?lg.scrollHeight-lg.scrollTop-lg.clientHeight<80:true;
@@ -4522,6 +4522,8 @@ function chatFit(){
 }
 if(window.visualViewport){visualViewport.addEventListener('resize',chatFit);visualViewport.addEventListener('scroll',chatFit);}
 window.addEventListener('resize',chatFit);
+document.addEventListener('focusin',e=>{if(e.target&&e.target.id==='chtext'){chatFit();setTimeout(chatFit,300);}});
+document.addEventListener('focusout',e=>{if(e.target&&e.target.id==='chtext')setTimeout(chatFit,100);});
 function friendRecHTML(x){   // 친구 자세히 보기: 스테이지·랭크전·탑·숲·던전·맞추기
   const rc=x.rec&&typeof x.rec==='object'?x.rec:null,n=(v,mx)=>Math.max(0,Math.min(mx,Math.floor(+v||0)));
   const none='<span class="small">정보 없음 · 친구가 새 버전에 접속하면 표시</span>';
