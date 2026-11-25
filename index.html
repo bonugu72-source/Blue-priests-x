@@ -284,6 +284,8 @@ body.title-mode{overflow:hidden}
 .pf-chahuia{box-shadow:0 0 30px rgba(140,180,255,.75),0 0 90px rgba(200,170,255,.35)}
 .pf-chahuia .pglow{background:radial-gradient(ellipse at 50% 100%,rgba(140,170,255,.5),transparent 65%);animation:breathe 2.4s ease-in-out infinite}
 .pf-marteria{box-shadow:0 0 30px rgba(124,255,90,.75),0 0 90px rgba(60,200,60,.4)}
+.pf-tachyon{box-shadow:0 0 30px rgba(255,42,74,.8),0 0 90px rgba(160,0,30,.5)}
+.pf-tachyon .pglow{background:radial-gradient(ellipse at 50% 100%,rgba(255,40,70,.5),transparent 65%);box-shadow:inset 0 0 60px rgba(14,0,4,.85);animation:breathe 2s ease-in-out infinite}
 .pf-agrev{box-shadow:0 0 30px rgba(179,107,255,.75),0 0 90px rgba(90,40,200,.5)}
 .pf-agrev .pglow{background:radial-gradient(ellipse at 50% 100%,rgba(170,100,255,.5),transparent 65%);box-shadow:inset 0 0 60px rgba(8,2,20,.85);animation:breathe 2.4s ease-in-out infinite}
 .pf-kete{box-shadow:0 0 30px rgba(255,138,60,.75),0 0 90px rgba(200,60,10,.5)}
@@ -2216,6 +2218,27 @@ const AREAS=[
       slashes:2, slashAllies:true, critAll:2, rev:{soulEvery:4000,at:20000,to:70000,rageEvery:3000,maxMul:32,deathEvery:4000},
       pre:'검은 날개와 흰 날개가 동시에 펼쳐진다. 투구 틈의 붉은 눈이 다시 타오르고, 보랏빛 불꽃의 검이 허공에서 두 자루로 갈라진다.\n\n"한 번 쓰러졌던 몸이다. 이번에는… 끝까지 간다."',
       moves:[{t:'atk',n:'보랏빛 일섬'},{t:'strong',n:'타천사의 검'},{t:'multi',n:'부활의 연격',hits:3,m:0.45},{t:'atk',n:'보랏빛 일섬'}]}
+  },
+  { name:'악몽의 계속', realm:'demon', country:'마계 · 끝나지 않는 악몽이 이어지는 잿빛 황야', flag:'🗡️', rec:98, recEnd:102, glow:'#ff2a4a',
+    desc:'잿빛 하늘 아래 부서진 바위가 허공에 떠 있다. 붉은 룬이 새겨진 대검이 지나간 자리마다 참격의 흔적이 쉬지 않고 맴돈다. 깨어나도 끝나지 않는 악몽 — 그 선두에 선 자가 있다.',
+    intro:'부활한 도시가 잠든 뒤에도, 꿈은 끝나지 않았다.\n\n눈을 뜨자 잿빛 황야가 펼쳐져 있었다. 하늘에서 떨어지는 재, 공중에 멈춘 바위, 그리고 어디선가 들려오는 웃음소리.\n\n"악몽은 계속돼. 너희가 몇 번을 깨어나도."',
+    outro:'붉은 룬의 빛이 꺼지고, 맴돌던 참격들이 하나씩 흩어진다.\n\n타키온은 부러진 대검을 끌어안고 웃음을 멈췄다. "…이번 악몽은, 내가 먼저 깨는구나."\n\n잿빛 하늘이 갈라지고, 오랜만에 진짜 아침이 밝아 온다.\n\n— 악몽의 계속 해방 —',
+    enemies:[
+      {name:'악몽의 파편',         icon:'🩸', hp:1320, atk:194, def:80, xp:540, gold:270, demon:true, moves:[{t:'atk',n:'붉은 파편'},{t:'strong',n:'룬 폭발'},{t:'atk',n:'붉은 파편'}]},
+      {name:'잿빛 몽마',           icon:'😈', hp:1240, atk:200, def:72, xp:541, gold:271, demon:true, moves:[{t:'atk',n:'악몽 속삭임'},{t:'curse',n:'잠의 저주'},{t:'silence',n:'꿈 봉인'}]},
+      {name:'떠도는 참격',         icon:'〰️', hp:1180, atk:204, def:66, xp:542, gold:271, demon:true, moves:[{t:'multi',n:'연속 참격',hits:3,m:0.45},{t:'dot',n:'베인 상처',dn:'출혈'},{t:'atk',n:'베기'}]},
+      {name:'룬 새김 기사',        icon:'🛡️', hp:1340, atk:196, def:88, xp:543, gold:272, demon:true, moves:[{t:'strong',n:'룬 대검'},{t:'atk',n:'찌르기'},{t:'curse',n:'룬의 낙인'}]},
+      {name:'붉은 날개 박쥐',      icon:'🦇', hp:1200, atk:202, def:70, xp:544, gold:272, demon:true, moves:[{t:'multi',n:'박쥐 떼',hits:3,m:0.45},{t:'drain',n:'흡혈'},{t:'sweep',n:'붉은 바람',m:0.15}]}
+    ],
+    elite:{name:'악몽의 기수', icon:'🏴', hp:23000, atk:240, def:84, xp:2900, gold:2300, demon:true,
+      moves:[{t:'strong',n:'악몽의 창'},{t:'multi',n:'끝없는 돌격',hits:3,m:0.55},{t:'curse',n:'깨지 않는 꿈'},{t:'charge',n:'악몽 행진'}]},
+    mid:{name:'바풀라', art:'vapula', title:'솔로몬 72악마 · 제60영 · 공작 · 36군단', hp:49000, atk:246, def:78, xp:12000, gold:8800, demon:true,
+      pre:'그리핀의 날개를 단 사자가 바위 위에서 몸을 일으킨다. 갈기 사이로 붉은 룬이 번쩍인다.\n\n"제60영 바풀라. 손재주와 지혜를 가르치지 — 오늘은 패배하는 법을."',
+      moves:[{t:'atk',n:'사자의 발톱'},{t:'strong',n:'그리핀 강하'},{t:'multi',n:'36군단의 포효',hits:3,m:0.5},{t:'curse',n:'잊혀진 지혜'},{t:'charge',n:'공작의 돌격'}]},
+    boss:{name:'타키온', art:'tachyon', title:'악몽 선구자', hp:90000, exactHp:true, atk:250, def:78, xp:70000, gold:100000, goldFirst:0, goldRepeat:100000, eternFirst:1, demon:true,
+      tachyon:{thrustEvery:3000,thrustM:1.2,slashMax:4,slashDmg:30,slashEvery:1000,reviveAfter:7000,reviveHp:50000,reviveMul:2},
+      pre:'룬이 새겨진 대검이 땅을 긁으며 다가온다. 은빛 머리칼 사이로 붉은 뿔과 박쥐 날개가 펼쳐지고, 소녀는 이를 드러내며 웃는다.\n\n"악몽 선구자 타키온! 7초만 버티면 — 난 몇 번이고 다시 일어나거든?"',
+      moves:[{t:'atk',n:'룬 대검 베기'},{t:'strong',n:'악몽의 일격'},{t:'multi',n:'붉은 난무',hits:3,m:0.45},{t:'atk',n:'룬 대검 베기'}]}
   }
 
 ];
@@ -2228,7 +2251,7 @@ const stageRec=(a,s)=>Math.round(AREAS[a].rec+(s-1)*(AREAS[a].recEnd-AREAS[a].re
 const RT={atkCd:1500,defCd:400,itemCd:1500,fleeCd:1000,allyMs:1500,bossMs:1500,midMs:1600,normalMs:1800};
 const DEF_FLOOR=0.3; // 방어력이 아무리 높아도 적 공격의 30%는 들어감
 const ENEMY_MULT=1.3, LATE_BOSS_MULT=1.1; // 적 공격력·체력 1.3배 (나베리우스·보티스는 1.1배)
-const NORMAL_HP=[2.4,4,4.5,5,5.5,6,6.5,7,7.5,8,8.5,9,9.5,10,10.5,11,11.5,12,12.5,13,13.5,14,14.5,15,15.5], NORMAL_REWARD=1.5; // 일반 적이 몇 턴은 버티며 공격하도록
+const NORMAL_HP=[2.4,4,4.5,5,5.5,6,6.5,7,7.5,8,8.5,9,9.5,10,10.5,11,11.5,12,12.5,13,13.5,14,14.5,15,15.5,16], NORMAL_REWARD=1.5; // 일반 적이 몇 턴은 버티며 공격하도록
 function scaleBase(base,a,s){
   const f=1+0.06*(s-1);
   return {...base,hp:Math.round(base.hp*f*NORMAL_HP[a]),atk:Math.round(base.atk*f),def:Math.round(base.def*(1+0.04*(s-1))),
@@ -2454,6 +2477,13 @@ const ART={
       <path d="M84,76 L80,58 L90,68 L95,54 L100,66 L105,54 L110,68 L120,58 L116,76 Z"/>
       <path d="M84,82 L74,70 L90,78 Z M116,82 L126,70 L110,78 Z"/>`,
     eyes:`<circle cx="92" cy="90" r="4.2"/><circle cx="108" cy="90" r="4.2"/>`},
+  vapula:{c:'#ff5a6e',eye:'#ffd36a',latin:'VAPVLA · SPIRITVS LX · DVX · XXXVI LEGIONES · ',
+    body:`<path d="M100,66 C82,66 70,80 70,98 C70,116 84,128 100,128 C116,128 130,116 130,98 C130,80 118,66 100,66 Z"/>
+      <path d="M100,52 L90,62 L78,56 L76,70 L62,70 L68,82 L56,90 L68,98 L58,110 L72,112 L68,126 L84,120 L100,134 L116,120 L132,126 L128,112 L142,110 L132,98 L144,90 L132,82 L138,70 L124,70 L122,56 L110,62 Z" opacity=".5"/>
+      <path d="M82,130 C76,150 78,170 84,186 L116,186 C122,170 124,150 118,130 Z"/>
+      <path d="M76,128 C52,110 30,112 16,132 C36,130 48,136 56,150 C46,152 36,160 32,174 C50,164 64,160 78,164 Z" opacity=".75"/>
+      <path d="M124,128 C148,110 170,112 184,132 C164,130 152,136 144,150 C154,152 164,160 168,174 C150,164 136,160 122,164 Z" opacity=".75"/>`,
+    eyes:`<path d="M86,94 L96,98 L86,101 Z"/><path d="M114,94 L104,98 L114,101 Z"/>`},
   raum:{c:'#9a7cff',eye:'#ff4d6d',latin:'RAVM · SPIRITVS XL · COMES · XXX LEGIONES · ',
     body:`<path d="M100,70 C88,70 80,80 80,92 C80,106 90,114 100,116 C110,114 120,106 120,92 C120,80 112,70 100,70 Z"/>
       <path d="M118,88 L146,96 L120,100 Z"/>
@@ -2533,6 +2563,7 @@ const PORTRAIT={
   levia:{img:'levia.jpg',cls:'pf-levia',pos:'50% 18%'},
   kete:{img:'kete.jpg',cls:'pf-kete',pos:'55% 22%'},
   agares_rev:{img:'agares_rev.jpg',cls:'pf-agrev',pos:'50% 16%'},
+  tachyon:{img:'tachyon.jpg',cls:'pf-tachyon',pos:'45% 22%'},
   merem:{img:'merem.jpg',cls:'pf-merem',pos:'40% 18%'},
   perta:{img:'perta.jpg',cls:'pf-perta',pos:'50% 24%'},
   mumyeong:{img:'mumyeong.jpg',cls:'pf-mumyeong',pos:'55% 16%'},
@@ -2585,7 +2616,8 @@ const BOSS_THEME={
   marteria:['#7cff5a','#123a14','#040c06'],        // 초록 불꽃 · 숲속의 관리인
   levia:['#ff3355','#2a0a14','#08030a'],           // 붉은 눈 · 그림자 여단의 지휘관
   kete:['#ff8a3c','#3a140a','#0c0504'],            // 업화 · 지옥의 흑마를 탄 심판자
-  agares_rev:['#b36bff','#1e0f3a','#07040f']       // 보랏빛 불꽃 · 부활한 타천사
+  agares_rev:['#b36bff','#1e0f3a','#07040f'],      // 보랏빛 불꽃 · 부활한 타천사
+  tachyon:['#ff2a4a','#3a0a12','#0c0306']          // 붉은 룬 · 악몽 선구자
 };
 function bossTheme(e){
   if(!e||!B||B.pvp||B.stype!=='boss'||!e.art)return null;
@@ -5970,12 +6002,12 @@ function synthAll(){
 }
 
 /* ===================== 전투 ===================== */
-function clearBattle(){forcedMv=null;if(B&&B.forest)forestRestore();if(B&&B.dgT)clearInterval(B.dgT);if(B&&B.enemyT)clearInterval(B.enemyT);if(B&&B.allyT)clearInterval(B.allyT);document.body.classList.remove('pfrozen');if(B&&B.freezeT)clearInterval(B.freezeT);if(B&&B.sakuraT)clearInterval(B.sakuraT);document.body.classList.remove('battle');applyBossTheme(null);if(B&&B.waveT)clearInterval(B.waveT);if(B&&B.soulT)clearInterval(B.soulT);if(B&&B.drainT)clearInterval(B.drainT);if(B&&B.tsT)clearInterval(B.tsT);if(B&&B.paraT)clearInterval(B.paraT);if(B&&B.zapT)clearInterval(B.zapT);if(B&&B.karmaT)clearInterval(B.karmaT);if(B&&B.trainT)clearInterval(B.trainT);if(B&&B.aoraT)clearInterval(B.aoraT);if(B&&B.heartT)clearInterval(B.heartT);if(B&&B.halfT)clearInterval(B.halfT);if(B&&B.fallT)clearInterval(B.fallT);if(B&&B.isaT)clearInterval(B.isaT);if(B&&B.nkT)clearInterval(B.nkT);if(B&&B.apT)clearInterval(B.apT);if(B&&B.remT)clearInterval(B.remT);if(B&&B.lvT)clearInterval(B.lvT);if(B&&B.ktT)clearInterval(B.ktT);if(B&&B.rvT)clearInterval(B.rvT);if(B)['diceT','judgeT','hariT','baemT','mihoT','totoT','mangT','coldT','pandoraT','hnT','hnThT'].forEach(k=>{if(B[k])clearInterval(B[k]);});B=null;}
+function clearBattle(){forcedMv=null;if(B&&B.forest)forestRestore();if(B&&B.dgT)clearInterval(B.dgT);if(B&&B.enemyT)clearInterval(B.enemyT);if(B&&B.allyT)clearInterval(B.allyT);document.body.classList.remove('pfrozen');if(B&&B.freezeT)clearInterval(B.freezeT);if(B&&B.sakuraT)clearInterval(B.sakuraT);document.body.classList.remove('battle');applyBossTheme(null);if(B&&B.waveT)clearInterval(B.waveT);if(B&&B.soulT)clearInterval(B.soulT);if(B&&B.drainT)clearInterval(B.drainT);if(B&&B.tsT)clearInterval(B.tsT);if(B&&B.paraT)clearInterval(B.paraT);if(B&&B.zapT)clearInterval(B.zapT);if(B&&B.karmaT)clearInterval(B.karmaT);if(B&&B.trainT)clearInterval(B.trainT);if(B&&B.aoraT)clearInterval(B.aoraT);if(B&&B.heartT)clearInterval(B.heartT);if(B&&B.halfT)clearInterval(B.halfT);if(B&&B.fallT)clearInterval(B.fallT);if(B&&B.isaT)clearInterval(B.isaT);if(B&&B.nkT)clearInterval(B.nkT);if(B&&B.apT)clearInterval(B.apT);if(B&&B.remT)clearInterval(B.remT);if(B&&B.lvT)clearInterval(B.lvT);if(B&&B.ktT)clearInterval(B.ktT);if(B&&B.rvT)clearInterval(B.rvT);if(B&&B.tkI)clearInterval(B.tkI);if(B)['diceT','judgeT','hariT','baemT','mihoT','totoT','mangT','coldT','pandoraT','hnT','hnThT'].forEach(k=>{if(B[k])clearInterval(B[k]);});B=null;}
 /* 반사·부적 등으로 적이 턴 밖에서 쓰러졌을 때 */
 function winNow(){
   if(!B||B.won)return;
   if(B.dungeon){dungeonNextBoss();return;}   // 던전: 승리 대신 다음 보스
-  if((B.e.berserk&&!B.berserked)||(B.e.madness&&!B.maddened)||(B.e.awaken&&!B.awoke)||(B.e.twin&&!B.twinned)||(B.e.relay&&(B.relayStage||0)<2)||(B.e.lastStand&&!B.lastStood)||(B.e.rampage&&!B.rampaged)||(B.e.rev&&!B.rvMad)||(B.e.duckHide&&!B.remHid)){B.e.hp=Math.max(1,B.e.hp);renderBattle();return;}
+  if((B.e.berserk&&!B.berserked)||(B.e.madness&&!B.maddened)||(B.e.awaken&&!B.awoke)||(B.e.twin&&!B.twinned)||(B.e.relay&&(B.relayStage||0)<2)||(B.e.lastStand&&!B.lastStood)||(B.e.rampage&&!B.rampaged)||(B.e.rev&&!B.rvMad)||(B.e.tachyon&&!B.tkRev&&tkArmed())||(B.e.duckHide&&!B.remHid)){B.e.hp=Math.max(1,B.e.hp);renderBattle();return;}
   B.won=true;B.busy=true;if(B.enemyT)clearInterval(B.enemyT);if(B.allyT)clearInterval(B.allyT);if(B.freezeT)clearInterval(B.freezeT);document.body.classList.remove('pfrozen');if(B.sakuraT)clearInterval(B.sakuraT);if(B.paraT)clearInterval(B.paraT);if(B.waveT)clearInterval(B.waveT);if(B.soulT)clearInterval(B.soulT);if(B.drainT)clearInterval(B.drainT);if(B.tsT)clearInterval(B.tsT);
   if(B.zapT)clearInterval(B.zapT);if(B.karmaT)clearInterval(B.karmaT);if(B.trainT)clearInterval(B.trainT);if(B.aoraT)clearInterval(B.aoraT);if(B.autoT)clearInterval(B.autoT);if(B.diceT)clearInterval(B.diceT);if(B.judgeT)clearInterval(B.judgeT);if(B.hariT)clearInterval(B.hariT);if(B.baemT)clearInterval(B.baemT);if(B.mihoT)clearInterval(B.mihoT);if(B.totoT)clearInterval(B.totoT);if(B.mangT)clearInterval(B.mangT);if(B.pandoraT)clearInterval(B.pandoraT);if(B.hnT)clearInterval(B.hnT);if(B.hnThT)clearInterval(B.hnThT);if(B.coldT)clearInterval(B.coldT);if(B.heartT)clearInterval(B.heartT);if(B.halfT)clearInterval(B.halfT);if(B.fallT)clearInterval(B.fallT);if(B.isaT)clearInterval(B.isaT);
   renderBattle();setTimeout(victory,750);
@@ -6400,6 +6432,7 @@ function startBattle(spec){
     if(B&&t.shadow&&!t.pvp)B.lvT=setInterval(lvTick,250);
     if(B&&t.storm&&!t.pvp)B.ktT=setInterval(keteTick,250);
     if(B&&t.rev&&!t.pvp)B.rvT=setInterval(revTick,250);
+    if(B&&t.tachyon&&!t.pvp)B.tkI=setInterval(tachyonTick,250);
     if(B&&t.wave){B.waveAt=Date.now()+t.wave;B.waveT=setInterval(waveTick,t.wave);}
     if(B&&t.slowSil){
       const c=party.slice().sort(()=>Math.random()-0.5).slice(0,t.slowSil);
@@ -6474,7 +6507,7 @@ function allyStep(){
   if(!B||B.over||B.won||B.busy||B.defending||!$('#modal').classList.contains('hidden'))return;
   const e=B.e;if(e.hp<=0)return;
   alliesAct();
-  if(e.hp<=0&&((e.berserk&&!B.berserked)||(e.madness&&!B.maddened)||(e.awaken&&!B.awoke)||(e.twin&&!B.twinned)||(e.relay&&(B.relayStage||0)<2)||(e.lastStand&&!B.lastStood)||(e.rampage&&!B.rampaged)||(e.duckHide&&!B.remHid)||(e.rev&&!B.rvMad)))e.hp=1;
+  if(e.hp<=0&&((e.berserk&&!B.berserked)||(e.madness&&!B.maddened)||(e.awaken&&!B.awoke)||(e.twin&&!B.twinned)||(e.relay&&(B.relayStage||0)<2)||(e.lastStand&&!B.lastStood)||(e.rampage&&!B.rampaged)||(e.duckHide&&!B.remHid)||(e.rev&&!B.rvMad)||(e.tachyon&&!B.tkRev&&tkArmed())))e.hp=1;
   if(P.hp<=0){P.hp=0;B.over=true;renderBattle();setTimeout(defeat,900);return;}
   if(e.hp<=0){winNow();return;}
   if(checkPhase())return;
@@ -6707,7 +6740,7 @@ function cmdHTML(){
 }
 
 function renderBattle(){
-  lvEnforce();atrEnforce();
+  lvEnforce();atrEnforce();tkEnforce();
   document.body.classList.add('battle');
   const e=B.e;
   applyBossTheme(e);
@@ -6806,6 +6839,7 @@ function renderBattle(){
   if(e.fixedDmg)passive.push('🎯 방어력 무시 고정 피해');
   if(e.paralyze)passive.push('⚡ 3초마다 동료 마비');
   if(e.allyCritVoid)passive.push('🌿 동료 치명타 피해 무효');
+  if(e.tachyon){const t=e.tachyon;passive.push(`🗡 ${t.thrustEvery/1000}초마다 대검 찌르기 (주인공·동료 피해만큼 회복) · 〰️ 공격할 때마다 참격 +1 (최대 ${t.slashMax}) — 1초마다 참격 1개당 고정 피해 ${t.slashDmg} (현재 ${B.tkSl||0}개)${B.tkRev?` · 🩸 부활함: 공격력 ×${t.reviveMul} · 회복 방해`:` · ⏳ ${t.reviveAfter/1000}초 생존 후 쓰러지면 부활 (${tkArmed()?'발동 준비됨':Math.ceil((t.reviveAfter-(B.tkAge||0))/1000)+'초 남음'})`}`);}
   if(e.rev)passive.push(`🗡 추격 참격 두 자루 (주인공·동료) · 💥 모든 공격 치명타 ×${e.critAll} · ${e.rev.soulEvery/1000}초마다 영혼을 가르는 참격 (방어하지 않으면 동료 현재 HP 절반)${B.rvMad?` · 😈 광기: 치명타 피해 흡수 · 공격력 ×${B.fallMul||1} (${e.rev.rageEvery/1000}초마다 2배) · ${e.rev.deathEvery/1000}초마다 죽음의 일격 (방어하지 않으면 동료 1명 즉사)`:` · 체력 ${fmt(e.rev.at)} 이하 시 광기`}`);
   if(e.storm)passive.push(`🌪 공격하지 않는 대신 ${e.storm.every/1000}초마다 폭풍 — 주인공·동료 현재 체력 ${Math.round(e.storm.pct*100)}% 감소 (보호막 무시)${e.horse?` · 🐎 ${e.horse.every/1000}초마다 지옥의 흑마 — 주인공·동료 고정 피해 ${e.horse.dmg} (보호막으로 막을 수 있음)`:''}`);
   if(e.shadow)passive.push(`🌑 ${e.shadow.every/1000}초마다 그림자 소환 (HP ${fmt(Math.round(e.maxHp*e.shadow.pct))} · 주인공 공격을 먼저 흡수)${e.ring?` · ⭕ ${e.ring.every/1000}초마다 파멸의 환 (동료 시야 ${e.ring.dur/1000}초 차단 · 공격 ${Math.round(e.ring.miss*100)}% 빗나감 · 체력 회복 불가)`:''}`);
@@ -6880,6 +6914,34 @@ function awakenStrike(){
   addLog(`✨ 각성 스킬 발동!`);
   document.body.classList.add('holyflash');setTimeout(()=>document.body.classList.remove('holyflash'),350);
   hitEnemy(AWAKEN_SKILL.mult,`✨ 「${AWAKEN_SKILL.name}」`);
+}
+/* 타키온: 3초마다 대검 찌르기(주인공·동료 피해만큼 회복) · 공격할 때마다 참격 +1(최대 4) — 1초마다 참격 수만큼 고정 피해 · 7초 생존 후 쓰러지면 부활(체력 50000 · 공격력 2배 · 회복 방해) */
+const tkArmed=()=>!!(B&&(B.tkAge||0)>=((B.e&&B.e.tachyon&&B.e.tachyon.reviveAfter)||7000));
+const tkAddSlash=()=>{const t=B&&B.e&&B.e.tachyon;if(!t||B.over)return;if((B.tkSl||0)<t.slashMax){B.tkSl=(B.tkSl||0)+1;addLog(`〰️ 참격이 하나 더 생겨났다 (${B.tkSl}/${t.slashMax})`);}};
+function tkCapsInit(){B.tkCap={hero:P.hp,ally:{}};partyIds().forEach(x=>{const h=B.ahp[x];if(h)B.tkCap.ally[x]=h.hp;});}
+function tkEnforce(){ // 부활 후 회복 방해: 체력이 오르면 되돌림 (쓰러졌다 부활하는 건 허용)
+  if(!B||!B.tkRev||!B.tkCap)return;const c=B.tkCap;
+  if(P.hp>c.hero&&c.hero>0)P.hp=c.hero;else c.hero=P.hp;
+  partyIds().forEach(x=>{const h=B.ahp[x];if(!h)return;const cp=c.ally[x];if(cp>0&&h.hp>cp)h.hp=cp;else c.ally[x]=h.hp;});
+}
+function tachyonTick(){
+  if(!B||B.over||B.won||P.hp<=0||!$('#modal').classList.contains('hidden'))return;
+  const e=B.e,t=e.tachyon;if(!t||e.hp<=0)return;
+  tkEnforce();
+  B.tkAge=(B.tkAge||0)+250;B.tkT=(B.tkT||0)+250;B.tkS=(B.tkS||0)+250;let ch=false;
+  if(B.tkAge===t.reviveAfter&&!B.tkRev){addLog(`⏳ ${e.name}이(가) ${t.reviveAfter/1000}초를 버텼다 — 이제 쓰러뜨려도 다시 깨어난다!`);ch=true;}
+  if(B.tkT>=t.thrustEvery){B.tkT=0;ch=true;
+    const hp0=P.hp;hitPlayer(t.thrustM,`🗡 대검 찌르기`);let tot=Math.max(0,hp0-P.hp);
+    partyIds().forEach(x=>{const h=B.ahp[x];if(!h||h.hp<=0)return;const d=allyTake(x,Math.max(1,Math.round(e.atk*t.thrustM*(B.fallMul||1))));const real=Math.min(h.hp,d);h.hp=Math.max(0,h.hp-d);tot+=real;if(h.hp<=0&&!allyDown(x))addLog(`💀 ${ALLIES[x].name} 쓰러짐`);});
+    const g=Math.min(e.maxHp-e.hp,tot);e.hp+=g;addLog(`🗡 ${e.name}의 대검 찌르기 — 준 피해만큼 체력 +${fmt(g)}`);queueFx('enemy','🗡+'+g,'heal');
+    tkAddSlash();
+    if(P.hp<=0){P.hp=0;B.over=true;renderBattle();setTimeout(defeat,900);return;}}
+  if(B.tkS>=t.slashEvery){B.tkS=0;const n=B.tkSl||0;
+    if(n>0){ch=true;const d=n*t.slashDmg;
+      const f=e.fixedDmg;e.fixedDmg=true;const sv=e.atk;e.atk=d;const st=B.stun;hitPlayer(1,`〰️ 참격 ${n}개`);e.atk=sv;e.fixedDmg=f;
+      partyIds().forEach(x=>{const h=B.ahp[x];if(!h||h.hp<=0)return;const dd=allyTake(x,d);h.hp=Math.max(0,h.hp-dd);if(h.hp<=0&&!allyDown(x))addLog(`💀 ${ALLIES[x].name} 쓰러짐 (참격)`);});
+      if(P.hp<=0){P.hp=0;B.over=true;renderBattle();setTimeout(defeat,900);return;}}}
+  if(ch)renderBattle();
 }
 /* 부활한 타천사 아가레스: 4초마다 영혼을 가르는 참격(방어하지 않으면 동료 현재 체력 절반) · 광기 후 3초마다 공격력 2배 · 4초마다 죽음의 일격(방어하지 않으면 동료 1명 즉사) */
 const ETERNAL_ITEM={name:'영원의 조각',icon:'❇️'};
@@ -7409,7 +7471,7 @@ function act(kind,arg){
     }
     addLog('도망에 실패했다!');
   }
-  if(e.hp<=0&&((e.berserk&&!B.berserked)||(e.madness&&!B.maddened)||(e.awaken&&!B.awoke)||(e.twin&&!B.twinned)||(e.relay&&(B.relayStage||0)<2)||(e.lastStand&&!B.lastStood)||(e.rampage&&!B.rampaged)||(e.duckHide&&!B.remHid)||(e.rev&&!B.rvMad)))e.hp=1; // 폭주·광기 전에는 쓰러지지 않음
+  if(e.hp<=0&&((e.berserk&&!B.berserked)||(e.madness&&!B.maddened)||(e.awaken&&!B.awoke)||(e.twin&&!B.twinned)||(e.relay&&(B.relayStage||0)<2)||(e.lastStand&&!B.lastStood)||(e.rampage&&!B.rampaged)||(e.duckHide&&!B.remHid)||(e.rev&&!B.rvMad)||(e.tachyon&&!B.tkRev&&tkArmed())))e.hp=1; // 폭주·광기 전에는 쓰러지지 않음
   const cd=kind==='attack'||kind==='skill'?RT.atkCd:kind==='item'?RT.itemCd:kind==='flee'?RT.fleeCd:RT.defCd;
   B.cdUntil=Date.now()+cd;B.cdLen=cd;B.menu='main';
   setTimeout(()=>{if(B&&!B.over&&!B.won&&$('#modal').classList.contains('hidden'))renderBattle();},cd+30);
@@ -7486,6 +7548,11 @@ function checkPhase(){
     showStory(`<div class="sum s5"><div class="sum-title">각성</div><div class="intro-art">${portraitHTML(w.art,'big')}</div><div class="sum-name">${e.name}</div><p class="sum-desc" style="color:#ffb0b0">${esc(w.line).replace(/\n/g,'<br>')}</p></div>`,
       ()=>{B.soulAt=Date.now()+w.soulTick;B.soulT=setInterval(soulTick,w.soulTick);addLog('⚠ 3초마다 「영혼을 가르는 일격」 — 방어 태세를 유지하라!');renderBattle();setTimeout(enemyTurn,500);},true);
     return true;
+  }
+  if(e.tachyon&&!B.tkRev&&e.hp<=1&&tkArmed()){ // 타키온: 7초 생존 후 쓰러지면 부활
+    const t=e.tachyon;B.tkRev=true;e.hp=Math.min(e.maxHp,t.reviveHp);B.fallMul=(B.fallMul||1)*t.reviveMul;tkCapsInit();
+    addLog(`🩸 ${e.name}이(가) 쓰러지는가 싶더니 — 다시 깨어났다! 체력 ${fmt(t.reviveHp)} · 공격력 ×${t.reviveMul} · 주인공과 동료의 회복을 방해한다`);
+    queueFx('enemy','🩸 부활','mpf');document.body.classList.add('flash');setTimeout(()=>document.body.classList.remove('flash'),300);
   }
   if(e.rev&&!B.rvMad&&e.hp>0&&e.hp<=e.rev.at){ // 부활한 아가레스: 광기 — 체력 회복 · 치명타 흡수 · 3초마다 공격력 2배 · 4초마다 죽음의 일격
     B.rvMad=true;e.hp=e.rev.to;B.fallMul=1;B.rvR=0;B.rvD=0;
@@ -7650,6 +7717,7 @@ function enemyTurn(){
   // 나베리우스: 숨 쉴 틈 없는 추격 참격
   const _held=mv.t==='sealed'||mv.t==='frozen'||mv.t==='bound'||mv.t==='mpara'||mv.t==='kidle'||mv.t==='mkick'; // 봉인·빙결·속박 중엔 추가 공격도 없음
   if(e.burnHit&&!_held&&P.hp>0&&Math.random()<0.4&&!(B.dot&&B.dot.name==='화상')){B.dot={name:'화상',dmg:Math.max(5,Math.round(e.atk*0.12)),turns:3};addLog('🔥 라이아의 불길 — 화상');}
+  if(e.tachyon&&!_held&&P.hp>0&&mv.t!=='pvp')tkAddSlash(); // 타키온: 공격할 때마다 참격 +1
   if(e.slashes&&!_held&&P.hp>0){
     for(let i=0;i<e.slashes;i++){hitPlayer(0.35,`🗡 추격 참격 ${i+1}`);
       if(e.slashAllies){const L=partyIds().filter(x=>B.ahp[x]&&B.ahp[x].hp>0);if(L.length){const x=pick(L),h=B.ahp[x],d=allyTake(x,Math.max(1,Math.round(e.atk*0.35*(B.fallMul||1)*(e.critAll||1))));h.hp=Math.max(0,h.hp-d);addLog(`🗡 추격 참격 ${i+1} — ${ALLIES[x].name}에게 ${d} 피해`);if(h.hp<=0&&!allyDown(x))addLog(`💀 ${ALLIES[x].name} 쓰러짐`);}}}
