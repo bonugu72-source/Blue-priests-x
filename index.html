@@ -3999,6 +3999,7 @@ function myPublic(){
   return {hero:String(P.name).slice(0,8),lv:P.lv,cp:teamCP(),area,stage:P.prog[area]||0,
     ended:!!P.ended,friends:(P.friends||[]).slice(0,100),
     team:{atk:P.atk,def:P.def,maxHp:P.maxHp,maxMp:P.maxMp,lv:P.lv,party:partyIds().map(id=>({id,lv:aData(id).lv,aw:P.awaken[id]||0,my:isMyth(id)?1:0,tr:trustLv(id),tn:transOn(id)?1:0,...(cosOf(id)?{cs:cosOf(id).id}:{})}))},
+    trans:Object.keys(P.trans||{}).filter(k=>P.trans[k]&&ALLIES[k]).slice(0,60),   // 초월한 동료·펫 (던전 랭킹 아이콘 테두리용)
     pvpW:(P.pvp&&P.pvp.w)||0,pvpL:(P.pvp&&P.pvp.l)||0,rankT:(P.rank&&P.rank.tier)||0,rankLP:(P.rank&&P.rank.lp)||0,rankOn:P.lv>=RANK_MIN_LV?1:0,
     ...(P.dg&&P.dg.best>0&&Array.isArray(P.dg.top)?{dgDay:P.dg.day,dgBest:P.dg.best,dgTop:P.dg.top.slice(0,20).map(r=>({v:r.v,p:(r.p||[]).slice(0,MAX_ACTIVE+3),at:r.at||0,...(r.d?{d:r.d}:{}),...(r.k!=null?{k:r.k}:{}),...(Array.isArray(r.tn)&&r.tn.length?{tn:r.tn.slice(0,8)}:{})}))}:{}),   // 던전 오늘의 기록 (상위 20개) — 기록이 없으면 넣지 않음 (프로필은 통째로 덮어써서 지난 기록도 함께 사라짐)
     ...(()=>{const v=myVsPublic();return Object.keys(v).length?{vs:v}:{};})(),   // 나와의 대결: 내가 친구에게 건 대결 결과 (친구 화면에서 합쳐 보여 줌)
@@ -5168,7 +5169,7 @@ function dgRankList(){
     const runs=Array.isArray(x.dgTop)&&x.dgTop.length?x.dgTop:(x.dgBest>0?[{v:x.dgBest,p:x.dgParty||[],at:x.dgAt||0}]:[]);   // 예전 버전은 최고 기록 1개
     const tp=(x.team&&Array.isArray(x.team.party))?x.team.party.filter(a=>a&&ALLIES[a.id]):[];
     const csm={};tp.forEach(a=>{csm[a.id]=typeof a.cs==='string'?a.cs:'';});
-    const tnTeam=tp.filter(a=>a.tn).map(a=>a.id);
+    const tnTeam=[...new Set([...(Array.isArray(x.trans)?x.trans:[]),...tp.filter(a=>a.tn).map(a=>a.id)])];   // 그 사람이 초월한 동료 (전체 목록 + 지금 출전 팀)
     runs.slice(0,DG_KEEP).forEach(r=>{if(r&&r.v>0)rows.push({id:x.id,hero:x.hero,lv:x.lv,v:r.v,p:r.p||[],at:r.at||0,d:r.d||null,k:r.k,tnl:Array.isArray(r.tn)?r.tn:tnTeam,csm});});
   });
   D.top.forEach(r=>rows.push({id:me,hero:P.name,lv:P.lv,v:r.v,p:r.p||[],at:r.at||0,d:r.d||null,k:r.k,me:true}));
