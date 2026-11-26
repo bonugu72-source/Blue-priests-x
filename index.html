@@ -6796,6 +6796,7 @@ function renderBattle(){
   if(B.evadeNext)st.push('🔦 눈부심');
   if(B.blind)st.push(`📜 시야 차단 ${B.blind}`);
   if(B.lvShadow>0)st.push(`🌑 그림자 ${fmt(B.lvShadow)}`);
+  if(B.e&&B.e.tachyon){const t=B.e.tachyon;st.push(B.tkRev?`🩸 부활함 · 회복 불가`:tkArmed()?`⏳ 부활 준비됨 — 쓰러뜨리면 다시 깨어남`:`⏳ ${Math.ceil((t.reviveAfter-(B.tkAge||0))/1000)}초 안에 쓰러뜨리면 부활 없음`);if(B.tkSl)st.push(`〰️ 참격 ${B.tkSl}개`);}
   if(B.lvBlind&&Object.keys(B.lvBlind).some(lvBlindOn))st.push(`⭕ 동료 시야 차단 · 회복 불가`);
   if(B.sealed>0)st.push(`⛓ 적 속박 ${B.sealed}`);
   if(remHideOn())st.push(`🦆 레미안 숨는 중 ${Math.ceil((B.remHideUntil-Date.now())/1000)}초`);
