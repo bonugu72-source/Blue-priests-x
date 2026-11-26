@@ -1434,7 +1434,7 @@ const ALLIES={
   elia:    {star:5,name:'엘리아',        icon:'🌹', role:'꽃의 수호', kit:'flower',
             desc:'색이 다른 꽃의 보호막(주인공 피해 흡수 · 동료 피해 절반, 2턴) · 꽃의 속박(적 1턴 행동 불가, 4턴마다) · 꽃잎 공격'},
   pasri:   {star:5,name:'파스리',        icon:'🏮', role:'고정 피해', kit:'fixed',
-            desc:'전투 시작 후 7초 동안 공격하지 못함 · 7초가 지나면 모든 공격이 적의 방어력을 무시하는 고정 피해 · 고정 피해도 30% 확률로 치명타(1.5배)'},
+            desc:'전투 시작 후 7초 동안 공격하지 못함 · 7초가 지나면 모든 공격이 적의 방어력을 무시하는 고정 피해 · 고정 피해도 30% 확률로 치명타(4배)'},
   gaia:    {star:5,name:'가이아 수도사',  icon:'🔷', role:'약점 간파', kit:'weakspot',
             desc:'약점: 15% 확률로 적의 약점을 찾아 공격력 3배의 고정 피해(방어력 무시) · 평소엔 창 찌르기 · 눈썰미: 출전 중 나라 보스 처치 시 💠 천상의 성유물 획득 확률 +10%'},
   sakura:  {star:5,name:'사쿠라',        icon:'🌸', role:'벚꽃바람', kit:'sakura',
@@ -6388,7 +6388,7 @@ function diceTick(){
 const TRAIN_MS=3000;
 const LM_WAVE=4000; // 루메온 신화 은하 파동 지속
 const PASRI_WAIT=7000; // 파스리 충전 시간 (10초 → 9초 → 7초)
-const PASRI_CRIT=0.3, PASRI_CRIT_MUL=1.5; // 파스리 고정 피해 치명타: 30% 확률 · 1.5배
+const PASRI_CRIT=0.3, PASRI_CRIT_MUL=4; // 파스리 고정 피해 치명타: 30% 확률 · 4배
 const KARMA_TAL=1.25; // 카르마 부적 피해 +25%
 const vistaBase=lv=>13.3+lv*4.2; // 14+lv*4.4 → 12.6+lv*4.0(하향) → 소폭 재상향
 function trainTick(){
