@@ -3998,7 +3998,7 @@ function myPublic(){
     ended:!!P.ended,friends:(P.friends||[]).slice(0,100),
     team:{atk:P.atk,def:P.def,maxHp:P.maxHp,maxMp:P.maxMp,lv:P.lv,party:partyIds().map(id=>({id,lv:aData(id).lv,aw:P.awaken[id]||0,my:isMyth(id)?1:0,tr:trustLv(id),tn:transOn(id)?1:0,...(cosOf(id)?{cs:cosOf(id).id}:{})}))},
     pvpW:(P.pvp&&P.pvp.w)||0,pvpL:(P.pvp&&P.pvp.l)||0,rankT:(P.rank&&P.rank.tier)||0,rankLP:(P.rank&&P.rank.lp)||0,rankOn:P.lv>=RANK_MIN_LV?1:0,
-    ...(P.dg&&P.dg.best>0&&Array.isArray(P.dg.top)?{dgDay:P.dg.day,dgBest:P.dg.best,dgTop:P.dg.top.slice(0,20).map(r=>({v:r.v,p:(r.p||[]).slice(0,MAX_ACTIVE),at:r.at||0,...(r.d?{d:r.d}:{}),...(r.k!=null?{k:r.k}:{})}))}:{}),   // 던전 오늘의 기록 (상위 20개) — 기록이 없으면 넣지 않음 (프로필은 통째로 덮어써서 지난 기록도 함께 사라짐)
+    ...(P.dg&&P.dg.best>0&&Array.isArray(P.dg.top)?{dgDay:P.dg.day,dgBest:P.dg.best,dgTop:P.dg.top.slice(0,20).map(r=>({v:r.v,p:(r.p||[]).slice(0,MAX_ACTIVE+3),at:r.at||0,...(r.d?{d:r.d}:{}),...(r.k!=null?{k:r.k}:{})}))}:{}),   // 던전 오늘의 기록 (상위 20개) — 기록이 없으면 넣지 않음 (프로필은 통째로 덮어써서 지난 기록도 함께 사라짐)
     ...(()=>{const v=myVsPublic();return Object.keys(v).length?{vs:v}:{};})(),   // 나와의 대결: 내가 친구에게 건 대결 결과 (친구 화면에서 합쳐 보여 줌)
     rec:{tw:(P.tower&&P.tower.best)||0,hv:(P.heaven&&P.heaven.best)||0,fo:(P.forest&&P.forest.best)||0,qz:P.quizBest||0},   // 친구 자세히 보기: 탑·숲·맞추기 최고 기록
     ...giftPublicFields(),   // 코인 선물 (보낸 선물·받은 선물 id)
@@ -5168,13 +5168,19 @@ function dgRankList(){
   D.top.forEach(r=>rows.push({id:me,hero:P.name,lv:P.lv,v:r.v,p:r.p||[],at:r.at||0,d:r.d||null,k:r.k,me:true}));
   return rows.sort((a,b)=>b.v-a.v||a.at-b.at).slice(0,DG_KEEP);
 }
+function dgRecParty(r){   // 던전 기록에 출전한 펫·동료 (고정 조력자 제외) — 딜 기록 순서(출전 순서) 기준
+  const s=[];
+  if(r&&r.d&&typeof r.d==='object')Object.keys(r.d).forEach(k=>{if(k!=='hero'&&k!==FIXED&&ALLIES[k]&&!s.includes(k))s.push(k);});
+  ((r&&r.p)||[]).forEach(k=>{if(k!==FIXED&&ALLIES[k]&&!s.includes(k))s.push(k);});
+  return s;
+}
 let dgRankShown=[];   // 지금 화면에 그린 랭킹 (누르면 이 기록의 딜 그래프)
 function dgRankHTML(full){   // full: 랭킹 상세 화면(20위까지) · 아니면 상위 3명만
   const list=dgRankList();dgRankShown=list;
   const n=full?DG_KEEP:3,shown=list.slice(0,n),myR=list.findIndex(x=>x.me)+1;
   const medal=r=>r===1?'🥇':r===2?'🥈':r===3?'🥉':r;
   const row=(x,r)=>`<div class="dgrow ${x.me?'me':''} ${r<=3?'r'+r:''}" data-dgrec="${r-1}"><span class="dgr">${medal(r)}</span>
-    <span class="dgn"><b>${esc(x.hero||'모험가')}${x.me?' <span class="tag t-ally dgme">나</span>':''}</b><small>Lv ${x.lv||'?'} · ${(x.p||[]).filter(id=>ALLIES[id]).map(id=>allyFace(id,'xs')).join('')||'동료 없음'}</small></span>
+    <span class="dgn"><b>${esc(x.hero||'모험가')}${x.me?' <span class="tag t-ally dgme">나</span>':''}</b><small>Lv ${x.lv||'?'} · ${dgRecParty(x).map(id=>allyFace(id,'xs')).join('')||'동료 없음'}</small></span>
     <span class="dgv">${fmt(x.v||0)}</span></div>`;
   const st=dgRankState==='live'?'<span class="pres on">🟢 실시간</span>':dgRankState==='wait'?'<span class="small">⏳ 연결 중…</span>':dgRankState==='err'?'<span class="small">⚠ 불러오기 실패</span>':'<span class="small">☁ 연결 전 · 내 기록만</span>';
   return `<div class="dgrhead"><span class="small">${dgDay().slice(5).replace('-','월 ')}일 · 매일 0시 초기화</span>${st}</div>
@@ -5243,7 +5249,7 @@ function showDgRecord(r,heroName,sub){
   showStory(`<div class="report result"><div class="rs-head win">🏰 ${fmt(r.v)}</div>
     <div class="sum-title">${sub}</div>
     <div class="rs-rew"><div>${r.at>1e12?`🕒 ${dgWhen(r.at)}`:''}${r.k!=null?` · 💀 보스 ${r.k}명`:''}</div>
-      <div class="dgrecp">${(r.p||[]).filter(id=>ALLIES[id]).map(id=>allyFace(id,'xs')).join('')||'<span class="small">동료 없음</span>'}</div></div>
+      <div class="dgrecp">${dgRecParty(r).map(id=>allyFace(id,'xs')).join('')||'<span class="small">동료 없음</span>'}</div></div>
     ${who.length?`<div class="rp-h">⚔ 준 피해 <span>합계 ${fmt(tot)}</span></div>${chart}`:'<div class="desc" style="text-align:center;margin-top:12px">이 기록은 딜 그래프가 저장되기 전에 세운 기록이라 그래프가 없어요.</div>'}</div>`,null,true);
   $('#mbtn').textContent='닫기';
 }
