@@ -2905,7 +2905,7 @@ const TIPS={
   rank:['🏅 랭크전','5성 동료 3명을 고른 AI 상대와 싸워 이기면 LP가 오르고, 100 LP를 모으면 다음 티어로 승급해. 티어가 오를수록 상대가 강해지고 승급 보상도 좋아져.'],
   tower:['🗼 탑','동료 <b>1명</b>만 데리고 30층까지 오르는 도전이야. HP가 가득 찬 상태로 싸우고, 끝나면 원래 HP로 돌아와. 층을 처음 돌파할 때마다 보상이 있어. 구원의 탑을 정복하면 <b>천상의 탑</b>이 열려.'],
   awaken:['💠 각성 · 신뢰도','5성 동료부터 💠 천상의 성유물로 <b>각성</b>할 수 있어. 각성할수록 전투력이 크게 오르고, 4·5번째 각성은 지역 이동을 모두 클리어해야 해.<br>티어가 있는 5성과 6성은 💗 신뢰도 XP로 <b>신뢰도</b>도 올릴 수 있어.'],
-  trans:['✴️ 초월','5각성과 신화 승급을 모두 마친 5성은 ✴️ 구원의 조각 1개로 <b>초월</b>에 도전할 수 있어 (성공 20%). 초월하면 전투력이 2배가 돼. 구원의 조각은 마계 최종 보스(5%) · 천상의 탑 · 캐릭터 맞추기에서 얻어.'],
+  trans:['✴️ 초월','5각성과 신화 승급을 모두 마친 5성(펫 포함)은 ✴️ 구원의 조각, 6성은 ❇️ 영원의 조각 1개로 <b>초월</b>에 도전할 수 있어 (성공 20%). 초월하면 전투력이 2배가 돼. 구원의 조각은 마계 최종 보스(5%) · 천상의 탑 · 캐릭터 맞추기에서 얻어.'],
   dungeon:['🏰 던전','보스들이 차례로 나오는 <b>60초 공격력 측정</b>이야. 보스는 반격하지 않아. 기록은 매일 0시에 초기화되고 다른 플레이어와 랭킹으로 겨뤄.'],
   realm:['😈 마계','지역 이동을 모두 끝내면 열리는 강한 보스들의 영역이야. 마계 최종 보스를 쓰러뜨리면 ✴️ 구원의 조각이 낮은 확률로 나와.']};
 function firstTip(k,cb){
@@ -2999,7 +2999,7 @@ const GUIDE_SECS=[
   ${gRow(gB('각성 n/5'),'★5·★6 전용. 💠 천상의 성유물로 강해져요.')}
   ${gRow(gB('🔱 신화 승급'),'최대 레벨이 되면 열려요. 전투력 2배.')}
   ${gRow(gB('💗 신뢰도 XP 사용 (+2)'),'신뢰도를 2단계 바로 올려요.')}
-  ${gRow(gB('✴️ 초월'),'5각성 + 신화 ★5 전용 마지막 단계. 전투력 2배.')}
+  ${gRow(gB('✴️ 초월'),'5각성 + 신화 ★5 · 펫 · ★6의 마지막 단계 (★6은 ❇️ 영원의 조각). 전투력 2배.')}
   ${gRow(gB('🐾 이 펫으로 출전'),`출전할 펫을 골라요. ${Object.keys(PET_NEED).map(k=>`${ALLIES[k].name}는 ${ALLIES[PET_NEED[k]].name}가 출전할 때만 함께 나가요.`).join(' ')}`)}
   ${gTip('버튼 하나하나가 정확히 얼마나 강해지는지는 「📈 캐릭터 성장」에 표로 정리했어요.')}`},
  {id:'adv',ic:'🗺',t:'모험 탭',s:'스테이지 · 랭크전 · 탑 · 사냥 · 미션',b:()=>`
@@ -3116,7 +3116,7 @@ const GUIDE_SECS=[
    ['☁️ 천상의 탑',`구원의 탑 ${TOWER_MAX}층 정복`],
    ['🌳 노력의 숲','고대 원단수 클리어'],
    ['🔱 신화 승급','동료 최대 레벨'],
-   ['✴️ 초월','★5 · 5각성 + 신화'],
+   ['✴️ 초월','★5 · 펫 · ★6 · 5각성 + 신화'],
    ['🏰 던전 · 🎡 룰렛 · 🎯 캐릭터 맞추기','처음부터']])}];
 function renderGuide(sec){
   const S=GUIDE_SECS.find(x=>x.id===sec);
@@ -3857,7 +3857,7 @@ function trustHTML(id){
   const nxt=l<TRUST_MAX?` · 다음 ${p-TRUST_REQ[l]}/${TRUST_REQ[l+1]-TRUST_REQ[l]}`:' · 최대';
   return `${txp&&l<TRUST_MAX?`<button class="btn txpbtn" data-txp="${id}">💗 신뢰도 XP 사용 (+2) · 보유 ${txp}</button>`:''}<div class="trust"><span class="hearts">${'❤️'.repeat(l)}${'🤍'.repeat(TRUST_MAX-l)}</span><span class="small">신뢰도 ${l}/${TRUST_MAX}${nxt}${l?` · 전투력 +${Math.round((trustMult(id)-1)*100)}%`:''}</span></div>`;
 }
-/* 초월: 5각성 + 신화 승급을 마친 ★5만 · 구원의 조각 1개 · 성공 20% · 초월하면 전투력 2배 */
+/* 초월: 5각성 + 신화 승급을 마친 ★5(펫 포함)·★6 · 구원의 조각(★6은 영원의 조각) 1개 · 성공 20% · 초월하면 전투력 2배 */
 const TRANS_RATE=0.2, TRANS_DROP=0.05, TRANS_DROP_DANIAN=0.10, TRANS_MULT=2, SALV_ITEM={name:'구원의 조각',icon:'✴️'};
 const transOn=id=>!fBorrow(id)&&!!(P&&P.trans&&P.trans[id]);
 const transItem=id=>ALLIES[id]&&ALLIES[id].star===6?'etern':'salv';
@@ -4695,7 +4695,7 @@ function pvpEnemyActs(e){
   else estat('dmg','hero',hitPlayer(1,`${e.heroName}의 공격`));
   for(const a of e.party){
     if(P.hp<=0)break;
-    const al=ALLIES[a.id],m=multOf(a.id,a.aw,a.my)*trustMultT(a.id,a.tr),lv=a.lv,nm=`${e.heroName}의 ${al.name}`;
+    const al=ALLIES[a.id],m=multOf(a.id,a.aw,a.my)*trustMultT(a.id,a.tr)*(a.tn?TRANS_MULT:1),lv=a.lv,nm=`${e.heroName}의 ${al.name}`;
     const dmg=(base,f,label)=>{
       let d=(base*m-P.def*(B.curse?0.6:1)*f)*rnd(0.9,1.1);
       if(B.defending)d*=0.6;if(B.ward)d*=0.5;
