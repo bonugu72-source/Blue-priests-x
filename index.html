@@ -1476,7 +1476,7 @@ const ALLIES={
   vista5:  {star:5,name:'비스타',        icon:'🚂', role:'열차 소환', kit:'train',
             desc:'3초마다 열차를 소환해 적을 관통(기본 공격의 2배 · 방어력 무시) · 열차 폭파로 적의 시야 차단(2턴간 적 공격 35% 빗나감) · 평소엔 군도 베기'},
   elise:   {star:5,name:'엘리스',        icon:'🍂', role:'정화의 바람', kit:'breeze', hpMul:2.5,
-            desc:'정화의 바람(주인공·동료의 디버프 제거: 방어력 감소·지속 피해·봉인·회복 감소·불화·둔화·침묵) · 디버프가 없으면 3턴마다 가을바람의 응원(주인공·동료 HP 10% 회복 + 3턴간 주인공 공격력 1.2배) · 공격은 약하지만 체력이 다른 동료의 2.5배'},
+            desc:'정화의 바람(주인공·동료의 디버프 제거: 방어력 감소·지속 피해·봉인·회복 감소·불화·둔화·침묵) · 디버프가 없으면 3턴마다 가을바람의 응원(주인공·동료 HP 15% 회복 + 3턴간 주인공 공격력 1.2배) · 공격은 약하지만 체력이 다른 동료의 2.5배'},
   siren:   {star:5,name:'세이렌 사제',   icon:'💎', role:'보석의 빛', kit:'prism',
             desc:'보석처럼 반짝이는 광선 공격 · 적이 힘을 모으거나 3턴마다 프리즘 굴절(다음 적 공격 피해 절반, 절반은 적에게 반사)'}
 };
@@ -7104,7 +7104,9 @@ function allyHit(base,label,defFactor,fixed){
   if(B.curAlly&&lvBlindOn(B.curAlly)&&Math.random()<(e.ring?e.ring.miss:0.35)){addLog(`${label}! — ⭕ 파멸의 환에 시야가 가려 빗나갔다`);queueFx('enemy','MISS','mpf');return 0;}
   if(B.vsil&&B.vsil[B.curAlly]&&Math.random()<0.3){addLog(`${label}! — 🔇 침묵에 막혀 무효`);queueFx('enemy','침묵','mpf');return 0;}
   const mb=mihoAtk();
+  const abf=ALLY_DMG_BUFF[B.curAlly]||1; // 동료 피해 버프
   let d=fixed?Math.max(1,Math.round((base+mb)*(B.am||1))):Math.max(1,Math.round(((base+mb)*(B.am||1)-enemyDef()*defFactor)*rnd(0.9,1.1)));
+  if(abf!==1)d=Math.max(1,Math.round(d*abf));
   if(B.vslow&&B.vslow[B.curAlly])d=Math.max(1,Math.round(d*0.6));
   const ch=charmOn();if(ch)d=Math.round(d*charmCrit()); // 로아의 유혹: 동료 공격도 치명타
   const isCrit=ch||/치명타/.test(label);
@@ -7125,6 +7127,7 @@ function allyHit(base,label,defFactor,fixed){
 }
 
 const ELIA_SHIELD_RATE=0.6; // 엘리아 꽃의 보호막 배율 (0.85 → 0.6)
+const ALLY_DMG_BUFF={guseju:1.5,asiris:1.5,karma:1.5,siren:1.6,elise:1.6}; // 구세주·아시리스·카르마 +50% · 세이렌·엘리스 +60%
 function alliesAct(){
   const e=B.e;
   B.stun=B.stun||{};
@@ -7381,7 +7384,7 @@ function alliesAct(){
         if((B.vslow&&Object.keys(B.vslow).length)||(B.vsil&&Object.keys(B.vsil).length)){B.vslow={};B.vsil={};db.push('동료 둔화·침묵');}
         if(db.length){addLog(`🍂 ${nm}의 정화의 바람 — ${db.join(', ')} 제거`);queueFx('player','🍂 정화','mpf');if(isMyth(id))heal(0.1,`🔱 만추의 축복`);}
         else if(B.eliseCD<=0){
-          B.eliseCD=isMyth(id)?2:3;heal(0.1,`🍂 ${nm}의 가을바람 응원`);
+          B.eliseCD=isMyth(id)?2:3;heal(0.15,`🍂 ${nm}의 가을바람 응원`);
           if(!B.aura){B.aura=4;addLog(`${nm}의 응원 — 3턴간 주인공 공격력 1.2배`);}
         }else allyHit(6+lv*2.4,`${nm}의 낙엽 바람`,0.5);
         break;}
