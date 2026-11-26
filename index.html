@@ -4710,7 +4710,7 @@ function pvpEnemyActs(e){
         if(e.hp<e.maxHp*0.6)heal(al.kit==='monk_heal'?0.25:al.kit==='civ_heal'?0.12:0.11);
         else dmg(6+lv*2,0.5,`${nm}의 공격`);
         break;
-      case 'seju':     if(Math.random()<0.08)dmg((8+lv*4)*6,0.5,`${nm} — 은총 폭주`);else dmg(8+lv*4,0.5,`${nm}의 은총`);break;
+      case 'seju':     if(Math.random()<SEJU_RAGE)dmg((8+lv*4)*6,0.5,`${nm} — 은총 폭주`);else dmg(8+lv*4,0.5,`${nm}의 은총`);break;
       case 'dominion': dmg(11+lv*3.2,0,`${nm}의 빛의 절단`);break;
       case 'asiris':   if(Math.random()<0.34)dmg((30+lv*9)*2,0,`${nm} — 신의 은총`);else addLog(`${nm} — 기적의 대가로 숨을 고른다`);break;
       case 'grace':    dmg(4+lv*4.6,0.5,`${nm}의 은총`);break;
@@ -4729,7 +4729,7 @@ function pvpEnemyActs(e){
       case 'twin':     dmg(6+lv*1.8,0.5,`${nm}의 쌍검 ①`);dmg(6+lv*1.8,0.5,`${nm}의 쌍검 ②`);break;
       case 'guard':    if(e.hp<e.maxHp*0.5&&Math.random()<0.3)heal(0.06);else dmg(9+lv*2.8,0.4,`${nm}의 방패 강타`);break;
       case 'chant':    if(e.hp<e.maxHp*0.7&&Math.random()<0.4)heal(0.12);else dmg(7+lv*2.4,0.5,`${nm}의 빛의 음표`);break;
-      case 'galaxy':   dmg((14+lv*4.3)*(Math.random()<0.3?1.5:1),0.25,`${nm}의 은하 마탄`);break;
+      case 'galaxy':   dmg((14+lv*4.3)*2*(Math.random()<0.3?1.5:1),0.25,`${nm}의 은하 마탄`);break;
       case 'charm':    dmg((12+lv*3.6)*1.5,0.4,`${nm}의 하트 화살 (치명타)`);break;
       case 'justice':  if(!B.pvpMuhee&&Date.now()-(B.startAt||0)>=(a.my?3000:5000)){B.pvpMuhee=true;const d=Math.floor(P.hp/2);P.hp-=d;estat('dmg',a.id,d);addLog(`⚖️ ${nm}의 정의! 주인공 체력 절반(${d})을 앗아갔다`);queueFx('player','⚖️-'+d,'pdmg');}break;
       case 'aora':     if(Math.random()<0.3){B.curse=Math.max(B.curse,2);addLog(`${nm}의 천사의 구원 — 주인공이 속박되어 방어력 감소`);}else dmg(16+lv*5,0.3,`${nm}의 천사의 심판`);break;
@@ -6404,6 +6404,7 @@ const LM_WAVE=4000; // 루메온 신화 은하 파동 지속
 const PASRI_WAIT=7000; // 파스리 충전 시간 (10초 → 9초 → 7초)
 const PASRI_POWER=2; // 7초 후 파스리 공격력 2배
 const PASRI_CRIT=0.3, PASRI_CRIT_MUL=4; // 파스리 고정 피해 치명타: 30% 확률 · 4배
+const SEJU_RAGE=0.25; // 구세주 은총 폭주 확률 (8% → 25%)
 const KARMA_TAL=1.875; // 카르마 부적 투척(기본 공격) 피해: 1.25 × 1.5
 const vistaBase=lv=>13.3+lv*4.2; // 14+lv*4.4 → 12.6+lv*4.0(하향) → 소폭 재상향
 function trainTick(){
@@ -7247,7 +7248,7 @@ function alliesAct(){
       case 'grace': allyHit(4+lv*4.6,`${nm}의 은총`,0.5);break;
       case 'seju':
         if(P.hp<P.maxHp*0.4)heal(0.15,`${nm}의 의지 — 보호의 오라`);
-        else if(Math.random()<0.08){allyHit((8+lv*4)*6,`${nm}의 눈동자가 검게 물든다 — 은총 폭주`,0.5);if(isMyth(id))addLog(`🔱 구원자의 눈 — ${nm}은(는) 이성을 잃지 않는다`);else{B.stun[id]=1;B.stunWhy[id]='이성 상실';}}
+        else if(Math.random()<SEJU_RAGE){allyHit((8+lv*4)*6,`${nm}의 눈동자가 검게 물든다 — 은총 폭주`,0.5);if(isMyth(id))addLog(`🔱 구원자의 눈 — ${nm}은(는) 이성을 잃지 않는다`);else{B.stun[id]=1;B.stunWhy[id]='이성 상실';}}
         else allyHit(8+lv*4,`${nm}의 은총`,0.5);
         break;
       case 'talisman': // 카르마: 시야 차단 부적 (실시간 부적은 karmaTick)
@@ -7303,7 +7304,7 @@ function alliesAct(){
         }else allyHit(10+lv*3.6,`${nm}의 날개 베기`,0.4);
         break;}
       case 'galaxy':{ // 루메온: 은하 충돌 (속박 + 둔화) · 마법 피해 (방어력 50% 무시)
-        const base=14+lv*4.3;
+        const base=(14+lv*4.3)*2; // 기본 마법력 2배
         if(Date.now()>=(B.galaxyCD||0)){
           const bind=3000,slow=6000,now=Date.now();
           B.sealed=Math.max(B.sealed||0,Math.ceil(bind/1500));B.eslowUntil=now+slow;B.galaxyCD=now+slow+GALAXY_REST;
