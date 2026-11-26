@@ -1424,7 +1424,7 @@ const ALLIES={
             desc:'심판의 창 공격 · 역전의 심판(주인공 HP 비율이 적보다 낮으면 피해 1.6배) · 봉인의 사슬(적이 힘을 모으면 끊어내 기술 취소 + 2턴 적 공격력 감소, 4턴 재사용 대기)'},
   /* ★5 */
   guseju:  {star:5,name:'구세주',        icon:'👁️', role:'천사의 은총 · 천사의 의지', kit:'seju',
-            desc:'강력한 은총 공격 · 예지(15% 확률로 적 공격 회피) · 의지(주인공 HP 40% 미만 시 보호 치유) · 가끔 폭주(3배 피해 후 1턴 이성 상실)'},
+            desc:'강력한 은총 공격 · 예지(15% 확률로 적 공격 회피) · 의지(주인공 HP 40% 미만 시 보호 치유) · 가끔 폭주(6배 피해 후 1턴 이성 상실)'},
   asiris:  {star:5,name:'아시리스 사제', icon:'🌟', role:'신의 은총', kit:'asiris',
             desc:'신의 은총(거대한 피해 + 적을 1턴 봉인) · 대가로 2턴 행동 불가 · 이후 반복'},
   karma:   {star:5,name:'카르마',        icon:'📜', role:'부적술', kit:'talisman',
@@ -4710,14 +4710,14 @@ function pvpEnemyActs(e){
         if(e.hp<e.maxHp*0.6)heal(al.kit==='monk_heal'?0.25:al.kit==='civ_heal'?0.12:0.11);
         else dmg(6+lv*2,0.5,`${nm}의 공격`);
         break;
-      case 'seju':     if(Math.random()<0.08)dmg((8+lv*4)*3,0.5,`${nm} — 은총 폭주`);else dmg(8+lv*4,0.5,`${nm}의 은총`);break;
+      case 'seju':     if(Math.random()<0.08)dmg((8+lv*4)*6,0.5,`${nm} — 은총 폭주`);else dmg(8+lv*4,0.5,`${nm}의 은총`);break;
       case 'dominion': dmg(11+lv*3.2,0,`${nm}의 빛의 절단`);break;
-      case 'asiris':   if(Math.random()<0.34)dmg(30+lv*9,0,`${nm} — 신의 은총`);else addLog(`${nm} — 기적의 대가로 숨을 고른다`);break;
+      case 'asiris':   if(Math.random()<0.34)dmg((30+lv*9)*2,0,`${nm} — 신의 은총`);else addLog(`${nm} — 기적의 대가로 숨을 고른다`);break;
       case 'grace':    dmg(4+lv*4.6,0.5,`${nm}의 은총`);break;
       case 'curse':    if(Math.random()<0.35){B.curse=Math.max(B.curse,2);addLog(`${nm}의 저주 — 방어력 감소`);}else dmg(7+lv*2.5,0.5,`${nm}의 저주의 일격`);break;
       case 'sight':    B.curse=Math.max(B.curse,2);addLog(`${nm}의 투시 — 약점을 간파당했다 (방어력 감소)`);break;
       case 'civ_mp':   addLog(`${nm}의 응원`);break;
-      case 'talisman': if(Math.random()<0.3){B.curse=Math.max(B.curse,2);addLog(`${nm}의 저주 부적 — 방어력 감소`);}else dmg(9+lv*3.6,0.3,`${nm}의 부적 투척`);break;
+      case 'talisman': if(Math.random()<0.3){B.curse=Math.max(B.curse,2);addLog(`${nm}의 저주 부적 — 방어력 감소`);}else dmg((9+lv*3.6)*1.5,0.3,`${nm}의 부적 투척`);break;
       case 'earth':    dmg(14+lv*4.4,0.5,`${nm}의 대지 가르기`);break;
       case 'flower':   if(e.hp<e.maxHp*0.6&&Math.random()<0.5)heal(0.14);else dmg(8+lv*3.4,0.5,`${nm}의 꽃잎`);break;
       case 'prism':    dmg(12+lv*4.2,0.3,`${nm}의 보석 광선`);break;
@@ -6404,7 +6404,7 @@ const LM_WAVE=4000; // 루메온 신화 은하 파동 지속
 const PASRI_WAIT=7000; // 파스리 충전 시간 (10초 → 9초 → 7초)
 const PASRI_POWER=2; // 7초 후 파스리 공격력 2배
 const PASRI_CRIT=0.3, PASRI_CRIT_MUL=4; // 파스리 고정 피해 치명타: 30% 확률 · 4배
-const KARMA_TAL=1.25; // 카르마 부적 피해 +25%
+const KARMA_TAL=1.875; // 카르마 부적 투척(기본 공격) 피해: 1.25 × 1.5
 const vistaBase=lv=>13.3+lv*4.2; // 14+lv*4.4 → 12.6+lv*4.0(하향) → 소폭 재상향
 function trainTick(){
   if(!B||B.over||B.won||!$('#modal').classList.contains('hidden'))return;
@@ -7247,7 +7247,7 @@ function alliesAct(){
       case 'grace': allyHit(4+lv*4.6,`${nm}의 은총`,0.5);break;
       case 'seju':
         if(P.hp<P.maxHp*0.4)heal(0.15,`${nm}의 의지 — 보호의 오라`);
-        else if(Math.random()<0.08){allyHit((8+lv*4)*3,`${nm}의 눈동자가 검게 물든다 — 은총 폭주`,0.5);if(isMyth(id))addLog(`🔱 구원자의 눈 — ${nm}은(는) 이성을 잃지 않는다`);else{B.stun[id]=1;B.stunWhy[id]='이성 상실';}}
+        else if(Math.random()<0.08){allyHit((8+lv*4)*6,`${nm}의 눈동자가 검게 물든다 — 은총 폭주`,0.5);if(isMyth(id))addLog(`🔱 구원자의 눈 — ${nm}은(는) 이성을 잃지 않는다`);else{B.stun[id]=1;B.stunWhy[id]='이성 상실';}}
         else allyHit(8+lv*4,`${nm}의 은총`,0.5);
         break;
       case 'talisman': // 카르마: 시야 차단 부적 (실시간 부적은 karmaTick)
@@ -7394,7 +7394,7 @@ function alliesAct(){
         else allyHit(12+lv*4.2,`${nm}의 보석 광선`,isMyth(id)?0:0.3);
         break;}
       case 'asiris': // 신의 은총: 짧은 기적, 반드시 대가
-        allyHit(30+lv*9,`${nm} — 신의 은총`,0);
+        allyHit((30+lv*9)*2,`${nm} — 신의 은총`,0);
         if(e.hp>0){B.sealed=Math.max(B.sealed,1);addLog(`${nm}의 봉인 — 적이 1턴간 움직일 수 없다`);}
         {const t=isMyth(id)?1:2;B.stun[id]=t;B.stunWhy[id]='기적의 대가';addLog(`${nm} — 기적의 대가로 ${t}턴간 행동 불가`);}
         break;
