@@ -6038,6 +6038,7 @@ function clearBattle(){forcedMv=null;if(B&&B.forest)forestRestore();if(B&&B.dgT)
 /* 반사·부적 등으로 적이 턴 밖에서 쓰러졌을 때 */
 function winNow(){
   if(!B||B.won)return;
+  if(B.e&&B.e.hp<=0&&tkRevive()){renderBattle();return;}
   if(B.dungeon){dungeonNextBoss();return;}   // 던전: 승리 대신 다음 보스
   if((B.e.berserk&&!B.berserked)||(B.e.madness&&!B.maddened)||(B.e.awaken&&!B.awoke)||(B.e.twin&&!B.twinned)||(B.e.relay&&(B.relayStage||0)<2)||(B.e.lastStand&&!B.lastStood)||(B.e.rampage&&!B.rampaged)||(B.e.rev&&!B.rvMad)||(B.e.tachyon&&!B.tkRev&&tkArmed())||(B.e.mmAwake&&!B.mmAwoke)||(B.e.duckHide&&!B.remHid)){B.e.hp=Math.max(1,B.e.hp);renderBattle();return;}
   B.won=true;B.busy=true;if(B.enemyT)clearInterval(B.enemyT);if(B.allyT)clearInterval(B.allyT);if(B.freezeT)clearInterval(B.freezeT);document.body.classList.remove('pfrozen');if(B.sakuraT)clearInterval(B.sakuraT);if(B.paraT)clearInterval(B.paraT);if(B.waveT)clearInterval(B.waveT);if(B.soulT)clearInterval(B.soulT);if(B.drainT)clearInterval(B.drainT);if(B.tsT)clearInterval(B.tsT);
@@ -6539,6 +6540,7 @@ function allyStep(){
   if(!B||B.over||B.won||B.busy||B.defending||!$('#modal').classList.contains('hidden'))return;
   const e=B.e;if(e.hp<=0)return;
   alliesAct();
+  if(e.hp<=0)tkRevive();
   if(e.hp<=0&&((e.berserk&&!B.berserked)||(e.madness&&!B.maddened)||(e.awaken&&!B.awoke)||(e.twin&&!B.twinned)||(e.relay&&(B.relayStage||0)<2)||(e.lastStand&&!B.lastStood)||(e.rampage&&!B.rampaged)||(e.duckHide&&!B.remHid)||(e.rev&&!B.rvMad)||(e.tachyon&&!B.tkRev&&tkArmed())||(e.mmAwake&&!B.mmAwoke)))e.hp=1;
   if(P.hp<=0){P.hp=0;B.over=true;renderBattle();setTimeout(defeat,900);return;}
   if(e.hp<=0){winNow();return;}
@@ -6951,6 +6953,13 @@ function awakenStrike(){
 /* 타키온: 3초마다 대검 찌르기(주인공·동료 피해만큼 회복) · 공격할 때마다 참격 +1(최대 4) — 1초마다 참격 수만큼 고정 피해 · 7초 생존 후 쓰러지면 부활(체력 50000 · 공격력 2배 · 회복 방해) */
 const tkArmed=()=>!!(B&&(B.tkAge||0)>=((B.e&&B.e.tachyon&&B.e.tachyon.reviveAfter)||7000));
 const tkAddSlash=()=>{const t=B&&B.e&&B.e.tachyon;if(!t||B.over)return;if((B.tkSl||0)<t.slashMax){B.tkSl=(B.tkSl||0)+1;addLog(`〰️ 참격이 하나 더 생겨났다 (${B.tkSl}/${t.slashMax})`);}};
+function tkRevive(){ // 쓰러지는 즉시 부활 (찌르기 회복보다 먼저)
+  if(!B||!B.e||!B.e.tachyon||B.tkRev||!tkArmed())return false;
+  const e=B.e,t=e.tachyon;B.tkRev=true;e.hp=Math.min(e.maxHp,t.reviveHp);B.fallMul=(B.fallMul||1)*t.reviveMul;tkCapsInit();
+  addLog(`🩸 ${e.name}이(가) 쓰러지는가 싶더니 — 다시 깨어났다! 체력 ${fmt(t.reviveHp)} · 공격력 ×${t.reviveMul} · 주인공과 동료의 회복을 방해한다`);
+  queueFx('enemy','🩸 부활','mpf');document.body.classList.add('flash');setTimeout(()=>document.body.classList.remove('flash'),300);
+  return true;
+}
 function tkCapsInit(){B.tkCap={hero:P.hp,ally:{}};partyIds().forEach(x=>{const h=B.ahp[x];if(h)B.tkCap.ally[x]=h.hp;});}
 function tkEnforce(){ // 부활 후 회복 방해: 체력이 오르면 되돌림 (쓰러졌다 부활하는 건 허용)
   if(!B||!B.tkRev||!B.tkCap)return;const c=B.tkCap;
@@ -6961,6 +6970,7 @@ function tachyonTick(){
   if(!B||B.over||B.won||P.hp<=0||!$('#modal').classList.contains('hidden'))return;
   const e=B.e,t=e.tachyon;if(!t||e.hp<=0)return;
   tkEnforce();
+  if(!B.tkRev&&e.hp<=1&&tkArmed()){tkRevive();renderBattle();return;}
   B.tkAge=(B.tkAge||0)+250;B.tkT=(B.tkT||0)+250;B.tkS=(B.tkS||0)+250;let ch=false;
   if(B.tkAge===t.reviveAfter&&!B.tkRev){addLog(`⏳ ${e.name}이(가) ${t.reviveAfter/1000}초를 버텼다 — 이제 쓰러뜨려도 다시 깨어난다!`);ch=true;}
   if(B.tkT>=t.thrustEvery){B.tkT=0;ch=true;
@@ -7505,6 +7515,7 @@ function act(kind,arg){
     }
     addLog('도망에 실패했다!');
   }
+  if(e.hp<=0)tkRevive();
   if(e.hp<=0&&((e.berserk&&!B.berserked)||(e.madness&&!B.maddened)||(e.awaken&&!B.awoke)||(e.twin&&!B.twinned)||(e.relay&&(B.relayStage||0)<2)||(e.lastStand&&!B.lastStood)||(e.rampage&&!B.rampaged)||(e.duckHide&&!B.remHid)||(e.rev&&!B.rvMad)||(e.tachyon&&!B.tkRev&&tkArmed())||(e.mmAwake&&!B.mmAwoke)))e.hp=1; // 폭주·광기 전에는 쓰러지지 않음
   const cd=kind==='attack'||kind==='skill'?RT.atkCd:kind==='item'?RT.itemCd:kind==='flee'?RT.fleeCd:RT.defCd;
   B.cdUntil=Date.now()+cd;B.cdLen=cd;B.menu='main';
@@ -7588,11 +7599,7 @@ function checkPhase(){
     addLog(`🌌 ${e.name} 각성! 악마의 얼굴이 온몸으로 번진다 — 공격력 ×${e.mmAwake.mul} · 동료 공격 ${Math.round(e.mmAwake.reflectAlly*100)}% 반사`);
     queueFx('enemy','🌌 각성','mpf');document.body.classList.add('flash');setTimeout(()=>document.body.classList.remove('flash'),300);
   }
-  if(e.tachyon&&!B.tkRev&&e.hp<=1&&tkArmed()){ // 타키온: 7초 생존 후 쓰러지면 부활
-    const t=e.tachyon;B.tkRev=true;e.hp=Math.min(e.maxHp,t.reviveHp);B.fallMul=(B.fallMul||1)*t.reviveMul;tkCapsInit();
-    addLog(`🩸 ${e.name}이(가) 쓰러지는가 싶더니 — 다시 깨어났다! 체력 ${fmt(t.reviveHp)} · 공격력 ×${t.reviveMul} · 주인공과 동료의 회복을 방해한다`);
-    queueFx('enemy','🩸 부활','mpf');document.body.classList.add('flash');setTimeout(()=>document.body.classList.remove('flash'),300);
-  }
+  if(e.tachyon&&!B.tkRev&&e.hp<=1&&tkArmed())tkRevive(); // 타키온: 7초 생존 후 쓰러지면 부활
   if(e.rev&&!B.rvMad&&e.hp>0&&e.hp<=e.rev.at){ // 부활한 아가레스: 광기 — 체력 회복 · 치명타 흡수 · 3초마다 공격력 2배 · 4초마다 죽음의 일격
     B.rvMad=true;e.hp=e.rev.to;B.fallMul=1;B.rvR=0;B.rvD=0;
     addLog(`😈 ${e.name}이(가) 미소를 지으며 광기에 돌입했다! 체력 ${fmt(e.rev.to)} · 치명타 피해 흡수 · ${e.rev.rageEvery/1000}초마다 공격력 2배 · ${e.rev.deathEvery/1000}초마다 「죽음의 일격」`);
